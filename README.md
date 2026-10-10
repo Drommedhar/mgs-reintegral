@@ -6,8 +6,7 @@
 
 ## Play the alpha
 
-Alpha 0.2 build: **0.2.0-alpha.1**. See [Releases](https://github.com/Drommedhar/mgs-reintegral/releases)
-for published downloads.
+Current prerelease: [**0.2.0-alpha.1**](https://github.com/Drommedhar/mgs-reintegral/releases/tag/v0.2.0-alpha.1).
 
 Download the `windows-x86.zip` from [Releases](https://github.com/Drommedhar/mgs-reintegral/releases),
 extract it and open **RE-INTEGRAL.exe**. The launcher asks for Integral Disc 1

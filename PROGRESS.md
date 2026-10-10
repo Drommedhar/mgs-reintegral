@@ -33,7 +33,26 @@ and its 600-VSync reload reached the Disc 2 entry corridor. Checkpoints restore
 map entries, not exact process snapshots. Original recordings and cards remain
 preserved; each checkpoint has adjacent provenance and validation JSON.
 
-## Alpha 0.2 release preparation — 10 October 2026
+## Alpha 0.2 published — 10 October 2026
+
+Published [0.2.0-alpha.1](https://github.com/Drommedhar/mgs-reintegral/releases/tag/v0.2.0-alpha.1)
+from `a6cf2278b1d54e1d71ebfd286b3098a07cc066fe` after
+[release run 38079640612](https://github.com/Drommedhar/mgs-reintegral/actions/runs/38079640612)
+passed all 147 hosted tests and the unpacked download checks. The local build of
+the same commit passed all 170 tests, including GPU readback and joint geometry.
+Downloaded all four release assets; the three ZIPs match their published SHA-256
+sums. The downloaded player package passes version/source identity, Unicode
+paths, read-only disc checks, importer startup without Python on PATH, UI smoke
+checks, and accompanying modern-renderer source checks. The published importer
+bundles x64 Python 3.12.10; the game remains x86.
+
+The downloaded executable booted real Integral discs into the briefing with all
+three graphics options, faster loading and the local German text/speech pack.
+It selected Disc 1 VOX sector 7 and exited normally after 1,500 VSyncs. Evidence
+is under ignored `build/alpha-0.2-published/`; this is a boot/stream-selection
+check, not a localized playthrough. No retail packs were uploaded. Release scans
+have no errors or fixable warnings; the inherited long `main` warning remains,
+and cppcheck/clang-tidy are unavailable locally.
 
 Version `0.2.0-alpha.1` builds the modern renderer with enhancements disabled by
 default, the joint/subdivision seam fixes, optional faster map loading, and the
