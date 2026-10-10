@@ -46,6 +46,8 @@ namespace ReIntegral
             if (settings.Invulnerable) arguments.Add("--invulnerable 1");
             if (settings.AutoCard) arguments.Add("--auto-card 1");
             if (settings.FastLoading) arguments.Add("--fast-loading 1");
+            if (!String.IsNullOrWhiteSpace(settings.TextPack)) arguments.Add("--text-pack " + Quote(settings.TextPack));
+            if (!String.IsNullOrWhiteSpace(settings.VoicePack)) arguments.Add("--voice-pack " + Quote(settings.VoicePack));
             if (frames > 0) arguments.Add("--frames " + settings.Frames);
             AddMantis(arguments, settings.MantisMemory);
             if (!String.IsNullOrWhiteSpace(settings.Advanced)) arguments.Add(settings.Advanced.Trim());
@@ -86,8 +88,21 @@ namespace ReIntegral
         public static async Task ValidateDisc(string executable, string path, int number, string directory)
         {
             if (!File.Exists(path)) throw new FileNotFoundException("Select an existing Disc " + number + " CUE file.", path);
-            using (var process = Process.Start(StartInfo(executable,
-                "--check-disc " + number + " " + Quote(Path.GetFullPath(path)), directory)))
+            await ValidateResource(executable, "--check-disc " + number + " " + Quote(Path.GetFullPath(path)),
+                "Disc " + number, directory);
+        }
+
+        public static async Task ValidateLanguage(string executable, string path, string directory)
+        {
+            if (String.IsNullOrWhiteSpace(path)) return;
+            if (!File.Exists(path)) throw new FileNotFoundException("Select an existing language pack.", path);
+            await ValidateResource(executable, "--check-language " + Quote(Path.GetFullPath(path)),
+                "Language pack", directory);
+        }
+
+        private static async Task ValidateResource(string executable, string arguments, string label, string directory)
+        {
+            using (var process = Process.Start(StartInfo(executable, arguments, directory)))
             {
                 var output = process.StandardOutput.ReadToEndAsync();
                 var error = process.StandardError.ReadToEndAsync();
@@ -96,12 +111,12 @@ namespace ReIntegral
                 {
                     process.Kill();
                     process.WaitForExit();
-                    throw new IOException("Disc validation timed out. Check that the image is on an accessible local drive.");
+                    throw new IOException(label + " validation timed out. Check that the file is on an accessible local drive.");
                 }
                 await complete;
                 process.WaitForExit();
                 if (process.ExitCode != 0)
-                    throw new InvalidDataException("Disc " + number + " could not be validated.\n" + await error + await output);
+                    throw new InvalidDataException(label + " could not be validated.\n" + await error + await output);
             }
         }
     }

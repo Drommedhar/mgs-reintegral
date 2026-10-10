@@ -1,0 +1,269 @@
+diff --git a/source/font/font.c b/source/font/font.c
+--- a/source/font/font.c
++++ b/source/font/font.c
+@@ -8,6 +8,9 @@
+ #include "mgstype.h"
+ #include "libgv/libgv.h"
+ #include "game/game.h"
++#ifdef MGS_NATIVE
++#include "mgs_language.h"
++#endif
+
+ // This struct describes the structure of
+ // "rubi.res" file.
+@@ -310,6 +313,11 @@
+
+ static unsigned int get_hantable(int a1)
+ {
++#ifdef MGS_NATIVE
++    unsigned localized;
++    if (MgsLanguageGlyph(a1, &localized))
++        return localized;
++#endif
+     if (a1 > 0)
+     {
+         if (a1 > 128)
+@@ -502,6 +510,11 @@
+     {
+         glyph = get_hantable(code);
+         font_location = gFontEnd + (glyph & 0xFFFFFF);
++#ifdef MGS_NATIVE
++        const unsigned char *localized = MgsLanguageGlyph(code, &glyph);
++        if (localized)
++            font_location = (char *)localized;
++#endif
+         result = (glyph >> 24) & 0xF;
+         loops = 12;
+
+@@ -988,6 +1001,9 @@
+     }
+
+     x = xtop;
++#ifdef MGS_NATIVE
++    string = MgsLanguageText(string);
++#endif
+     m = string;
+
+     result = 0;
+diff --git a/source/game/jimctrl.c b/source/game/jimctrl.c
+--- a/source/game/jimctrl.c
++++ b/source/game/jimctrl.c
+@@ -1,6 +1,9 @@
+ #include "jimctrl.h"
+
+ #include <stdio.h>
++#ifdef MGS_NATIVE
++#include "mgs_language.h"
++#endif
+ #include "mgstype.h"
+ #include "libfs/libfs.h"
+ #include "game/game.h"
+@@ -392,7 +395,11 @@
+     }
+     seekResult = FS_StreamGetData(toSeek);
+
++    #ifdef MGS_NATIVE
++    if (MgsLanguageUseEnglish(GM_Configuration & GM_CONFIG_ENGLISH))
++#else
+     if (GM_Configuration & GM_CONFIG_ENGLISH)
++#endif
+     {
+         jimaku_work.field_27 = 3;
+         jimaku_work.field_26 = 6;
+diff --git a/source/game/strctrl.c b/source/game/strctrl.c
+--- a/source/game/strctrl.c
++++ b/source/game/strctrl.c
+@@ -10,6 +10,10 @@
+ #include "game/game.h"
+ #include "game/jimctrl.h"
+ #include "kojo/demo.h"
++#ifdef MGS_NATIVE
++#include "mgs_language.h"
++#include "mgs_safety.h"
++#endif
+
+ /*---------------------------------------------------------------------------*/
+
+@@ -200,6 +204,10 @@
+     StrctrlWork.field_24 = 0;
+     StrctrlWork.map = GM_CurrentMap;
+
++#ifdef MGS_NATIVE
++    MgsLanguageSelectStream(flags == 2 ? 5 : 4, MgsSafetyDiscNumber(),
++                            stream_code - FS_StreamGetTop(flags == 2), stream_code);
++#endif
+     FS_StreamTaskStart( stream_code );
+     return (void *)&StrctrlWork;
+ }
+diff --git a/source/libfs/stream.c b/source/libfs/stream.c
+--- a/source/libfs/stream.c
++++ b/source/libfs/stream.c
+@@ -9,6 +9,9 @@
+ #include "mgstype.h"
+ #include "mts/mts.h"
+ #include "sound/sd_cli.h"
++#ifdef MGS_NATIVE
++#include "mgs_language.h"
++#endif
+
+ static int SECTION(".bss")   fs_stream_ref_count;
+ static int SECTION(".bss")   fs_stream_read;
+@@ -147,6 +150,23 @@
+     return 0;
+ }
+
++#ifdef MGS_NATIVE
++static void ReadLanguageStream(void)
++{
++    CDBIOS_TASK task = {0};
++    task.buffer = fs_stream_write_ptr;
++    task.sector = fs_stream_sector;
++    task.buffer_size = 512;
++    while (fs_stream_read) {
++        MgsLanguageReadSector(task.sector, task.buffer);
++        int status = StreamReadyCallback(&task);
++        if (status == 1)
++            task.buffer = (char *)task.buffer + 2048;
++        ++task.sector;
++    }
++}
++#endif
++
+ static void StartRead( void )
+ {
+     int temp_a0;
+@@ -200,6 +220,12 @@
+     }
+
+     fs_stream_read = 1;
++#ifdef MGS_NATIVE
++    if (MgsLanguageStreamActive()) {
++        ReadLanguageStream();
++        return;
++    }
++#endif
+     CDBIOS_ReadRequest(fs_stream_write_ptr, fs_stream_sector, 0, &StreamReadyCallback);
+ }
+
+@@ -346,6 +372,9 @@
+
+ void FS_StreamStop( void )
+ {
++#ifdef MGS_NATIVE
++    MgsLanguageCloseStream();
++#endif
+     fs_stream_stop = 1;
+     fs_stream_end = 1;
+     fs_stream_task_state = 0;
+diff --git a/source/menu/item.c b/source/menu/item.c
+--- a/source/menu/item.c
++++ b/source/menu/item.c
+@@ -5,6 +5,9 @@
+ #include "bullet/blast.h"
+ #include "game/game.h"
+ #include "radio.h"
++#ifdef MGS_NATIVE
++#include "mgs_language.h"
++#endif
+
+ static PANEL_TEXTURE panel_tex[ MENU_ITEM_COUNT ];
+
+@@ -246,6 +249,19 @@
+ void menu_item_printDescription_8003B614(int itemIndex)
+ {
+     char *itemDescription = itm_descriptions_8009E3E4[itemIndex];
++#ifdef MGS_NATIVE
++    unsigned localized_id = itemIndex;
++    if (GM_FrozenItemsState == 1 && (itemIndex == IT_Ration || itemIndex == IT_Ketchup))
++        localized_id = itemIndex == IT_Ration ? 24 : 25;
++    if (itemIndex == IT_MineDetector && GM_GameLevel >= GM_LEVEL_HARD)
++        localized_id = 26;
++    const char *localized = MgsLanguageDescription(localized_id, GM_CardFlag);
++    if (localized)
++    {
++        menu_printDescription_8003F97C((char *)localized);
++        return;
++    }
++#endif
+
+     if (GM_FrozenItemsState == 1)
+     {
+diff --git a/source/menu/radio.c b/source/menu/radio.c
+--- a/source/menu/radio.c
++++ b/source/menu/radio.c
+@@ -2,6 +2,9 @@
+ #include "menuman.h"
+
+ #include <stdio.h>
++#ifdef MGS_NATIVE
++#include "mgs_language.h"
++#endif
+ #include <stdlib.h>
+ #include <sys/types.h>
+ #include <libgte.h>
+@@ -1305,6 +1308,11 @@
+                     }
+                     else
+                     {
++#ifdef MGS_NATIVE
++                        if (MgsLanguageStreamActive())
++                            menu_radio_codec_helper__helper13_800410E4(work, subtitles);
++                        else
++#endif
+                         menu_radio_codec_helper__helper13_800410E4(work, pCharaStruct2->field_C_pScript);
+                     }
+                     pCharaStruct2->field_10_subtitles = subtitles;
+diff --git a/source/menu/radiomes.c b/source/menu/radiomes.c
+--- a/source/menu/radiomes.c
++++ b/source/menu/radiomes.c
+@@ -1,6 +1,9 @@
+ #include "radio.h"
+
+ #include <stdio.h>
++#ifdef MGS_NATIVE
++#include "mgs_language.h"
++#endif
+ #include <stdlib.h>
+ #include <libapi.h>
+
+@@ -521,7 +524,11 @@
+     char pad[8]; // unused stack...
+
+     startSector = pRadioCode & 0xffff;
++    #ifdef MGS_NATIVE
++    if (MgsLanguageUseEnglish(GM_Configuration & GM_CONFIG_ENGLISH))
++#else
+     if (GM_Configuration & GM_CONFIG_ENGLISH)
++#endif
+     {
+         size = ((pRadioCode >> 16) & 0xff) * 2048;
+         startSector = startSector + ((unsigned int)pRadioCode / 0x1000000);
+diff --git a/source/menu/weapon.c b/source/menu/weapon.c
+--- a/source/menu/weapon.c
++++ b/source/menu/weapon.c
+@@ -9,6 +9,9 @@
+ #include "libgcl/libgcl.h"
+ #include "game/game.h"
+ #include "menu/radio.h"
++#ifdef MGS_NATIVE
++#include "mgs_language.h"
++#endif
+
+ // TODO: Move to correct header
+ // Functions of signature TMenuItemUnknownFn:
+@@ -1041,6 +1044,15 @@
+ void menu_weapon_printDescription_8003E030(int wpn_id)
+ {
+     char *weaponDescription;
++#ifdef MGS_NATIVE
++    unsigned localized_id = GM_GameLevel == GM_LEVEL_VERYEASY && wpn_id == WP_Famas ? 110 : 100 + wpn_id;
++    const char *localized = MgsLanguageDescription(localized_id, 0);
++    if (localized)
++    {
++        menu_printDescription_8003F97C((char *)localized);
++        return;
++    }
++#endif
+
+     weaponDescription = wpn_descriptions_8009E5CC[wpn_id];
+     if (wpn_id == WP_Socom)

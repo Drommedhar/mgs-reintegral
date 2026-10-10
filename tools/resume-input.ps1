@@ -24,7 +24,7 @@ function Get-MgsResumeCache {
 
 function Export-MgsResumeCheckpoint {
     param([string]$Executable, $Session, [string]$Prefix, [string]$Checkpoint,
-          [string]$Log, $Startup, [string]$Disc, [string]$DiscTwo, [string]$ModsRoot)
+          [string]$Log, $Startup, [string]$Disc, [string]$DiscTwo, [string]$ModsRoot, [string]$TextPack, [string]$VoicePack)
 
     $arguments = @('--disc', $Disc, '--stage', $Startup.stage,
         '--replay-input', $Prefix, '--input-identity', $Session.Identity,
@@ -37,6 +37,8 @@ function Export-MgsResumeCheckpoint {
     if ($memorySeed) { $arguments += @('--mantis-memory', $memorySeed.ToString()) }
     if ($DiscTwo) { $arguments += @('--disc-two', $DiscTwo) }
     if ($ModsRoot) { $arguments += @('--mods-root', $ModsRoot) }
+    if ($TextPack) { $arguments += @('--text-pack', $TextPack) }
+    if ($VoicePack) { $arguments += @('--voice-pack', $VoicePack) }
     if ($Session.CheckpointPath) { $arguments += @('--load-checkpoint', $Session.CheckpointPath) }
     Push-Location $Session.RuntimeDirectory
     try {
@@ -55,7 +57,7 @@ function Export-MgsResumeCheckpoint {
 function New-MgsResumeCache {
     param([string]$ProjectDirectory, [string]$Executable, [string]$MoviePath,
           [string]$Directory, [string]$SourceHash, $Session, $Startup,
-          [string]$Disc, [string]$DiscTwo, [string]$ModsRoot)
+          [string]$Disc, [string]$DiscTwo, [string]$ModsRoot, [string]$TextPack, [string]$VoicePack)
 
     $attempt = [Guid]::NewGuid().ToString('N')
     $output = Join-Path $Directory $attempt
@@ -77,7 +79,7 @@ function New-MgsResumeCache {
     }
     Write-Host "[resume] Recovering the last loaded map entry once; progress log: $log"
     Export-MgsResumeCheckpoint -Executable $Executable -Session $Session -Prefix $prefix `
-        -Checkpoint $checkpoint -Log $log -Startup $Startup -Disc $Disc -DiscTwo $DiscTwo -ModsRoot $ModsRoot
+        -Checkpoint $checkpoint -Log $log -Startup $Startup -Disc $Disc -DiscTwo $DiscTwo -ModsRoot $ModsRoot -TextPack $TextPack -VoicePack $VoicePack
     $metadata = [ordered]@{
         schema = 1; sourceSha256 = $SourceHash; identity = $Session.Identity
         attempt = $attempt; stage = $selection.selected.stage
@@ -94,14 +96,14 @@ function New-MgsResumeCache {
 
 function Initialize-MgsInputResume {
     param([string]$ProjectDirectory, [string]$Executable, [string]$MoviePath,
-          [string]$Disc, [string]$DiscTwo, [string]$ModsRoot)
+          [string]$Disc, [string]$DiscTwo, [string]$ModsRoot, [string]$TextPack, [string]$VoicePack)
 
     Assert-MgsInputPlainPath $MoviePath
     Assert-MgsInputPlainPath "$MoviePath.session/session.json"
     $metadata = Get-Content -LiteralPath "$MoviePath.session/session.json" -Raw | ConvertFrom-Json
     $startup = $metadata.identityData.startup
     $session = Initialize-MgsInputSession -ProjectDirectory $ProjectDirectory -Executable $Executable `
-        -ReplayPath $MoviePath -Disc $Disc -DiscTwo $DiscTwo -ModsRoot $ModsRoot `
+        -ReplayPath $MoviePath -Disc $Disc -DiscTwo $DiscTwo -ModsRoot $ModsRoot -TextPack $TextPack -VoicePack $VoicePack `
         -Stage $startup.stage -StageMap $startup.map -BonusItems $startup.bonusItems `
         -Invulnerable (Get-MgsInputInvulnerability $startup) `
         -AutoCard (Get-MgsInputBooleanSetting $startup 'autoCard') `
@@ -113,5 +115,5 @@ function Initialize-MgsInputResume {
     if ($checkpoint) { return $checkpoint }
     return New-MgsResumeCache -ProjectDirectory $ProjectDirectory -Executable $Executable `
         -MoviePath $MoviePath -Directory $directory -SourceHash $sourceHash -Session $session `
-        -Startup $startup -Disc $Disc -DiscTwo $DiscTwo -ModsRoot $ModsRoot
+        -Startup $startup -Disc $Disc -DiscTwo $DiscTwo -ModsRoot $ModsRoot -TextPack $TextPack -VoicePack $VoicePack
 }

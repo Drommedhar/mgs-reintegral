@@ -9,6 +9,7 @@ test-data/**/*.zip
 test-data/campaign-completion-20261010/manifest.json
 __pycache__/
 *.pyc
+*.mgslang
 .ruff_cache/
 renderers/godot/project/.godot/
 renderers/godot/project/.generated/

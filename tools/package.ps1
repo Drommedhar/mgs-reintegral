@@ -20,11 +20,17 @@ New-Item -ItemType Directory -Path $package -Force | Out-Null
 foreach ($file in @('RE-INTEGRAL.exe', 'mgs-integral-native.exe')) {
     Copy-Item -LiteralPath (Join-Path $build $file) -Destination $package
 }
+Copy-Item -LiteralPath (Join-Path $build 'language-importer') -Destination $package -Recurse
+if (Get-ChildItem -LiteralPath $package -Recurse -File | Where-Object { $_.Extension -in @('.mgslang', '.bin', '.cue', '.iso', '.dat', '.dir') }) {
+    throw 'Retail resource files must not be included in a player package.'
+}
 $versionText = & (Join-Path $package 'mgs-integral-native.exe') --version
 if ($LASTEXITCODE -ne 0 -or $versionText -notlike "RE:INTEGRAL $Version (*)") { throw 'Executable version does not match package version.' }
 Copy-Item -LiteralPath (Join-Path $project 'LICENSE') -Destination $package
 Copy-Item -LiteralPath (Join-Path $project 'docs/ALPHA.md') -Destination (Join-Path $package 'START-HERE.md')
 Copy-Item -LiteralPath (Join-Path $project 'docs/THIRD_PARTY.md') -Destination $package
+Copy-Item -LiteralPath (Join-Path $project 'docs/LANGUAGES.md') -Destination $package
+Copy-Item -LiteralPath (Join-Path $project 'docs/REGIONAL_LANGUAGE_RESOURCES.md') -Destination $package
 Copy-Item -LiteralPath (Join-Path $project 'sources.lock.json') -Destination $package
 $notices = Join-Path $package 'licenses'
 New-Item -ItemType Directory -Path $notices | Out-Null

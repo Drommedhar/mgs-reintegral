@@ -35,6 +35,16 @@ to identify the affected material and supporting information.
 
 ## License scopes recorded upstream
 
+The optional language importer is frozen from this project's Python sources with
+[PyInstaller 6.16.0](https://pyinstaller.org/en/v6.16.0/usage.html). Its x64 CPython
+runtime is included so players do not need to install Python. Build requirements
+pin PyInstaller and its hook package; `language-importer/build-info.json` records
+the interpreter and freezer versions. The bundle includes the installed Python
+distribution's license, runtime dependency notices and PyInstaller's
+license/bootloader exception in its `licenses` folder. See
+[PyInstaller's terms](https://pyinstaller.org/en/v6.16.0/license.html).
+No retail disc resources or generated language packs are bundled.
+
 We have not found a repository-wide license grant in the pinned FoxdieTeam tree. Its recovered game code and stage data are outside this project's MIT license. This port does not grant rights to the original game or its content.
 
 PsyZ's [root license inventory](https://github.com/Xeeynamo/psyz/blob/6d9c5730c414da327dbb12a8e6600b7774b49201/LICENSE) assigns different scopes. `psyz/src/platform/` and `psyz/src/psyz/` carry MPL 2.0; the root inventory labels `psyz/include` and `psyz/src/psyq` “Unlicensed.” The [decomp subtree](https://github.com/Xeeynamo/psyz/blob/6d9c5730c414da327dbb12a8e6600b7774b49201/decomp/LICENSE) has its own MIT notice crediting psyqz members and sotn-decomp contributors. Several tools and samples are separately MIT-licensed. Preserve these distinctions and their notices when preparing any distribution; PsyZ is not uniformly MIT-licensed.

@@ -40,6 +40,8 @@ internal static class LauncherSettingsTest
         Require(!value.TextureCorrection && !value.GeometryPrecision && !value.DepthBuffer,
             "Experimental graphics must default off");
         value.DiscOne = "C:\\日本語\\disc 1.cue";
+        value.TextPack = "C:\\my languages\\german.mgslang";
+        value.VoicePack = "C:\\my languages\\english.mgslang";
         value.Advanced = "--mods-root \"C:\\my mods\"";
         value.Save(path);
         value.Fullscreen = true;
@@ -52,6 +54,11 @@ internal static class LauncherSettingsTest
         Require(restored.TextureCorrection && restored.GeometryPrecision && restored.DepthBuffer,
             "Graphics settings did not round-trip");
         Require(restored.FastLoading, "Fast loading setting did not round-trip");
+        Require(restored.TextPack == value.TextPack && restored.VoicePack == value.VoicePack,
+            "Language selections did not round-trip");
+        string languages = GameLaunch.Arguments(restored);
+        Require(languages.Contains("--text-pack " + GameLaunch.Quote(value.TextPack)) &&
+            languages.Contains("--voice-pack " + GameLaunch.Quote(value.VoicePack)), "Language paths were not quoted");
         Require(Directory.GetFiles(directory, "*.tmp").Length == 0, "Temporary settings file leaked");
         File.WriteAllText(path, "<Settings><Version>99</Version></Settings>");
         try { Settings.Load(path); throw new InvalidOperationException("Unknown settings version accepted"); }

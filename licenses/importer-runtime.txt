@@ -1,0 +1,19 @@
+The language importer includes CPython and its standard-library dependencies.
+Python.txt contains the installed Python distribution's notices, including bzip2.
+PyInstaller.txt contains the bootloader license and distribution exception.
+
+OpenSSL 3 libcrypto is used for hashing. It is supplied by the Python installation
+and is covered by Apache-2.0.txt. https://www.openssl.org/
+https://github.com/openssl/openssl/blob/openssl-3.0.15/LICENSE.txt
+PyInstaller runtime hooks also use Apache 2.0.
+
+zlib is copyright Jean-loup Gailly and Mark Adler; see zlib.txt.
+Notice source: https://github.com/madler/zlib/blob/v1.3.1/LICENSE
+
+The liblzma component comes from XZ Utils, whose library sources were placed in
+the public domain. https://tukaani.org/xz/
+https://github.com/tukaani-project/xz/blob/v5.4.3/COPYING
+
+The included Windows runtime DLLs are supplied by the Python distribution.
+Interpreter, OpenSSL, zlib and freezer versions are recorded in build-info.json.
+No retail game assets are included in this software bundle.

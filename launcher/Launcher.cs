@@ -12,6 +12,7 @@ namespace ReIntegral
     {
         private readonly string dataDirectory, executable, settingsPath;
         private readonly TextBox discOne = new TextBox(), discTwo = new TextBox();
+        private readonly TextBox textPack = new TextBox(), voicePack = new TextBox();
         private readonly ComboBox resolution = new ComboBox(), mantis = new ComboBox();
         private readonly CheckBox wide = new CheckBox(), fullscreen = new CheckBox();
         private readonly CheckBox textureCorrection = new CheckBox();
@@ -71,6 +72,7 @@ namespace ReIntegral
             BuildDisplay();
             BuildGraphics();
             BuildGameplay();
+            BuildLanguages();
             BuildAdvanced();
             play.Text = "Save and play";
             play.SetBounds(550, 580, 154, 34);
@@ -183,9 +185,45 @@ namespace ReIntegral
             LabelAt(page, "Quote paths containing spaces. Direct stage entry does not set campaign state.", 297);
         }
 
+        private void LanguageRow(TabPage page, TextBox field, string label, int y)
+        {
+            LabelAt(page, label, y);
+            field.SetBounds(16, y + 27, 505, 26);
+            page.Controls.Add(field);
+            AddButton(page.Controls, "Browse…", 532, y + 23, delegate {
+                using (var dialog = new OpenFileDialog { Filter = "Language packs (*.mgslang)|*.mgslang", CheckFileExists = true })
+                    if (dialog.ShowDialog(this) == DialogResult.OK) field.Text = dialog.FileName;
+            });
+        }
+
+        private void BuildLanguages()
+        {
+            var page = Page("Languages");
+            LanguageRow(page, textPack, "Text pack — inventory and matched dialogue", 16);
+            LanguageRow(page, voicePack, "Speech pack — voices with their timed subtitles", 94);
+            LabelAt(page, "Leave a field empty to use Integral. Packs are imported from your own discs.", 180);
+            LabelAt(page, "Coverage is partial: unmatched dialogue and movies retain Integral English.", 216);
+            LabelAt(page, "Integral stages, models and game scripts remain in use.", 252);
+            AddButton(page.Controls, "Use Integral", 16, 282, delegate { textPack.Clear(); voicePack.Clear(); });
+            AddButton(page.Controls, "Import from discs…", 164, 282, delegate { Guard(ImportLanguage); });
+        }
+
+        private void ImportLanguage()
+        {
+            using (var dialog = new LanguageImportDialog(dataDirectory, discOne.Text, discTwo.Text))
+            {
+                if (dialog.ShowDialog(this) != DialogResult.OK) return;
+                textPack.Text = dialog.PackPath;
+                voicePack.Text = dialog.PackPath;
+                Save();
+                status.Text = "Language imported and selected for text and speech.";
+            }
+        }
+
         private void LoadSettings(Settings value)
         {
             discOne.Text = value.DiscOne; discTwo.Text = value.DiscTwo;
+            textPack.Text = value.TextPack; voicePack.Text = value.VoicePack;
             resolution.Text = value.Resolution; wide.Checked = value.Widescreen;
             fullscreen.Checked = value.Fullscreen; bonus.Checked = value.BonusItems;
             textureCorrection.Checked = value.TextureCorrection;
@@ -200,6 +238,7 @@ namespace ReIntegral
         private Settings ReadSettings()
         {
             return new Settings { DiscOne = AbsolutePath(discOne.Text), DiscTwo = AbsolutePath(discTwo.Text),
+                TextPack = AbsolutePath(textPack.Text), VoicePack = AbsolutePath(voicePack.Text),
                 Resolution = resolution.Text.Trim(), Widescreen = wide.Checked, Fullscreen = fullscreen.Checked,
                 TextureCorrection = textureCorrection.Checked,
                 GeometryPrecision = geometryPrecision.Checked, DepthBuffer = depthBuffer.Checked,
@@ -227,13 +266,16 @@ namespace ReIntegral
             validating = true;
             play.Enabled = false;
             tabs.Enabled = false;
-            status.Text = "Validating your disc images…";
+            status.Text = "Validating your discs and language packs…";
             try
             {
                 var settings = ReadSettings();
                 activeArguments = GameLaunch.Arguments(settings);
                 await GameLaunch.ValidateDisc(executable, settings.DiscOne, 1, dataDirectory);
                 await GameLaunch.ValidateDisc(executable, settings.DiscTwo, 2, dataDirectory);
+                await GameLaunch.ValidateLanguage(executable, settings.TextPack, dataDirectory);
+                if (settings.VoicePack != settings.TextPack)
+                    await GameLaunch.ValidateLanguage(executable, settings.VoicePack, dataDirectory);
                 settings.Save(settingsPath);
                 rapidRestarts = 0;
                 StartGame();
@@ -288,6 +330,16 @@ namespace ReIntegral
                         DrawToBitmap(preview, new Rectangle(0, 0, Width, Height));
                         preview.Save(Path.Combine(dataDirectory, "launcher-" + index + ".png"));
                     }
+                }
+                using (var dialog = new LanguageImportDialog(dataDirectory, discOne.Text, discTwo.Text))
+                {
+                    dialog.Show(this);
+                    using (var preview = new Bitmap(dialog.Width, dialog.Height))
+                    {
+                        dialog.DrawToBitmap(preview, new Rectangle(0, 0, dialog.Width, dialog.Height));
+                        preview.Save(Path.Combine(dataDirectory, "launcher-import.png"));
+                    }
+                    dialog.Close();
                 }
                 Close();
                 return;

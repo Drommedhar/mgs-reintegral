@@ -2,6 +2,7 @@
 
 Download the `windows-x86.zip` asset, extract the entire folder, and open
 **RE-INTEGRAL.exe**. Keep the launcher beside `mgs-integral-native.exe`.
+Keep the `language-importer` folder alongside them for optional language imports.
 The symbols and MPL source ZIPs are separate downloads for debugging and
 source access; they are not needed to play.
 
@@ -9,12 +10,14 @@ source access; they are not needed to play.
 
 - Windows 10 22H2 or Windows 11, with .NET Framework 4.8 enabled for the launcher.
   The game is a 32-bit executable and also runs on 64-bit Windows.
+  Creating optional language packs requires 64-bit Windows.
 - A Direct3D 12 capable GPU and driver supporting the bundled SDL GPU backend.
   A broader hardware compatibility matrix is still to be established.
 - Your Japanese Integral Disc 1 (`SLPM-86247`) and Disc 2 (`SLPM-86248`) in
   single-track MODE2/2352 BIN/CUE format. Select the CUE files and keep their
-  BIN files alongside them. Other editions, plain ISO images, and VR Missions
-  are not supported by this alpha. No game content is supplied.
+  BIN files alongside them. Integral remains required for gameplay. US English
+  v1.0 and German campaign pairs can supply optional text and speech. Plain ISO
+  images and VR Missions are unsupported. No game content is supplied.
 
 Players do not need Git, Python, CMake, Visual Studio, or PowerShell scripts.
 The launcher uses Windows' .NET Framework; the native C/C++ runtime and SDL are
@@ -27,6 +30,13 @@ linked into the game. The executables are unsigned.
 3. Review **Gameplay** for optional bonus items, invulnerability, auto-card,
    and Psycho Mantis memory profiles. Defaults leave gameplay aids disabled.
 4. Click **Save and play**. Disc identities are checked before the game starts.
+
+For optional German or US English text and speech, open **Languages → Import
+from discs…**, choose the regional release and its two images, then click
+**Import and use**. The launcher creates and checks a pack locally; no Python
+installation is needed and nothing is uploaded or downloaded. Allow several
+minutes and several GiB of free memory and disk space. Coverage is partial;
+unmatched dialogue and movies retain Integral. See `LANGUAGES.md` for details.
 
 **Developer options** exposes debug overlay, startup stage and frame limit.
 The additional-arguments field accepts the remaining native command-line
@@ -46,6 +56,8 @@ The launcher stores data in `%LOCALAPPDATA%\RE-INTEGRAL`:
 - `bu00` and `bu10`: native memory-card saves, created by the game.
 - `logs`: a separate timestamped log for each game process, with version and
   commit information. Logs can contain local file paths and launch arguments.
+- `languages`: private imported language packs and their source/coverage receipts.
+  The `logs` folder also contains language import logs. Do not share these packs.
 
 Updating or replacing the application folder preserves this data. Existing
 development saves under `.local/runtime/bu00` and `bu10` can be copied to the
@@ -71,7 +83,7 @@ when reporting a bug. Reopen the launcher to repair paths after moving discs.
 One main-campaign route was completed through credits on 10 October 2026.
 That does not establish coverage of all branches, optional modes, controllers
 or GPUs. This alpha focuses on installing and launching the native build.
-Regional resource selection, VR Missions, the replacement Godot renderer and
+Complete regional coverage, VR Missions, the replacement Godot renderer and
 broader mod formats remain future work; see the repository roadmap.
 
 Report bugs at https://github.com/Drommedhar/mgs-reintegral/issues with the

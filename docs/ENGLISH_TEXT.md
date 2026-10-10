@@ -14,13 +14,16 @@ retains configuration `0x0100`, confirming that these Japanese descriptions
 appear while English is enabled. Earlier English validation covered dialogue
 and subtitles, not every description or menu.
 
-The user approved future language-resource imports from other disc editions,
-including US and European releases and German. Keep Integral gameplay and
-support separately selectable, modifiable language packs containing localized
-text, fonts and UI graphics. Importers will need region/revision mappings for
-resource IDs and text stored in executable tables. This is a future resource
-feature; cross-region disc imports and complete UI translation are not yet
-implemented.
+Optional [English and German language packs](LANGUAGES.md) now import executable
+description tables, German glyphs, matched dialogue and speech from the supported
+US and German campaign pairs. Integral remains the gameplay base. Coverage is
+partial; full UI graphics and movie localization are not implemented.
+
+The supplied US and German campaign pairs have now received a
+[read-only compatibility audit](REGIONAL_LANGUAGE_RESOURCES.md). It identifies
+the executable text tables, regional Codec addressing, font encoding and
+cinematic timing work needed for optional packs. Runtime language-pack support
+remains unimplemented.
 
 ## Briefing subtitles
 

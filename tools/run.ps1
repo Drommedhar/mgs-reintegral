@@ -20,6 +20,8 @@ param(
     [ValidateRange(0, 65535)]
     [int]$StageMap,
     [string]$ModsRoot,
+    [string]$TextPack,
+    [string]$VoicePack,
     [string]$Capture,
     [string]$CadenceLog,
     [string]$RecordInput,
@@ -208,6 +210,11 @@ if ($ReplayInput -or $ResumeInput) {
     $replayPath = [IO.Path]::GetFullPath($sourceMovie, $projectDirectory)
     $replayMetadata = Get-Content -LiteralPath "$replayPath.session/session.json" -Raw | ConvertFrom-Json
     $startup = $replayMetadata.identityData.startup
+    foreach ($option in @('TextPack', 'VoicePack')) {
+        if (-not $PSBoundParameters.ContainsKey($option) -and $replayMetadata.sources.PSObject.Properties[$option]) {
+            Set-Variable -Name $option -Value $replayMetadata.sources.$option
+        }
+    }
     if ($ReplayInput -and $replayMetadata.PSObject.Properties['presentation']) {
         $presentation = $replayMetadata.presentation
         foreach ($option in @('TextureCorrection', 'GeometryPrecision', 'DepthBuffer', 'FastLoading')) {
@@ -282,10 +289,19 @@ if ($DiscTwo) {
 if ($ModsRoot) {
     $ModsRoot = (Resolve-Path -LiteralPath $ModsRoot).Path
 }
+foreach ($option in @('TextPack', 'VoicePack')) {
+    $pack = Get-Variable -Name $option -ValueOnly
+    if ($pack) {
+        $pack = (Resolve-Path -LiteralPath $pack).Path
+        Set-Variable -Name $option -Value $pack
+        Assert-MgsInputOutputs $pack @($Capture, $CadenceLog, $RecordInput, $SaveCheckpoint)
+    }
+}
 if ($ResumeInput) {
     . (Join-Path $PSScriptRoot 'resume-input.ps1')
     $LoadCheckpoint = Initialize-MgsInputResume -ProjectDirectory $projectDirectory `
-        -Executable $executable -MoviePath $replayPath -Disc $Disc -DiscTwo $DiscTwo -ModsRoot $ModsRoot
+        -Executable $executable -MoviePath $replayPath -Disc $Disc -DiscTwo $DiscTwo -ModsRoot $ModsRoot `
+        -TextPack $TextPack -VoicePack $VoicePack
 }
 if ($ResumeInput) {
     Assert-MgsInputOutputs $LoadCheckpoint @($Capture, $CadenceLog, $RecordInput, $SaveCheckpoint)
@@ -348,6 +364,8 @@ if ($PSBoundParameters.ContainsKey('StageMap')) {
 if ($ModsRoot) {
     $gameArguments += @('--mods-root', $ModsRoot)
 }
+if ($TextPack) { $gameArguments += @('--text-pack', $TextPack) }
+if ($VoicePack) { $gameArguments += @('--voice-pack', $VoicePack) }
 if ($Frames) {
     $gameArguments += @('--frames', $Frames.ToString())
 }
@@ -392,6 +410,7 @@ if ($RecordInput -or $ReplayInput) {
         -AutoCard ([bool]$AutoCard) `
         -MantisMemorySeed $mantisMemorySeed `
         -ModsRoot $ModsRoot -CheckpointPath $LoadCheckpoint `
+        -TextPack $TextPack -VoicePack $VoicePack `
         -Presentation @{ widescreen = [bool]$Widescreen; resolution = $Resolution; fullscreen = [bool]$Fullscreen; TextureCorrection = [bool]$TextureCorrection; GeometryPrecision = [bool]$GeometryPrecision; DepthBuffer = [bool]$DepthBuffer; FastLoading = [bool]$FastLoading }
     $runtimeDirectory = $inputSession.RuntimeDirectory
     $inputFlag = if ($RecordInput) { '--record-input' } else { '--replay-input' }

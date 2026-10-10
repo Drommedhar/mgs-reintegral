@@ -52,6 +52,16 @@ Assert-True ($metadata.identityData.assets.disc.images.Count -eq 2) 'CUE images 
 Assert-True ($null -eq $metadata.identityData.startup.PSObject.Properties['checkpointSha256']) 'Legacy metadata changed.'
 Assert-Rejected { Initialize-MgsInputSession @options -RecordPath $movie } 'requires a new'
 Write-Text $movie 'fake-input-data'
+$pack = Join-Path $fixture 'languages/german.mgslang'
+Write-Text $pack 'pack-one'
+$languageMovie = Join-Path $fixture 'replays/german.input'
+$languageRecord = Initialize-MgsInputSession @options -RecordPath $languageMovie -TextPack $pack -VoicePack $pack
+Write-Text $languageMovie 'fake-input-data'
+$languageReplay = Initialize-MgsInputSession @options -ReplayPath $languageMovie -TextPack $pack -VoicePack $pack
+Assert-True ($languageReplay.Identity -ceq $languageRecord.Identity) 'Language replay identity changed.'
+Assert-Rejected { Initialize-MgsInputSession @options -ReplayPath $languageMovie -TextPack $pack } 'assets differ'
+Write-Text $pack 'pack-two'
+Assert-Rejected { Initialize-MgsInputSession @options -ReplayPath $languageMovie -TextPack $pack -VoicePack $pack } 'assets differ'
 Write-Text $exe 'build-two'
 Write-Text $normalCard 'new-human-progress'
 $replay = Initialize-MgsInputSession @options -ReplayPath $movie

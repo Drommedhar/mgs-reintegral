@@ -33,6 +33,72 @@ and its 600-VSync reload reached the Disc 2 entry corridor. Checkpoints restore
 map entries, not exact process snapshots. Original recordings and cards remain
 preserved; each checkpoint has adjacent provenance and validation JSON.
 
+## Optional regional localization — 10 October 2026
+
+The launcher now provides **Languages → Import from discs…** with regional
+release selection, four disc pickers (Integral paths prefilled), progress, logs
+and cancellation. Import runs from a bundled x64 Python executable; players need
+no Python installation or network connection. Temporary extraction stays inside
+a unique profile-local staging folder. The native validator checks the completed
+pack before the folder is renamed and the text/speech settings are selected.
+Failure/cancellation removes unfinished output and leaves existing packs intact.
+Release packaging includes the importer and its runtime notices, rejects retail
+asset extensions, and excludes all generated packs. `.mgslang` is ignored globally.
+
+Launcher import validation: both launcher builds compile; all five relevant CTest
+suites pass in each build (settings, import workflow, bundled importer, language
+packs and content import). Synthetic workflow tests cover repeat imports,
+nonzero exit, corrupt output, missing receipt, cancellation, Unicode paths,
+source preservation and staging cleanup. The unpacked player ZIP passes checks
+with Python absent from PATH, including importer startup, invalid-disc rejection,
+notices and UI smoke captures. The scoped Aislop scan reports zero findings.
+A real German import through the launcher service produced 2,667 records with
+the same SHA-256 as the existing CLI pack, then passed native validation. A
+1,500-VSync Integral briefing boot with that pack selected VOX sector 7 and
+rendered German captions. Evidence stays in ignored `build/language-launcher-check/`.
+This is scoped import/playback verification, not a full localized playthrough.
+
+Implemented local English/German packs with an importer that validates the donor
+and Integral executable revisions, records source hashes, and reports disc-specific
+coverage. Launcher and CLI selections are optional. Inventory descriptions,
+German glyphs, matched text, speech and cinematic audio/captions use donor assets;
+Integral scripts, stages and animation stay in use. Codec segment mismatches and
+unmatched references retain Integral. Movie/XA localization and complete German
+coverage remain outstanding. See [usage and limits](docs/LANGUAGES.md).
+
+Pack checksums/framing, malformed-input handling, animation preservation, ambiguous
+mapping rejection and recording identity have asset-free regression coverage.
+Record/replay/resume identity includes selected pack hashes. Retail data and local
+coverage receipts stay under ignored `.local/languages/`.
+
+Validation before the launcher importer: reference Debug 164/164 and modern RelWithDebInfo 168/168 CTest
+cases pass; the registered vendor patch passes bootstrap verification. Real-disc
+boots selected the German opening, briefing and initial dock Codec streams.
+Inspected captures show German Codec text and German briefing glyphs. German
+coverage is 449/1,108 and 311/754 VOX entries, plus 119/119 DEMO entries; excluded
+dialogue and movies remain Integral. Full playthrough and perceptual audio sync
+remain for human testing. Aislop reports no errors or fixable warnings; the
+existing long native startup function is still flagged, and cppcheck/clang-tidy
+are unavailable in this environment.
+
+## Regional language source audit — 10 October 2026
+
+Inspected the newly supplied US English (`SLUS_005.94` / `SLUS_007.76`) and
+German (`SLES_015.07` / `SLES_115.07`) campaign pairs alongside Integral.
+Both donor pairs contain full campaign resource banks, including Disc 2.
+Recorded image/executable/resource hashes and parsed all twelve VOX/DEMO banks.
+Original images and the MGSR project were preserved; extracted content and
+detailed reports remain ignored under `build/language-audit/`.
+
+The [language resource audit](docs/REGIONAL_LANGUAGE_RESOURCES.md) records
+identical Codec portrait assets, verified opening English payload matches,
+different Codec addressing, German font encoding and PAL timing, dynamic UI
+text offsets, and Integral-only content requiring explicit mapping/fallback.
+Recommended first implementation: selectable English UI resources, retaining
+Integral speech/gameplay, followed by German text/Codec and cinematic support.
+This is asset/source analysis; no pack importer or runtime localization has
+been implemented or playtested.
+
 ## Map loading pacing — 10 October 2026
 
 Added opt-in **Faster map loading (experimental)** on the launcher's Gameplay

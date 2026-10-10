@@ -11,6 +11,8 @@ namespace ReIntegral
         public int Version = 1;
         public string DiscOne = "";
         public string DiscTwo = "";
+        public string TextPack = "";
+        public string VoicePack = "";
         public string Resolution = "1280x720";
         public bool Widescreen = true;
         public bool Fullscreen;

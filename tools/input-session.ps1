@@ -197,6 +197,8 @@ function Initialize-MgsInputSession {
         [bool]$AutoCard = $false,
         [ValidateRange(0, 2147483647)][int]$MantisMemorySeed = 0,
         [string]$ModsRoot,
+        [string]$TextPack,
+        [string]$VoicePack,
         [string]$CheckpointPath,
         [hashtable]$Presentation
     )
@@ -235,6 +237,15 @@ function Initialize-MgsInputSession {
         cards = $null
     }
     if ($Invulnerable) { $data.startup.invulnerable = $true }
+    $languagePaths = @{}
+    foreach ($option in @('TextPack', 'VoicePack')) {
+        $path = Get-Variable -Name $option -ValueOnly
+        if ($path) {
+            $path = [IO.Path]::GetFullPath($path, $project)
+            $languagePaths[$option] = $path
+            $data.assets[$option] = Get-MgsInputFileHash $path
+        }
+    }
     if ($AutoCard) { $data.startup.autoCard = $true }
     if ($MantisMemorySeed) { $data.startup.mantisMemorySeed = $MantisMemorySeed }
     if ($checkpointHash) {
@@ -269,6 +280,7 @@ function Initialize-MgsInputSession {
             sources = [ordered]@{ disc = $discPath; discTwo = $discTwoPath; modsRoot = $modsPath }
         }
         if ($Presentation) { $metadata.presentation = $Presentation }
+        foreach ($option in $languagePaths.Keys) { $metadata.sources[$option] = $languagePaths[$option] }
         $metadataJson = ConvertTo-Json -InputObject $metadata -Depth 20
         [IO.File]::WriteAllText($metadataPath, $metadataJson, [Text.UTF8Encoding]::new($false))
         [void][IO.Directory]::CreateDirectory($runtime)

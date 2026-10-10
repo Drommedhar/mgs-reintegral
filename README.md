@@ -15,6 +15,11 @@ It saves settings and memory cards under `%LOCALAPPDATA%\RE-INTEGRAL` so updates
 preserve them. No development tools or Python installation is needed to play.
 See [alpha requirements, controls and limitations](docs/ALPHA.md).
 
+Source builds also support optional [English and German language packs](docs/LANGUAGES.md)
+imported from your own regional discs. Use **Languages → Import from discs…**;
+the bundled importer creates packs locally without a Python installation.
+Integral remains the gameplay base. Regional coverage is currently partial.
+
 ## Roadmap
 
 - **Regional resources:** support text and voice resources from more regions
@@ -58,7 +63,7 @@ terminal after prerequisite installation, then run setup again. Dependencies
 are fetched from upstream and pinned in `sources.lock.json`; this repository
 does not mirror tool installers or dependency checkouts.
 
-Use PowerShell 7 on Windows with Git, Python 3.11 or newer, and Visual Studio 2022 with C++ x86 tools, a Windows SDK, and the LLVM/Clang component. The scripts locate Visual Studio with `vswhere` and activate its x86 environment. CMake 3.31.8 and Ninja 1.13.1 are downloaded to `.tools` with checksum verification; Jinja2 3.1.6 is installed into `.venv`.
+Use PowerShell 7 on Windows with Git, 64-bit Python 3.11 or newer, and Visual Studio 2022 with C++ x86 tools, a Windows SDK, and the LLVM/Clang component. The scripts locate Visual Studio with `vswhere` and activate its x86 environment. CMake 3.31.8 and Ninja 1.13.1 are downloaded to `.tools` with checksum verification; pinned Python build requirements, including Jinja2 and PyInstaller, are installed into `.venv`. The game remains x86; the bundled language importer uses x64 for its working memory.
 
 ```powershell
 ./tools/bootstrap.ps1

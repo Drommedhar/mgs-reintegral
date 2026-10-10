@@ -60,7 +60,7 @@ add_executable(mgs-integral-native src/main.c src/mgs_disc.c src/mgs_memory.c sr
     src/mgs_bonus_items.c src/mgs_invulnerability.c src/mgs_game_options.c src/mgs_input_movie.c src/mgs_input_log.c src/mgs_controller_ports.c src/mgs_mantis_memory.c src/mgs_checkpoint.c src/mgs_ending_probe.c
     src/mgs_completed_load_probe.c src/mgs_escape_route.c src/mgs_rex_probe.c src/mgs_liquid_probe.c
     src/mgs_garage_route.c src/mgs_video.c src/mgs_visibility.c src/mgs_frame_timing.c
-    src/mgs_texture_correction.c src/mgs_loading.c)
+    src/mgs_texture_correction.c src/mgs_loading.c src/mgs_language.c)
 target_include_directories(mgs-integral-native PRIVATE include "${MGS_NATIVE_ROOT}" "${MGS_NATIVE_ROOT}/include"
     "${CMAKE_CURRENT_BINARY_DIR}")
 target_link_libraries(mgs-integral-native PRIVATE mgs_game)
@@ -836,6 +836,9 @@ if(BUILD_TESTING)
         set_tests_properties(${test_target} PROPERTIES TIMEOUT 15)
     endforeach()
     add_test(NAME import_content COMMAND "${Python3_EXECUTABLE}" -m unittest tests.test_import_content)
+    add_test(NAME language_pack COMMAND "${Python3_EXECUTABLE}" -m unittest tests.test_language)
+    set_tests_properties(language_pack PROPERTIES WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+        ENVIRONMENT "MGS_LANGUAGE_TEST_ENGINE=$<TARGET_FILE:mgs-integral-native>")
     set_tests_properties(import_content PROPERTIES WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
     add_test(NAME list_assets COMMAND "${Python3_EXECUTABLE}" -m unittest tests.test_list_assets)
     set_tests_properties(list_assets PROPERTIES WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")

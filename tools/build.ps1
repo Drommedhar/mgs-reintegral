@@ -20,7 +20,11 @@ $sources = Get-Content -LiteralPath (Join-Path $projectDirectory 'sources.lock.j
 $missingSources = @($sources.repositories | Where-Object {
     -not (Test-Path -LiteralPath (Join-Path $projectDirectory "$($_.path)/.git"))
 })
-if (-not (Test-Path -LiteralPath $python) -or $missingSources.Count -gt 0) {
+$requirementsStamp = Join-Path $projectDirectory '.venv/requirements.sha256'
+$requirementsHash = (Get-FileHash -LiteralPath (Join-Path $projectDirectory 'requirements.txt')).Hash
+$requirementsCurrent = (Test-Path -LiteralPath $requirementsStamp) -and
+    (Get-Content -LiteralPath $requirementsStamp -Raw).Trim() -eq $requirementsHash
+if (-not (Test-Path -LiteralPath $python) -or $missingSources.Count -gt 0 -or -not $requirementsCurrent) {
     & (Join-Path $PSScriptRoot 'bootstrap.ps1')
 }
 $toolchain = & (Join-Path $PSScriptRoot 'toolchain.ps1')

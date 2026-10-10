@@ -21,6 +21,7 @@
 #include "mgs_texture_correction.h"
 #include "mgs_game_options.h"
 #include "mgs_loading.h"
+#include "mgs_language.h"
 #include "mgs_safety.h"
 #include "mgs_build.h"
 
@@ -30,6 +31,7 @@ typedef struct {
     const char *disc, *disc_two, *stage, *probe_mode, *mods_root, *cadence_path;
     const char *record_input, *replay_input, *input_identity;
     const char *load_checkpoint, *save_checkpoint;
+    const char *text_pack, *voice_pack;
     int stage_explicit, stage_map, bonus_items, invulnerable;
     unsigned replay_tail_frames, mantis_memory_seed;
     int replay_fast, debug_overlay, auto_card, texture_correction, geometry_precision, depth_buffer;
@@ -257,7 +259,8 @@ static int ValidateOutputPaths(const StartupOptions *options, const char *captur
 {
     const char *names[] = {options->record_input, options->cadence_path, capture,
                           options->save_checkpoint, options->replay_input,
-                          options->load_checkpoint, options->disc, options->disc_two};
+                          options->load_checkpoint, options->disc, options->disc_two,
+                          options->text_pack, options->voice_pack};
     StartupPath paths[sizeof(names) / sizeof(names[0])] = {0};
     if (!names[0] && !names[1] && !names[2] && !names[3])
         return 1;
@@ -284,6 +287,7 @@ static int ParseOption(StartupOptions *options, const char *name, const char *va
         {"--record-input", &options->record_input},
         {"--replay-input", &options->replay_input},
         {"--load-checkpoint", &options->load_checkpoint},
+        {"--text-pack", &options->text_pack}, {"--voice-pack", &options->voice_pack},
         {"--save-checkpoint", &options->save_checkpoint},
         {"--input-identity", &options->input_identity}
     };
@@ -406,6 +410,8 @@ static void PrintUsage(FILE *stream)
           "  --invulnerable 0|1\n"
           "  --auto-card 0|1\n"
           "  --fast-loading 0|1 (accelerate map loading only)\n"
+          "  --text-pack <pack.mgslang> --voice-pack <pack.mgslang>\n"
+          "  --check-language <pack.mgslang> (validate without game boot)\n"
           "  --mantis-memory SEED (1..2147483647; synthetic memory-card reading)\n"
           "  --stage <linked stage> [--stage-map id] --frames count\n"
           "  --record-input <path> | --replay-input <path>\n"
@@ -419,6 +425,8 @@ static void PrintUsage(FILE *stream)
 
 int main(int argc, char **argv)
 {
+    if (argc == 3 && strcmp(argv[1], "--check-language") == 0)
+        return MgsLanguageInspect(argv[2]) ? 0 : 2;
     if (argc == 2 && strcmp(argv[1], "--version") == 0) {
         puts("RE:INTEGRAL " MGS_RELEASE_VERSION " (" MGS_BUILD_COMMIT ")");
         return 0;
@@ -446,6 +454,12 @@ int main(int argc, char **argv)
     SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
     if (!ValidateOutputPaths(&options, capture_path))
         return 2;
+    if (!MgsLanguageConfigure(options.text_pack, options.voice_pack))
+        return 2;
+    if (atexit(MgsLanguageClose) != 0) {
+        MgsLanguageClose();
+        return 1;
+    }
     if (!MgsVideoConfigure(&options.video))
         return 2;
     if (!MgsTextureCorrectionConfigure(options.texture_correction, options.geometry_precision, options.depth_buffer)) {
