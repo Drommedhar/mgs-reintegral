@@ -45,6 +45,7 @@ namespace ReIntegral
             if (settings.BonusItems) arguments.Add("--bonus-items 1");
             if (settings.Invulnerable) arguments.Add("--invulnerable 1");
             if (settings.AutoCard) arguments.Add("--auto-card 1");
+            if (settings.FastLoading) arguments.Add("--fast-loading 1");
             if (frames > 0) arguments.Add("--frames " + settings.Frames);
             AddMantis(arguments, settings.MantisMemory);
             if (!String.IsNullOrWhiteSpace(settings.Advanced)) arguments.Add(settings.Advanced.Trim());

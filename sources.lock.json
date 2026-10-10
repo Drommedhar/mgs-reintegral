@@ -89,7 +89,8 @@
         "patches/mgs-godot-scene-export.patch",
         "patches/mgs-projected-geometry.patch",
         "patches/mgs-precise-face-culling.patch",
-        "patches/mgs-precise-subdivision.patch"
+        "patches/mgs-precise-subdivision.patch",
+        "patches/mgs-loading-pacing.patch"
       ]
     },
     {
@@ -119,7 +120,8 @@
         "patches/psyz-live-adsr.patch",
         "patches/psyz-audio-output-buffer.patch",
         "patches/psyz-godot-command-transport.patch",
-        "patches/psyz-projected-geometry.patch"
+        "patches/psyz-projected-geometry.patch",
+        "patches/psyz-audio-output-suppression.patch"
       ]
     },
     {

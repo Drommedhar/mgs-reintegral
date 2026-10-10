@@ -88,6 +88,13 @@ $cardReplay = Initialize-MgsInputSession @options -ReplayPath $cardMovie -AutoCa
 Assert-True ($cardReplay.Identity -ceq $cardRecord.Identity) 'Auto-card replay identity changed.'
 Assert-Rejected { Initialize-MgsInputSession @options -ReplayPath $cardMovie } 'auto-card setting differs'
 Assert-Rejected { Get-MgsInputBooleanSetting ([pscustomobject]@{autoCard='false'}) 'autoCard' } 'Invalid autoCard'
+$loadingMovie = Join-Path $fixture 'replays/fast-loading.input'
+$loadingRecord = Initialize-MgsInputSession @options -RecordPath $loadingMovie -Presentation @{FastLoading=$true}
+Write-Text $loadingMovie 'fake-input-data'
+$loadingMetadata = Get-Content "$loadingMovie.session/session.json" -Raw | ConvertFrom-Json
+Assert-True $loadingMetadata.presentation.FastLoading 'Fast loading presentation setting was not recorded.'
+$loadingReplay = Initialize-MgsInputSession @options -ReplayPath $loadingMovie -Presentation @{FastLoading=$false}
+Assert-True ($loadingReplay.Identity -ceq $loadingRecord.Identity) 'Loading presentation changed replay identity.'
 Write-Text $modFile 'changed-mod'
 Assert-Rejected { Initialize-MgsInputSession @options -ReplayPath $movie } 'assets differ'
 Write-Text $modFile 'mod-content'

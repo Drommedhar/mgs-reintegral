@@ -18,6 +18,7 @@ namespace ReIntegral
         private readonly CheckBox geometryPrecision = new CheckBox(), depthBuffer = new CheckBox();
         private readonly CheckBox bonus = new CheckBox(), invulnerable = new CheckBox();
         private readonly CheckBox autoCard = new CheckBox(), overlay = new CheckBox();
+        private readonly CheckBox fastLoading = new CheckBox();
         private readonly TextBox stage = new TextBox(), frames = new TextBox(), advanced = new TextBox();
         private readonly Button play = new Button();
         private readonly Label status = new Label();
@@ -154,12 +155,13 @@ namespace ReIntegral
             CheckAt(page, bonus, "Start with Stealth Camouflage and Bandana", 18);
             CheckAt(page, invulnerable, "Invulnerability (testing; scripted deaths still apply)", 58);
             CheckAt(page, autoCard, "Use owned access cards without equipping them", 98);
-            LabelAt(page, "Psycho Mantis memory reading: off, random, or a numeric seed", 153);
-            mantis.SetBounds(16, 184, 280, 28);
+            CheckAt(page, fastLoading, "Faster map loading (experimental)", 138);
+            LabelAt(page, "Psycho Mantis memory reading: off, random, or a numeric seed", 185);
+            mantis.SetBounds(16, 214, 280, 28);
             mantis.Items.AddRange(new object[] { "off", "random" });
             page.Controls.Add(mantis);
-            LabelAt(page, "Controller-port swap: F2 or press both sticks (L3 + R3).", 240);
-            LabelAt(page, "Bonus items persist in ordinary saves. Other options apply to this launch.", 275);
+            LabelAt(page, "Controller-port swap: F2 or press both sticks (L3 + R3).", 260);
+            LabelAt(page, "Bonus items persist in ordinary saves. Other options apply to this launch.", 295);
         }
 
         private void BuildAdvanced()
@@ -190,6 +192,7 @@ namespace ReIntegral
             geometryPrecision.Checked = value.GeometryPrecision;
             depthBuffer.Checked = value.DepthBuffer;
             invulnerable.Checked = value.Invulnerable; autoCard.Checked = value.AutoCard;
+            fastLoading.Checked = value.FastLoading;
             overlay.Checked = value.DebugOverlay; mantis.Text = value.MantisMemory;
             stage.Text = value.Stage; frames.Text = value.Frames; advanced.Text = value.Advanced;
         }
@@ -201,6 +204,7 @@ namespace ReIntegral
                 TextureCorrection = textureCorrection.Checked,
                 GeometryPrecision = geometryPrecision.Checked, DepthBuffer = depthBuffer.Checked,
                 BonusItems = bonus.Checked, Invulnerable = invulnerable.Checked, AutoCard = autoCard.Checked,
+                FastLoading = fastLoading.Checked,
                 DebugOverlay = overlay.Checked, MantisMemory = mantis.Text.Trim(), Stage = stage.Text.Trim(),
                 Frames = frames.Text.Trim(), Advanced = advanced.Text.Replace("\r", " ").Replace("\n", " ") };
         }

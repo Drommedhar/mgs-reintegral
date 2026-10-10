@@ -60,7 +60,7 @@ add_executable(mgs-integral-native src/main.c src/mgs_disc.c src/mgs_memory.c sr
     src/mgs_bonus_items.c src/mgs_invulnerability.c src/mgs_game_options.c src/mgs_input_movie.c src/mgs_input_log.c src/mgs_controller_ports.c src/mgs_mantis_memory.c src/mgs_checkpoint.c src/mgs_ending_probe.c
     src/mgs_completed_load_probe.c src/mgs_escape_route.c src/mgs_rex_probe.c src/mgs_liquid_probe.c
     src/mgs_garage_route.c src/mgs_video.c src/mgs_visibility.c src/mgs_frame_timing.c
-    src/mgs_texture_correction.c)
+    src/mgs_texture_correction.c src/mgs_loading.c)
 target_include_directories(mgs-integral-native PRIVATE include "${MGS_NATIVE_ROOT}" "${MGS_NATIVE_ROOT}/include"
     "${CMAKE_CURRENT_BINARY_DIR}")
 target_link_libraries(mgs-integral-native PRIVATE mgs_game)
@@ -92,6 +92,11 @@ if(TARGET psyz_renderer)
 endif()
 add_subdirectory(launcher)
 if(BUILD_TESTING)
+    add_executable(mgs_loading_test tests/mgs_loading_test.c src/mgs_loading.c)
+    target_include_directories(mgs_loading_test PRIVATE include vendor/psyz/psyz/include
+        vendor/psyz/external/SDL/include)
+    target_compile_options(mgs_loading_test PRIVATE -UNDEBUG)
+    add_test(NAME mgs_loading_test COMMAND mgs_loading_test)
     add_executable(mgs_texture_correction_test tests/mgs_texture_correction_test.c src/mgs_texture_correction.c)
     target_include_directories(mgs_texture_correction_test PRIVATE include vendor/psyz/psyz/include)
     target_compile_definitions(mgs_texture_correction_test PRIVATE __psyz)

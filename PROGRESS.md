@@ -33,6 +33,37 @@ and its 600-VSync reload reached the Disc 2 entry corridor. Checkpoints restore
 map entries, not exact process snapshots. Original recordings and cards remain
 preserved; each checkpoint has adjacent provenance and validation JSON.
 
+## Map loading pacing — 10 October 2026
+
+Added opt-in **Faster map loading (experimental)** on the launcher's Gameplay
+tab, `-FastLoading` in the run wrapper and `--fast-loading 0|1` in the engine.
+It defaults off. The previous failed sector-batching loader remains removed.
+The new host adapter removes presentation waits during the original stage-load
+lifetime while retaining every loader/CD frame, texture allocation and cleanup.
+The deterministic clock is selected before startup; normal pacing resumes at
+load completion. A separate audio-output suppression flag preserves all SPU
+samples/interrupts and independent caller pause state, then primes fresh output.
+BGM behavior is unchanged. Replay records this as presentation metadata.
+
+PAL `s16d` load: **3720.3 → 32.7 ms**; Ninja `s08b`: **2836.1 → 27.0 ms** at
+2560x1440 with all modern geometry options. Both matched every recorded state
+and produced byte-identical final captures. A PAL launch without recording
+also matches the image. The existing New Game-to-dock and unattended opening
+replays pass (4996 / 2496 inputs); the opening capture also remains identical.
+One older `s11e` recording diverges at the same VSync 648 with the option off
+and on, so it does not validate the later transitions in that recording.
+
+Both x86 game/launcher builds compile; all **167 modern / 163 reference** CTests
+pass, including loading-mode restoration, audio timing/pause, settings,
+recording metadata and CLI checks. Bootstrap verifies **85 MGS / 24 PsyZ**
+patches, including `mgs-loading-pacing.patch` and
+`psyz-audio-output-suppression.patch`. Scoped first-party/audio scans score 100.
+The original 142-line `SetupNextFile` retains one nonfixable complexity warning;
+cppcheck/clang-tidy remain unavailable. Source files and the archive loader's
+resource dispatch are preserved. Details and limits are in
+[performance diagnostics](docs/PERFORMANCE_DIAGNOSTICS.md#map-loading), with
+local evidence in `build/map-loading/`. Whole-campaign testing remains pending.
+
 ## Character joint seams and PBR removal — 10 October 2026
 
 Removed the experimental PBR material/light/shadow implementation, its launcher

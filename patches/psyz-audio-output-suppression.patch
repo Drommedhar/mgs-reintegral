@@ -1,0 +1,64 @@
+--- a/psyz/include/psyz/audio.h
++++ b/psyz/include/psyz/audio.h
+@@ -59,6 +59,11 @@
+ /* Refill SDL audio on the owning game thread when PSYZ_POLL_IRQ_ONLY is set. */
+ void Psyz_AudioPump(void);
+ 
++/* Discard accelerated presentation audio while preserving the deterministic
++ * SPU/IRQ timeline and the caller's independent pause state. Returns -1 if
++ * the deterministic clock is disabled, otherwise 0. */
++int Psyz_AudioSetOutputSuppressed(int suppressed);
++
+ typedef struct {
+     unsigned queued_frames;
+     unsigned empty_refills;
+--- a/psyz/src/platform/sdl3_audio.c
++++ b/psyz/src/platform/sdl3_audio.c
+@@ -16,6 +16,7 @@
+ static bool pumping;
+ static bool queued_once;
+ static bool output_paused;
++static bool output_suppressed;
+ static bool timeline_priming = true;
+ static PsyzAudioStats audio_stats;
+ static Uint64 last_refill_ns;
+@@ -76,7 +77,7 @@
+     if (!sdl_stream) {
+         return;
+     }
+-    if (output_paused) {
++    if (output_paused || output_suppressed) {
+         if (!SDL_ClearAudioStream(sdl_stream)) {
+             ERRORF("cannot clear paused audio: %s", SDL_GetError());
+             abort();
+@@ -244,7 +245,7 @@
+     is_audio_init = false;
+     service_tasks = NULL;
+     pumping = queued_once = false;
+-    output_paused = false;
++    output_paused = output_suppressed = false;
+     timeline_priming = true;
+     audio_stats = (PsyzAudioStats){0};
+     last_refill_ns = 0;
+@@ -277,6 +278,21 @@
+     }
+ }
+ 
++int Psyz_AudioSetOutputSuppressed(int suppressed) {
++    if (!Psyz_ClockDeterministic())
++        return -1;
++    if (sdl_stream && (!SDL_PauseAudioStreamDevice(sdl_stream) ||
++                       !SDL_ClearAudioStream(sdl_stream))) {
++        ERRORF("cannot reset accelerated audio output: %s", SDL_GetError());
++        return -1;
++    }
++    output_suppressed = suppressed != 0;
++    timeline_priming = true;
++    queued_once = false;
++    last_refill_ns = 0;
++    return 0;
++}
++
+ int Psyz_AudioIsPaused(void) {
+     return !sdl_stream || SDL_AudioStreamDevicePaused(sdl_stream);
+ }

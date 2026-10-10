@@ -20,6 +20,7 @@
 #include "mgs_video.h"
 #include "mgs_texture_correction.h"
 #include "mgs_game_options.h"
+#include "mgs_loading.h"
 #include "mgs_safety.h"
 #include "mgs_build.h"
 
@@ -32,6 +33,7 @@ typedef struct {
     int stage_explicit, stage_map, bonus_items, invulnerable;
     unsigned replay_tail_frames, mantis_memory_seed;
     int replay_fast, debug_overlay, auto_card, texture_correction, geometry_precision, depth_buffer;
+    int fast_loading;
     MgsVideoOptions video;
 } StartupOptions;
 
@@ -319,6 +321,10 @@ static int ParseOption(StartupOptions *options, const char *name, const char *va
         if (strcmp(value, "1") && strcmp(value, "0"))
             return 0;
         options->replay_fast = value[0] == '1';
+    } else if (strcmp(name, "--fast-loading") == 0) {
+        if (strcmp(value, "1") && strcmp(value, "0"))
+            return 0;
+        options->fast_loading = value[0] == '1';
     } else if (strcmp(name, "--mantis-memory") == 0) {
         return ParseFrameCount(value, &options->mantis_memory_seed) &&
                options->mantis_memory_seed <= 2147483647u;
@@ -399,6 +405,7 @@ static void PrintUsage(FILE *stream)
           "  --disc-two <Disc 2.cue> --mods-root <path> --bonus-items 0|1\n"
           "  --invulnerable 0|1\n"
           "  --auto-card 0|1\n"
+          "  --fast-loading 0|1 (accelerate map loading only)\n"
           "  --mantis-memory SEED (1..2147483647; synthetic memory-card reading)\n"
           "  --stage <linked stage> [--stage-map id] --frames count\n"
           "  --record-input <path> | --replay-input <path>\n"
@@ -476,6 +483,10 @@ int main(int argc, char **argv)
     if (!MgsInputMovieConfigure(options.record_input, options.replay_input, options.input_identity,
                                options.replay_tail_frames))
         return 1;
+    if (!MgsLoadingConfigure(options.fast_loading)) {
+        fputs("Fast loading requires the deterministic game clock.\n", stderr);
+        return 1;
+    }
     MgsControllerPortsInit();
     if (options.replay_fast) {
         if (Psyz_VideoSetVsyncMode(PSYZ_VSYNC_LIMITLESS) != 0)

@@ -1,0 +1,29 @@
+--- a/source/libfs/cdstage.c
++++ b/source/libfs/cdstage.c
+@@ -14,6 +14,7 @@
+ 
+ #ifdef MGS_NATIVE
+ #include "mgs_mods.h"
++#include "mgs_loading.h"
+ #endif
+ 
+ extern void *StageCharacterEntries;
+@@ -614,6 +615,9 @@
+     info->tag = NULL;
+     word_8009D504 = 0;
+     CDBIOS_ReadRequest( buffer, sector, FS_SECTOR_SIZE, StageConfigReadyCallback );
++#ifdef MGS_NATIVE
++    MgsLoadingBegin(dirname);
++#endif
+ 
+     return (void *)info;
+ }
+@@ -637,4 +641,7 @@
+     GV_Free( info );
+     FS_CdStageProgBinFix();
+     DG_FrameRate = 2;
+-}
++#ifdef MGS_NATIVE
++    MgsLoadingEnd();
++#endif
++}

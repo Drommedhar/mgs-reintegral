@@ -51,6 +51,57 @@ frames or an unfinished run; successful replay completion is established by
 the input subsystem's `PASS replay` result. Percentiles of the CSV describe
 logged slow frames only. Truncated CSV rows are reported rather than counted.
 
+## Map loading
+
+Enable **Gameplay → Faster map loading (experimental)** in a rebuilt launcher,
+or add `-FastLoading` to `tools/run.ps1` (`--fast-loading 1` directly). It defaults
+off and is available with the reference and modern renderers. Replay inherits
+the recorded presentation setting; `-FastLoading:$false` overrides it without
+changing the recording's gameplay identity.
+
+This implementation preserves the CD sector cadence, resource callbacks,
+texture staging and frame-based memory cleanup. It selects the existing
+deterministic game clock before startup and temporarily removes presentation
+waits between `FS_LoadStageRequest` and `FS_LoadStageComplete`. The previous
+presentation mode is restored afterward, including unlimited diagnostic replay.
+Authored fades and gameplay/cutscene pacing outside loading retain their normal
+rate. The log's `[loading]` line measures only that resource-loading phase.
+
+Host audio generated during accelerated loading is discarded. The SPU, sound
+tasks and interrupts still run for every simulated sample; output resumes with
+a fresh buffer after loading. This suppression is independent of the caller's
+audio pause state. BGM reset and continuation follow the original game.
+
+Unlike the discarded sector-batching experiment, this does not process a whole
+stage inside one loader frame or change decoded-texture allocation lifetimes.
+
+On 10 October 2026, local 2560x1440 modern-renderer comparisons with all three
+geometry options enabled measured:
+
+| Load | Normal | Accelerated | Final capture |
+| --- | ---: | ---: | --- |
+| PAL checkpoint, `s16d` | 3720.3 ms | 32.7 ms | Byte-identical |
+| Ninja checkpoint, `s08b` | 2836.1 ms | 27.0 ms | Byte-identical |
+
+Both normal-speed replays retained every state check: 596 inputs / 600 VSyncs
+for PAL and 1396 / 1400 for Ninja. A separate PAL launch without input recording
+also produced the identical image (30.1 ms map load). These are local resource
+phase measurements, not whole-transition or other-hardware guarantees.
+Evidence is under `build/map-loading/`.
+
+The existing 4996-input New Game replay passes through `init`, `title`, `d00a`
+and loaded `s00a`. The 2496-input unattended opening replay also passes and
+retains its earlier capture exactly. Those two correctness checks use
+`-ReplayFast`, so their wall times are not real-time comparisons. One older
+campaign recording diverges at `s11e` VSync 648 with fast loading both disabled
+and enabled; it is not used as acceptance evidence for later transitions.
+
+All 167 modern and 163 reference CTests pass. Loading tests verify restoration
+of each presentation mode across repeated loads. Audio tests compare identical
+timer/SPU/task traces, verify suppression preserves an independent pause, and
+check playback resumes afterward. Whole-campaign fast-loading acceptance
+remains user testing.
+
 ## Dock puddle rendering
 
 The 2560×1440 repro showed GPU submission waits around 40 ms during the puddle

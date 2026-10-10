@@ -71,6 +71,11 @@ The executable is `build/windows-x86-debug/mgs-integral-native.exe`. The Windows
 An [experimental modern renderer](renderers/modern/README.md) now provides optional perspective-correct model textures, subpixel geometry and a floating-point depth buffer. Build it in a separate directory with `-RendererModule renderers/modern`; its launcher exposes the three switches on the **Graphics** tab. The regular build remains the original renderer.
 
 The same graphical launcher is built alongside Debug and optimized executables.
+Its **Gameplay → Faster map loading (experimental)** option removes presentation
+waits during stage reads while preserving loader frames and resource ordering.
+It defaults off; `tools/run.ps1 -FastLoading` enables it from PowerShell.
+See [loading measurements and validation](docs/PERFORMANCE_DIAGNOSTICS.md#map-loading).
+
 To reproduce an optimized package locally:
 
 ```powershell

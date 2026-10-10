@@ -10,6 +10,7 @@ param(
     [switch]$TextureCorrection,
     [switch]$GeometryPrecision,
     [switch]$DepthBuffer,
+    [switch]$FastLoading,
     [ValidatePattern('^[0-9]+x[0-9]+$')]
     [string]$Resolution,
     [switch]$Fullscreen,
@@ -209,7 +210,7 @@ if ($ReplayInput -or $ResumeInput) {
     $startup = $replayMetadata.identityData.startup
     if ($ReplayInput -and $replayMetadata.PSObject.Properties['presentation']) {
         $presentation = $replayMetadata.presentation
-        foreach ($option in @('TextureCorrection', 'GeometryPrecision', 'DepthBuffer')) {
+        foreach ($option in @('TextureCorrection', 'GeometryPrecision', 'DepthBuffer', 'FastLoading')) {
             if (-not $PSBoundParameters.ContainsKey($option) -and $presentation.PSObject.Properties[$option]) {
                 Set-Variable -Name $option -Value ([bool]$presentation.$option)
             }
@@ -306,6 +307,9 @@ if ($GeometryPrecision) {
 if ($DepthBuffer) {
     $gameArguments += '--depth-buffer'
 }
+if ($FastLoading) {
+    $gameArguments += @('--fast-loading', '1')
+}
 if ($PSBoundParameters.ContainsKey('Resolution')) {
     $gameArguments += @('--resolution', $Resolution)
 }
@@ -388,7 +392,7 @@ if ($RecordInput -or $ReplayInput) {
         -AutoCard ([bool]$AutoCard) `
         -MantisMemorySeed $mantisMemorySeed `
         -ModsRoot $ModsRoot -CheckpointPath $LoadCheckpoint `
-        -Presentation @{ widescreen = [bool]$Widescreen; resolution = $Resolution; fullscreen = [bool]$Fullscreen; TextureCorrection = [bool]$TextureCorrection; GeometryPrecision = [bool]$GeometryPrecision; DepthBuffer = [bool]$DepthBuffer }
+        -Presentation @{ widescreen = [bool]$Widescreen; resolution = $Resolution; fullscreen = [bool]$Fullscreen; TextureCorrection = [bool]$TextureCorrection; GeometryPrecision = [bool]$GeometryPrecision; DepthBuffer = [bool]$DepthBuffer; FastLoading = [bool]$FastLoading }
     $runtimeDirectory = $inputSession.RuntimeDirectory
     $inputFlag = if ($RecordInput) { '--record-input' } else { '--replay-input' }
     $gameArguments += @($inputFlag, $inputSession.InputPath, '--input-identity', $inputSession.Identity)
@@ -403,6 +407,7 @@ if ($RecordInput -or $ReplayInput) {
         executableSha256 = (Get-FileHash -LiteralPath $executable -Algorithm SHA256).Hash
         widescreen = [bool]$Widescreen; resolution = $Resolution
         TextureCorrection = [bool]$TextureCorrection; GeometryPrecision = [bool]$GeometryPrecision; DepthBuffer = [bool]$DepthBuffer
+        FastLoading = [bool]$FastLoading
         fullscreen = [bool]$Fullscreen; debugOverlay = [bool]$DebugOverlay
     }
     $performance | ConvertTo-Json | Set-Content -LiteralPath $performancePath -Encoding utf8

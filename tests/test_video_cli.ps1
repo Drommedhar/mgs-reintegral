@@ -67,6 +67,7 @@ foreach ($value in @('320x240', '2560x1440', '7680x4320')) {
 }
 Assert-WrapperResult 'default widescreen resolution' @{Widescreen = $true} 'Build the native executable first'
 Assert-WrapperResult 'fullscreen without resolution' @{Fullscreen = $true} 'Build the native executable first'
+Assert-WrapperResult 'fast loading' @{FastLoading = $true} 'Build the native executable first'
 
 if (-not $WrapperOnly) {
     foreach ($value in $malformed + $outOfRange) {
@@ -77,6 +78,8 @@ if (-not $WrapperOnly) {
         @('--resolution', '--fullscreen'),
         @('--widescreen', '1'),
         @('--fullscreen', '1'),
+        @('--fast-loading'),
+        @('--fast-loading', 'yes'),
         @('--widescreen', '--frames'),
         @('--resolution=2560x1440')
     )) {
@@ -90,6 +93,8 @@ if (-not $WrapperOnly) {
         @('--texture-correction'),
         @('--geometry-precision'),
         @('--depth-buffer'),
+        @('--fast-loading', '0'),
+        @('--fast-loading', '1'),
         @('--texture-correction', '--geometry-precision', '--depth-buffer'),
         @('--fullscreen'),
         @('--widescreen', '--fullscreen'),

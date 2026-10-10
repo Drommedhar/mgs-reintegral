@@ -73,15 +73,23 @@ static void StartSoundClock(void) {
     SpuSetKey(SPU_ON, SPU_23CH);
 }
 
-static void RenderTimeline(int jitter) {
+enum { TIMELINE_REFERENCE, TIMELINE_JITTER, TIMELINE_SUPPRESSED };
+
+static void RenderTimeline(int mode) {
     uint64_t ticks = 0, samples = 0;
     for (unsigned frame = 0; frame < 120; ++frame) {
         int pal = frame >= 60;
         ticks += pal ? 176400 : 147147;
-        if (jitter) {
+        if (mode == TIMELINE_JITTER) {
             SDL_Delay(frame == 25 ? 250 : frame % 3);
             if (frame == 12) Psyz_AudioPause();
             if (frame == 20) Psyz_AudioUnpause();
+        }
+        if (mode == TIMELINE_SUPPRESSED) {
+            if (frame == 20) assert(Psyz_AudioSetOutputSuppressed(1) == 0);
+            if (frame == 30) Psyz_AudioPause();
+            if (frame == 50) assert(Psyz_AudioSetOutputSuppressed(0) == 0);
+            if (frame == 60) Psyz_AudioUnpause();
         }
         unsigned expected = (unsigned)(ticks / 200 - samples);
         assert(Psyz_ClockVBlanks() == frame);
@@ -90,6 +98,14 @@ static void RenderTimeline(int jitter) {
         assert(Psyz_ClockSetDeterministic(1) == -1);
         Psyz_AudioPump();
         assert(Psyz_ClockAudioFramesDue() == 0);
+        if (mode == TIMELINE_SUPPRESSED && frame >= 20 && frame < 60) {
+            PsyzAudioStats stats;
+            assert(Psyz_AudioStats(&stats) == 0 && stats.paused && !stats.queued_frames);
+        }
+        if (mode == TIMELINE_SUPPRESSED && frame == 63) {
+            PsyzAudioStats stats;
+            assert(Psyz_AudioStats(&stats) == 0 && !stats.paused && stats.queued_frames > 0);
+        }
         assert(Psyz_ClockNowUs() == (uint32_t)((ticks / 200 * 200) * 50 / 441));
         samples += expected;
         Psyz_ClockEndFrame();
@@ -108,7 +124,7 @@ static void RenderTimeline(int jitter) {
     assert(GetRCnt(RCntCNT2) > 4000 && GetRCnt(RCntCNT2) < 4300);
 }
 
-static unsigned RunTimeline(Event* result, int jitter) {
+static unsigned RunTimeline(Event* result, int mode) {
     assert(Psyz_ClockSetDeterministic(1) == 0);
     event_count = timer_irqs = sound_irqs = sound_tasks = 0;
     sound_pending = 0;
@@ -119,7 +135,7 @@ static unsigned RunTimeline(Event* result, int jitter) {
     assert(StartRCnt(RCntCNT2));
     StartSoundClock();
     Psyz_AudioSetServiceCallback(ServiceTasks);
-    RenderTimeline(jitter);
+    RenderTimeline(mode);
     SpuSetIRQ(SPU_OFF);
     SpuSetIRQCallback(NULL);
     assert(StopRCnt(RCntCNT2));
@@ -129,16 +145,20 @@ static unsigned RunTimeline(Event* result, int jitter) {
 }
 
 int main(void) {
-    Event reference[TRACE_CAPACITY], jittered[TRACE_CAPACITY];
+    Event reference[TRACE_CAPACITY], jittered[TRACE_CAPACITY], suppressed[TRACE_CAPACITY];
     assert(SDL_SetHintWithPriority(SDL_HINT_AUDIO_DRIVER, "dummy", SDL_HINT_OVERRIDE));
     assert(Psyz_AudioInit() == 0);
     SpuInit();
-    unsigned reference_count = RunTimeline(reference, 0);
-    unsigned jittered_count = RunTimeline(jittered, 1);
+    unsigned reference_count = RunTimeline(reference, TIMELINE_REFERENCE);
+    unsigned jittered_count = RunTimeline(jittered, TIMELINE_JITTER);
     assert(reference_count == jittered_count);
     assert(memcmp(reference, jittered, sizeof(reference)) == 0);
+    unsigned suppressed_count = RunTimeline(suppressed, TIMELINE_SUPPRESSED);
+    assert(reference_count == suppressed_count);
+    assert(memcmp(reference, suppressed, sizeof(reference)) == 0);
     Psyz_AudioDestroy();
     assert(Psyz_ClockSetDeterministic(0) == 0);
+    assert(Psyz_AudioSetOutputSuppressed(1) == -1);
     uint32_t before = Psyz_ClockNowUs();
     SDL_Delay(3);
     assert((uint32_t)(Psyz_ClockNowUs() - before) >= 1000);

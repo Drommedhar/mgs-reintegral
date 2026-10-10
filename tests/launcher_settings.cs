@@ -36,12 +36,14 @@ internal static class LauncherSettingsTest
         string path = Path.Combine(directory, "settings.xml");
         var value = Settings.Load(path);
         Require(!value.Invulnerable && !value.BonusItems && !value.AutoCard, "Gameplay aids must default off");
+        Require(!value.FastLoading, "Experimental fast loading must default off");
         Require(!value.TextureCorrection && !value.GeometryPrecision && !value.DepthBuffer,
             "Experimental graphics must default off");
         value.DiscOne = "C:\\日本語\\disc 1.cue";
         value.Advanced = "--mods-root \"C:\\my mods\"";
         value.Save(path);
         value.Fullscreen = true;
+        value.FastLoading = true;
         value.TextureCorrection = value.GeometryPrecision = value.DepthBuffer = true;
         value.Save(path);
         var restored = Settings.Load(path);
@@ -49,6 +51,7 @@ internal static class LauncherSettingsTest
             "Settings round-trip or replacement failed");
         Require(restored.TextureCorrection && restored.GeometryPrecision && restored.DepthBuffer,
             "Graphics settings did not round-trip");
+        Require(restored.FastLoading, "Fast loading setting did not round-trip");
         Require(Directory.GetFiles(directory, "*.tmp").Length == 0, "Temporary settings file leaked");
         File.WriteAllText(path, "<Settings><Version>99</Version></Settings>");
         try { Settings.Load(path); throw new InvalidOperationException("Unknown settings version accepted"); }
@@ -57,13 +60,13 @@ internal static class LauncherSettingsTest
 
     private static void CheckArguments()
     {
-        var settings = new Settings { BonusItems = true, Invulnerable = true, AutoCard = true,
+        var settings = new Settings { BonusItems = true, Invulnerable = true, AutoCard = true, FastLoading = true,
             DebugOverlay = true, Fullscreen = true, TextureCorrection = true, GeometryPrecision = true, DepthBuffer = true,
             Stage = "s00a", Frames = "600", MantisMemory = "42",
             Advanced = "--capture \"C:\\frame capture.bmp\"" };
         string command = GameLaunch.Arguments(settings);
         foreach (string flag in new[] { "--bonus-items 1", "--invulnerable 1", "--auto-card 1", "--debug-overlay",
-            "--fullscreen", "--widescreen", "--texture-correction", "--geometry-precision", "--depth-buffer",
+            "--fullscreen", "--widescreen", "--texture-correction", "--geometry-precision", "--depth-buffer", "--fast-loading 1",
             "--stage s00a", "--frames 600", "--mantis-memory 42", settings.Advanced })
             Require(command.Contains(flag), "Missing option: " + flag);
         foreach (string resolution in new[] { "3840x2160", "2560x1920", "0x0", "1920x1080 --help" })
