@@ -103,7 +103,14 @@ public distribution. The repository and first alpha remain private.
   actionlint. Scoped aislop reports 100 with no findings; `cppcheck` and
   `clang-tidy` are unavailable to that scan.
 
-The first hosted build/publication and download verification are pending.
+The first hosted build compiled successfully and passed 141 of 142 hosted
+tests. The remaining audit test exposed Windows short-path normalization in
+`compile_evidence`; the helper now resolves its source root. The regression
+passes with long and short temp paths under Python 3.11 and 3.12. Python 3.12
+also passes the unpacked ZIP and UI checks using the shortened temp path.
+The workflow now saves verified dependencies before tests and uses pinned
+Node 24 Actions. Release/tag reuse is rejected before a publishing build.
+Hosted publication and download verification are pending the corrected run.
 Broader hardware and clean Windows installation acceptance remain user testing.
 
 ## Current handoff scope

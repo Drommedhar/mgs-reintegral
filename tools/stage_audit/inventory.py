@@ -66,6 +66,7 @@ def selected_objects(template, overlay: str, vr: bool) -> list[str]:
 
 
 def compile_evidence(paths: list[Path], project: Path, source: Path) -> dict:
+    source = source.resolve()
     evidence = defaultdict(list)
     for database in paths:
         entries = json.loads(database.read_text(encoding="utf-8"))

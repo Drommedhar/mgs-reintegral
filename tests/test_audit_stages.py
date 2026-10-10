@@ -75,11 +75,12 @@ class StageInventoryTests(unittest.TestCase):
         evidence = address_evidence("0x800c1234", {"source/a.c"}, index)
         self.assertEqual([item["source"] for item in evidence], ["source/a.c"])
 
-    def test_missing_or_stale_output_is_not_compiled_evidence(self):
+    def test_unresolved_source_and_missing_or_stale_output(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             source = root / "source"
             source.mkdir()
+            source = source / ".." / "source"
             code = source / "actor.c"
             code.write_text("void Actor(void) {}", encoding="utf-8")
             database = root / "compile_commands.json"

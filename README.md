@@ -38,6 +38,9 @@ Normal startup opens the title sequence with English text selected from Integral
 
 ## Build
 
+Start in [PowerShell 7](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows)
+with [Git for Windows](https://git-scm.com/downloads/win) installed, then:
+
 ```powershell
 git clone https://github.com/Drommedhar/mgs-reintegral.git
 cd mgs-reintegral
@@ -76,7 +79,9 @@ GitHub Actions runs only through **Actions → Build alpha release → Run workf
 Normal pushes do not trigger builds. One Windows job builds, runs tests, checks
 the unpacked player package, and publishes a prerelease after successful
 uploads to a draft. Uncheck **publish** for a test build retained for three
-days. Hosted CI excludes tests requiring a real GPU; those are checked locally.
+days. Published versions need a new alpha number; existing releases and tags
+are never overwritten. Hosted CI excludes tests requiring a real GPU; those
+are checked locally.
 
 [sources.lock.json](sources.lock.json) pins dependency revisions and the patch order. `bootstrap.ps1 -Check` verifies the existing checkout without applying changes. Bootstrap compares complete cumulative patch states, including patches that edit earlier patches' lines. It preserves the real Git index and refuses conflicting local edits. Keep source changes in `patches/` or first-party files; `vendor/` is downloaded and ignored by Git.
 
