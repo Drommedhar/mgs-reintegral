@@ -1,0 +1,28 @@
+diff --git a/source/okajima/chafgrnd.c b/source/okajima/chafgrnd.c
+index 9b25d1f02..5a8811a84 100644
+--- a/source/okajima/chafgrnd.c
++++ b/source/okajima/chafgrnd.c
+@@ -18,6 +18,11 @@ static int SECTION(".bss") dword_800BDF9C;
+ 
+ int SECTION(".bss") okajima_CHAF_LIFE;
+ 
++#ifdef MGS_NATIVE
++/* Define the particle anchor instead of reading PS1 low memory through NULL. */
++static RECT chaff_particle_anchor = {0, 0, 0, 0};
++#endif
++
+ /*---------------------------------------------------------------------------*/
+ 
+ #define CHAFF_LIFETIME  300
+@@ -270,7 +275,11 @@ static int GetResources(Work *work, MATRIX *world)
+     vec1.vy = 0;
+     vec2.vz = 0;
+ 
++#ifdef MGS_NATIVE
++    prim = GM_MakePrim(DG_PRIM_RECTANGLE | DG_PRIM_TILE, 64, work->field_834, &chaff_particle_anchor);
++#else
+     prim = GM_MakePrim(DG_PRIM_RECTANGLE | DG_PRIM_TILE, 64, work->field_834, NULL);
++#endif
+     work->field_a34 = prim;
+ 
+     if (!prim)

@@ -1,0 +1,412 @@
+{
+  "stage": "s11d",
+  "disc": 1,
+  "overlay_sha256": "b7e8487718b1c3dd835b3b71b785acc367469f5c84e7834d2b91518dc17da21e",
+  "overlay_bytes": 60856,
+  "overlay_base": "0x800c3208",
+  "recovered_blocks": 37,
+  "instruction_words": 5786,
+  "blocks": [
+    {
+      "name": "s11d_hind_800C99F4",
+      "address": "0x800c99f4",
+      "instruction_words": 104
+    },
+    {
+      "name": "s11d_hind_800C9B94",
+      "address": "0x800c9b94",
+      "instruction_words": 58
+    },
+    {
+      "name": "s11d_hind_800C9C7C",
+      "address": "0x800c9c7c",
+      "instruction_words": 57
+    },
+    {
+      "name": "s11d_hind_800C9D60",
+      "address": "0x800c9d60",
+      "instruction_words": 433
+    },
+    {
+      "name": "s11d_hind_800CA504",
+      "address": "0x800ca504",
+      "instruction_words": 117
+    },
+    {
+      "name": "s11d_hind_800CA6D8",
+      "address": "0x800ca6d8",
+      "instruction_words": 308
+    },
+    {
+      "name": "s11d_hind_800CABA8",
+      "address": "0x800caba8",
+      "instruction_words": 125
+    },
+    {
+      "name": "s11d_hind_800CAE6C",
+      "address": "0x800cae6c",
+      "instruction_words": 45
+    },
+    {
+      "name": "s11d_hind_800CAFEC",
+      "address": "0x800cafec",
+      "instruction_words": 26
+    },
+    {
+      "name": "s11d_hind_800CB054",
+      "address": "0x800cb054",
+      "instruction_words": 73
+    },
+    {
+      "name": "s11d_hind_800CB178",
+      "address": "0x800cb178",
+      "instruction_words": 102
+    },
+    {
+      "name": "s11d_hind_800CB3A0",
+      "address": "0x800cb3a0",
+      "instruction_words": 218
+    },
+    {
+      "name": "s11d_rope_800C3E50",
+      "address": "0x800c3e50",
+      "instruction_words": 265
+    },
+    {
+      "name": "s11d_rope_800C4648",
+      "address": "0x800c4648",
+      "instruction_words": 117
+    },
+    {
+      "name": "s11d_rope_800C48EC",
+      "address": "0x800c48ec",
+      "instruction_words": 163
+    },
+    {
+      "name": "s11d_rope_800C4B78",
+      "address": "0x800c4b78",
+      "instruction_words": 154
+    },
+    {
+      "name": "s11d_rope_800C502C",
+      "address": "0x800c502c",
+      "instruction_words": 155
+    },
+    {
+      "name": "s11d_rope_800C5410",
+      "address": "0x800c5410",
+      "instruction_words": 47
+    },
+    {
+      "name": "s11d_rope_800C5584",
+      "address": "0x800c5584",
+      "instruction_words": 355
+    },
+    {
+      "name": "s11d_rope_800C5B10",
+      "address": "0x800c5b10",
+      "instruction_words": 217
+    },
+    {
+      "name": "s11d_rope_800C5E74",
+      "address": "0x800c5e74",
+      "instruction_words": 217
+    },
+    {
+      "name": "s11d_rope_800C634C",
+      "address": "0x800c634c",
+      "instruction_words": 75
+    },
+    {
+      "name": "s11d_rope_800C6544",
+      "address": "0x800c6544",
+      "instruction_words": 188
+    },
+    {
+      "name": "s11d_rope_800C6834",
+      "address": "0x800c6834",
+      "instruction_words": 82
+    },
+    {
+      "name": "s11d_rope_800C697C",
+      "address": "0x800c697c",
+      "instruction_words": 103
+    },
+    {
+      "name": "s11d_rope_800C6CD4",
+      "address": "0x800c6cd4",
+      "instruction_words": 149
+    },
+    {
+      "name": "s11d_rope_800C6F28",
+      "address": "0x800c6f28",
+      "instruction_words": 132
+    },
+    {
+      "name": "s11d_rope_800C7138",
+      "address": "0x800c7138",
+      "instruction_words": 122
+    },
+    {
+      "name": "s11d_rope_800C7320",
+      "address": "0x800c7320",
+      "instruction_words": 132
+    },
+    {
+      "name": "s11d_rope_800C766C",
+      "address": "0x800c766c",
+      "instruction_words": 248
+    },
+    {
+      "name": "s11d_rope_800C7B2C",
+      "address": "0x800c7b2c",
+      "instruction_words": 125
+    },
+    {
+      "name": "s11d_rope_800C7D20",
+      "address": "0x800c7d20",
+      "instruction_words": 105
+    },
+    {
+      "name": "s11d_rope_800C7F8C",
+      "address": "0x800c7f8c",
+      "instruction_words": 157
+    },
+    {
+      "name": "s11d_rope_800C8364",
+      "address": "0x800c8364",
+      "instruction_words": 202
+    },
+    {
+      "name": "s11d_rope_800C882C",
+      "address": "0x800c882c",
+      "instruction_words": 246
+    },
+    {
+      "name": "s11d_rope_800C8C88",
+      "address": "0x800c8c88",
+      "instruction_words": 151
+    },
+    {
+      "name": "s11d_rope_800C91AC",
+      "address": "0x800c91ac",
+      "instruction_words": 213
+    }
+  ],
+  "layouts": {
+    "RappelHindWork": 2428,
+    "RopeWork": 4248
+  },
+  "constructors": [
+    {
+      "hash": "0x92bc",
+      "address": "0x800d0538",
+      "symbol": "CHARA_ASIOTOKUN"
+    },
+    {
+      "hash": "0xa12e",
+      "address": "0x800d09ec",
+      "symbol": "CHARA_FADEIO"
+    },
+    {
+      "hash": "0x18e3",
+      "address": "0x800cf5ec",
+      "symbol": "CHARA_SNOW"
+    },
+    {
+      "hash": "0x73ea",
+      "address": "0x800cff54",
+      "symbol": "CHARA_SPHERE"
+    },
+    {
+      "hash": "0x1ad3",
+      "address": "0x800c3c5c",
+      "symbol": "CHARA_TEXTURE"
+    },
+    {
+      "hash": "0xbda8",
+      "address": "0x800c9500",
+      "symbol": "NewRope"
+    },
+    {
+      "hash": "0x11e9",
+      "address": "0x800cb708",
+      "symbol": "NewHind"
+    },
+    {
+      "hash": "0x76bc",
+      "address": "0x800ccd54",
+      "symbol": "CHARA_DAMAGESMOKE2"
+    },
+    {
+      "hash": "0x8b1a",
+      "address": "0x800cda20",
+      "symbol": "CHARA_LANDING"
+    },
+    {
+      "hash": "0xc35f",
+      "address": "0x800ce73c",
+      "symbol": "CHARA_PIPE"
+    }
+  ],
+  "constructor_changes": false,
+  "tests": {
+    "mgs_rappel_test": {
+      "cases": 1536,
+      "functions": [
+        "800c99f4",
+        "800c9b94",
+        "800c9c7c",
+        "800c9d60",
+        "800ca504",
+        "800ca6d8"
+      ],
+      "coverage": [
+        "flight",
+        "banking",
+        "bobbing",
+        "hover phases",
+        "messages",
+        "four targeting modes"
+      ],
+      "compares": [
+        "actor state",
+        "ordered engine-boundary traces"
+      ]
+    },
+    "mgs_rope_test": {
+      "cases": 1280,
+      "functions": [
+        "800c4b78",
+        "800c5584",
+        "800c5e74",
+        "800c634c"
+      ],
+      "coverage": [
+        "contact and rope angles",
+        "pendulum X",
+        "pendulum Z",
+        "hanging geometry",
+        "jump impulses"
+      ],
+      "compares": [
+        "actor state",
+        "primitive geometry",
+        "sound and vibration traces"
+      ]
+    },
+    "total": 2816,
+    "limitations": [
+      "selected helper functions, not exhaustive actor state coverage",
+      "allocation, rendering, transforms and other engine boundaries isolated",
+      "MIPS square-root execution emulates the two hardware leading-zero registers"
+    ]
+  },
+  "runtime": {
+    "fixture": "tests/fixtures/s11d_story178.cdb",
+    "frames": 1800,
+    "story": 178,
+    "map": "0x7df9",
+    "position": [
+      -3000,
+      23000,
+      -13500
+    ],
+    "heading": 2048,
+    "source": "original s11g sub_E9FB; preceding rope-item trap sets story178",
+    "observed": [
+      "original script constructs Rope and Hind",
+      "arrival reaches original rest controller",
+      "incoming Codec closes",
+      "normal Right input moves player",
+      "tower, rope, player and helicopter gunfire visible",
+      "clean bounded exit"
+    ],
+    "movement": {
+      "horizontal_units": 2320,
+      "input_frames": 58,
+      "game_ticks": 35,
+      "movement_ticks": 25,
+      "collision_ticks": 2
+    },
+    "not_observed": [
+      "complete descent",
+      "jump sequence",
+      "landing transition",
+      "all damage/death branches",
+      "continuous campaign arrival",
+      "human playability"
+    ],
+    "up_probe": "Codec overlap; zero input frames, no climbing conclusion",
+    "log": "build/movie-audit/rappel178.log",
+    "capture": "build/movie-audit/rappel178.bmp"
+  },
+  "validation": {
+    "full_debug_link": "pass",
+    "standalone_wall_wextra": "five translation units, zero warnings"
+  },
+  "aislop": {
+    "errors": 0,
+    "fixable_warnings": 0,
+    "nonfixable_warnings": [
+      {
+        "file": "source/overlays/s11d/chara/rope/rope_native_motion.h",
+        "detail": "s11d_rope_800C48EC \u00c2\u00b7 101 lines"
+      },
+      {
+        "file": "source/overlays/s11d/chara/rope/rope_native_motion.h",
+        "detail": "s11d_rope_800C4B78 \u00c2\u00b7 94 lines"
+      },
+      {
+        "file": "source/overlays/s11d/chara/rope/rope_native_motion.h",
+        "detail": "s11d_rope_800C502C \u00c2\u00b7 93 lines"
+      },
+      {
+        "file": "source/overlays/s11d/chara/rope/rope_native_motion.h",
+        "detail": "s11d_rope_800C5584 \u00c2\u00b7 199 lines"
+      },
+      {
+        "file": "source/overlays/s11d/chara/rope/rope_native_motion.h",
+        "detail": "s11d_rope_800C5B10 \u00c2\u00b7 96 lines"
+      },
+      {
+        "file": "source/overlays/s11d/chara/rope/rope_native_states.h",
+        "detail": "s11d_rope_800C6544 \u00c2\u00b7 102 lines"
+      },
+      {
+        "file": "source/overlays/s11d/chara/rope/rope_native_states.h",
+        "detail": "s11d_rope_800C6CD4 \u00c2\u00b7 99 lines"
+      },
+      {
+        "file": "source/overlays/s11d/chara/rope/rope_native_states.h",
+        "detail": "s11d_rope_800C6F28 \u00c2\u00b7 92 lines"
+      },
+      {
+        "file": "source/overlays/s11d/chara/rope/rope_native_states.h",
+        "detail": "s11d_rope_800C766C \u00c2\u00b7 127 lines"
+      },
+      {
+        "file": "source/overlays/s11d/chara/rope/rope_native_states.h",
+        "detail": "s11d_rope_800C7F8C \u00c2\u00b7 93 lines"
+      },
+      {
+        "file": "source/overlays/s11d/chara/rope/rope.c",
+        "detail": "1267 lines"
+      }
+    ],
+    "test_findings": 0
+  },
+  "patch": "patches/mgs-rappel.patch",
+  "patch_paths": [
+    "source/overlays/s11d/overlay2.c",
+    "source/overlays/s11d/overlay3.c",
+    "source/overlays/s11d/chara/hind/hind.c",
+    "source/overlays/s11d/chara/hind/hind_native.h",
+    "source/overlays/s11d/chara/rope/rope.c",
+    "source/overlays/s11d/chara/rope/rope_native.h",
+    "source/overlays/s11d/chara/rope/rope_native_motion.h",
+    "source/overlays/s11d/chara/rope/rope_native_states.h",
+    "source/overlays/s11d/chara/rope/rope_native_setup.h"
+  ],
+  "replayed_on_locked_patches": 46
+}

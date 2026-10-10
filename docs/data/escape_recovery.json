@@ -1,0 +1,170 @@
+{
+  "stages": [
+    "s19b",
+    "s19br"
+  ],
+  "original_upstream_asm_entries": 50,
+  "original_instruction_words": 6897,
+  "previously_recovered": {
+    "source": "menu/countdwn.c",
+    "entries": 1,
+    "words": 319
+  },
+  "newly_recovered_entries": 49,
+  "newly_recovered_words": 6578,
+  "original_overlay_sha256": {
+    "s19b": "d757942aca5d36ab95741801de1f68526c3a8e128018814f25655b7d72a7c249",
+    "s19br": "3d2d7c04d13dd3f55a97348f74eaf891615cfa203812d15494b53f9e570fe2bd"
+  },
+  "variant_proof": {
+    "functions_compared": 446,
+    "different_functions": 0,
+    "different_noncode_bytes": 61,
+    "compiled_overlay_data_differences": [
+      "rumble bytes after zero-duration terminator",
+      "unused sixth halfword after five difficulty entries",
+      "filename byte after NUL",
+      "actor-name byte after NUL"
+    ],
+    "other_bytes": "string/script alignment and unused SDK/linker tail; excluded from recovered C data"
+  },
+  "layouts": {
+    "EscapeSystem": 364,
+    "EscapeRoadWork": 3204,
+    "EscapeJeepWork": 1020,
+    "EscapeJeep2Work": 1020,
+    "EscapeLiquidWork": 2376,
+    "companion": 2080,
+    "mounted_snake": 2400
+  },
+  "reference_tests": {
+    "mgs_jeep_road_test": 2560,
+    "mgs_jeep_driver_test": 1536,
+    "mgs_escape_snake_test": 793,
+    "mgs_escape_liquid_test": 2560
+  },
+  "runtime": {
+    "initial_fixture": "story284, countdown600seconds, map7df9 from original incoming garage script",
+    "s19b_intro_vsync": 1800,
+    "s19br_intro_vsync": 1800,
+    "input_probe_vsync": 900,
+    "extended_probe_vsync": 3600,
+    "left_yaw": 1824,
+    "left_game_ticks": 60,
+    "right_yaw": -1767,
+    "right_game_ticks": 60,
+    "successful_player_bullets": 15,
+    "extended_result": "after input release original enemies killed Snake; original Game Over rendered without native fault",
+    "capture": "build/movie-audit/escape284-controls900.bmp",
+    "logs": [
+      "build/movie-audit/escape284-1800c.log",
+      "build/movie-audit/escapebr284-1800.log",
+      "build/movie-audit/escape284-controls900.log",
+      "build/movie-audit/escape284-controls.log"
+    ]
+  },
+  "native_corrections": [
+    "distant scenery resource12 has no hazard file; driveable12 require hazards",
+    "mounted Snake initial position uses already passed root control before shared pointer publication",
+    "vehicle and gunner Work layouts separated",
+    "callbacks pass actual typed Work pointer under native ABI",
+    "contiguous original data represented as typed arrays/vectors",
+    "full native primitive tags and original GTE sqr12 opcode"
+  ],
+  "patch": {
+    "path": "patches/mgs-escape.patch",
+    "paths": [
+      "build/linker_command_file.txt",
+      "source/overlays/s19b/escape.h",
+      "source/overlays/s19b/jeep_liquid.h",
+      "source/overlays/s19b/jeep_vehicles.h",
+      "source/overlays/s19b/overlay2.c",
+      "source/overlays/s19b/overlay3.c",
+      "source/overlays/s19b/overlay4.c",
+      "source/overlays/s19b/overlay5.c",
+      "source/overlays/s19b/overlay6.c",
+      "source/overlays/s19b/takabe/democame.c",
+      "source/overlays/s19b/takabe/jeep.c",
+      "source/overlays/s19b/takabe/jeep/gsplash3.c",
+      "source/overlays/s19b/takabe/jeep/jdrumfir.c",
+      "source/overlays/s19b/takabe/jeep/jeepdemo.c",
+      "source/overlays/s19b/takabe/jeep2.c",
+      "source/overlays/s19b/takabe/jeep2_native.h",
+      "source/overlays/s19b/takabe/jeep_liq/jeep_collision_native.h",
+      "source/overlays/s19b/takabe/jeep_liq/jeep_liq.c",
+      "source/overlays/s19b/takabe/jeep_liq/jeep_liq_actor_native.h",
+      "source/overlays/s19b/takabe/jeep_liq/jeep_liq_vehicle_native.h",
+      "source/overlays/s19b/takabe/jeep_mrl/jeep_mrl.c",
+      "source/overlays/s19b/takabe/jeep_mrl/jeep_mrl_native.h",
+      "source/overlays/s19b/takabe/jeep_native.h",
+      "source/overlays/s19b/takabe/jeep_sne/jeep_sne.c",
+      "source/overlays/s19b/takabe/jeep_srl.c",
+      "source/overlays/s19b/takabe/jeep_srl_native.h"
+    ],
+    "bytes": 186283,
+    "baseline": 50,
+    "tree": "b04d344567be7997dfde43db53b684a0b030fe0b",
+    "lock_index": 51
+  },
+  "aislop": {
+    "summary": {
+      "errors": 0,
+      "warnings": 11,
+      "fixable": 0,
+      "files": 40,
+      "elapsed": "607ms"
+    },
+    "nonfixable": [
+      {
+        "file": "takabe/jeep_native.h",
+        "detail": "s19b_jeep_800D2258 \u00b7 98 lines"
+      },
+      {
+        "file": "menu/countdwn.c",
+        "detail": "draw_countdown_tile \u00b7 7 params"
+      },
+      {
+        "file": "takabe/jeep/jblood.c",
+        "detail": "InitVerts \u00b7 96 lines"
+      },
+      {
+        "file": "takabe/jeep/jbullet.c",
+        "detail": "FindIntersection \u00b7 102 lines"
+      },
+      {
+        "file": "takabe/jeep/jdrum.c",
+        "detail": "Act \u00b7 89 lines"
+      },
+      {
+        "file": "takabe/jeep/jeep_gte.c",
+        "detail": "Act \u00b7 126 lines"
+      },
+      {
+        "file": "takabe/jeep_emy/jeep_emy.c",
+        "detail": "Act \u00b7 102 lines"
+      },
+      {
+        "file": "takabe/jeep_emy/jeep_emy.c",
+        "detail": "s19b_jbullet_800C5010 \u00b7 91 lines"
+      },
+      {
+        "file": "takabe/jeep_emy/jeep_emy.c",
+        "detail": "s19b_jbullet_800C598C \u00b7 93 lines"
+      },
+      {
+        "file": "takabe/jeep_liq/jeep_liq.c",
+        "detail": "1190 lines"
+      },
+      {
+        "file": "takabe/jeep_sne/jeep_sne.c",
+        "detail": "s19b_jlamp2_800D596C \u00b7 115 lines"
+      }
+    ]
+  },
+  "limitations": [
+    "full escape route and authored next-stage transition not completed",
+    "whole-game rival jeep/Liquid fight and final skid event not reached",
+    "controller test validates aim and successful bullet allocation, not target defeat",
+    "human full campaign run remains required"
+  ]
+}

@@ -1,0 +1,6 @@
+.lines -e
+bu /1 mgs_integral_native!MgsNativeReloadOverlay "ew mgs_integral_native!var_buf+a 124; .printf \"FIXTURE story292 selects original ending cinematic\\n\"; gc"
+sxe -c "r;kv;q" av
+sxe -c "r;kv;q" dz
+g
+q

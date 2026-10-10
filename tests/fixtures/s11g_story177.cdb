@@ -1,0 +1,9 @@
+.lines -e
+bu /1 mgs_integral_native!MgsNativeReloadOverlay "ew mgs_integral_native!var_buf+a b1; ew mgs_integral_native!linkvarbuf+10 1194 dc 38d6; ew mgs_integral_native!var_buf+2 800 0; .printf \"FIXTURE: story177 and exact original sub_E596 post-intro pose (4500,220,14550), heading2048.\\n\"; gc"
+bu /1 mgs_integral_native!NewHindBoss ".printf \"OBSERVE: original scenario constructs native Hind.\\n\"; gc"
+bu /1 mgs_integral_native!s11g_hind_800DAAC8 ".printf \"OBSERVE: recovered Hind flight controller.\\n\"; gc"
+bu /1 mgs_integral_native!s11g_blastoff_800DBF88 ".printf \"OBSERVE: recovered Hind aiming controller.\\n\"; gc"
+sxe -c "r;kv;q" av
+sxe -c "r;kv;q" dz
+g
+q

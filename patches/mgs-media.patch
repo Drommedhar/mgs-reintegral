@@ -1,0 +1,448 @@
+diff --git a/source/libfs/cdstage.c b/source/libfs/cdstage.c
+index 58cd9122f..ec5ae93aa 100644
+--- a/source/libfs/cdstage.c
++++ b/source/libfs/cdstage.c
+@@ -12,6 +12,10 @@
+ #include "libgv/libgv.h"    // for GV_xxxMemory
+ #include "sound/sd_cli.h"
+ 
++#ifdef MGS_NATIVE
++#include "mgs_mods.h"
++#endif
++
+ extern void *StageCharacterEntries;
+ 
+ /*---------------------------------------------------------------------------*/
+@@ -127,8 +131,6 @@ typedef struct {
+     int           remaining;
+ } FS_STAGE_INFO;
+ 
+-extern FS_STAGE_INFO *fs_stage_info;
+-extern int gLoaderStartTime_800B528C;
+ extern int gOverlayBinSize_800B5290;
+ extern int FS_ResidentCacheDirty;
+ 
+@@ -171,10 +173,13 @@ static int SetupNextFile( DATACNF_TAG *tag, CDBIOS_TASK *task )
+         switch ( tag->ext )
+         {
+         case 'b': // *.bin
++#ifdef MGS_NATIVE
++            MgsNativeReloadOverlay();
++#endif
+             /* set the overlay's load address */
+             task->buffer = StageCharacterEntries;
+-        #ifdef DEV_EXE
+-            task->buffer = NULL; // no overlay in the dev variant
++        #if defined(DEV_EXE) || defined(MGS_NATIVE)
++            task->buffer = NULL;
+         #endif
+             break;
+ 
+@@ -377,6 +382,28 @@ static inline int get_cache_id( DATACNF_TAG *tag )
+     return ( tag->ext - 'a' ) << 16 | tag->id;
+ }
+ 
++static void LoadResource(void *data, int name, int size, int cache_mode)
++{
++    int status;
++#ifdef MGS_NATIVE
++    int id = name & 0xffff;
++    int extension = (name >> 16) + 'a';
++    int overridden = MgsModsApply(id, extension, data, size);
++    if (overridden < 0)
++    {
++        exit(EXIT_FAILURE);
++    }
++#endif
++    status = GV_LoadInit(data, name, cache_mode);
++#ifdef MGS_NATIVE
++    if (overridden && status <= 0)
++    {
++        printf("Rejected mod resource %04x.%c\n", id, extension);
++        exit(EXIT_FAILURE);
++    }
++#endif
++}
++
+ static int LoadCacheSection( FS_STAGE_INFO *info, int unused )
+ {
+     DATACNF_TAG *next_tag;
+@@ -397,7 +424,8 @@ static int LoadCacheSection( FS_STAGE_INFO *info, int unused )
+ 
+         if ( info->tag_start1[-1].mode != 'c' || info->tag_end2 >= next_tag )
+         {
+-            GV_LoadInit(info->current_ptr + tag->size, get_cache_id(tag), GV_INIT_CACHE);
++            LoadResource(info->current_ptr + tag->size, get_cache_id(tag),
++                         tag[1].size - tag->size, GV_INIT_CACHE);
+         }
+         else
+         {
+@@ -481,7 +509,7 @@ static int LoadDataArchives( FS_STAGE_INFO *info )
+             ptr = ntag + 1;
+         }
+ 
+-        GV_LoadInit( ptr, ( ( ntag2->ext - 'a' ) << 16 ) | ntag2->id, region );
++        LoadResource(ptr, ((ntag2->ext - 'a') << 16) | ntag2->id, ntag2->size, region);
+         info->remaining -= size;
+ 
+         if ( info->remaining <= 0 )
+@@ -545,6 +573,13 @@ void *FS_LoadStageRequest( const char *dirname )
+     FS_STAGE_INFO  *info;
+     void           *buffer;
+ 
++#ifdef MGS_NATIVE
++    MgsNativeSelectStage(dirname);
++    if (MgsModsSetStage(dirname) != 0)
++    {
++        exit(EXIT_FAILURE);
++    }
++#endif
+     DG_FrameRate = 1;
+     printf( "load %s\n", dirname );
+     gLoaderStartTime_800B528C = VSync( -1 );
+@@ -553,12 +588,18 @@ void *FS_LoadStageRequest( const char *dirname )
+     if ( sector < 0 )
+     {
+         printf( "NOT FOUND %s\n", dirname );
++#ifdef MGS_NATIVE
++        exit(EXIT_FAILURE);
++#endif
+     }
+ 
+     info = GV_Malloc( sizeof( FS_STAGE_INFO ) );
+     if ( !info )
+     {
+         printf( "no_mem\n" );
++#ifdef MGS_NATIVE
++        exit(EXIT_FAILURE);
++#endif
+     }
+ 
+     buffer = GV_GetMaxFreeMemory( GV_NORMAL_MEMORY );
+diff --git a/source/libfs/select.c b/source/libfs/select.c
+index c82cb7321..46dd0a67a 100644
+--- a/source/libfs/select.c
++++ b/source/libfs/select.c
+@@ -16,7 +16,9 @@ int SECTION(".bss") FS_DiskNum;
+ 
+ void FS_StartDaemon( void )
+ {
++#ifndef MGS_NATIVE
+     SetMem( 2 );    // Set effective memory to 2MB (DTL-H2X00 has 8MB)
++#endif
+     FS_CDInit();    // Init CD read system
+     sio_output_stop();
+ }
+@@ -26,6 +28,7 @@ void FS_CdStageProgBinFix( void )
+     /* do nothing */
+ }
+ 
++#ifndef MGS_NATIVE
+ CdlCB CdReadCallback( CdlCB func )
+ {
+     return NULL;
+@@ -66,3 +69,4 @@ int PCclose(int fd)
+ {
+     return 0;
+ }
++#endif
+diff --git a/source/libfs/srchfile.c b/source/libfs/srchfile.c
+index 82792d076..ae6ef9125 100644
+--- a/source/libfs/srchfile.c
++++ b/source/libfs/srchfile.c
+@@ -216,7 +216,8 @@ static int ReadCdDirectory(char *buffer, FS_FILE_INFO *finfo)
+                 size_ptr = &dir_record[10];
+                 size = read_lsb_ulong(size_ptr);
+ 
+-                printf("FILE %s : top %d size %d set %d\n", name_buf, top, size, found->pos);
++                printf("FILE %s : top %d size %d set %d\n", name_buf, top, size,
++                       found ? found->pos : 0);
+             }
+         }
+ 
+diff --git a/source/menu/life.c b/source/menu/life.c
+index a38e5d72a..b99091e63 100644
+--- a/source/menu/life.c
++++ b/source/menu/life.c
+@@ -98,6 +98,10 @@ void menu_draw_bar(MenuPrim *prim, long x, long y, long rest, long now, long max
+     int        x_text;
+     int        diff;
+     int        width;
++#ifdef MGS_NATIVE
++    int damage_text = (uintptr_t)bconf & 1u;
++    bconf = (MENU_BAR_CONF *)((uintptr_t)bconf & ~(uintptr_t)1u);
++#endif
+ 
+     if (GM_GameStatus & (STATE_TAKING_PHOTO | STATE_LIFE_OFF | STATE_DEMO))
+     {
+@@ -118,7 +122,11 @@ void menu_draw_bar(MenuPrim *prim, long x, long y, long rest, long now, long max
+     // offset text by 4 pixels down
+     text_config.ypos = y + 4;
+ 
++#ifdef MGS_NATIVE
++    if ( damage_text )
++#else
+     if ( !((int)bconf & 0x80000000) )
++#endif
+     {
+         // Red flashing text when taking smoking or O2 damage
+         text_config.color = 0x643030FF;
+diff --git a/source/menu/menuman.c b/source/menu/menuman.c
+index 95890c352..c8ae57646 100644
+--- a/source/menu/menuman.c
++++ b/source/menu/menuman.c
+@@ -17,7 +17,6 @@ MenuWork SECTION(".bss") Work;
+ extern int MENU_PrimUse;
+ 
+ extern GV_PAD *GM_CurrentPadData;
+-GV_PAD        *GM_CurrentPadData;
+ 
+ void menu_texture_init_8003CC94(MenuWork *work);
+ void menu_radar_init_8003B474(MenuWork *work);
+@@ -251,9 +250,14 @@ int MENU_Printf(const char *fmt, const char *str, int param_3, int param_4, int
+ 
+     if (menu_prim.next)
+     {
+-        sprintf(string_buffer, (char *)fmt, str, param_3, param_4, param_5);
++        string_length = snprintf(string_buffer, sizeof(string_buffer), fmt,
++                                 str, param_3, param_4, param_5);
++        if (string_length < 0 || string_length >= sizeof(string_buffer))
++        {
++            printf("MENU_Printf: text exceeds display buffer\n");
++            return -1;
++        }
+         free_space = menu_prim.end - menu_prim.next;
+-        string_length = strlen(string_buffer);
+         if (string_length * 0x14 + 0x28U <= free_space)
+         {
+             if (gMenuTextConfig_8009E2E4.flags & TextConfig_Flags_eLargeFont_10)
+diff --git a/source/menu/menuman.h b/source/menu/menuman.h
+index f7f0ce0e2..cc43c61e9 100644
+--- a/source/menu/menuman.h
++++ b/source/menu/menuman.h
+@@ -9,7 +9,11 @@
+ #include "face.h"
+ #include "memcard/memcard.h"
+ 
++#ifdef MGS_NATIVE
++#define UNTAG_PTR(Type, Ptr) (Type *)((uintptr_t)(Ptr) | 1u)
++#else
+ #define UNTAG_PTR(Type, Ptr) (Type *)((unsigned int)Ptr & 0x7FFFFFFF)
++#endif
+ 
+ typedef struct
+ {
+diff --git a/source/menu/radar.c b/source/menu/radar.c
+index f1b9600f4..82b646ed1 100644
+--- a/source/menu/radar.c
++++ b/source/menu/radar.c
+@@ -7,10 +7,14 @@
+ #include "libdg/libdg.h"
+ #include "game/game.h"
+ 
++#ifdef MGS_NATIVE
++#include <psyz/gte.h>
++#endif
++
+ // getScratchAddr() but cast as a pointer to the specified type.
+ // Unlike the original, offset is NOT multiplied by the sizeof(type).
+ // TODO: remove
+-#define getScratchAddr2(type, offset)   ((type *)(0x1f800000+(offset)))
++#define getScratchAddr2(type, offset)   ((type *)((char *)getScratchAddr(0)+(offset)))
+ 
+ int MENU_RadarScale = 13;
+ int MENU_RadarRangeH = 21845;
+@@ -175,6 +179,20 @@ void draw_radar_frame(MenuWork *menuMan, u_long *ot)
+     menu_render_rect_8003DB2C(menuMan->prim, x2, y1 + 68, 70, 1, 0); // Bottom border.
+ }
+ 
++#ifdef MGS_NATIVE
++static void gte_stbh(void *address)
++{
++    short result[2] = {(short)Psyz_GteDataRead(9), (short)Psyz_GteDataRead(10)};
++    memcpy(address, result, sizeof(result));
++}
++
++static void gte_ldv0h(const void *address)
++{
++    unsigned int value;
++    memcpy(&value, address, sizeof(value));
++    Psyz_GteDataWrite(0, value);
++}
++#else
+ // clang-format off
+ // gte_stbv but with sh instead of sb
+ #define gte_stbh( r0 ) __asm__ volatile (                       \
+@@ -192,6 +210,7 @@ void draw_radar_frame(MenuWork *menuMan, u_long *ot)
+         :                                                       \
+         : "r"( r0 ) )
+ // clang-format on
++#endif
+ 
+ void menu_draw_radar(MenuWork *work, u_long *ot, int arg2)
+ {
+@@ -216,7 +235,7 @@ void menu_draw_radar(MenuWork *work, u_long *ot, int arg2)
+     DR_TPAGE *pTpage;
+     DR_TPAGE *pTpage_2;
+ 
+-    u_long *prim;
++    OT_TYPE *prim;
+ 
+     int x;
+     int z;
+@@ -238,7 +257,7 @@ void menu_draw_radar(MenuWork *work, u_long *ot, int arg2)
+     int cond2;
+     int rgb;
+ 
+-    u_long  *ot2;
++    OT_TYPE *ot2;
+     LINE_F2 *pLine;
+ 
+     int radar_atr;
+@@ -398,7 +417,8 @@ void menu_draw_radar(MenuWork *work, u_long *ot, int arg2)
+     }
+ 
+     NEW_PRIM(prim, work);
+-    *prim = 0;
++    setaddr(prim, 0);
++    setlen(prim, 0);
+     addPrim(ot, prim);
+ 
+     pvec = getScratchAddr2(PVECTOR, 0);
+@@ -519,7 +539,7 @@ void menu_draw_radar(MenuWork *work, u_long *ot, int arg2)
+                     }
+                 }
+ 
+-                gte_ldv0h(0x1F800020);
++                gte_ldv0h(getScratchAddr2(char, 0x20));
+                 gte_rt();
+ 
+                 if (((((int *)scratchShort)[0x18 / 4] < pWall->p1.y) ||
+@@ -528,7 +548,7 @@ void menu_draw_radar(MenuWork *work, u_long *ot, int arg2)
+                      ((pWall->p2.y + pWall->p2.h) < ((int *)scratchShort)[0x1C / 4])))
+                 {
+                     rgb = 0x40004000;
+-                    ot2 = ot;
++                    ot2 = (OT_TYPE *)ot;
+                 }
+                 else
+                 {
+@@ -546,12 +566,12 @@ void menu_draw_radar(MenuWork *work, u_long *ot, int arg2)
+ 
+                 gte_stbh(&pLine->x0);
+ 
+-                gte_ldv0h(0x1F800024);
++                gte_ldv0h(getScratchAddr2(char, 0x24));
+                 gte_rt();
+ 
+                 LSTORE(rgb, &pLine->r0);
+-                pLine->tag = *ot2 | 0x03000000;
+-                *ot2 = (int)(pLine)&0xffffff;
++                setlen(pLine, 3);
++                addPrim(ot2, pLine);
+                 gte_stbh(&pLine->x1);
+ 
+                 pLine++;
+diff --git a/source/menu/radioanim.c b/source/menu/radioanim.c
+index 756f14744..899c1e2dd 100644
+--- a/source/menu/radioanim.c
++++ b/source/menu/radioanim.c
+@@ -5,7 +5,7 @@
+ #include "mts/mts.h"
+ #include "mts/taskid.h"
+ 
+-#define OFFSET_TO_PTR2(ptr, offset) ((int)(offset) = (int)(ptr) + (int)(offset))
++#define OFFSET_TO_PTR2(ptr, offset) ((offset) = (__typeof__(offset))((char *)(ptr) + (unsigned int)(offset)))
+ 
+ menu_0x14 SECTION(".bss") stru_800BDA48[ 2 ];
+ 
+@@ -157,7 +157,7 @@ void menu_radio_codec_task_proc_helper_80046F3C(menu_chara_struct *pStru, faces_
+ 
+     for (; i > 0; facesIter++, i--)
+     {
+-        anim.intptr = OFFSET_TO_PTR2(faces, facesIter->field_8_anim_data.raw_ptr);
++        anim.raw_ptr = OFFSET_TO_PTR2(faces, facesIter->field_8_anim_data.raw_ptr);
+ 
+         switch (facesIter->field_0_anim_type)
+         {
+diff --git a/source/menu/radiofacedraw.c b/source/menu/radiofacedraw.c
+index 3914c3294..4b9d0b6cf 100644
+--- a/source/menu/radiofacedraw.c
++++ b/source/menu/radiofacedraw.c
+@@ -12,8 +12,7 @@
+ STATIC RECT rect_800AB6D8 = {1008, 432, 5, 20};
+ STATIC int  dword_800AB6E0 = 0;
+ 
+-menu_chara_struct *dword_800ABB38;
+-menu_chara_struct *SECTION(".sbss") dword_800ABB38; // force gp
++extern menu_chara_struct *dword_800ABB38;
+ 
+ int SECTION(".sbss") dword_800ABB3C;
+ 
+@@ -210,12 +209,19 @@ void menu_radio_draw_face_helper3_800487DC(menu_chara_struct *pStru, int idx)
+     rect.w = 26;
+     rect.h = 89;
+ 
++#ifdef MGS_NATIVE
++    _Static_assert(sizeof(mgs_main_ram) >= 0x10000 + 31 * 0x2000 + 0x1000 + 26 * 89 * 2,
++                   "Native RAM must cover the codec noise image");
++    /* The original memory-noise effect samples the managed native game arena. */
++    LoadImage(&rect, (u_long *)(mgs_main_ram + 0x10000 + (rand() % 32) * 0x2000 + GV_Clock * 0x1000));
++#else
+     // TODO: the following code loads
+     // an image from a random area of the memory.
+     // It looks like this is a trick to quickly get
+     // a pseudorandom noise. But, maybe this match is not correct
+     // and 0x80010000 should not be hardcoded.
+     LoadImage(&rect, (u_long *)(0x80010000 + (rand() % 32) * 0x2000 + GV_Clock * 0x1000));
++#endif
+ }
+ 
+ void menu_radio_draw_face_helper4_80048868(MenuPrim *prim, menu_chara_struct_sub *a2, int idx)
+diff --git a/source/sound/sd_main.c b/source/sound/sd_main.c
+index 7c9f28b64..146b3c472 100644
+--- a/source/sound/sd_main.c
++++ b/source/sound/sd_main.c
+@@ -8,6 +8,9 @@
+ #include "../mts/mts.h"
+ #include "../mts/taskid.h"
+ #include "libfs/libfs.h"
++#ifdef MGS_NATIVE
++#include "libgv/libgv.h"
++#endif
+ 
+ extern unsigned char *se_header;
+ 
+@@ -313,7 +316,14 @@ void keyOn(unsigned int ch)
+ 
+ int sd_mem_alloc(void)
+ {
++#ifdef MGS_NATIVE
++    _Static_assert(0x4000 + sizeof(WAVE_W) * 256 + 0x800 + 0x2000 +
++                   CDLOAD_BUF_SIZE + 10 <= MGS_TOP_RAM_SIZE,
++                   "Native top RAM must contain sound buffers and stream header");
++    sng_data = MEM_BOTTOM;
++#else
+     sng_data = (unsigned char *)0x801E0000;
++#endif
+     printf("sng_data %X\n", (unsigned int)sng_data);
+ 
+     wave_header = (WAVE_W *)(sng_data + 0x4000);
+diff --git a/source/sound/sd_str.c b/source/sound/sd_str.c
+index 7a4185fef..993423f7d 100644
+--- a/source/sound/sd_str.c
++++ b/source/sound/sd_str.c
+@@ -121,10 +121,10 @@ int StartStream(void)
+     }
+ 
+     keyOff(SPU_21CH | SPU_22CH);
+-    str_mute_fg = NULL;
++    str_mute_fg = 0;
+     FS_StreamClear(str_header);
+-    str_mute_ctr = NULL;
+-    str_mute_status = NULL;
++    str_mute_ctr = 0;
++    str_mute_status = 0;
+     return 0;
+ }
+ 

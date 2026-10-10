@@ -1,0 +1,849 @@
+diff --git a/source/game/movie.c b/source/game/movie.c
+index 463f48f4e..2fecfeff0 100644
+--- a/source/game/movie.c
++++ b/source/game/movie.c
+@@ -16,6 +16,9 @@
+ #include "sound/sd_cli.h"
+ #include "mts/mts.h"
+ #include "mts/mts_pad.h"
++#ifdef MGS_NATIVE
++#include "mgs_video.h"
++#endif
+ 
+ /*---------------------------------------------------------------------------*/
+ 
+@@ -368,6 +371,9 @@ static void Act(Work *work)
+ 
+ static void Die(Work *work)
+ {
++#ifdef MGS_NATIVE
++    MgsVideoMovie(0);
++#endif
+     DecDCToutCallback(NULL);
+     StUnSetRing();
+     CdControlB(CdlPause, NULL, NULL);
+@@ -419,6 +425,9 @@ void *NewMovie(unsigned int code)
+ 
+     GV_InitActor(GV_ACTOR_MANAGER, &movie_work.actor, NULL);
+     GV_SetNamedActor(&movie_work.actor, Act, Die, "movie.c");
++#ifdef MGS_NATIVE
++    MgsVideoMovie(1);
++#endif
+ 
+     movie_work.info = file;
+     movie_work.f2C = 1;
+diff --git a/source/libdg/bound.c b/source/libdg/bound.c
+index 4749a7297..8cd687a9d 100644
+--- a/source/libdg/bound.c
++++ b/source/libdg/bound.c
+@@ -1,6 +1,10 @@
+ #include "libdg.h"
+ #include "mgstype.h"
+ #include "game/game.h"
++#ifdef MGS_NATIVE
++#include "mgs_video.h"
++#include "mgs_visibility.h"
++#endif
+ 
+ static void UpdateThermalTexture( DG_CHANL *chanl, int index );
+ 
+@@ -68,12 +72,12 @@ static inline void MakeBoundVerts( int *bound )
+     gte_stsz3c( vzp );
+ }
+ 
+-static inline int BoundCheckDepth( int xl, int yl, int xh, int yh )
++static inline int BoundCheckDepth( int xl, int yl, int xh, int yh, int half_width )
+ {
+     int i, bound_flag;
+     long *depth;
+ 
+-    if ( xh > 160 || xl < -160 || yh > 112 || yl < -112 )
++    if ( xh > half_width || xl < -half_width || yh > 112 || yl < -112 )
+     {
+         /* prim partially on-screen */
+         bound_flag = 1;
+@@ -95,7 +99,7 @@ static inline int BoundCheckDepth( int xl, int yl, int xh, int yh )
+     return 0;
+ }
+ 
+-static inline int BoundCheck( DVECTOR *verts )
++static inline int BoundCheckWidth( DVECTOR *verts, int half_width )
+ {
+     int i, bound_flag;
+     int xl, yl, xh, yh;
+@@ -126,7 +130,7 @@ static inline int BoundCheck( DVECTOR *verts )
+         }
+     }
+ 
+-    if ( xl > 160 || xh < -160 || yl > 112 || yh < -112 )
++    if ( xl > half_width || xh < -half_width || yl > 112 || yh < -112 )
+     {
+         /* prim completely off-screen */
+         bound_flag = 0;
+@@ -134,12 +138,67 @@ static inline int BoundCheck( DVECTOR *verts )
+     else
+     {
+         /* prim on-screen, check against depth */
+-        bound_flag = BoundCheckDepth( xl, yl, xh, yh );
++        bound_flag = BoundCheckDepth( xl, yl, xh, yh, half_width );
+     }
+ 
+     return bound_flag;
+ }
+ 
++static inline int BoundCheck( DVECTOR *verts )
++{
++    int half_width = 160;
++#ifdef MGS_NATIVE
++    half_width = MgsVideoHalfWidth();
++#endif
++    return BoundCheckWidth( verts, half_width );
++}
++
++#ifdef MGS_NATIVE
++static void BoundObjsNative( DG_OBJS *objs, int pack, int flag, int render_group, int *classic_group )
++{
++    int index;
++    DG_OBJ *obj = objs->objs;
++
++    for ( index = 0; index < objs->n_models; index++, obj++ )
++    {
++        int render_mode = render_group ? 2 : 0;
++        int classic_mode = *classic_group ? 2 : 0;
++        int classic_failed = 0;
++
++        if ( ( render_mode || classic_mode ) && ( flag & DG_FLAG_BOUND ) )
++        {
++            gte_SetRotMatrix( &obj->screen );
++            gte_SetTransMatrix( &obj->screen );
++            MakeBoundVerts( &obj->model->lx );
++            render_mode = render_group ? BoundCheck( VXY[ 1 ] ) : 0;
++            classic_mode = *classic_group ? BoundCheckWidth( VXY[ 1 ], 160 ) : 0;
++        }
++        obj->bound_mode = render_mode;
++        if ( render_mode || classic_mode )
++        {
++            obj->free_count = 8;
++            if ( obj->packs[ pack ] == NULL && DG_MakeObjPacket( obj, pack, flag ) < 0 )
++            {
++                classic_failed = classic_mode != 0;
++                classic_mode = 0;
++                obj->bound_mode = 0;
++                if ( flag & DG_FLAG_GBOUND )
++                {
++                    objs->bound_mode = 0;
++                    render_group = 0;
++                    if ( classic_failed ) *classic_group = 0;
++                }
++            }
++        }
++        else if ( obj->packs[ pack ] != NULL && --obj->free_count <= 0 )
++        {
++            DG_FreeObjPacket( obj, pack );
++        }
++        MgsVisibilityRemember( &obj->bound_mode, classic_mode );
++        if ( classic_failed && ( flag & DG_FLAG_GBOUND ) ) return;
++    }
++}
++#else
+ static void BoundObjs( DG_OBJS *objs, int pack, int flag, int arg_flag )
+ {
+     int n_models, bound_flag;
+@@ -190,11 +249,15 @@ static void BoundObjs( DG_OBJS *objs, int pack, int flag, int arg_flag )
+         obj++;
+     }
+ }
++#endif
+ 
+ void DG_BoundChanl( DG_CHANL *chanl, int index )
+ {
+     int group_id, n_objs, flag, bound_flag;
+     DG_OBJS **queue, *objs;
++#ifdef MGS_NATIVE
++    int classic_flag;
++#endif
+ 
+     DG_Clip( &chanl->clip_rect, chanl->screen );
+ 
+@@ -205,10 +268,16 @@ void DG_BoundChanl( DG_CHANL *chanl, int index )
+         objs = *queue++;
+         flag = objs->flag;
+         bound_flag = 0;
++#ifdef MGS_NATIVE
++        classic_flag = 0;
++#endif
+ 
+         if ( !( flag & DG_FLAG_INVISIBLE ) && ( objs->group_id == 0 || ( objs->group_id & group_id ) ) )
+         {
+             bound_flag = 2;
++#ifdef MGS_NATIVE
++            classic_flag = 2;
++#endif
+ 
+             if ( flag & DG_FLAG_GBOUND )
+             {
+@@ -216,11 +285,19 @@ void DG_BoundChanl( DG_CHANL *chanl, int index )
+                 gte_SetTransMatrix( &objs->objs[ 0 ].screen );
+                 MakeBoundVerts( &objs->def->lx );
+                 bound_flag = BoundCheck( VXY[ 1 ] );
++#ifdef MGS_NATIVE
++                classic_flag = BoundCheckWidth( VXY[ 1 ], 160 );
++#endif
+             }
+         }
+ 
+         objs->bound_mode = bound_flag;
++#ifdef MGS_NATIVE
++        BoundObjsNative( objs, index, flag, bound_flag, &classic_flag );
++        MgsVisibilityRemember( &objs->bound_mode, classic_flag );
++#else
+         BoundObjs( objs, index, flag, bound_flag );
++#endif
+     }
+ 
+     UpdateThermalTexture( chanl, index );
+diff --git a/source/libdg/chanl.c b/source/libdg/chanl.c
+index 993c42d7a..df78e6686 100644
+--- a/source/libdg/chanl.c
++++ b/source/libdg/chanl.c
+@@ -7,6 +7,10 @@
+ #include <libgpu.h>
+ #include <libapi.h>
+ #include "mgstype.h"
++#ifdef MGS_NATIVE
++#include "mgs_video.h"
++#include "mgs_visibility.h"
++#endif
+ 
+ /*---------------------------------------------------------------------------*/
+ 
+@@ -80,19 +84,31 @@ static void CopyDrawEnv( DG_CHANL *cp, DRAWENV *envp, int isbg )
+     cp->new_clip_rect.w = env.clip.w;
+     cp->new_clip_rect.h = env.clip.h;
+     SetDrawEnv( cp->new_env, &env );
++#ifdef MGS_NATIVE
++    MgsVideoTagChannel(cp->new_env, cp == &DG_Chanls[1]);
++#endif
+ 
+     env.clip.x += shift;
+     env.ofs[ 0 ] += shift;
+     SetDrawEnv( &cp->new_env[ 1 ], &env );
++#ifdef MGS_NATIVE
++    MgsVideoTagChannel(&cp->new_env[1], cp == &DG_Chanls[1]);
++#endif
+ 
+     if ( isbg )
+     {
+         env.isbg = 0;
+         SetDrawEnv( &bg_drawenv[ 1 ], &env );
++#ifdef MGS_NATIVE
++        MgsVideoTagChannel(&bg_drawenv[1], 0);
++#endif
+ 
+         env.clip.x -= shift;
+         env.ofs[ 0 ] -= shift;
+         SetDrawEnv( &bg_drawenv[ 0 ], &env );
++#ifdef MGS_NATIVE
++        MgsVideoTagChannel(&bg_drawenv[0], 0);
++#endif
+     }
+ }
+ 
+@@ -150,7 +166,13 @@ void DG_DrawChanlSystem( int which )
+     DG_StartTime = GetRCnt( RCntCNT1 );
+ 
+     /* channels 1 and 2 are linked into channel 0 */
++#ifdef MGS_NATIVE
++    MgsVideoBeginFrame(which);
++#endif
+     DrawOTag( (OT_TYPE *)&DG_Chanls[ 0 ].env1[ which ] );
++#ifdef MGS_NATIVE
++    MgsVideoEndFrame();
++#endif
+ }
+ 
+ void DG_ClearChanlSystem( int which )
+@@ -208,6 +230,9 @@ void DG_SortChanlSystem( int which )
+     DG_CHANLFUNC *func;
+ 
+     time = &DG_ChanlTime[ 1 ];
++#ifdef MGS_NATIVE
++    MgsVisibilityBegin( MgsVideoHalfWidth() != 160 );
++#endif
+ 
+     if ( stop_chanl_system_flag )
+     {
+@@ -241,6 +266,9 @@ void DG_SortChanlSystem( int which )
+         *time++ = GetRCnt( RCntCNT1 );
+         N_ChanlPerfMax = time - DG_ChanlTime;
+     }
++#ifdef MGS_NATIVE
++    MgsVisibilityEnd();
++#endif
+ }
+ 
+ void DG_SetDrawEnv( int chanl, DRAWENV *env )
+diff --git a/source/libdg/divide.c b/source/libdg/divide.c
+index a7b17f8eb..7dc12ef09 100644
+--- a/source/libdg/divide.c
++++ b/source/libdg/divide.c
+@@ -1,5 +1,8 @@
+ #include "libdg.h"
+ #include "mgstype.h"
++#ifdef MGS_NATIVE
++#include "mgs_video.h"
++#endif
+ 
+ extern M_Sys MemorySystems[MAX_MEMSYS];
+ 
+@@ -172,12 +175,17 @@ STATIC int DG_GetRVectorCode( RVECTOREX *rvec )
+ STATIC void DG_SetRVectorCode( RVECTOREX *rvec )
+ {
+     char code = 0;
++    int half_width = 160;
+ 
+-    if ( rvec->sxy.vx < -160 )
++#ifdef MGS_NATIVE
++    half_width = MgsVideoHalfWidth();
++#endif
++
++    if ( rvec->sxy.vx < -half_width )
+     {
+         code = 1;
+     }
+-    else if ( 160 < rvec->sxy.vx  )
++    else if ( half_width < rvec->sxy.vx  )
+     {
+         code = 2;
+     }
+diff --git a/source/libdg/frame.c b/source/libdg/frame.c
+index bed284706..e9248a98e 100644
+--- a/source/libdg/frame.c
++++ b/source/libdg/frame.c
+@@ -8,6 +8,9 @@
+ #include "mgstype.h"
+ #include "libgv/libgv.h"
+ #include "menu/menuman.h"
++#ifdef MGS_NATIVE
++#include "mgs_video.h"
++#endif
+ 
+ /*** data ***/
+ STATIC VECTOR SECTION(".data") Lower = {0, -4096, 0, 0};
+@@ -205,6 +208,9 @@ void DG_Clip( RECT *rect, int dist )
+     x = rect->x;
+     DG_ClipMin[ 0 ] = x;
+     DG_ClipMax[ 0 ] = x + rect->w - 1;
++#ifdef MGS_NATIVE
++    MgsVideoExpandClip(&DG_ClipMin[0], &DG_ClipMax[0]);
++#endif
+     y = rect->y;
+     DG_ClipMin[ 1 ] = y;
+     DG_ClipMax[ 1 ] = y + rect->h - 1;
+diff --git a/source/libdg/trans.c b/source/libdg/trans.c
+index 7075bc908..05d0be887 100644
+--- a/source/libdg/trans.c
++++ b/source/libdg/trans.c
+@@ -3,6 +3,9 @@
+ #include "inline_n.h"
+ #include "inline_x.h"
+ #include "libgv/libgv.h" // for GV_Clock
++#ifdef MGS_NATIVE
++#include "mgs_video.h"
++#endif
+ 
+ typedef struct _SCRATCH
+ {
+@@ -185,15 +188,20 @@ static inline void DG_BoundCheck( DVECTOR *vert )
+ {
+     int clip;
+     int val;
++    int half_width = 160;
++
++#ifdef MGS_NATIVE
++    half_width = MgsVideoHalfWidth();
++#endif
+ 
+     clip = 0;
+ 
+     val = vert->vx;
+-    if ( val < -160 )
++    if ( val < -half_width )
+     {
+         clip = 1;
+     }
+-    else if ( val > 160 )
++    else if ( val > half_width )
+     {
+         clip = 2;
+     }
+diff --git a/source/menu/radio.c b/source/menu/radio.c
+index aebbe84b8..e4892bba6 100644
+--- a/source/menu/radio.c
++++ b/source/menu/radio.c
+@@ -13,6 +13,9 @@
+ #include "libdg/libdg.h"
+ #include "libgcl/libgcl.h"
+ #include "game/game.h"
++#ifdef MGS_NATIVE
++#include "mgs_video.h"
++#endif
+ 
+ static SPRT             SECTION(".bss") gRadioNumberSprt_800bd9b0;
+ char                    SECTION(".bss") gap_800BD9C4[ 12 ]; // TODO
+@@ -1512,6 +1515,9 @@ STATIC void menu_radio_update_80042198(MenuWork *work, u_long *ot)
+                 gMenuCallbackProc_800ABB08.type = 0xF;
+                 GM_GameStatus &= ~(STATE_PADMASK | STATE_PADRELEASE);
+                 work->field_2A_state = MENU_CODEC_OPEN;
++#ifdef MGS_NATIVE
++                MgsVideoCodec(1);
++#endif
+                 menu_radio_update_helper2_80038A7C();
+                 MENU_JimakuClear();
+                 GV_PauseLevel |= GV_PAUSE_STOP;
+@@ -1604,6 +1610,9 @@ STATIC void menu_radio_update_80042198(MenuWork *work, u_long *ot)
+         if (work->field_210_codec_state == 20 && GM_StreamStatus() != 0)
+         {
+             work->field_2A_state = MENU_CLOSED;
++#ifdef MGS_NATIVE
++            MgsVideoCodec(0);
++#endif
+             menu_radio_update_helper_80038A6C();
+             menu_radio_update_helper6_80047D40(work);
+             GV_ResetPacketMemory();
+@@ -1644,12 +1653,18 @@ STATIC void menu_radio_update_80042198(MenuWork *work, u_long *ot)
+ 
+ void menu_radio_init(MenuWork *work)
+ {
++#ifdef MGS_NATIVE
++    MgsVideoCodec(0);
++#endif
+     work->field_2C_modules[MENU_RADIO] = menu_radio_update_80042198;
+     work->field_28_flags |= 0x10u;
+ }
+ 
+ void menu_radio_kill(MenuWork *work)
+ {
++#ifdef MGS_NATIVE
++    MgsVideoCodec(0);
++#endif
+     work->field_28_flags &= ~0x10u;
+ }
+ 
+diff --git a/source/okajima/blur.c b/source/okajima/blur.c
+index fc3260c02..8bb3734ff 100644
+--- a/source/okajima/blur.c
++++ b/source/okajima/blur.c
+@@ -10,6 +10,9 @@
+ #include "libgcl/libgcl.h"
+ #include "libgv/libgv.h"
+ #include "game/game.h"
++#ifdef MGS_NATIVE
++#include "mgs_video.h"
++#endif
+ 
+ /*---------------------------------------------------------------------------*/
+ 
+@@ -35,6 +38,10 @@ typedef struct _Work
+     int     f70;
+     int     f74;
+     char    pad3[0x8];
++#ifdef MGS_NATIVE
++    DR_TPAGE effect_mode[2][2];
++    DR_TPAGE clear_mode[2][2];
++#endif
+ } Work;
+ 
+ /*---------------------------------------------------------------------------*/
+@@ -47,7 +54,7 @@ DR_STP SECTION(".bss") d01a_dword_800D1468[2];
+ 
+ /*---------------------------------------------------------------------------*/
+ 
+-static void BG_Clear(void)
++static void BG_Clear(Work *work)
+ {
+     OT_TYPE *ot;
+     TILE   *tile;
+@@ -56,6 +63,10 @@ static void BG_Clear(void)
+ 
+     ot = DG_Chanl(0)->ot[GV_Clock];
+ 
++#ifdef MGS_NATIVE
++    MgsVideoSetDrawMode(&work->clear_mode[GV_Clock][1], MGS_VIDEO_WORLD);
++    addPrim(&ot[0xFF], &work->clear_mode[GV_Clock][1]);
++#endif
+     tile = &d01a_dword_800D1428[GV_Clock];
+     SetTile(tile);
+     setSemiTrans(tile, 1);
+@@ -67,6 +78,10 @@ static void BG_Clear(void)
+     stp = &d01a_dword_800D1448[GV_Clock];
+     SetDrawStp(stp, 1);
+     addPrim(&ot[0xFF], stp);
++#ifdef MGS_NATIVE
++    MgsVideoSetDrawMode(&work->clear_mode[GV_Clock][0], MGS_VIDEO_CANVAS);
++    addPrim(&ot[0xFF], &work->clear_mode[GV_Clock][0]);
++#endif
+ 
+     ot = DG_Chanl(1)->ot[GV_Clock];
+ 
+@@ -255,7 +270,7 @@ static void Act(Work *work)
+ 
+     work->f5C++;
+ 
+-    BG_Clear();
++    BG_Clear(work);
+ 
+     if (work->f60 > 0)
+     {
+@@ -289,11 +304,19 @@ static void Act(Work *work)
+ 
+     InitPacks(prim, work, 0, GV_Clock, var_t1, var_t0);
+ 
++#ifdef MGS_NATIVE
++    MgsVideoSetDrawMode(&work->effect_mode[GV_Clock][1], MGS_VIDEO_HUD);
++    addPrim(ot, &work->effect_mode[GV_Clock][1]);
++#endif
+     for (i = 0; i < 4; i++)
+     {
+         addPrim(ot, prim);
+         prim++;
+     }
++#ifdef MGS_NATIVE
++    MgsVideoSetDrawMode(&work->effect_mode[GV_Clock][0], MGS_VIDEO_CANVAS);
++    addPrim(ot, &work->effect_mode[GV_Clock][0]);
++#endif
+ }
+ 
+ static void Die(Work *work)
+diff --git a/source/okajima/blurpure.c b/source/okajima/blurpure.c
+index db666aa21..3aef5a188 100644
+--- a/source/okajima/blurpure.c
++++ b/source/okajima/blurpure.c
+@@ -9,6 +9,9 @@
+ #include "libdg/libdg.h"
+ #include "game/game.h"
+ #include "strcode.h"
++#ifdef MGS_NATIVE
++#include "mgs_video.h"
++#endif
+ 
+ /*---------------------------------------------------------------------------*/
+ 
+@@ -27,6 +30,10 @@ typedef struct _BLUR_PRIMS
+     SPRT     sprt2[2];
+     DR_TPAGE tpage1[2];
+     DR_TPAGE tpage2[2];
++#ifdef MGS_NATIVE
++    DR_TPAGE effect_mode[2][2];
++    DR_TPAGE clear_mode[2][2];
++#endif
+ } BLUR_PRIMS;
+ 
+ typedef struct _Work
+@@ -48,6 +55,10 @@ static void ClearScreen(Work *work)
+     /* DG_ChanlOTag doesn't work here */
+     ot = DG_Chanl(0)->ot[GV_Clock];
+ 
++#ifdef MGS_NATIVE
++    MgsVideoSetDrawMode(&work->prims->clear_mode[GV_Clock][1], MGS_VIDEO_WORLD);
++    addPrim(ot + OT_LEN - 1, &work->prims->clear_mode[GV_Clock][1]);
++#endif
+     tile = &work->prims->tile[GV_Clock];
+     setTile(tile);
+     setXY0(tile, -FRAME_WIDTH/2, -FRAME_HEIGHT/2);
+@@ -58,6 +69,10 @@ static void ClearScreen(Work *work)
+     stp = &work->prims->stp1[GV_Clock];
+     SetDrawStp(stp, 1);
+     addPrim(ot + OT_LEN - 1, stp);
++#ifdef MGS_NATIVE
++    MgsVideoSetDrawMode(&work->prims->clear_mode[GV_Clock][0], MGS_VIDEO_CANVAS);
++    addPrim(ot + OT_LEN - 1, &work->prims->clear_mode[GV_Clock][0]);
++#endif
+ 
+     /* DG_ChanlOTag doesn't work here */
+     ot = DG_Chanl(1)->ot[GV_Clock];
+@@ -101,6 +116,10 @@ static void DrawEffect(Work *work)
+     /* DG_ChanlOTag doesn't work here */
+     ot = DG_Chanl(0)->ot[GV_Clock];
+ 
++#ifdef MGS_NATIVE
++    MgsVideoSetDrawMode(&work->prims->effect_mode[GV_Clock][1], MGS_VIDEO_WORLD);
++    addPrim(ot, &work->prims->effect_mode[GV_Clock][1]);
++#endif
+     sprt = &work->prims->sprt1[GV_Clock];
+     SetSprt(sprt);
+     setSemiTrans(sprt, 1);
+@@ -120,6 +139,10 @@ static void DrawEffect(Work *work)
+     tpage = &work->prims->tpage2[GV_Clock];
+     SetDrawTPage(tpage, 0, 1, GetTPage(2, 0, FRAME_WIDTH * (1 - GV_Clock), 0));
+     addPrim(ot, tpage);
++#ifdef MGS_NATIVE
++    MgsVideoSetDrawMode(&work->prims->effect_mode[GV_Clock][0], MGS_VIDEO_CANVAS);
++    addPrim(ot, &work->prims->effect_mode[GV_Clock][0]);
++#endif
+ }
+ 
+ /*---------------------------------------------------------------------------*/
+diff --git a/source/takabe/focus.c b/source/takabe/focus.c
+index 6c48bcc51..ff1b13f2c 100644
+--- a/source/takabe/focus.c
++++ b/source/takabe/focus.c
+@@ -7,6 +7,9 @@
+ #include "mgstype.h"
+ #include "libgv/libgv.h"
+ #include "libdg/libdg.h"
++#ifdef MGS_NATIVE
++#include "mgs_video.h"
++#endif
+ 
+ typedef struct _FocusPrims
+ {
+@@ -15,6 +18,9 @@ typedef struct _FocusPrims
+     SPRT     sprt1[2];
+     DR_TPAGE tpage2[2];
+     SPRT     sprt2[2];
++#ifdef MGS_NATIVE
++    DR_TPAGE effect_mode[2][2];
++#endif
+ } FocusPrims;
+ 
+ typedef struct _Work
+@@ -69,6 +75,10 @@ void FocusAct_800CEA70(Work *work)
+ 
+     ot = DG_ChanlOTag(0);
+ 
++#ifdef MGS_NATIVE
++    MgsVideoSetDrawMode(&work->prims->effect_mode[GV_Clock][1], MGS_VIDEO_WORLD);
++    addPrim(ot, &work->prims->effect_mode[GV_Clock][1]);
++#endif
+     sprt = &work->prims->sprt2[GV_Clock];
+     sprt->x0 = -work->xoff;
+     sprt->y0 = -112 - work->yoff;
+@@ -87,6 +97,10 @@ void FocusAct_800CEA70(Work *work)
+     addPrim(&ot[near], &stp[2]);
+     addPrim(&ot[far], &stp[1]);
+     addPrim(&ot[0xFF], &stp[0]);
++#ifdef MGS_NATIVE
++    MgsVideoSetDrawMode(&work->prims->effect_mode[GV_Clock][0], MGS_VIDEO_CANVAS);
++    addPrim(ot, &work->prims->effect_mode[GV_Clock][0]);
++#endif
+ }
+ 
+ void FocusDie_800CED74(Work *work)
+diff --git a/source/takabe/libdg2.c b/source/takabe/libdg2.c
+index e9e8abe0b..bb7325a61 100644
+--- a/source/takabe/libdg2.c
++++ b/source/takabe/libdg2.c
+@@ -4,6 +4,10 @@
+ #include "libdg/libdg.h"
+ #include "libgcl/libgcl.h"
+ #include "game/game.h"
++#ifdef MGS_NATIVE
++#include "mgs_video.h"
++#include "mgs_visibility.h"
++#endif
+ 
+ // Modified versions of functions from libdg
+ 
+@@ -502,7 +506,22 @@ static inline void GetClipBounds( int flag, SVECTOR *clip )
+     clip->vz = ( flag & 4 ) ? BOUND_MAX.vz : BOUND_MIN.vz;
+ }
+ 
+-void DG_BoundObjs_800D5010(DG_OBJS *objs, int idx, unsigned int flag, int in_bound_mode)
++#ifdef MGS_NATIVE
++static int FogClassicMode(int mode, const RECT *clip, int left, int top, int right, int bottom)
++{
++    int xmax = clip->x + clip->w - 1;
++    int ymax = clip->y + clip->h - 1;
++    if (!mode || left > xmax || right < clip->x || top > ymax || bottom < clip->y)
++        return 0;
++    return right > xmax || left < clip->x || bottom > ymax || top < clip->y ? 1 : 2;
++}
++#endif
++
++void DG_BoundObjs_800D5010(DG_OBJS *objs, int idx, unsigned int flag, int in_bound_mode
++#ifdef MGS_NATIVE
++                          , int *classic_group, const RECT *classic_clip
++#endif
++                          )
+ {
+     int        i, i2, i3, a2, t0, a3, t1;
+     int        bound_mode, bound_mode2, bound_mode3;
+@@ -519,8 +538,15 @@ void DG_BoundObjs_800D5010(DG_OBJS *objs, int idx, unsigned int flag, int in_bou
+ 
+     for (; n_models > 0; --n_models)
+     {
++#ifdef MGS_NATIVE
++        int classic_mode = 0;
++#endif
+         bound_mode = 0;
+-        if (in_bound_mode)
++        if (in_bound_mode
++#ifdef MGS_NATIVE
++            || *classic_group
++#endif
++           )
+         {
+             bound_mode = 2;
+             if (flag & DG_FLAG_BOUND)
+@@ -677,9 +703,23 @@ void DG_BoundObjs_800D5010(DG_OBJS *objs, int idx, unsigned int flag, int in_bou
+             }
+         }
+ 
++#ifdef MGS_NATIVE
++        if (*classic_group)
++        {
++            classic_mode = bound_mode & 3;
++            if (flag & DG_FLAG_BOUND)
++                classic_mode = FogClassicMode(bound_mode, classic_clip, a2, t0, a3, t1);
++        }
++        if (!in_bound_mode)
++            bound_mode = 0;
++#endif
+         // loc_800188E4
+         obj->bound_mode = (obj->bound_mode & 0x18) | bound_mode;
+-        if (bound_mode)
++        if (bound_mode
++#ifdef MGS_NATIVE
++            || classic_mode
++#endif
++           )
+         {
+             obj->free_count = 8;
+             if (!obj->packs[idx])
+@@ -691,7 +731,16 @@ void DG_BoundObjs_800D5010(DG_OBJS *objs, int idx, unsigned int flag, int in_bou
+                     if (flag & DG_FLAG_GBOUND)
+                     {
+                         objs->bound_mode = 0;
++#ifdef MGS_NATIVE
++                        in_bound_mode = 0;
++                        if (classic_mode)
++                        {
++                            *classic_group = 0;
++                            return;
++                        }
++#else
+                         return;
++#endif
+                     }
+                 }
+             }
+@@ -742,6 +791,9 @@ void FogBoundChanl_800D5500(DG_CHANL *chanl, int idx)
+     for (; n_objs > 0; --n_objs)
+     {
+         DG_OBJS *current_objs = *objs;
++#ifdef MGS_NATIVE
++        int classic_mode;
++#endif
+         objs++;
+         flag = current_objs->flag;
+ 
+@@ -905,7 +957,15 @@ void FogBoundChanl_800D5500(DG_CHANL *chanl, int idx)
+             }
+         }
+         current_objs->bound_mode = bound_mode;
++#ifdef MGS_NATIVE
++        classic_mode = bound_mode & 3;
++        if (bound_mode && (flag & DG_FLAG_GBOUND))
++            classic_mode = FogClassicMode(bound_mode, &chanl->clip_rect, a2, t0, a3, t1);
++        DG_BoundObjs_800D5010(current_objs, idx, flag, bound_mode, &classic_mode, &chanl->clip_rect);
++        MgsVisibilityRemember(&current_objs->bound_mode, classic_mode);
++#else
+         DG_BoundObjs_800D5010(current_objs, idx, flag, bound_mode);
++#endif
+     }
+ 
+     s12c_800D5B00(chanl, idx);
+@@ -1251,16 +1311,22 @@ POLY_GT4 *s12c_800D5DE0(unsigned int *pFaceIndices, POLY_GT4 *pPoly, int n_packs
+     return pPoly;
+ }
+ 
++#ifdef MGS_NATIVE
++#define FOG_HALF_WIDTH MgsVideoHalfWidth()
++#else
++#define FOG_HALF_WIDTH 160
++#endif
++
+ #define CALCULATE_CLIPPING(verts)                               \
+     {                                                           \
+         int  tmp;                                               \
+         char res;                                               \
+         res = 0;                                                \
+         tmp = (verts)->vx;                                      \
+-        if (tmp < -160) {                                       \
++        if (tmp < -FOG_HALF_WIDTH) {                             \
+             res = 1;                                            \
+         }                                                       \
+-        else if (tmp > 160) {                                   \
++        else if (tmp > FOG_HALF_WIDTH) {                         \
+             res = 2;                                            \
+         }                                                       \
+         tmp = (verts)->vy;                                      \
+diff --git a/source/takabe/wt_view.c b/source/takabe/wt_view.c
+index f5b91a487..09ff08f7c 100644
+--- a/source/takabe/wt_view.c
++++ b/source/takabe/wt_view.c
+@@ -9,6 +9,9 @@
+ #include "libgv/libgv.h"
+ #include "libdg/libdg.h"
+ #include "libgcl/libgcl.h"
++#ifdef MGS_NATIVE
++#include "mgs_video.h"
++#endif
+ 
+ // XXX SetPriority & DR_PRIO are undocumented APIs.
+ // XXX They were previously public until their removal from libgpu.h
+@@ -30,6 +33,10 @@ typedef struct _WaterViewPrims
+     SPRT     sprt2[2][122];
+     TILE     tile[4];
+     TILE     tile2[2];
++#ifdef MGS_NATIVE
++    DR_TPAGE effect_mode[2][2];
++    DR_TPAGE clear_mode[2][2];
++#endif
+ } WaterViewPrims;
+ 
+ typedef struct _Work
+@@ -159,12 +166,20 @@ static void Act(Work *work)
+     {
+         WaterViewDraw(work);
+ 
++#ifdef MGS_NATIVE
++        MgsVideoSetDrawMode(&work->prims->clear_mode[GV_Clock][1], MGS_VIDEO_WORLD);
++        addPrim(&ot[0xFF], &work->prims->clear_mode[GV_Clock][1]);
++#endif
+         tile = &work->prims->tile2[GV_Clock];
+         addPrim(&ot[0xFF], tile);
+ 
+         priority = &work->prims->priority[GV_Clock];
+         SetPriority(priority, 0, 1);
+         addPrim(&ot[0xFF], priority);
++#ifdef MGS_NATIVE
++        MgsVideoSetDrawMode(&work->prims->clear_mode[GV_Clock][0], MGS_VIDEO_CANVAS);
++        addPrim(&ot[0xFF], &work->prims->clear_mode[GV_Clock][0]);
++#endif
+ 
+         if (GV_PauseLevel == 0)
+         {
+@@ -345,6 +360,10 @@ static void WaterViewDraw(Work *work)
+ 
+     ot = DG_ChanlOTag(0);
+ 
++#ifdef MGS_NATIVE
++    MgsVideoSetDrawMode(&work->prims->effect_mode[GV_Clock][1], MGS_VIDEO_WORLD);
++    addPrim(ot, &work->prims->effect_mode[GV_Clock][1]);
++#endif
+     addPrim(ot, &work->prims->tile[GV_Clock * 2 + 0]);
+     addPrim(ot, &work->prims->tile[GV_Clock * 2 + 1]);
+ 
+@@ -489,6 +508,10 @@ static void WaterViewDraw(Work *work)
+     }
+ 
+     addPrim(ot, &work->prims->tpage[GV_Clock]);
++#ifdef MGS_NATIVE
++    MgsVideoSetDrawMode(&work->prims->effect_mode[GV_Clock][0], MGS_VIDEO_CANVAS);
++    addPrim(ot, &work->prims->effect_mode[GV_Clock][0]);
++#endif
+ 
+     if (nprims > 16)
+     {

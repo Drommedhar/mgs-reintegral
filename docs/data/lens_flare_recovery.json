@@ -1,0 +1,76 @@
+{
+  "stage": "s18a",
+  "disc": 2,
+  "original_overlay": {
+    "stage": "s18a",
+    "identity": "4b9b.b",
+    "offset": 52033536,
+    "size": 135620,
+    "sha256": "4f605b802aef5c69ce4cc875165d41139acde9af1e9fdf419d0e4cee2bc7087e"
+  },
+  "functions": [
+    {
+      "name": "sub_800D1CCC",
+      "address": "0x800d1ccc",
+      "end": "0x800d1d3c",
+      "instruction_words": 28
+    },
+    {
+      "name": "sub_800D1D3C",
+      "address": "0x800d1d3c",
+      "end": "0x800d1db8",
+      "instruction_words": 31
+    },
+    {
+      "name": "sub_800D1DB8",
+      "address": "0x800d1db8",
+      "end": "0x800d1f30",
+      "instruction_words": 94
+    },
+    {
+      "name": "sub_800D1F30",
+      "address": "0x800d1f30",
+      "end": "0x800d1fa4",
+      "instruction_words": 29
+    },
+    {
+      "name": "sub_800D1FA4",
+      "address": "0x800d1fa4",
+      "end": "0x800d1fc4",
+      "instruction_words": 8
+    },
+    {
+      "name": "sub_800D1FC4",
+      "address": "0x800d1fc4",
+      "end": "0x800d2250",
+      "instruction_words": 163
+    },
+    {
+      "name": "sub_800D2250",
+      "address": "0x800d2250",
+      "end": "0x800d2388",
+      "instruction_words": 78
+    }
+  ],
+  "native_actor_bytes": 252,
+  "api": "void *NewLensFlare(MATRIX *world, int lifetime)",
+  "shared_state": "original0x800BDF90 exposed as GM_StunBlastPosition in resident stngrnd.c",
+  "native_failure_correction": "constructor returns failure, sole destructor frees every successful allocation once and clears pointers; original partial cleanup could double-free",
+  "tests": {
+    "target": "mgs_lens_flare_test",
+    "original_mips_state_cases": 256,
+    "original_mips_packet_cases": 128,
+    "partial_cleanup_counts": 9,
+    "projection_boundary": "deterministic screen coordinates, real recovered per-quad integer geometry",
+    "packet_comparison": "all36 original payload bytes and length, with native full-pointer header"
+  },
+  "runtime": "not yet observed in Liquid encounter; root stage integration pending",
+  "patch": "patches/mgs-lens-flare.patch",
+  "aislop": {
+    "errors": 0,
+    "fixable_warnings": 0,
+    "new_source_findings": 0,
+    "test_findings": 0,
+    "inherited_nonfixable_warning": "stngrnd.c GetResources91lines"
+  }
+}

@@ -1,0 +1,12 @@
+diff --git a/psyz/src/platform/sdl3_common.h b/psyz/src/platform/sdl3_common.h
+index d1c7518..97d1eb0 100644
+--- a/psyz/src/platform/sdl3_common.h
++++ b/psyz/src/platform/sdl3_common.h
+@@ -925,6 +925,7 @@ static void PollEvents(void) {
+     }
+ #ifndef PLATFORM_IOS
+     if (Psyz_QuitRequested()) {
++        Psyz_AudioDestroy();
+         QuitPlatform();
+         exit(0);
+     }

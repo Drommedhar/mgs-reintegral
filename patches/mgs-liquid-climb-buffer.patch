@@ -1,0 +1,31 @@
+diff --git a/source/animal/liquid/liquid_action.c b/source/animal/liquid/liquid_action.c
+index 82c0fff25..f30bb064c 100644
+--- a/source/animal/liquid/liquid_action.c
++++ b/source/animal/liquid/liquid_action.c
+@@ -2097,7 +2097,7 @@ void liquid_800CBB50(LiquidWork *work, int tick)
+     int      v16;
+     int      v17;
+     int      v18;
+-    SVECTOR  vect_ptr;
++    SVECTOR  near_vectors[2];
+ 
+     p_control = &work->control;
+     if (tick != 0)
+@@ -2235,13 +2235,13 @@ void liquid_800CBB50(LiquidWork *work, int tick)
+         if (v10 != 0)
+             seg_flag = 32;
+         if (HZD_NearHazardCheck(p_control->map->hzd, &work->control.mov, 5000, 4, seg_flag) != 0)
+-            HZD_GetNearVector(&vect_ptr);
++            HZD_GetNearVector(near_vectors);
+         else
+             printf(" Err Err Err Liquid Near Err !! \n");
+-        p_control->mov.vx += vect_ptr.vx;
+-        p_control->mov.vy += vect_ptr.vy;
++        p_control->mov.vx += near_vectors[0].vx;
++        p_control->mov.vy += near_vectors[0].vy;
+         vz = p_control->mov.vz;
+-        v12 = vect_ptr.vz;
++        v12 = near_vectors[0].vz;
+         p_control->step.vx = 0;
+         p_control->step.vz = 0;
+         p_control->mov.vz = vz + v12;

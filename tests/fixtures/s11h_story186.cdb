@@ -1,0 +1,10 @@
+.lines -e
+bu /1 mgs_integral_native!MgsNativeReloadOverlay "ew mgs_integral_native!var_buf+a ba; ew mgs_integral_native!linkvarbuf+10 1393 0 f24f; ew mgs_integral_native!var_buf+2 400 0; .printf \"FIXTURE: story186 with original pre-demo pose5011,0,-3505 and heading1024.\\n\"; gc"
+bu /1 mgs_integral_native!NewPutHzd ".printf \"OBSERVE: original scenario constructs recovered PutHzd collision actor.\\n\"; gc"
+bu /1 mgs_integral_native!NewHindBoss ".printf \"OBSERVE: original scenario constructs Hind boss.\\n\"; gc"
+bu /1 mgs_integral_native!s11g_hind_800D7644 ".printf \"OBSERVE: recovered Hind combat controller.\\n\"; gc"
+bu /1 mgs_integral_native!s11g_blastoff_800DBF88 ".printf \"OBSERVE: recovered Hind aiming controller.\\n\"; gc"
+sxe -c "r;kv;q" av
+sxe -c "r;kv;q" dz
+g
+q

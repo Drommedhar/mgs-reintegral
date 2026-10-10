@@ -1,0 +1,138 @@
+diff --git a/source/enemy/meryl7.c b/source/enemy/meryl7.c
+index c86ef04b0..76883308a 100644
+--- a/source/enemy/meryl7.c
++++ b/source/enemy/meryl7.c
+@@ -449,7 +449,7 @@ int s07a_meryl7_800D5BB0( WatcherWork* work )
+ int s07a_meryl7_800D5C4C( char *opt, short* s )
+ {
+     int i;
+-    unsigned char *res;
++    char *res;
+ 
+     for ( i = 0 ; ( res = GCL_NextStr() ) ; i++ )
+     {
+@@ -464,7 +464,7 @@ int s07a_meryl7_800D5C4C( char *opt, short* s )
+ int s07a_meryl7_800D5CA4( char *opt, int* l )
+ {
+     int i;
+-    unsigned char *res;
++    char *res;
+ 
+     for ( i = 0 ; ( res = GCL_NextStr() ) ; i++ )
+     {
+diff --git a/source/enemy/merylaction.c b/source/enemy/merylaction.c
+index 782ada1e0..c570a63c7 100644
+--- a/source/enemy/merylaction.c
++++ b/source/enemy/merylaction.c
+@@ -1536,7 +1536,7 @@ int s07a_meryl_unk_800D9A28( SVECTOR* svec )
+     return 1;
+ }
+ 
+-void MERYL_PutSound( WatcherWork *work, int mark )
++void MERYL_PutSound( WatcherWork *work )
+ {
+     int a3;
+     int a2;
+@@ -1573,7 +1573,7 @@ void MERYL_PutSound( WatcherWork *work, int mark )
+     }
+ }
+ 
+-void MERYL_PutBreath( WatcherWork *work, int arg1 )
++void MERYL_PutBreath( WatcherWork *work )
+ {
+     int frame;
+     if ( EnemyCommand.mode == TOP_COMM_ALERT )
+diff --git a/source/enemy/merylthink.c b/source/enemy/merylthink.c
+index 3fcc1c4b1..0d28eb133 100644
+--- a/source/enemy/merylthink.c
++++ b/source/enemy/merylthink.c
+@@ -1269,7 +1269,9 @@ int s07a_meryl_unk_800DCFD4( WatcherWork *work )
+ 
+     count = work->count3;
+ 
++#ifndef MGS_NATIVE
+     asm(""); //TODO fix
++#endif
+     if ( work->actend != 0 || count > 300 )
+     {
+         return 1;
+diff --git a/source/overlays/s07a/overlay2.c b/source/overlays/s07a/overlay2.c
+index 549a73083..a05171c61 100644
+--- a/source/overlays/s07a/overlay2.c
++++ b/source/overlays/s07a/overlay2.c
+@@ -1,5 +1,16 @@
+ #include "game/game.h"
+ 
++#ifdef MGS_NATIVE
++#include "enemy/enemy.h"
++extern const char s07a_dword_800E2FA4[];
++extern const char s07a_aSocomx_800E2F98[];
++extern const char s07a_aFamasx_800E2F8C[];
++void MERYL_PutSound(WatcherWork *work);
++void MERYL_PutBreath(WatcherWork *work);
++void MERYL_PutLSight(WatcherWork *work);
++void MERYL_PutBullet(WatcherWork *work);
++#endif
++
+ int s07a_dword_800C35F8[8] = { 2500, 3500, 4000, 5000, 5500, 5600, 5700, 5800 };
+ unsigned short s07a_dword_800C3618[8] = { 450, 15, 30, 60, 90, 0, 32001, 30000 };
+ 
+@@ -19,6 +30,22 @@ SVECTOR s07a_dword_800C36A4 = {-1024, 0, 0};
+ SVECTOR s07a_dword_800C36AC = {0, 0, 100};
+ SVECTOR s07a_dword_800C36B4 = {-1024, 0, 0};
+ 
++#ifdef MGS_NATIVE
++const char *s07a_dword_800C36BC[] =
++{
++    s07a_dword_800E2FA4,
++    s07a_aSocomx_800E2F98,
++    s07a_aFamasx_800E2F8C
++};
++
++void *s07a_dword_800C36C8[] =
++{
++    MERYL_PutSound,
++    MERYL_PutBreath,
++    MERYL_PutLSight,
++    MERYL_PutBullet
++};
++#else
+ char *s07a_dword_800C36BC[] =
+ {
+     (char *)0x800E2FA4,
+@@ -33,6 +60,7 @@ void *s07a_dword_800C36C8[] =
+     (void *)0x800D9C5C,
+     (void *)0x800D9C98
+ };
++#endif
+ 
+ SVECTOR s07a_dword_800C36D8 = {5, -500, 80};
+ SVECTOR s07a_dword_800C36E0 = {0, -550, 950};
+diff --git a/source/takabe/mirror.c b/source/takabe/mirror.c
+index e96e71cae..51a64840e 100644
+--- a/source/takabe/mirror.c
++++ b/source/takabe/mirror.c
+@@ -69,7 +69,6 @@ void MirrorAct_800DFDDC(Work *work)
+     DG_MDL       *mdl;
+     DG_OBJS      *objs;
+     DG_OBJ       *obj;
+-    long         *mtx_temp2;
+ 
+ 
+     GM_CurrentMap = work->map;
+@@ -268,8 +267,8 @@ void MirrorAct_800DFDDC(Work *work)
+             objs->light = object->light;
+             DG_VisibleObjs(objs);
+ 
+-            mtx_temp2 = &objs->world.t[work->f30];
+-            *mtx_temp2 = *((short *)&work->f28 + work->f30) * 2 - *mtx_temp2;
++            objs->world.t[work->f30] = *((short *)&work->f28 + work->f30) * 2
++                                      - objs->world.t[work->f30];
+ 
+             mtx_temp = (short *)&object->objs.world.m[work->f30];
+             mtx_temp[0] = -mtx_temp[0];
+@@ -506,4 +505,3 @@ void Mirror_800E0BDC(DG_OBJS *objs)
+         obj++;
+     }
+ }
+-

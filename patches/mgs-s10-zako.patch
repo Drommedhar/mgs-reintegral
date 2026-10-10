@@ -1,0 +1,2506 @@
+diff --git a/source/overlays/s10a/animal/zako10/action.c b/source/overlays/s10a/animal/zako10/action.c
+new file mode 100644
+index 000000000..f74ac8d71
+--- /dev/null
++++ b/source/overlays/s10a/animal/zako10/action.c
+@@ -0,0 +1,230 @@
++#include "zako10.h"
++
++short Z10_ActionTable[52] = {0, 1, 1, 2};
++
++static void Idle(Work *work, int time);
++static void Walk(Work *work, int time);
++static void Turn(Work *work, int time);
++static void ReadyGun(Work *work, int time);
++static void Fire(Work *work, int time);
++
++/* Integral's CAA80, CAB70, CADAC..CADBC and CAF50..CAFA0 are jr ra/nop. */
++static void InactiveAction(Work *work, int time)
++{
++    (void)work;
++    (void)time;
++}
++
++static int TouchSide(int from, int to)
++{
++    if (to < 0 || from < 0)
++        return 0;
++    int difference = GV_DiffDirS(from, to);
++    if (difference < -896 || difference > 896)
++        return 0;
++    return difference < 0 ? 2 : 1;
++}
++
++static void ReviseReadyGun(Work *work)
++{
++    int player_height = GM_PlayerBody->objs->objs[6].world.t[1];
++    int height = work->body.objs->objs[6].world.t[1];
++    int angle = ratan2(work->sn_dis, player_height - height) & 4095;
++    int rotation = GV_NearExp8(work->adjust[2].vx, angle - 1024);
++    work->adjust[2].vx = work->adjust[6].vx = rotation;
++    work->adjust[7].vx = rotation < 0 ? rotation * 3 : rotation * 3 / 2;
++}
++
++static int SelectAction(Work *work)
++{
++    int press = work->pad.press;
++    if (press & 0x1802EC7)
++    {
++        if (work->action2 == NULL)
++        {
++            work->action2 = InactiveAction;
++            work->time2 = 0;
++        }
++        work->control.turn.vx = work->control.turn.vz = 0;
++        GM_ConfigMotionAdjust(&work->body, NULL);
++        return 0;
++    }
++    if (press & 0x100)
++        SetMode(work, InactiveAction);
++    else if (press & 0x20)
++        SetMode(work, Turn);
++    else if (press & 0x400000)
++        SetMode(work, InactiveAction);
++    else if (press & 0x30000)
++    {
++        SetMode(work, ReadyGun);
++        work->adjust[2].vx = 0;
++    }
++    else
++        return 0;
++    return 1;
++}
++
++static void Idle(Work *work, int time)
++{
++    work->target->class |= TARGET_FLAG;
++    work->act_status |= 1;
++    if (Z10_Command.alert_mode == 0)
++        work->target->class |= TARGET_C4;
++    work->vision.length = Z10_EyeLength;
++    if (time == 0)
++        SetAction(work, 0, 4);
++    if (SelectAction(work))
++    {
++        UnsetMode(work);
++        return;
++    }
++    if (work->pad.dir >= 0)
++    {
++        if (GV_DiffDirAbs(work->control.rot.vy, work->pad.dir) >= 256)
++            work->control.turn.vy = work->pad.dir;
++        else
++        {
++            SetAction(work, work->pad.field_4 & 1 ? 2 : 1, 4);
++            SetMode(work, Walk);
++        }
++    }
++    work->vision.facedir = work->control.rot.vy;
++}
++
++static void Walk(Work *work, int time)
++{
++    (void)time;
++    work->target->class |= TARGET_FLAG;
++    if (Z10_Command.alert_mode == 0)
++        work->target->class |= TARGET_C4;
++    work->vision.length = Z10_EyeLength;
++    if (SelectAction(work))
++    {
++        UnsetMode(work);
++        return;
++    }
++    CONTROL *control = &work->control;
++    int      direction = work->pad.dir;
++    int      motion = work->act.motion1;
++    int      touch = -1;
++    if ((work->pad.field_4 & 1) && motion != 2)
++        SetAction(work, 2, 4);
++    if (direction < 0)
++    {
++        SetMode(work, Idle);
++        UnsetMode(work);
++        return;
++    }
++    if (control->n_touches > 0)
++    {
++        touch = GV_VecDir2(&control->vecs[0]);
++        if (control->n_touches > 1)
++        {
++            int second = GV_VecDir2(&control->vecs[1]);
++            if (GV_DiffDirAbs(direction, second) < GV_DiffDirAbs(direction, touch))
++                touch = second;
++        }
++    }
++    int side = TouchSide(direction, touch);
++    if (side == 1)
++        direction = (touch - 1024) & 4095;
++    else if (side == 2)
++        direction = (touch + 1024) & 4095;
++    if (work->body.objs->bound_mode == 0)
++        control->rot.vy = direction;
++    control->turn.vy = direction;
++    int speed = motion == 1 ? 50 : motion == 2 ? 100 : 0;
++    control->step.vx = speed * rsin(direction) / 4096;
++    control->step.vz = speed * rcos(direction) / 4096;
++    work->vision.facedir = control->rot.vy;
++}
++
++static void Turn(Work *work, int time)
++{
++    work->target->class |= TARGET_FLAG;
++    work->vision.length = Z10_EyeLength;
++    if (time == 0)
++        SetAction(work, 16, 4);
++    if (work->body.is_end || !(work->pad.press & 0x20))
++        SetMode(work, Idle);
++    else
++    {
++        work->control.turn.vy = work->sn_dir;
++        work->control.step.vx = work->control.step.vz = 0;
++        work->vision.facedir = work->control.rot.vy;
++    }
++}
++
++static void ReadyGun(Work *work, int time)
++{
++    work->target->class |= TARGET_FLAG;
++    work->vision.length = Z10_EyeLength;
++    int press = work->pad.press;
++    if (time == 0)
++    {
++        SetAction(work, press & 0x10000 ? 3 : 5, 4);
++        GM_ConfigMotionAdjust(&work->body, work->adjust);
++        GM_SeSetMode(&work->control.mov, 178, 1);
++    }
++    ReviseReadyGun(work);
++    if (!(press & 0x30000))
++        SetMode(work, Idle);
++    else if (press & 0x40000)
++        SetModeNoAdjust(work, Fire);
++    else if (press & 0x80000)
++        SetMode(work, InactiveAction);
++    else if (press & 0x300000)
++        SetModeNoAdjust(work, InactiveAction);
++    else
++    {
++        work->control.turn.vy = work->pad.dir;
++        work->vision.facedir = work->control.rot.vy;
++    }
++}
++
++static void Fire(Work *work, int time)
++{
++    work->target->class |= TARGET_FLAG;
++    work->vision.length = Z10_EyeLength;
++    if (time == 0)
++    {
++        SetAction(work, 4, 0);
++        Z10_SetPutChar(work, 3);
++        GM_ConfigMotionAdjust(&work->body, work->adjust);
++    }
++    ReviseReadyGun(work);
++    SetModeNoAdjust(work, ReadyGun);
++}
++
++void Z10_ActionUpdate(Work *work)
++{
++    ACT     *act = &work->act;
++    CONTROL *control = &work->control;
++    work->trigger = 0;
++    work->vision.length = 0;
++    work->target->class = TARGET_AVAIL;
++    work->field_8FC = 0;
++    work->act_status = 0;
++    work->suppress_step = 0;
++    ACTION action = work->action;
++    control->height = work->body.height * work->scale / 4096;
++    control->hzd_height = control->levels[0] + 750;
++    int time = work->time++;
++    if (action == NULL)
++        action = work->action = Idle;
++    action(work, time);
++    if (work->action2)
++    {
++        time = work->time2++;
++        work->action2(work, time);
++    }
++    control->r_sphere = act->field_1E ? -1 : GV_NearExp2(control->r_sphere, act->field_1C);
++    work->hom->flag = (work->target->class & TARGET_POWER) != 0;
++    if (act->field_04 < 0 && control->grounded)
++        act->field_04 = 0;
++    act->field_04 -= 16;
++    control->step.vy = act->field_04;
++    if (work->mark_time > 0)
++        work->mark_time--;
++}
+diff --git a/source/overlays/s10a/animal/zako10/put.c b/source/overlays/s10a/animal/zako10/put.c
+new file mode 100644
+index 000000000..c7063020d
+--- /dev/null
++++ b/source/overlays/s10a/animal/zako10/put.c
+@@ -0,0 +1,156 @@
++#include "zako10.h"
++#include "anime/animconv/anime.h"
++#include "enemy/l_sight.h"
++#include "okajima/bullet.h"
++
++extern void *AN_Breath(MATRIX *world);
++extern void *AN_HeadMark(MATRIX *world, int mark);
++
++static void    PutSound(Work *work);
++static void    PutBreath(Work *work);
++static void    PutLaserSight(Work *work);
++static void    PutBullet(Work *work);
++static int     ClearPutChar(Work *work, PUTFUNC function);
++static PUTFUNC put_chars[] = {PutSound, PutBreath, PutLaserSight, PutBullet};
++static SVECTOR bullet_offset = {5, -500, 80, 0};
++
++void Z10_PutMark(Work *work, int mark)
++{
++    MATRIX *world;
++
++    if (!(work->control.map->index & GM_PlayerMap))
++        return;
++    world = &work->body.objs->objs[6].world;
++
++    if (mark == 0)
++        GM_SeSet(&work->control.mov, SE_EXCLAMATION);
++    if (work->mark_time != 0)
++        GV_DestroyActor(work->mark);
++
++    work->mark = AN_HeadMark(world, mark);
++    work->mark_time = 30;
++}
++
++static void PutSound(Work *work)
++{
++    int action = work->act.motion1;
++    int frame = work->m_ctrl.info1.frame;
++    int left = 160 + (work->param.index % 4) * 2;
++    int right = left + 1;
++    if ((action == 1 && frame == 22) || (action == 2 && frame == 16))
++        GM_SeSet(&work->control.mov, right);
++    else if ((action == 1 && frame == 11) || (action == 2 && frame == 8))
++        GM_SeSet(&work->control.mov, left);
++}
++
++static void PutBreath(Work *work)
++{
++    int frame;
++
++    if (Z10_Command.alert_mode == 1)
++        return;
++    if (!(work->control.map->index & GM_PlayerMap))
++        return;
++
++    if (work->act.motion2 == 20)
++    {
++        if (work->m_ctrl.info2.frame == 31)
++        {
++            AN_Breath(&work->body.objs->objs[6].world);
++        }
++    }
++    else if (work->act.motion2 == 22)
++    {
++        frame = work->m_ctrl.info2.frame;
++        if (frame == 15 || frame == 35 || frame == 50 || frame == 60 || frame == 70 || frame == 74 || frame == 78)
++        {
++            AN_Breath(&work->body.objs->objs[6].world);
++        }
++    }
++    else if (work->act.motion2 == 19)
++    {
++        frame = work->m_ctrl.info2.frame;
++        if (frame == 30 || frame == 40 || frame == 50 || frame == 60 || frame == 70 || frame == 80 || frame == 90 ||
++            frame == 95 || frame == 100 || frame == 105)
++        {
++            AN_Breath(&work->body.objs->objs[6].world);
++        }
++    }
++    else
++    {
++        if ((GV_Time % 64) == (work->param.index * 16))
++        {
++            AN_Breath(&work->body.objs->objs[6].world);
++        }
++    }
++}
++
++static void PutLaserSight(Work *work)
++{
++    if (work->vision.pad != 2)
++        return;
++    NewLSight(&GM_PlayerPosition, &work->control.mov, MAKE_RGB(143, 0, 0));
++}
++
++static void PutBullet(Work *work)
++{
++    SVECTOR rotation = DG_ZeroVector;
++    MATRIX  bullet;
++    rotation.vx = GV_RandS(16);
++    rotation.vz = GV_RandU(128);
++    MATRIX *world = &work->body.objs->objs[4].world;
++    DG_SetPos(world);
++    DG_MovePos(&bullet_offset);
++    DG_RotatePos(&rotation);
++    ReadRotMatrix(&bullet);
++    NewBulletEnemy(&bullet, 2, 1, 0, (GV_Time & 3) != 0);
++    GM_SeSetMode(&work->control.mov, 45, 1);
++    AN_BulletSmoke(world, 0);
++    AN_FamasFlash(&bullet);
++    ClearPutChar(work, PutBullet);
++}
++
++int Z10_SetPutChar(Work *work, int index)
++{
++    int i;
++
++    for (i = 0; i < 8; i++)
++    {
++        if (work->putchar[i] == NULL)
++        {
++            work->putchar[i] = put_chars[index];
++            return 1;
++        }
++    }
++
++    return 0;
++}
++
++static int ClearPutChar(Work *work, PUTFUNC func)
++{
++    int i;
++
++    for (i = 0; i < 8; i++)
++    {
++        if (work->putchar[i] == func)
++        {
++            work->putchar[i] = NULL;
++            return 1;
++        }
++    }
++
++    return 0;
++}
++
++void Z10_ExecPutChars(Work *work)
++{
++    int i;
++    void (*func)(Work *);
++
++    for (i = 0; i < 8; i++)
++    {
++        func = work->putchar[i];
++        if (func != NULL)
++            func(work);
++    }
++}
+diff --git a/source/overlays/s10a/animal/zako10/think.c b/source/overlays/s10a/animal/zako10/think.c
+new file mode 100644
+index 000000000..d7aa8a151
+--- /dev/null
++++ b/source/overlays/s10a/animal/zako10/think.c
+@@ -0,0 +1,653 @@
++#include "zako10.h"
++#include "enemy/asiato.h"
++#include "enemy/eyeflash.h"
++
++extern int NearAsiato(void);
++
++static const unsigned short action_chance[] = {100, 50, 25, 10};
++static const unsigned short action_time[] = {300, 15, 30, 60, 90, 0, 0, 30000};
++static const int            action_press[32] = {0, 1, 2, 4, 4, 64, 128, 512, 1024, 2048, 256, 65536, 0,
++                                                0, 0, 0, 0, 1, 2,  4,   4,   64,   128,  512, 1024,  2048};
++
++static void TargetStart(Work *work)
++{
++    work->target_addr = work->start_addr;
++    work->target_pos = work->start_pos;
++    work->target_map = work->start_map;
++}
++
++static void TargetPlayer(Work *work)
++{
++    work->target_addr = Z10_PlayerAddress;
++    work->target_pos = Z10_PlayerPosition;
++    work->target_map = Z10_PlayerMap;
++}
++
++static void TargetNoise(Work *work)
++{
++    work->target_addr = HZD_GetAddress(GM_WhereList[0]->map->hzd, &GM_NoisePosition, -1);
++    work->target_pos = GM_NoisePosition;
++    work->target_map = Z10_PlayerMap;
++}
++
++static void TargetLast(Work *work)
++{
++    work->target_addr = Z10_Command.target_addr;
++    work->target_pos = Z10_Command.target_pos;
++    work->target_map = Z10_Command.target_map;
++}
++
++static void TargetNext(Work *work)
++{
++    int      next = (unsigned char)work->param.next;
++    HZD_ZON *zone = HZD_GetZone(work->control.map->hzd, next);
++    work->target_addr = next | (next << 8);
++    work->target_pos.vx = zone->x;
++    work->target_pos.vy = zone->y;
++    work->target_pos.vz = zone->z;
++    work->target_map = work->start_map;
++}
++
++static void NextNode(Work *work)
++{
++    if (++work->next_node >= work->n_nodes)
++        work->next_node = 0;
++    work->target_pos = work->nodes[work->next_node];
++    work->target_addr = HZD_GetAddress(work->control.map->hzd, &work->target_pos, -1);
++    work->target_map = work->start_map;
++}
++
++static void ResetThink(Work *work)
++{
++    work->think1 = work->think2 = work->think3 = 0;
++    work->count3 = 0;
++    work->route_action = 0;
++}
++
++static void FoundPlayer(Work *work)
++{
++    work->think2 = 7;
++    work->think3 = 11;
++    work->count3 = 0;
++}
++
++static void PursuePlayer(Work *work)
++{
++    work->think1 = 1;
++    if ((unsigned char)work->param.next == 255)
++    {
++        work->think2 = 8;
++        work->think3 = 14;
++    }
++    else
++    {
++        work->think2 = 10;
++        work->think3 = 23;
++        TargetNext(work);
++    }
++    work->count3 = 0;
++    work->pad.field_4 = 1;
++}
++
++static void PursueLast(Work *work)
++{
++    if ((unsigned char)work->param.next == 255)
++        TargetLast(work);
++    else
++        TargetNext(work);
++    work->think1 = 1;
++    work->think2 = 10;
++    work->think3 = 23;
++    work->count3 = 0;
++    work->pad.field_4 = 1;
++}
++
++static void LeaveAlert(Work *work)
++{
++    work->think1 = 2;
++    if ((unsigned char)work->param.next == 255 && work->chase_dis < 7000)
++    {
++        TargetLast(work);
++        work->think2 = 12;
++    }
++    else if ((unsigned char)work->param.next != 255 &&
++             !HZD_InsideZone(work->control.map->hzd, &work->control.mov, (unsigned char)work->param.next))
++    {
++        TargetNext(work);
++        work->think2 = 11;
++    }
++    else
++    {
++        work->think2 = 13;
++        work->think3 = 24;
++        work->think4 = 2;
++        work->count3 = 0;
++        work->pad.field_4 = 0;
++        return;
++    }
++    work->count3 = 0;
++    work->pad.field_4 = 1;
++}
++
++static void HeardNoise(Work *work)
++{
++    if (GM_NoisePower == 5)
++    {
++        work->think2 = 1;
++        work->think3 = 7;
++    }
++    else if (GM_NoisePower == 200 || GM_NoisePower == 255)
++    {
++        TargetNoise(work);
++        Z10_TargetNoise();
++        work->think2 = 7;
++        work->think3 = 12;
++    }
++    else
++    {
++        TargetNoise(work);
++        work->think2 = 1;
++        work->think3 = 5;
++        work->modetime[0] = 0;
++    }
++    work->count3 = 0;
++}
++
++static int WaitReturn(Work *work)
++{
++    if (work->count3 == 0)
++        work->pad.sound = 245;
++    else if (work->count3 >= 33)
++        return 1;
++    work->count3++;
++    return 0;
++}
++
++static int Navigate(Work *work)
++{
++    MAP     *map = work->control.map;
++    HZD_HDL *hzd = map->hzd;
++    int      target = work->target_addr;
++    if (work->target_map != map->index)
++    {
++        int      next = Z10_FindRoute(map->index, work->target_map);
++        HZD_ZON *zone = HZD_GetZone(hzd, next);
++        work->target_pos.vx = zone->x;
++        work->target_pos.vy = zone->y;
++        work->target_pos.vz = zone->z;
++        target = next | (next << 8);
++    }
++    int address = HZD_GetAddress(hzd, &work->control.mov, work->current_addr);
++    work->current_addr = address;
++    int     reached = HZD_ReachTo(hzd, address, work->next_addr);
++    SVECTOR difference;
++    if (target == work->last_addr && reached > 0)
++    {
++        GV_SubVec3(&work->next_pos, &work->control.mov, &difference);
++        return GV_VecDir2(&difference);
++    }
++    work->last_addr = target;
++    if (HZD_ReachTo(hzd, address, target) >= 2)
++    {
++        int      next = HZD_Navigate(hzd, address, target, &work->control.mov);
++        HZD_ZON *zone = HZD_GetZone(hzd, next);
++        work->next_pos.vx = zone->x;
++        work->next_pos.vy = zone->y;
++        work->next_pos.vz = zone->z;
++        next &= 255;
++        work->next_addr = next | (next << 8);
++        GV_SubVec3(&work->next_pos, &work->control.mov, &difference);
++        return GV_VecDir2(&difference);
++    }
++    if (work->target_map == work->control.map->index)
++    {
++        work->next_pos = work->target_pos;
++        work->next_addr = target;
++        GV_SubVec3(&work->next_pos, &work->control.mov, &difference);
++        work->pad.dir = GV_VecDir2(&difference);
++        return -1;
++    }
++    int next = Z10_FindRoute(work->target_map, work->control.map->index);
++    work->control.map = GM_GetMap(work->target_map);
++    HZD_ZON *zone = HZD_GetZone(work->control.map->hzd, next);
++    work->control.mov.vx = zone->x;
++    work->control.mov.vy = zone->y;
++    work->control.mov.vz = zone->z;
++    work->current_addr = work->last_addr = -1;
++    return work->control.rot.vy;
++}
++
++static int MoveDirect(Work *work, int range)
++{
++    int x = work->target_pos.vx - work->control.mov.vx;
++    int z = work->target_pos.vz - work->control.mov.vz;
++    if (x > -range && x < range && z > -range && z < range)
++        return 1;
++    SVECTOR difference = {x, 0, z, 0};
++    work->pad.dir = GV_VecDir2(&difference);
++    work->count3++;
++    return 0;
++}
++
++static int MoveRoute(Work *work)
++{
++    if (work->pad.time != 0)
++    {
++        work->pad.press |= work->pad.field_8;
++        work->pad.time--;
++    }
++    return MoveDirect(work, 350) != 0;
++}
++
++static int SelectRouteAction(Work *work)
++{
++    int command = work->target_pos.pad;
++    int chance = (command & 0x1C00) >> 10;
++    if (GV_RandU(100) >= action_chance[chance & 3] || work->route_action == 1)
++    {
++        work->pad.time = work->pad.field_8 = 0;
++        work->route_action = 0;
++        return 0;
++    }
++    if (chance & 4)
++        work->route_action = 1;
++    work->pad.time = action_time[(command & 0xE0) >> 5];
++    work->pad.field_8 = action_press[command & 31];
++    if (command & 16)
++        return 0;
++    work->pad.dir = (command & 0x300) * 4;
++    return 1;
++}
++
++static int WaitRouteAction(Work *work)
++{
++    if (work->pad.time != 0)
++    {
++        work->pad.press |= work->pad.field_8;
++        work->pad.time--;
++    }
++    else if (work->action2 == NULL)
++        return 1;
++    return 0;
++}
++
++static int Surprise(Work *work)
++{
++    if (work->count3 == 0)
++    {
++        Z10_PutMark(work, 0);
++        GM_SeSet(&work->control.mov, 83);
++        NewEyeflash(&work->body.objs->objs[6].world, &work->control.mov, "kirari01", 0);
++    }
++    if ((unsigned)work->count3 >= 20)
++        return 1;
++    work->pad.press |= 0x20;
++    work->count3++;
++    return 0;
++}
++
++static int SurpriseNoise(Work *work)
++{
++    if (work->count3 == 0)
++    {
++        GM_SeSet(&work->control.mov, 83);
++        Z10_PutMark(work, 0);
++    }
++    if ((unsigned)work->count3 >= 21)
++        return 1;
++    work->count3++;
++    return 0;
++}
++
++static int MoveToTarget(Work *work)
++{
++    if (!(work->count3 & 31))
++    {
++        work->current_addr = work->last_addr = -1;
++        Navigate(work);
++    }
++    work->pad.dir = Navigate(work);
++    if (work->pad.dir < 0)
++        return 1;
++    work->count3++;
++    return 0;
++}
++
++static int MoveToPlayer(Work *work)
++{
++    TargetPlayer(work);
++    if (work->target_map != work->control.map->index)
++        return -1;
++    if (work->count3 & 16)
++    {
++        work->current_addr = HZD_GetAddress(work->control.map->hzd, &work->control.mov, -1);
++        if (HZD_ReachTo(work->control.map->hzd, work->current_addr, work->target_addr) >= 2)
++            return -1;
++    }
++    return MoveDirect(work, 1500);
++}
++
++static int Attack(Work *work, int action)
++{
++    int time = work->count3;
++    int ready = action == 17 ? 0x20000 : 0x10000;
++    work->pad.press |= ready;
++    if ((action == 16 && time == 4) || (action == 17 && time == 8) || (action == 21 && time >= 20))
++        return 1;
++    if (action == 19)
++    {
++        if (time == 30)
++            work->pad.press |= 0x100000;
++        else if (work->body.is_end)
++            return 1;
++    }
++    else if (action == 20)
++    {
++        if (time == 0)
++            work->pad.press |= 0x40000;
++        else if (work->body.is_end)
++            return 1;
++    }
++    else if (action == 21)
++    {
++        if (time < 10 && !(time & 1))
++            work->pad.press |= 0x40000;
++    }
++    else if (action == 16 && time == 0)
++        work->pad.press |= 0x40000;
++    else if (action == 17 && time == 0)
++        work->pad.press |= 0x80000;
++    work->pad.dir = work->sn_dir;
++    work->count3++;
++    return 0;
++}
++
++static void ReturnToRoute(Work *work)
++{
++    if (work->think3 == 3 && WaitReturn(work))
++    {
++        TargetStart(work);
++        work->next_node = work->n_nodes - 1;
++        ResetThink(work);
++        work->pad.field_4 = 1;
++    }
++    if (work->alert_level >= 2)
++        FoundPlayer(work);
++}
++
++static int ReloadRoute(Work *work)
++{
++    MAP     *map = GM_GetMap(work->start_map);
++    HZD_PAT *route = &map->hzd->def->routes[work->param.root];
++    work->n_nodes = route->n_points;
++    if (work->n_nodes <= 0)
++        return -1;
++    for (int index = 0; index < work->n_nodes; index++)
++    {
++        HZD_PTP *point = &route->points[index];
++        work->nodes[index] = (SVECTOR){point->x, point->y, point->z, point->command};
++    }
++    work->start_pos = work->nodes[0];
++    work->start_addr = HZD_GetAddress(map->hzd, &work->start_pos, -1);
++    return 0;
++}
++
++static int CheckRouteChange(Work *work)
++{
++    if ((unsigned char)work->param.c_root == Z10_Command.field_24)
++        return 0;
++    work->param.c_root = Z10_Command.field_24;
++    ReloadRoute(work);
++    return 1;
++}
++
++static void PatrolEvents(Work *work)
++{
++    int events = work->modetime[6];
++    if (events & 4)
++    {
++        work->think2 = work->think3 = 4;
++        work->count3 = 0;
++        work->modetime[2] = 0;
++    }
++    else if (events & 2)
++    {
++        work->think2 = 2;
++        work->think3 = 5;
++        work->count3 = 0;
++    }
++    else if (events & 1)
++        HeardNoise(work);
++    else if (events & 16)
++    {
++        work->think2 = work->think3 = 5;
++        work->modetime[4] = NearAsiato();
++        work->count3 = 0;
++    }
++    else if (work->alert_level >= 3)
++    {
++        Z10_TargetLast();
++        FoundPlayer(work);
++    }
++}
++
++static void Patrol(Work *work)
++{
++    if (work->think3 == 0 && MoveToTarget(work))
++    {
++        work->pad.field_4 = 0;
++        work->think2 = 0;
++        work->think3 = 1;
++        NextNode(work);
++        work->count3 = 0;
++    }
++    else if (work->think3 == 1 && MoveRoute(work))
++    {
++        if (CheckRouteChange(work))
++        {
++            TargetStart(work);
++            work->next_node = work->n_nodes - 1;
++            ResetThink(work);
++            work->pad.field_4 = 1;
++            return;
++        }
++        if (SelectRouteAction(work))
++            work->think3 = 2;
++        else
++        {
++            NextNode(work);
++            work->count3 = 0;
++        }
++    }
++    else if (work->think3 == 2 && WaitRouteAction(work))
++    {
++        NextNode(work);
++        work->think3 = 1;
++        work->count3 = 0;
++    }
++    PatrolEvents(work);
++}
++
++static void StartAlert(Work *work)
++{
++    if (work->think3 == 11 && Surprise(work))
++    {
++        PursuePlayer(work);
++        work->pad.sound = Z10_Command.alert_mode ? 246 : 240;
++        work->alert_level = 255;
++    }
++    else if (work->think3 == 12 && SurpriseNoise(work))
++    {
++        work->think1 = 1;
++        work->think2 = 10;
++        work->think3 = 23;
++        work->pad.field_4 = 1;
++        work->pad.sound = 240;
++        work->count3 = 0;
++        work->alert_level = 255;
++    }
++    else if (work->think3 == 13 && SurpriseNoise(work))
++    {
++        PursuePlayer(work);
++        work->pad.sound = 240;
++        work->alert_level = 255;
++    }
++}
++
++static void CheckAttackRange(Work *work)
++{
++    if ((Z10_Command.time / 4) % 4 == work->param.index)
++    {
++        if ((unsigned char)work->param.next == 255)
++        {
++            if (work->current_addr != Z10_PlayerAddress &&
++                (work->chase_dis < work->sn_dis || (work->chase_dis <= 4000 && work->vision.pad != 2)))
++                PursuePlayer(work);
++        }
++        else if (work->vision.pad != 2 &&
++                 !HZD_InsideZone(work->control.map->hzd, &work->control.mov, (unsigned char)work->param.next))
++            PursuePlayer(work);
++    }
++    if (work->vision.pad == 2)
++    {
++        Z10_TargetLast();
++        work->alert_level = 255;
++    }
++}
++
++static void AttackPlayer(Work *work)
++{
++    int action = work->think3;
++    if ((action == 16 || action == 17 || (action >= 19 && action <= 22)) && Attack(work, action))
++    {
++        work->think3 = 22;
++        work->count3 = 0;
++    }
++    CheckAttackRange(work);
++}
++
++static void ChasePlayer(Work *work)
++{
++    if (work->think3 == 14)
++    {
++        TargetPlayer(work);
++        if (MoveToTarget(work))
++        {
++            work->think3 = 15;
++            work->count3 = 0;
++        }
++    }
++    else if (work->think3 == 15)
++    {
++        int reached = MoveToPlayer(work);
++        if (reached != 0)
++        {
++            if (reached < 0)
++                work->think3 = 14;
++            else
++            {
++                work->think2 = 9;
++                work->think3 = 22;
++            }
++            work->count3 = 0;
++        }
++    }
++    if (work->sn_dis < work->chase_dis)
++    {
++        if (work->chase_dis < 7000 && work->vision.pad != 2)
++        {
++            Z10_TargetLast();
++            return;
++        }
++        work->think2 = 9;
++        work->think3 = 22;
++        work->count3 = 0;
++    }
++    if (work->vision.pad == 2)
++        work->alert_level = 255;
++    Z10_TargetLast();
++}
++
++static void ChaseLast(Work *work)
++{
++    if (work->think3 == 23 && MoveToTarget(work))
++    {
++        work->think2 = 9;
++        work->think3 = 22;
++        work->count3 = 0;
++    }
++    if ((unsigned char)work->param.next == 255 && (work->modetime[6] & 1))
++    {
++        Z10_TargetLast();
++        work->think2 = 7;
++        work->think3 = 13;
++        work->count3 = 0;
++    }
++    else if (work->vision.pad == 2)
++    {
++        work->think2 = 9;
++        work->think3 = 22;
++        work->count3 = 0;
++    }
++}
++
++static void PhaseNormal(Work *work)
++{
++    switch (work->think2)
++    {
++    case 0:
++        Patrol(work);
++        break;
++    case 6:
++        ReturnToRoute(work);
++        break;
++    case 7:
++        work->control.radar_atr |= 0x1000;
++        StartAlert(work);
++        break;
++    }
++    if (Z10_Command.alert_mode != 0)
++        PursueLast(work);
++}
++
++static void PhaseAlert(Work *work)
++{
++    switch (work->think2)
++    {
++    case 7:
++        StartAlert(work);
++        break;
++    case 8:
++        ChasePlayer(work);
++        break;
++    case 9:
++        AttackPlayer(work);
++        break;
++    case 10:
++        ChaseLast(work);
++        break;
++    }
++    if (Z10_Command.alert_mode != 1)
++        LeaveAlert(work);
++}
++
++void Z10_Think(Work *work)
++{
++    work->pad.dir = -1;
++    work->pad.press = 0;
++    if (work->think1 == 0 || work->think1 == 1)
++    {
++        work->act.field_1E = 1;
++        if (work->think1 == 0)
++            PhaseNormal(work);
++        else
++            PhaseAlert(work);
++    }
++    if (Z10_Activated <= 0)
++    {
++        work->alert_level = 0;
++        work->control.radar_atr = 0;
++    }
++    else
++        work->alert_level = 255;
++}
+diff --git a/source/overlays/s10a/animal/zako10/zako10.c b/source/overlays/s10a/animal/zako10/zako10.c
+new file mode 100644
+index 000000000..f28a27435
+--- /dev/null
++++ b/source/overlays/s10a/animal/zako10/zako10.c
+@@ -0,0 +1,498 @@
++#include "zako10.h"
++
++#include <stdio.h>
++#include "strcode.h"
++#include "mts/mts.h" // for fprintf
++#include "libgcl/libgcl.h"
++#include "chara/snake/shadow.h"
++#include "enemy/glight.h"
++#include "game/game.h"
++
++/*---------------------------------------------------------------------------*/
++
++#define MOTION_DATA 43169
++
++#define BODY_FLAG (DG_FLAG_TEXT | DG_FLAG_TRANS | DG_FLAG_SHADE | DG_FLAG_GBOUND | DG_FLAG_AMBIENT | DG_FLAG_IRTEXTURE)
++#define WEAPON_FLAG (DG_FLAG_TEXT | DG_FLAG_TRANS | DG_FLAG_SHADE | DG_FLAG_GBOUND | DG_FLAG_ONEPIECE)
++
++static int dist_data[] = {
++    4000, 4000, 7000, 8000, 8000, 8000, 8000, 8000,
++};
++
++static u_short time_data[] = {
++    300, 15, 30, 60, 90, 0, 32001, 30000,
++};
++
++/*---------------------------------------------------------------------------*/
++
++static void CheckFlag(Work *work)
++{
++    if (work->activate_pending && Z10_Activated > 0)
++    {
++        work->visible = 1;
++        GM_ConfigControlAttribute(&work->control, 13);
++        work->activate_pending = 0;
++        work->act_status = 0;
++    }
++}
++
++static void ChangeModel(DG_OBJS *objs, DG_DEF *def)
++{
++    DG_OBJ *obj;
++    int     i;
++
++    DG_FreeObjsPacket(objs, 0);
++    DG_FreeObjsPacket(objs, 1);
++
++    objs->def = def;
++    obj = objs->objs;
++    for (i = 0; i < 16; i++)
++    {
++        obj->model = &def->models[i];
++        obj->n_packs = def->models[i].n_faces;
++        obj++;
++    }
++}
++
++static void CheckModel(Work *work)
++{
++    if (work->visible != 0)
++    {
++        if (work->param.low_poly == 1)
++        {
++            if ((GM_GameStatus & STATE_CAM_CHANGE) || GM_Camera.first_person)
++            {
++                if (work->lod != 1)
++                {
++                    work->lod = 1;
++                    ChangeModel(work->body.objs, work->lod_models[1]);
++                }
++            }
++            else
++            {
++                if (work->lod != 0)
++                {
++                    work->lod = 0;
++                    ChangeModel(work->body.objs, work->lod_models[0]);
++                }
++            }
++        }
++
++        DG_VisibleObjs(work->body.objs);
++        DG_VisibleObjs(work->weapon.objs);
++        *work->shadow_enable = 1;
++        *work->glight_enable = 1;
++    }
++    else
++    {
++        DG_InvisibleObjs(work->body.objs);
++        DG_InvisibleObjs(work->weapon.objs);
++        *work->shadow_enable = 0;
++        *work->glight_enable = 0;
++    }
++}
++
++static void Act(Work *work)
++{
++    VECTOR   scale;
++    CONTROL *control;
++    TARGET  *trg, *touch;
++
++    control = &work->control;
++    if (GM_CheckMessage(work, control->name, HASH_KILL))
++    {
++        GV_DestroyActor(work);
++        return;
++    }
++
++    CheckFlag(work);
++
++    if (work->activate_pending == 0)
++    {
++        Z10_PushMove(work);
++
++        GM_ActControl(control);
++        GM_ActObject2(&work->body);
++        GM_ActObject2(&work->weapon);
++        DG_GetLightMatrix2(&control->mov, work->light);
++
++        Z10_ActionMain(work);
++
++        trg = work->target;
++        GM_MoveTarget(trg, &control->mov);
++        GM_PushTarget(trg);
++
++        if (trg->class & TARGET_TOUCH)
++        {
++            touch = &work->touch;
++            if (touch->class & TARGET_TOUCH)
++            {
++                if (touch->damaged & TARGET_TOUCH)
++                    touch->damaged &= ~TARGET_TOUCH;
++                GM_MoveTarget(touch, &control->mov);
++                GM_TouchTarget(touch);
++            }
++        }
++
++        scale.vx = scale.vy = scale.vz = work->scale;
++        ScaleMatrix(&work->body.objs->world, &scale);
++    }
++
++    CheckModel(work);
++}
++
++static void InitTarget(Work *work)
++{
++    TARGET *trg, *trg2;
++    int     life, faint;
++
++    trg = work->target;
++    life = work->param.life;
++    faint = work->param.faint;
++    GM_SetTarget(trg, TARGET_FLAG, ENEMY_SIDE, &Z10_TargetSize);
++    GM_SetPowerTarget(trg, POWER_DECREASE, -1, life, faint, &Z10_TargetForce);
++    GM_SetCaptureTarget(trg, -1, faint, NULL, NULL);
++    GM_SetC4Target(trg, &work->body.objs->objs[1].world);
++
++    trg2 = &work->attack;
++    GM_SetTarget(trg2, TARGET_POWER, PLAYER_SIDE, &Z10_AttackSize);
++    GM_SetPowerTarget(trg2, POWER_CONST | POWER_EXPLODE, 5, 0, 3, &Z10_AttackForce);
++
++    trg2 = &work->touch;
++    GM_SetTarget(trg2, TARGET_TOUCH, ENEMY_SIDE, &Z10_TouchSize);
++    GM_SetPowerTarget(trg2, POWER_CONST | POWER_EXPLODE, 5, 0, 0, &Z10_TouchForce);
++}
++
++static void InitAct(Work *work)
++{
++    ACT *act;
++
++    act = &work->act;
++    GV_ZeroMemory(act, sizeof(ACT));
++    act->field_00 = 0;
++    act->field_1C = 450;
++    act->field_1E = 1;
++
++    work->action = NULL;
++    work->action2 = NULL;
++    work->time = 0;
++    work->time2 = 0;
++}
++
++static int InitState(Work *work, int name, int where)
++{
++    SVECTOR  indices;
++    CONTROL *control;
++    OBJECT  *body, *weapon;
++
++    control = &work->control;
++    if (GM_InitControl(control, name, where) < 0)
++        return -1;
++
++    {
++        char *position = GCL_GetOption('p');
++        char *direction = GCL_GetOption('d');
++        GM_ConfigControlString(control, position, direction);
++    }
++    GM_ConfigControlAttribute(control, RADAR_VISIBLE | RADAR_SIGHT | RADAR_ALL_MAP);
++    GM_ConfigControlInterp(control, 4);
++    control->seg_flag = HZD_SEG_NO_NAVIGATE;
++    GM_ConfigControlTrapCheck(control);
++
++    body = &work->body;
++    weapon = &work->weapon;
++
++    GM_InitObject(body, 38582, BODY_FLAG, MOTION_DATA);
++    GM_ConfigObjectJoint(body);
++    GM_ConfigMotionControl(body, &work->m_ctrl, MOTION_DATA, work->m_segs1, work->m_segs2, control, work->rots);
++    GM_ConfigObjectLight(body, work->light);
++
++    work->param.low_poly = 0;
++    char *low_poly = GCL_GetOption('y');
++    if (low_poly)
++        work->param.low_poly = GCL_StrToInt(low_poly);
++    if (work->param.low_poly == 1)
++    {
++        work->lod_models[1] = body->objs->def;
++        work->lod_models[0] = GV_GetCache(GV_CacheID(55267, 'k'));
++        work->lod = 1;
++    }
++
++    work->hom = GM_SetHomingTarget(&body->objs->objs[6].world, control);
++
++    GM_InitObject(weapon, KMD_FAMAS, WEAPON_FLAG, 0);
++    GM_ConfigObjectLight(weapon, work->light);
++    GM_ConfigObjectRoot(weapon, body, 4);
++
++    indices.vx = 0;
++    indices.vy = 6;
++    indices.vz = 12;
++    indices.pad = 15;
++    work->shadow = NewShadow2(control, body, indices, &work->shadow_enable);
++    work->glight = NewGunLight(&body->objs->objs[4].world, &work->glight_enable);
++
++    Z10_SetPutChar(work, 0);
++    InitAct(work);
++    return 0;
++}
++
++static void FreeState(Work *work)
++{
++    Z10_ResetWorkID(work->param.index);
++    GM_FreeControl(&work->control);
++    GM_FreeObject(&work->body);
++    GM_FreeObject(&work->weapon);
++    GM_FreeTarget(work->target);
++    GV_DestroyActor(work->glight);
++    GV_DestroyActor(work->shadow);
++    GM_ResetHomingTarget(work->hom);
++}
++
++static void Die(Work *work)
++{
++    FreeState(work);
++}
++
++static int ReadNodes(Work *work)
++{
++    HZD_PAT *route;
++    HZD_PTP *point;
++    int      i;
++
++    route = work->control.map->hzd->def->routes;
++    route += work->param.root;
++
++    work->n_nodes = route->n_points;
++    if (work->n_nodes <= 0)
++        return -1;
++
++    point = route->points;
++    for (i = 0; i < work->n_nodes; i++)
++    {
++        work->nodes[i].vx = point->x;
++        work->nodes[i].vy = point->y;
++        work->nodes[i].vz = point->z;
++        work->nodes[i].pad = point->command;
++        point++;
++    }
++
++    return 0;
++}
++
++static int ReadDir(char *opt, short *data)
++{
++    int   count;
++    char *str;
++
++    count = 0;
++    while ((str = GCL_NextStr()) != NULL)
++    {
++        *data = GCL_StrToInt(str);
++        data++;
++        count++;
++    }
++    return count;
++}
++
++static int ReadTime(char *opt, int *data)
++{
++    int   count;
++    char *str;
++
++    count = 0;
++    while ((str = GCL_NextStr()) != NULL)
++    {
++        *data = GCL_StrToInt(str);
++        data++;
++        count++;
++    }
++
++    return count;
++}
++
++static int InitTables(Work *work)
++{
++    int   i;
++    char *opt;
++
++    for (i = 0; i < 8; i++)
++    {
++        work->acttime[i] = time_data[i];
++    }
++
++    opt = GCL_GetOption('t');
++    if (opt)
++    {
++        if (ReadTime(opt, &work->acttime[1]) > 4)
++        {
++            printf("Err Err Err  Set time Over\n");
++            return -1;
++        }
++    }
++
++    for (i = 0; i < 4; i++)
++    {
++        work->dir[i] = i * 1024;
++    }
++
++    opt = GCL_GetOption('i');
++    if (opt)
++    {
++        if (ReadDir(opt, work->dir) > 4)
++        {
++            printf("Err Err Err  Set Dir Over\n");
++            return -1;
++        }
++    }
++
++    return 0;
++}
++
++static void InitThink(Work *work)
++{
++    int addr, i;
++
++    work->think1 = 0;
++    work->think2 = 0;
++    work->think3 = 0;
++    work->think4 = 0;
++    work->count3 = 0;
++    work->l_count = 0;
++    work->t_count = 0;
++    work->mark_time = 0;
++    work->next_node = 0;
++    work->search_flag = 0;
++    work->act_status = 0;
++
++    work->target_pos = work->nodes[0];
++    work->target_addr = HZD_GetAddress(work->control.map->hzd, &work->target_pos, -1);
++    work->target_map = GM_CurrentMap;
++    work->alert_level = 0;
++
++    work->visible = 1;
++    work->vision.range = 512;
++    work->vision.facedir = 0;
++    work->field_B90 = 0;
++    work->pad.sound = 0;
++    work->pad.time = 0;
++    work->vision.length = Z10_EyeLength;
++    work->player_pos = Z10_NoPoint;
++    work->subweapon = NULL;
++    work->control.mov = work->nodes[0];
++    work->param.c_root = 0;
++    work->param.c_next = work->param.next;
++
++    for (i = 0; i < 8; i++)
++    {
++        work->modetime[i] = 0;
++    }
++
++    work->modetime[7] = 0;
++    work->modetime[4] = 0xFF;
++
++    GM_ConfigControlRadarparam(&work->control, 0, 512, Z10_EyeLength, 0);
++
++    work->start_pos = work->nodes[0];
++    work->start_map = GM_CurrentMap;
++
++    addr = HZD_GetAddress(work->control.map->hzd, &work->control.mov, -1);
++    work->start_addr = addr;
++    work->next_addr = addr;
++    work->last_addr = addr;
++    work->next_pos = work->start_pos;
++    work->hom->flag = 0;
++    work->alert_level = 0;
++    GM_ConfigControlAttribute(&work->control, 0);
++    work->visible = 0;
++    work->target->class = TARGET_AVAIL;
++    work->activate_pending = 1;
++    work->act_status = 0x10000000;
++}
++
++static void GetResources(Work *work, int name, int where)
++{
++    char *opt;
++
++    InitState(work, name, where);
++
++    work->param.index = Z10_SetWorkID(work);
++    if (work->param.index < 0)
++        printf("Err not enough work !!\n");
++
++    InitTables(work);
++
++    work->param.root = 0;
++    opt = GCL_GetOption('r');
++    if (opt)
++        work->param.root = GCL_StrToInt(opt);
++
++    work->param.life = 192;
++    opt = GCL_GetOption('l');
++    if (opt)
++        work->param.life = GCL_StrToInt(opt);
++
++    work->param.faint = 7;
++    opt = GCL_GetOption('f');
++    if (opt)
++        work->param.faint = GCL_StrToInt(opt);
++
++    work->param.blood = 65;
++    opt = GCL_GetOption('b');
++    if (opt)
++        work->param.blood = GCL_StrToInt(opt);
++
++    printf(" low[pory=%d\n", work->param.low_poly);
++
++    work->param.g_flag = 255;
++    opt = GCL_GetOption('g');
++    if (opt)
++        work->param.g_flag = GCL_StrToInt(opt);
++
++    if (work->param.blood == 90)
++        work->param.g_flag = 0;
++
++    work->chase_dis = dist_data[work->param.index];
++    work->chase_index = work->param.index;
++
++    work->param.next = 255;
++    opt = GCL_GetOption('n');
++    if (opt)
++        work->param.next = GCL_StrToInt(opt);
++
++    work->param.area = 'A';
++    opt = GCL_GetOption('a');
++    if (opt)
++        work->param.area = GCL_StrToInt(opt);
++
++    if (work->param.area == 'S')
++        Z10_SetPutChar(work, 1);
++
++    work->scale = 4096;
++    opt = GCL_GetOption('s');
++    if (opt)
++        work->scale += GCL_StrToInt(opt);
++
++    work->param.item = 1;
++
++    if (ReadNodes(work) < 0)
++        fprintf(1, "watchar.c : action point Err\n");
++
++    work->target = GM_AllocTarget();
++    if (work->target)
++        InitTarget(work);
++
++    InitThink(work);
++}
++
++void *NewZako10(int name, int where)
++{
++    Work *work;
++
++    work = GV_NewActor(GV_ACTOR_PREV, sizeof(Work));
++    if (work != NULL)
++    {
++        GV_SetNamedActor(work, Act, Die, "zako10.c");
++        GetResources(work, name, where);
++    }
++    return (void *)work;
++}
+diff --git a/source/overlays/s10a/animal/zako10/zako10.h b/source/overlays/s10a/animal/zako10/zako10.h
+new file mode 100644
+index 000000000..39054bf4d
+--- /dev/null
++++ b/source/overlays/s10a/animal/zako10/zako10.h
+@@ -0,0 +1,243 @@
++#ifndef MGS_ZAKO10_H
++#define MGS_ZAKO10_H
++
++#include "game/game.h"
++
++#define TARGET_FLAG (TARGET_AVAIL | TARGET_CAPTURE | TARGET_POWER | TARGET_PUSH | TARGET_SEEK | TARGET_TOUCH)
++
++typedef struct _ACT
++{
++    int     field_00;
++    short   field_04;
++    short   field_06;
++    int     field_08;
++    SVECTOR field_0C;
++    int     field_14;
++    short   motion1;
++    short   motion2;
++    short   field_1C;
++    short   field_1E;
++    short   field_20;
++    short   field_22;
++} ACT;
++
++typedef struct _PARAM
++{
++    signed char index;
++    signed char blood;
++    signed char area;
++    signed char low_poly;
++    char        next;
++    signed char root;
++    char        c_root;
++    char        c_next;
++    signed char item;
++    char        g_flag;
++    short       life;
++    short       faint;
++    short       damage;
++} PARAM;
++
++typedef struct _VISION
++{
++    short facedir;
++    short range;
++    short length;
++    short pad;
++} VISION;
++
++typedef struct _PAD
++{
++    int   press;
++    int   field_4;
++    int   field_8;
++    int   time;
++    short dir;
++    short sound;
++} PAD;
++
++struct _Work;
++
++typedef void (*ACTION)(struct _Work *, int);
++typedef void (*PUTFUNC)(struct _Work *);
++
++typedef struct _Work
++{
++    GV_ACT         actor;
++    CONTROL        control;
++    OBJECT         body;
++    int            lod;
++    DG_DEF        *lod_models[2];
++    MOTION_CONTROL m_ctrl;
++    MOTION_SEGMENT m_segs1[17];
++    MOTION_SEGMENT m_segs2[17];
++    SVECTOR        rots[16];
++    SVECTOR        adjust[16];
++    OBJECT         weapon;
++    MATRIX         light[2];
++    ACT            act;
++    ACTION         action;
++    ACTION         action2;
++    int            time;
++    int            time2;
++    int            field_8FC;
++    TARGET        *target;
++    TARGET         attack;
++    TARGET         touch;
++    TARGET         punch;
++    HOMING        *hom;
++    int            scale;
++    int            visible;
++    int            n_nodes;
++    SVECTOR        nodes[32];
++    int            search_flag;
++    void          *shadow;
++    int           *shadow_enable;
++    void          *glight;
++    int           *glight_enable;
++    PUTFUNC        putchar[8];
++    short          think1;
++    short          think2;
++    short          think3;
++    short          think4;
++    int            count3;
++    int            t_count;
++    int            l_count;
++    int            next_node;
++    PAD            pad;
++    short          route_action;
++    short          unused_B4E;
++    u_long         trigger;
++    void          *subweapon;
++    short          field_B58;
++    short          field_B5A;
++    short          field_B5C;
++    char           padB5E[0x2];
++    void          *mark;
++    char           padB64[0x4];
++    int            mark_time;
++    int            act_status;
++    char           padB70[0x4];
++    PARAM          param;
++    char           padB84[0x4];
++    VISION         vision;
++    short          field_B90;
++    int            alert_level;
++    signed char    modetime[8];
++    SVECTOR        player_pos;
++    int            player_dir;
++    int            acttime[8];
++    short          dir[4];
++    SVECTOR        start_pos;
++    SVECTOR        target_pos;
++    int            start_addr;
++    int            start_map;
++    int            last_addr;
++    int            target_addr;
++    int            target_map;
++    int            chase_dis;
++    int            chase_index;
++    SVECTOR        route_vector;
++    int            current_addr;
++    int            next_addr;
++    int            next_zone;
++    int            route_mode;
++    SVECTOR        next_pos;
++    int            route_flags;
++    int            unused_C24;
++    int            sn_dis;
++    int            sn_dir;
++    int            activate_pending;
++    int            suppress_step;
++    int            unused_C38;
++} Work;
++
++typedef struct
++{
++    u_short map, count;
++    u_short data[8][2];
++} Z10RouteMap;
++
++typedef struct
++{
++    int   field_0, state, field_8;
++    Work *work;
++} Z10Watcher;
++
++typedef struct
++{
++    int         name, max_activations, activation_delay, n_watchers;
++    int         time, time2, alert_time, alert_level, alert_mode, field_24;
++    int         target_addr, target_map;
++    SVECTOR     target_pos;
++    short       n_zones, far_zone, zones[4];
++    int         order[8], field_64;
++    MAP        *map;
++    Z10RouteMap routes;
++    Z10Watcher  watchers[8];
++    int         field_110, field_114, field_118, voice;
++} Z10Commander;
++
++extern Z10Commander Z10_Command;
++extern int          Z10_Mode, Z10_Alert, Z10_Unknown, Z10_Activated;
++extern int          Z10_PlayerAddress, Z10_PlayerMap;
++extern SVECTOR      Z10_PlayerPosition;
++extern SVECTOR      Z10_TargetSize, Z10_TargetForce, Z10_AttackSize, Z10_AttackForce;
++extern SVECTOR      Z10_TouchSize, Z10_TouchForce, Z10_NoPoint;
++extern int          Z10_EyeLength;
++
++int   Z10_SetWorkID(Work *work);
++void  Z10_ResetWorkID(int index);
++int   Z10_FindRoute(int map, int zone);
++void  Z10_TargetLast(void);
++void  Z10_TargetNoise(void);
++void  Z10_ActionUpdate(Work *work);
++void  Z10_ActionMain(Work *work);
++void  Z10_PushMove(Work *work);
++void  Z10_Think(Work *work);
++int   Z10_SetPutChar(Work *work, int index);
++void  Z10_ExecPutChars(Work *work);
++void  Z10_PutMark(Work *work, int mark);
++void *NewZako10(int name, int where);
++void *NewZako10Commander(int name, int where);
++
++static inline void SetAction(Work *work, int action, int interp)
++{
++    extern short Z10_ActionTable[52];
++    work->act.motion1 = action;
++    GM_ConfigObjectAction(&work->body, Z10_ActionTable[action], 0, interp);
++}
++
++static inline void SetMode(Work *work, ACTION action)
++{
++    work->action = action;
++    work->time = 0;
++    work->control.turn.vx = work->control.turn.vz = 0;
++    GM_ConfigMotionAdjust(&work->body, NULL);
++}
++
++static inline void SetModeNoAdjust(Work *work, ACTION action)
++{
++    work->action = action;
++    work->time = 0;
++    work->control.turn.vx = work->control.turn.vz = 0;
++}
++
++static inline void UnsetMode(Work *work)
++{
++    extern short Z10_ActionTable[52];
++    work->act.motion2 = 0;
++    GM_ConfigObjectOverride(&work->body, Z10_ActionTable[0], 0, 4, 0);
++    work->action2 = NULL;
++    work->time2 = 0;
++    work->act.motion2 = 0;
++    work->control.turn.vx = work->control.turn.vz = 0;
++}
++
++#ifdef MGS_NATIVE
++_Static_assert(sizeof(Z10Commander) == 288, "Zako10 commander layout");
++_Static_assert(sizeof(Work) == 3132, "Zako10 original actor layout");
++_Static_assert(offsetof(Work, start_pos) == 0xBD4, "Zako10 route layout");
++#endif
++
++#endif
+diff --git a/source/overlays/s10a/animal/zako10/zk10act.c b/source/overlays/s10a/animal/zako10/zk10act.c
+new file mode 100644
+index 000000000..07903f025
+--- /dev/null
++++ b/source/overlays/s10a/animal/zako10/zk10act.c
+@@ -0,0 +1,318 @@
++#include "zako10.h"
++
++#include "enemy/asiato.h"
++
++/*---------------------------------------------------------------------------*/
++
++static void SetRadarParam(Work *work)
++{
++    VISION            *vision;
++    RADAR_SIGHT_PARAM *r_param;
++
++    vision = &work->vision;
++    r_param = &work->control.radar_param;
++
++    r_param->dir = vision->facedir;
++    r_param->dis = vision->length;
++    r_param->range = vision->range * 2;
++    r_param->r = 0;
++}
++
++static void CheckTarget(Work *work)
++{
++    if (work->modetime[7] & 0x4)
++    {
++        if (work->target->damaged & (TARGET_CAPTURE | TARGET_POWER))
++        {
++            work->modetime[6] |= 0x4;
++        }
++        else if ((work->touch.damaged & TARGET_TOUCH) &&
++                 (GM_PlayerStatus & (PLAYER_MOVE | PLAYER_CB_BOX)) != PLAYER_CB_BOX)
++        {
++            work->modetime[6] |= 0xC;
++        }
++    }
++}
++
++static int ZoneDist(HZD_HDL *hzd, SVECTOR *vec1, SVECTOR *vec2)
++{
++    int from, to;
++
++    from = HZD_GetAddress(hzd, vec1, -1);
++    to = HZD_GetAddress(hzd, vec2, -1);
++    from &= 0xFF;
++    to &= 0xFF;
++    return HZD_ZoneDistance(hzd, from, to);
++}
++
++static void CheckNoise(Work *work)
++{
++    CONTROL *control;
++
++    if (!(work->modetime[7] & 0x1))
++        return;
++    if (work->act_status & 0x68)
++        return;
++
++    control = &work->control;
++    if (!(control->map->index & GM_PlayerMap))
++        return;
++    if (GM_NoisePower == 0)
++        return;
++
++    switch (GM_NoisePower)
++    {
++    case 5:
++        if (GV_DiffVec3(&GM_NoisePosition, &control->mov) < 500)
++            work->modetime[6] |= 0x1;
++        break;
++    case 200:
++        if (GV_DiffVec3(&GM_NoisePosition, &control->mov) < 8000)
++            work->modetime[6] |= 0x1;
++        break;
++    case 100:
++        if (GV_DiffVec3(&GM_NoisePosition, &control->mov) >= 8000)
++            break;
++        if (ZoneDist(control->map->hzd, &control->mov, &GM_NoisePosition) >= 300)
++            break;
++        work->modetime[6] |= 0x1;
++        GM_NoiseLength = 0;
++        GM_NoisePower = 0;
++        break;
++    case 255:
++        work->modetime[6] |= 0x1;
++        break;
++    }
++}
++
++static void CheckBox(Work *work)
++{
++    if (!(work->modetime[7] & 0x2))
++        return;
++    if (work->vision.pad != 2)
++        return;
++    if (!(GM_PlayerStatus & PLAYER_CB_BOX))
++        return;
++
++    if (GV_DiffVec3(&work->player_pos, &GM_PlayerPosition) > 50 || work->player_dir != GM_WhereList[0]->rot.vy)
++    {
++        if (Z10_Command.alert_mode == 1)
++            return;
++        work->player_pos = GM_PlayerPosition;
++        work->player_dir = GM_WhereList[0]->rot.vy;
++        work->modetime[6] |= 0x2;
++    }
++    else if (GV_DiffVec3(&work->control.mov, &GM_PlayerPosition) < 1500)
++    {
++        work->modetime[6] |= 0x40;
++    }
++
++    work->vision.pad = 0;
++    work->modetime[6] |= 0x80;
++}
++
++static void CheckAsiato(Work *work)
++{
++    HZD_HDL *hzd;
++    SVECTOR *pos;
++    VISION  *vis;
++
++    if (!(work->modetime[7] & 0x10) || work->think2 == 5)
++        return;
++
++    hzd = work->control.map->hzd;
++    pos = &work->control.mov;
++    vis = &work->vision;
++
++    if (AsiatoCheck(hzd, pos) && SearchNearAsiato(hzd, pos, vis->facedir, vis->range, vis->length) >= 0)
++    {
++        work->modetime[6] |= 0x10;
++    }
++}
++
++static void CheckAlert(Work *work)
++{
++    work->modetime[6] = 0;
++    CheckNoise(work);
++
++    if (Z10_Command.alert_mode != 1)
++    {
++        CheckTarget(work);
++        CheckBox(work);
++        CheckAsiato(work);
++    }
++}
++
++static void UpdateAlert(Work *work)
++{
++    switch (work->vision.pad)
++    {
++    case 0:
++        if (work->field_B90 != 2 || !(GM_PlayerStatus & PLAYER_INTRUDE) || work->vision.length == 0)
++        {
++            work->field_B90 = 0;
++            work->alert_level -= 4;
++        }
++        break;
++    case 1:
++        work->field_B90 = 1;
++        work->alert_level--;
++        break;
++    case 2:
++        work->field_B90 = 2;
++        work->alert_level++;
++        break;
++    }
++
++    if (work->alert_level < 0)
++    {
++        work->alert_level = 0;
++    }
++    else if (work->alert_level > 255)
++    {
++        work->alert_level = 255;
++    }
++}
++
++static void CheckVision(Work *work)
++{
++    SVECTOR  tmp;
++    CONTROL *control;
++    SVECTOR *pos;
++    int      dir, dis, height;
++    MAP     *map;
++
++    control = &work->control;
++    pos = &GM_PlayerPosition;
++    GV_SubVec3(pos, &control->mov, &tmp);
++
++    dir = GV_VecDir2(&tmp);
++    work->sn_dir = dir;
++
++    dis = GV_VecLen3(&tmp);
++    work->sn_dis = dis;
++
++    height = ABS(pos->vy - work->control.mov.vy);
++
++    if (!(work->control.map->index & GM_PlayerMap))
++    {
++        work->vision.pad = 0;
++        return;
++    }
++
++    if (GM_PlayerStatus & PLAYER_INTRUDE)
++    {
++        work->vision.pad = 0;
++        return;
++    }
++
++    if ((Z10_Command.time % Z10_Command.n_watchers) != work->param.index)
++    {
++        return;
++    }
++
++    if (dis > (Z10_EyeLength + 2000))
++    {
++        work->vision.pad = 0;
++        return;
++    }
++
++    if (height > 2000)
++    {
++        work->vision.pad = 0;
++        return;
++    }
++
++    if (dis >= 500 && GV_DiffDirAbs(work->vision.facedir, dir) >= work->vision.range)
++    {
++        work->vision.pad = 0;
++        return;
++    }
++
++    map = work->control.map;
++    if (!HZD_OnlineHazardCheck(map->hzd, pos, &control->mov, HZD_CHK_ALL, HZD_SEG_NO_PLAYER) &&
++        !GM_OnlineTargetCheckAny(&control->mov, pos, map->index, &tmp))
++    {
++        if (dis > work->vision.length)
++        {
++            work->vision.pad = 1;
++        }
++        else
++        {
++            work->vision.pad = 2;
++        }
++    }
++    else
++    {
++        work->vision.pad = 0;
++    }
++}
++
++/*---------------------------------------------------------------------------*/
++
++void Z10_ActionMain(Work *work)
++{
++    if (work->act.motion1 <= 48)
++    {
++        SetRadarParam(work);
++        CheckVision(work);
++        CheckAlert(work);
++        UpdateAlert(work);
++        Z10_Think(work);
++        Z10_ExecPutChars(work);
++    }
++
++    Z10_ActionUpdate(work);
++}
++
++void Z10_PushMove(Work *work)
++{
++    TARGET  *trg;
++    int      turn, motion1;
++    CONTROL *control;
++
++    trg = work->target;
++    turn = 0;
++
++    if (!(trg->damaged & TARGET_PUSH))
++        return;
++
++    GV_AddVec3(&trg->offset, &work->control.step, &work->control.step);
++    trg->damaged &= ~TARGET_PUSH;
++
++    motion1 = work->act.motion1;
++    if (motion1 == 1 || motion1 == 2)
++    {
++        if (trg->offset.pad != 0)
++        {
++            if (GV_Time & 256)
++            {
++                if (work->param.index & 1)
++                {
++                    turn = trg->offset.pad * 1024;
++                }
++                else
++                {
++                    turn = (trg->offset.pad + 2) * 1024;
++                }
++            }
++            else
++            {
++                if (work->param.index & 1)
++                {
++                    turn = (trg->offset.pad + 2) * 1024;
++                }
++                else
++                {
++                    turn = trg->offset.pad * 1024;
++                }
++            }
++
++            turn &= 4095;
++        }
++
++        control = &work->control;
++        control->turn.vy = turn;
++        control->r_sphere = GV_NearExp2(control->r_sphere, work->act.field_1C);
++    }
++}
+diff --git a/source/overlays/s10a/animal/zako10/zk10com.c b/source/overlays/s10a/animal/zako10/zk10com.c
+new file mode 100644
+index 000000000..e31546c0d
+--- /dev/null
++++ b/source/overlays/s10a/animal/zako10/zk10com.c
+@@ -0,0 +1,366 @@
++#include "zako10.h"
++#include "enemy/asiato.h"
++#include "game/vibrate.h"
++#include "libgcl/libgcl.h"
++
++SVECTOR      Z10_TargetSize = {300, 1500, 300, 0};
++SVECTOR      Z10_TargetForce;
++SVECTOR      Z10_AttackSize = {800, 500, 800, 0};
++SVECTOR      Z10_AttackForce = {100, 0, 0, 0};
++SVECTOR      Z10_TouchSize = {300, 800, 300, 0};
++SVECTOR      Z10_TouchForce;
++SVECTOR      Z10_NoPoint = {30000, 30000, 30000, 0};
++int          Z10_EyeLength = 4000;
++Z10Commander Z10_Command;
++int          Z10_Mode, Z10_Alert, Z10_Unknown, Z10_Activated;
++int          Z10_PlayerAddress, Z10_PlayerMap;
++SVECTOR      Z10_PlayerPosition;
++
++static const int     chase_distance[8] = {4000, 4000, 7000, 8000, 8000, 8000, 8000, 8000};
++static unsigned char vibration_h[] = {1, 10, 0, 0};
++static unsigned char vibration_l[] = {255, 10, 0, 0};
++
++typedef struct
++{
++    GV_ACT actor;
++    int    unused;
++} CommanderWork;
++
++int Z10_SetWorkID(Work *work)
++{
++    for (int index = 0; index < 8; index++)
++    {
++        Z10Watcher *watcher = &Z10_Command.watchers[index];
++        if (watcher->work == NULL)
++        {
++            watcher->work = work;
++            watcher->state = 2;
++            return index;
++        }
++    }
++    return -1;
++}
++
++void Z10_ResetWorkID(int index)
++{
++    Z10_Command.watchers[index].work = NULL;
++    Z10_Command.watchers[index].state = 1;
++}
++
++void Z10_TargetLast(void)
++{
++    Z10_Command.target_addr = Z10_PlayerAddress;
++    Z10_Command.target_pos = Z10_PlayerPosition;
++    Z10_Command.target_map = Z10_PlayerMap;
++}
++
++void Z10_TargetNoise(void)
++{
++    Z10_Command.target_addr = HZD_GetAddress(GM_WhereList[0]->map->hzd, &GM_NoisePosition, -1);
++    Z10_Command.target_pos = GM_NoisePosition;
++    Z10_Command.target_map = GM_PlayerMap;
++}
++
++int Z10_FindRoute(int map, int zone)
++{
++    Z10RouteMap *routes = &Z10_Command.routes;
++    if (routes->map != map)
++        return 0;
++    for (int index = 0; index < routes->count; index++)
++        if (routes->data[index][0] == zone)
++            return routes->data[index][1];
++    return -1;
++}
++
++static int ReadRoutes(Z10RouteMap *routes)
++{
++    int count = 0;
++    do
++    {
++        routes->data[count][0] = GCL_StrToInt(GCL_NextStr());
++        routes->data[count][1] = GCL_StrToInt(GCL_NextStr());
++        count++;
++    } while (GCL_NextStr() != NULL);
++    return count;
++}
++
++static int ReadZones(short *zones)
++{
++    int   count = 0;
++    char *value;
++    while ((value = GCL_NextStr()) != NULL)
++        zones[count++] = GCL_StrToInt(value);
++    return count;
++}
++
++static void FindFarZone(void)
++{
++    int longest = 0;
++    int farthest = 0;
++    for (int index = 0; index < Z10_Command.n_zones; index++)
++    {
++        HZD_ZON *zone = HZD_GetZone(Z10_Command.map->hzd, Z10_Command.zones[index]);
++        SVECTOR  position = {zone->x, GM_PlayerPosition.vy, zone->z, 0};
++        int      distance = GV_DiffVec3(&position, &GM_PlayerPosition);
++        if (distance > longest)
++        {
++            longest = distance;
++            farthest = index;
++        }
++    }
++    Z10_Command.far_zone = farthest;
++}
++
++static void SortWatchers(void)
++{
++    int distance[8];
++    int count = Z10_Command.n_watchers;
++    for (int index = 0; index < count; index++)
++        distance[index] = Z10_Command.watchers[Z10_Command.order[index]].work->sn_dis;
++    int last = count - 1;
++    while (last >= 0)
++    {
++        int swapped = -1;
++        for (int index = 1; index <= last; index++)
++        {
++            if (distance[index] < distance[index - 1])
++            {
++                int temporary = distance[index - 1];
++                distance[index - 1] = distance[index];
++                distance[index] = temporary;
++                temporary = Z10_Command.order[index - 1];
++                Z10_Command.order[index - 1] = Z10_Command.order[index];
++                Z10_Command.order[index] = temporary;
++                swapped = index - 1;
++            }
++        }
++        last = swapped;
++    }
++    for (int index = 0; index < count; index++)
++    {
++        int id = Z10_Command.order[index];
++        Z10_Command.watchers[id].work->chase_dis = chase_distance[id];
++    }
++}
++
++static void UpdateWatcher(Z10Watcher *watcher)
++{
++    switch (watcher->field_8)
++    {
++    case 0:
++        if (watcher->state == 1)
++        {
++            watcher->field_8 = 1;
++            watcher->field_0 = 1;
++            Z10_Command.field_64++;
++        }
++        break;
++    case 1:
++        if (--watcher->field_0 <= 0)
++        {
++            watcher->field_8 = 2;
++            watcher->field_0 = 0;
++        }
++        break;
++    case 2:
++        if ((Z10_Command.alert_mode == 0 && (Z10_Command.field_110 & 1)) ||
++            (Z10_Command.alert_mode == 1 && Z10_Command.field_64 < 255 &&
++             (unsigned char)watcher->work->param.next == 255))
++        {
++            FindFarZone();
++            watcher->state = 2;
++            watcher->field_8 = 0;
++        }
++        break;
++    }
++}
++
++static void UpdateAlertLevel(int level)
++{
++    if (Z10_Command.alert_level - level < 5)
++        Z10_Command.alert_level = level;
++    else
++        Z10_Command.alert_level -= 4;
++    if (Z10_Command.alert_level < Z10_Alert)
++        Z10_Command.alert_level = Z10_Alert;
++    Z10_Alert = 0;
++}
++
++static void UpdateAlertMode(void)
++{
++    switch (Z10_Command.alert_mode)
++    {
++    case 0:
++        if (Z10_Command.alert_level >= 255)
++        {
++            Z10_Command.alert_mode = 1;
++            Z10_Command.alert_level = 255;
++            GM_SeSet2(0, 63, 42);
++            Z10_Command.field_64 = 0;
++        }
++        break;
++    case 1:
++        if (Z10_Command.alert_level <= 0)
++        {
++            Z10_Command.alert_mode = 2;
++            Z10_Command.alert_time = 300;
++        }
++        GM_AlertMax = MAX(GM_AlertMax, MIN(Z10_Command.alert_level, 256));
++        break;
++    case 2:
++        if (--Z10_Command.alert_time <= 0)
++        {
++            Z10_Command.alert_mode = 0;
++            Z10_Command.alert_time = 0;
++        }
++        if (Z10_Command.alert_level >= 255)
++        {
++            Z10_Command.alert_level = 255;
++            Z10_Command.alert_mode = 1;
++            Z10_Command.field_64 = 0;
++        }
++        GM_AlertMax = MAX(GM_AlertMax, MIN(Z10_Command.alert_time, 256));
++        break;
++    }
++    Z10_Mode = Z10_Command.alert_mode;
++}
++
++static void UpdateCommander(void)
++{
++    int alert = 0;
++    for (int index = 0; index < Z10_Command.n_watchers; index++)
++    {
++        Z10Watcher *watcher = &Z10_Command.watchers[index];
++        if (watcher->state == 2)
++            alert = MAX(alert, watcher->work->alert_level);
++        else if (watcher->state == 1)
++            UpdateWatcher(watcher);
++    }
++    UpdateAlertLevel(alert);
++    UpdateAlertMode();
++    SortWatchers();
++    Z10_Command.field_110 = 0;
++}
++
++static void UpdatePlayer(void)
++{
++    int address = GM_PlayerAddress;
++    if ((address & 255) == ((address >> 8) & 255) && (address & 255) != 255)
++    {
++        Z10_PlayerAddress = address;
++        Z10_PlayerPosition = GM_PlayerPosition;
++        Z10_PlayerMap = GM_PlayerMap;
++    }
++}
++
++static int ExecProcs(char *parameter)
++{
++    int count = 0;
++    while (parameter)
++    {
++        int proc = GCL_StrToInt(parameter);
++        parameter = GCL_NextStr();
++        GCL_ExecProc(proc, NULL);
++        count++;
++    }
++    return count;
++}
++
++static int ReceiveCommand(void)
++{
++    GV_MSG *message;
++    return GV_ReceiveMessage(Z10_Command.name, &message) > 0 ? message->message[0] : -1;
++}
++
++static void UpdateActivation(void)
++{
++    if (Z10_Activated == 1)
++    {
++        if (Z10_Command.time2 >= 31 && GM_StreamStatus() == 1)
++            GM_StreamPlayStart();
++    }
++    else if (Z10_Activated == 0 && ReceiveCommand() == 1)
++    {
++        Z10_Activated = 1;
++        NewPadVibration(vibration_h, 1);
++        NewPadVibration(vibration_l, 2);
++        if (GM_StreamStatus() == -1)
++            GM_VoxStream(Z10_Command.voice, 0x40000000);
++        Z10_Command.time2 = 0;
++    }
++    Z10_Command.time2++;
++}
++
++static void Act(CommanderWork *work)
++{
++    (void)work;
++    UpdateActivation();
++    UpdatePlayer();
++    UpdateCommander();
++    Z10_Command.time++;
++}
++
++/* The original commander destructor at 800CEC3C has no side effects. */
++static void Die(CommanderWork *work)
++{
++    (void)work;
++}
++
++static void GetResources(int name, int where)
++{
++    Z10_Activated = Z10_Command.field_24 = Z10_Command.alert_level = 0;
++    Z10_Command.name = name;
++    for (int index = 0; index < 8; index++)
++    {
++        Z10_Command.watchers[index] = (Z10Watcher){0};
++        Z10_Command.order[index] = index;
++    }
++    Z10_Command.time = Z10_Command.alert_mode = Z10_Mode = Z10_Alert = 0;
++    Z10_Command.map = GM_GetMap((short)where);
++    if (GCL_GetOption('v'))
++        Z10_Command.n_zones = ReadZones(Z10_Command.zones);
++    else
++    {
++        Z10_Command.n_zones = 1;
++        Z10_Command.zones[0] = 0;
++    }
++    Z10_Command.far_zone = 0;
++    char *option = GCL_GetOption('f');
++    if (option)
++        GCL_StrToInt(option);
++    Z10_Unknown = 1;
++    NewAsiato(0, 0, 0, NULL);
++    if (GCL_GetOption('j'))
++        Z10_Command.routes.count = ReadRoutes(&Z10_Command.routes);
++    else
++    {
++        Z10_Command.routes.count = 1;
++        Z10_Command.routes.data[0][0] = Z10_Command.routes.data[0][1] = 0;
++    }
++    Z10_Command.routes.map = where;
++    Z10_Command.voice = GCL_GetOption('b') ? GCL_StrToInt(GCL_NextStr()) : 0;
++    Z10_Command.n_watchers = 0;
++    option = GCL_GetOption('n');
++    if (option)
++        Z10_Command.n_watchers = ExecProcs(option);
++    Z10_Command.max_activations = 0;
++    option = GCL_GetOption('c');
++    if (option)
++        Z10_Command.max_activations = ExecProcs(option);
++    Z10_Command.activation_delay = 0;
++    option = GCL_GetOption('s');
++    if (option)
++        Z10_Command.activation_delay = ExecProcs(option);
++    Z10_Command.field_114 = 0;
++}
++
++void *NewZako10Commander(int name, int where)
++{
++    CommanderWork *work = GV_NewActor(GV_ACTOR_PREV, sizeof(CommanderWork));
++    if (work)
++    {
++        GV_SetNamedActor(work, Act, Die, "zk10com.c");
++        GetResources(name, where);
++    }
++    return work;
++}

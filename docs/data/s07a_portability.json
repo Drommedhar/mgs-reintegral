@@ -1,0 +1,114 @@
+{
+  "schema": 1,
+  "stage": "s07a",
+  "upstream_commit": "f54dbb2a58adfc2755403296c9ebb653fbec277b",
+  "provenance": {
+    "stage": "s07a",
+    "disc": "SLPM_862.47",
+    "resource": "477b.b",
+    "offset": 24952832,
+    "size": 132192,
+    "sha256": "20cb960a5d97e0b60c030ed0c17eea78bf6d7e0f5dc50945828e8c2106612546",
+    "load_address": "0x800c3208",
+    "resident_sha256": "4b8252b65953a02021486406cfcdca1c7670d1d1a8f3cf6e750ef6e360dc3a2f",
+    "analysis_image": "Original resident and stage code plus zero gap; entry reset to first constructor; analysis only."
+  },
+  "constructor_table": "Already named in recovered upstream C; unchanged.",
+  "native_pointer_bindings": {
+    "0x800c36bc": [
+      {
+        "original_address": "0x800e2fa4",
+        "native_symbol": "s07a_dword_800E2FA4",
+        "bytes": "RATION x 1"
+      },
+      {
+        "original_address": "0x800e2f98",
+        "native_symbol": "s07a_aSocomx_800E2F98",
+        "bytes": "SOCOM x 12"
+      },
+      {
+        "original_address": "0x800e2f8c",
+        "native_symbol": "s07a_aFamasx_800E2F8C",
+        "bytes": "FAMAS x 15"
+      }
+    ],
+    "0x800c36c8": [
+      {
+        "original_address": "0x800d9a6c",
+        "native_symbol": "MERYL_PutSound",
+        "evidence": "Original walking/running frame checks and sound183/184 calls match C."
+      },
+      {
+        "original_address": "0x800d9b14",
+        "native_symbol": "MERYL_PutBreath",
+        "evidence": "Original alert/map checks, action19/20/22 timing, and default GV_Time64-frame cadence match C."
+      },
+      {
+        "original_address": "0x800d9c5c",
+        "native_symbol": "MERYL_PutLSight",
+        "evidence": "Original vision==2, player and actor endpoints, color143 match C."
+      },
+      {
+        "original_address": "0x800d9c98",
+        "native_symbol": "MERYL_PutBullet",
+        "evidence": "Original random aim, object4 matrix, gunfire smoke/flash and self-unregister calls match C; this callback does not create a damaging projectile."
+      }
+    ]
+  },
+  "changes": [
+    "Native callback and item-string tables use confirmed host symbols.",
+    "Remove unused second parameters from two callbacks to match their one-argument invocation.",
+    "Exclude empty matching-only assembly statement on native builds.",
+    "Match GCL string pointer types and access matrix translation without long/int pointer mismatch."
+  ],
+  "patch": {
+    "path": "patches/mgs-s07a.patch",
+    "size": 4028,
+    "sha256": "5d8e1f93849c88b71783b4a55d19345e56481afdecbc3d7b7d9feddc2b11c1ce",
+    "files": [
+      "source/overlays/s07a/overlay2.c",
+      "source/enemy/merylaction.c",
+      "source/enemy/meryl7.c",
+      "source/enemy/merylthink.c",
+      "source/takabe/mirror.c"
+    ]
+  },
+  "validation": {
+    "standalone_syntax": "12 additional translation units pass Windows x86 C17 syntax compilation with unknown pragmas as errors.",
+    "native_link": true,
+    "native_runtime_validated": true,
+    "human_playtesting": false,
+    "configuration": "RelWithDebInfo;19 CTest suites passed including original integer square-root compatibility.",
+    "scope": "Automated direct-entry and debugger-fixture smoke tests; no human playtesting, full encounter, or campaign validation.",
+    "runs": [
+      {
+        "log": "build/s07a-entry.log",
+        "vsyncs": 900,
+        "setup": "Explicit development stage entry; default initial story state.",
+        "movement_delta": 2996,
+        "pad_frames": 57,
+        "movement_ticks": 24,
+        "capture": "build/s07a-room.bmp",
+        "result": "Movement passed; Snake, radar and doorway capture inspected by agent; door open/close logged."
+      },
+      {
+        "log": "build/s07a-fixture111.log",
+        "vsyncs": 1800,
+        "setup": "tests/fixtures/s07a_story111.cdb sets original story variable $w:00000A=111 before first stage scenario; no other writes.",
+        "original_condition": "111 <= story <112 creates commander with Meryl procedure sub_E453, which creates class0x5078.",
+        "result": "Original Meryl constructor breakpoint observed, actor route changes logged, automated movement passed; no access violation.",
+        "capture": "build/s07a-fixture111.bmp"
+      }
+    ],
+    "aislop": {
+      "score": 74,
+      "errors": 0,
+      "fixable_warnings": 0,
+      "nonfixable_complexity_warnings": 12,
+      "unavailable_engines": [
+        "clang-format",
+        "cppcheck"
+      ]
+    }
+  }
+}

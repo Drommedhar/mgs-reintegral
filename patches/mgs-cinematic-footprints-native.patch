@@ -1,0 +1,24 @@
+diff --git a/source/enemy/asiato.c b/source/enemy/asiato.c
+index 98e20907f..1c5bd1a4b 100644
+--- a/source/enemy/asiato.c
++++ b/source/enemy/asiato.c
+@@ -353,8 +353,19 @@ static int asiato_800D17BC(Work2 *work)
+ {
+     HZD_HDL *hdl;
+ 
++#ifdef MGS_NATIVE
++    /* Cinematics have a dummy player; avoid the unused PS1 low-memory read. */
++    if (!AsiatoIsAllowedOnMove_800D179C())
++    {
++        return 0;
++    }
++
++    hdl = GM_WhereList[0]->map->hzd;
++    if (!asiato_800D16F8(work, hdl, &GM_PlayerPosition))
++#else
+     hdl = GM_WhereList[0]->map->hzd;
+     if (!AsiatoIsAllowedOnMove_800D179C() || !asiato_800D16F8(work, hdl, &GM_PlayerPosition))
++#endif
+     {
+         return 0;
+     }

@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "stage": "s15c",
+  "source": "source/overlays/s15c/okajima/valcan/valcan.c",
+  "original_overlay": {
+    "stage": "s15c",
+    "disc": 2,
+    "size": 131720,
+    "offset": 46100480,
+    "load_address": "0x800c3208",
+    "sha256": "7a6d398f600f359a04b8d9fcb7c006fdc888f4fcbdffd761e09ef4a932195483",
+    "assembly_blocks": 26,
+    "instruction_words": 5997
+  },
+  "assembly_blocks": [
+    {
+      "name": "s15c_crow_800DA2A8",
+      "address": "0x800da2a8",
+      "words": 172,
+      "sha256": "93c85cde8c8b09f68766c11325599cb4144f4e6e162335ee0096296e171bfc82"
+    },
+    {
+      "name": "s15c_crow_800DA990",
+      "address": "0x800da990",
+      "words": 207,
+      "sha256": "4f3dda5d0336e315b2e293ce9ba686861d0fe7162ca022c448b74caf98ea87b7"
+    },
+    {
+      "name": "s15c_crow_800DAE7C",
+      "address": "0x800dae7c",
+      "words": 84,
+      "sha256": "043944117e723224664927dbb3e45ac2672c09576d2f35d458f9e0f736597dbe"
+    },
+    {
+      "name": "s15c_crow_800DAFCC",
+      "address": "0x800dafcc",
+      "words": 141,
+      "sha256": "c6d456ac7cec5ae3f48bfc3ec78df28606eedb38a48e9511be5b2e33f030576b"
+    },
+    {
+      "name": "s15c_crow_800DB200",
+      "address": "0x800db200",
+      "words": 57,
+      "sha256": "153ef9b065fc52742a05093cded26d01da7c7a4220967658b82643f435a13a6b"
+    },
+    {
+      "name": "s15c_crow_800DB9F0",
+      "address": "0x800db9f0",
+      "words": 177,
+      "sha256": "09cb442c12922048ef055650950cb2932dc889f7c4b11e6fd74d5f07df65f1cb"
+    },
+    {
+      "name": "s15c_crow_800DBCB4",
+      "address": "0x800dbcb4",
+      "words": 176,
+      "sha256": "85def10101f2204bf1fe97d3fd3bc8322eb73a9174ecda81a3446a57d7a6bfbf"
+    },
+    {
+      "name": "s15c_crow_800DC318",
+      "address": "0x800dc318",
+      "words": 290,
+      "sha256": "8b544252ad4365730877df822884b554e3554954fdbbd200e34ed68cb6e909be"
+    },
+    {
+      "name": "s15c_crow_800DC7A0",
+      "address": "0x800dc7a0",
+      "words": 313,
+      "sha256": "87d41f64c3cf5a0d3877fd4b3587196037319f754d155d674665b77a8d524c2d"
+    },
+    {
+      "name": "s15c_crow_800DD03C",
+      "address": "0x800dd03c",
+      "words": 335,
+      "sha256": "bed9aae59225a08fa7e57a5db1a02eeb6073e85ad07651d891f8f69948c7c244"
+    },
+    {
+      "name": "s15c_valcan_800D8ECC",
+      "address": "0x800d8ecc",
+      "words": 87,
+      "sha256": "7f5dbd472017859333c6255e49af4a2405b9019a9331350120bbde900acfe19d"
+    }
+  ],
+  "status": "11 missing blocks recovered to C; standalone native compilation and isolated Debug test passed; full stage runtime pending",
+  "native_layout": {
+    "sizeof": "0x954",
+    "target": "0x664",
+    "shadow_vertices": "0x6d4",
+    "turn_time": "0x75c"
+  },
+  "tests": {
+    "target": "mgs_valcan_navigation_test",
+    "navigation_cases": 256,
+    "damage_cases": 96,
+    "reference": "Unicorn2.1.4 runs original instructions; deterministic external engine boundaries. Native tests extract unchanged recovered definitions.",
+    "reference_files": [
+      ".local/recovery/valcan/reference_navigation.py",
+      ".local/recovery/valcan/reference_damage.py"
+    ],
+    "expected_files": [
+      "tests/mgs_valcan_fixtures.h",
+      "tests/mgs_valcan_damage_fixtures.h"
+    ],
+    "limits": [
+      "No complete boss fight or native stage runtime established by isolated tests",
+      "Damage tests isolate engine services and existing actor helpers; they do not validate rendering/audio"
+    ]
+  },
+  "patch": "patches/mgs-valcan.patch",
+  "scan": {
+    "errors": 0,
+    "fixable_warnings": 0,
+    "nonfixable_complexity_warnings": 12
+  }
+}

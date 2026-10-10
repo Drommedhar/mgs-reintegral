@@ -1,0 +1,92 @@
+{
+  "offset": 36798464,
+  "size": 106868,
+  "sha256": "60c1e1882b4d9df99478a117a9bfb0d20eb58f4f37305aa46bb1658cf2761eb7",
+  "blocks": [
+    {
+      "name": "s11g_11g_demo_800CB878",
+      "address": "0x800cb878",
+      "instruction_words": 71
+    },
+    {
+      "name": "s11g_blastoff_800DBF88",
+      "address": "0x800dbf88",
+      "instruction_words": 534
+    },
+    {
+      "name": "s11g_hind_800D6848",
+      "address": "0x800d6848",
+      "instruction_words": 895
+    },
+    {
+      "name": "s11g_hind_800D7644",
+      "address": "0x800d7644",
+      "instruction_words": 1856
+    },
+    {
+      "name": "s11g_hind_800D96B0",
+      "address": "0x800d96b0",
+      "instruction_words": 308
+    },
+    {
+      "name": "s11g_hind_800D9B80",
+      "address": "0x800d9b80",
+      "instruction_words": 621
+    },
+    {
+      "name": "s11g_hind_800DA534",
+      "address": "0x800da534",
+      "instruction_words": 56
+    },
+    {
+      "name": "s11g_hind_800DAAC8",
+      "address": "0x800daac8",
+      "instruction_words": 878
+    }
+  ],
+  "stage": "s11g",
+  "disc": 1,
+  "native_actor_bytes": 2688,
+  "tests": {
+    "flight_state": 720,
+    "ribbon": 288,
+    "flight_boundaries": "deterministic random, voice queue and sound services; original interpolation and trigonometry execute",
+    "ribbon_boundaries": "none",
+    "native_test": "mgs_hind_helpers_test"
+  },
+  "runtime": {
+    "build": "Debug Win32",
+    "frames": 1800,
+    "story": 177,
+    "fixture": "tests/fixtures/s11g_story177.cdb",
+    "incoming_pose": [
+      4500,
+      220,
+      14550
+    ],
+    "heading": 2048,
+    "setup_source": "original scenario sub_E596",
+    "observed": [
+      "original scenario constructs Hind",
+      "recovered aiming controller executes",
+      "scripted sequence returns player control",
+      "ordinary controller movement665units across19movement ticks and4collisionticks",
+      "clean bounded exit"
+    ],
+    "not_observed": [
+      "late flight controller in this story branch",
+      "completed boss fight",
+      "continuous campaign arrival",
+      "human playability"
+    ],
+    "log": "build/movie-audit/hind177.log",
+    "capture": "build/movie-audit/hind177.bmp"
+  },
+  "patch": "patches/mgs-hind.patch",
+  "aislop": {
+    "errors": 0,
+    "fixable_warnings": 0,
+    "nonfixable_complexity_warnings": 18,
+    "test_findings": 0
+  }
+}

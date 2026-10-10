@@ -1,0 +1,674 @@
+diff --git a/decomp/src/libgpu/sys.c b/decomp/src/libgpu/sys.c
+index 60229d6..c064279 100644
+--- a/decomp/src/libgpu/sys.c
++++ b/decomp/src/libgpu/sys.c
+@@ -465,10 +465,7 @@ void SetDrawOffset(DR_OFFSET* p, u_short* ofs) {
+     p->code[1] = 0;
+ }
+ 
+-typedef struct {
+-    u_long tag;
+-    u_long code[2];
+-} DR_PRIO;
++typedef DR_STP DR_PRIO;
+ void SetPriority(DR_PRIO* p, int pbc, int pbw) {
+     int data;
+     setlen(p, 2);
+diff --git a/psyz/include/psyz/audio.h b/psyz/include/psyz/audio.h
+index 620a98a..a22f635 100644
+--- a/psyz/include/psyz/audio.h
++++ b/psyz/include/psyz/audio.h
+@@ -52,6 +52,13 @@ void Psyz_AudioLock(void);
+  */
+ void Psyz_AudioUnlock(void);
+ 
++/* SDL's polled-IRQ backend calls service outside interrupt callbacks, between
++ * sample-timed SPU interrupts. Register on the owning game thread. */
++void Psyz_AudioSetServiceCallback(void (*service)(void));
++
++/* Refill SDL audio on the owning game thread when PSYZ_POLL_IRQ_ONLY is set. */
++void Psyz_AudioPump(void);
++
+ #ifdef __cplusplus
+ }
+ #endif
+diff --git a/psyz/include/psyz/spu.h b/psyz/include/psyz/spu.h
+index a3ba2d8..0a0e06e 100644
+--- a/psyz/include/psyz/spu.h
++++ b/psyz/include/psyz/spu.h
+@@ -139,6 +139,12 @@ unsigned char* Psyz_SpuGetRam(void);
+  */
+ void Psyz_SpuPullSamples(short* out, int num_frames);
+ 
++/* Game-thread rendering: dispatch each newly raised IRQ before the next sample.
++ * service runs outside the interrupt callback and may schedule game tasks.
++ * Do not call this endpoint from a host audio callback or critical section. */
++void Psyz_SpuPullSamplesServiced(short* out, int num_frames,
++                               void (*service)(void));
++
+ #ifdef __cplusplus
+ }
+ #endif
+diff --git a/psyz/src/platform/sdl3_audio.c b/psyz/src/platform/sdl3_audio.c
+index 7f56f3f..073eff2 100644
+--- a/psyz/src/platform/sdl3_audio.c
++++ b/psyz/src/platform/sdl3_audio.c
+@@ -3,13 +3,19 @@
+ #include <SDL3/SDL.h>
+ #include <stdbool.h>
+ #include <stdio.h>
++#include <stdlib.h>
+ 
+ #define N_CHANNELS 2
+ #define SAMPLE_SIZE sizeof(short)
++#define BUFFER_FRAMES 2048
+ 
+ static SDL_AudioStream* sdl_stream;
+ static SDL_Mutex* mutex;
++static void (*service_tasks)(void);
++static bool pumping;
++static bool queued_once;
+ 
++#ifndef PSYZ_POLL_IRQ_ONLY
+ // Audio callback: SDL pulls audio from the SPU via this callback.
+ // The audio driver synchronizes the SPU based on the pulled samples.
+ static void SDLCALL audio_callback(void* userdata, SDL_AudioStream* stream,
+@@ -32,6 +38,43 @@ static void SDLCALL audio_callback(void* userdata, SDL_AudioStream* stream,
+     }
+     SDL_UnlockMutex(mutex);
+ }
++#endif
++
++void Psyz_AudioSetServiceCallback(void (*service)(void)) {
++    service_tasks = service;
++}
++
++void Psyz_AudioPump(void) {
++#ifdef PSYZ_POLL_IRQ_ONLY
++    if (!sdl_stream || pumping || SDL_AudioStreamDevicePaused(sdl_stream)) {
++        return;
++    }
++    int queued = SDL_GetAudioStreamQueued(sdl_stream);
++    if (queued < 0) {
++        ERRORF("cannot query queued audio: %s", SDL_GetError());
++        abort();
++    }
++    int frames = BUFFER_FRAMES - queued / (N_CHANNELS * SAMPLE_SIZE);
++    if (frames <= 0) {
++        return;
++    }
++    if (!queued && queued_once) {
++        WARNF("audio queue exhausted before game-thread refill");
++    }
++    short buffer[BUFFER_FRAMES * N_CHANNELS];
++    pumping = true;
++    SDL_LockMutex(mutex);
++    Psyz_SpuPullSamplesServiced(buffer, frames, service_tasks);
++    SDL_UnlockMutex(mutex);
++    if (!SDL_PutAudioStreamData(sdl_stream, buffer,
++                               frames * N_CHANNELS * SAMPLE_SIZE)) {
++        ERRORF("cannot queue generated audio: %s", SDL_GetError());
++        abort();
++    }
++    queued_once = true;
++    pumping = false;
++#endif
++}
+ 
+ static bool is_audio_init = false;
+ int Psyz_AudioInit(void) {
+@@ -58,7 +101,13 @@ int Psyz_AudioInit(void) {
+         .freq = PSYZ_SPU_SAMPLE_RATE,
+     };
+     sdl_stream = SDL_OpenAudioDeviceStream(
+-        SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &spec, audio_callback, NULL);
++        SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &spec,
++#ifdef PSYZ_POLL_IRQ_ONLY
++        NULL,
++#else
++        audio_callback,
++#endif
++        NULL);
+     if (!sdl_stream) {
+         ERRORF("failed to open audio device: %s", SDL_GetError());
+         SDL_DestroyMutex(mutex);
+@@ -85,6 +134,8 @@ void Psyz_AudioDestroy(void) {
+         mutex = NULL;
+     }
+     is_audio_init = false;
++    service_tasks = NULL;
++    pumping = queued_once = false;
+ }
+ 
+ void Psyz_AudioLock() {
+diff --git a/psyz/src/platform/sdl3_gpu.c b/psyz/src/platform/sdl3_gpu.c
+index 752a7d9..016d256 100644
+--- a/psyz/src/platform/sdl3_gpu.c
++++ b/psyz/src/platform/sdl3_gpu.c
+@@ -57,6 +57,9 @@ typedef struct {
+ } Posi;
+ 
+ #define VRAM_BYTES (VRAM_W * VRAM_H * 4)
++#define STREAM_VERTEX_CAPACITY (MAX_VERTEX_COUNT * 16)
++#define STREAM_INDEX_CAPACITY (MAX_INDEX_COUNT * 16)
++#define STREAM_VERTEX_BYTES (STREAM_VERTEX_CAPACITY * sizeof(Vertex))
+ 
+ static SDL_GPUDevice* device = NULL;
+ static bool swapchain_ok = false;
+@@ -70,6 +73,10 @@ static SDL_GPUBuffer* vbuf = NULL;
+ static SDL_GPUBuffer* ibuf = NULL;
+ static SDL_GPUBuffer* clear_vbuf = NULL;
+ static SDL_GPUTransferBuffer* vtx_transfer = NULL;
++static SDL_GPUTransferBuffer* clear_transfer = NULL;
++static unsigned stream_vertices;
++static unsigned stream_indices;
++static bool stream_cycle = true;
+ static SDL_GPUTransferBuffer* tex_upload_transfer = NULL;
+ static SDL_GPUTransferBuffer* tex_download_transfer = NULL;
+ static SDL_GPUGraphicsPipeline* pipe_tri;
+@@ -130,6 +137,8 @@ static void SubmitFrame(void) {
+     if (!pending_cmd) {
+         return;
+     }
++    stream_vertices = stream_indices = 0;
++    stream_cycle = true;
+     if (swapchain_ok) {
+         SubmitCmd();
+         return;
+@@ -329,12 +338,12 @@ static bool CreateGpuResources(void) {
+ 
+     const SDL_GPUBufferCreateInfo vbuf_info = {
+         .usage = SDL_GPU_BUFFERUSAGE_VERTEX,
+-        .size = MAX_VERTEX_COUNT * sizeof(Vertex),
++        .size = STREAM_VERTEX_BYTES,
+     };
+     vbuf = SDL_CreateGPUBuffer(device, &vbuf_info);
+     const SDL_GPUBufferCreateInfo ibuf_info = {
+         .usage = SDL_GPU_BUFFERUSAGE_INDEX,
+-        .size = MAX_INDEX_COUNT * sizeof(u16),
++        .size = STREAM_INDEX_CAPACITY * sizeof(u16),
+     };
+     ibuf = SDL_CreateGPUBuffer(device, &ibuf_info);
+     const SDL_GPUBufferCreateInfo clear_vbuf_info = {
+@@ -350,9 +359,14 @@ static bool CreateGpuResources(void) {
+     const SDL_GPUTransferBufferCreateInfo vtx_transfer_info = {
+         .usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD,
+         .size =
+-            MAX_VERTEX_COUNT * sizeof(Vertex) + MAX_INDEX_COUNT * sizeof(u16),
++            STREAM_VERTEX_BYTES + STREAM_INDEX_CAPACITY * sizeof(u16),
+     };
+     vtx_transfer = SDL_CreateGPUTransferBuffer(device, &vtx_transfer_info);
++    const SDL_GPUTransferBufferCreateInfo clear_transfer_info = {
++        .usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD,
++        .size = 4 * sizeof(Vertex),
++    };
++    clear_transfer = SDL_CreateGPUTransferBuffer(device, &clear_transfer_info);
+     const SDL_GPUTransferBufferCreateInfo upload_info = {
+         .usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD,
+         .size = VRAM_BYTES,
+@@ -363,7 +377,7 @@ static bool CreateGpuResources(void) {
+         .size = VRAM_BYTES,
+     };
+     tex_download_transfer = SDL_CreateGPUTransferBuffer(device, &download_info);
+-    if (!vtx_transfer || !tex_upload_transfer || !tex_download_transfer) {
++    if (!vtx_transfer || !clear_transfer || !tex_upload_transfer || !tex_download_transfer) {
+         ERRORF("SDL_CreateGPUTransferBuffer: %s", SDL_GetError());
+         return false;
+     }
+@@ -789,6 +803,10 @@ static void QuitPlatform(void) {
+             SDL_ReleaseGPUTransferBuffer(device, vtx_transfer);
+             vtx_transfer = NULL;
+         }
++        if (clear_transfer) {
++            SDL_ReleaseGPUTransferBuffer(device, clear_transfer);
++            clear_transfer = NULL;
++        }
+         if (tex_upload_transfer) {
+             SDL_ReleaseGPUTransferBuffer(device, tex_upload_transfer);
+             tex_upload_transfer = NULL;
+@@ -1072,19 +1090,47 @@ static void FlushTextureFeedback(const u_long* packets, int len, int code) {
+     }
+ }
+ 
+-int Draw_PushPrim(u_long* packets, int max_len) {
+-    int len = max_len;
+-    int code = (int)(*packets >> 24) & 0xFF;
+-    bool isPoly = !(code & 0x40);
+-    bool isLine = (code & 0x40) && !(code & 0x20);
+-    bool isTile = (code & 0x40) && (code & 0x20);
+-    bool isTextured = (code & TEXTURED) != 0;
+-    bool isGouraud = (code & GOURAUD) != 0;
+-    bool isShadeTex = !((code & 1) && isTextured && !isLine);
+-    u16 tpage = -1, clut = -1, pad2, pad3;
+-    Vertex* v;
+-
+-    if (preserve_masked || (code & SEMITRANSP)) {
++static bool TriangleInRange(const Vertex* a, const Vertex* b, const Vertex* c) {
++    int min_x = SDL_min(a->x, SDL_min(b->x, c->x));
++    int max_x = SDL_max(a->x, SDL_max(b->x, c->x));
++    int min_y = SDL_min(a->y, SDL_min(b->y, c->y));
++    int max_y = SDL_max(a->y, SDL_max(b->y, c->y));
++    return max_x - min_x < 1024 && max_y - min_y < 512;
++}
++
++static int PolygonIndices(int vertices)
++{
++    static const unsigned short triangles[2][3] = {{0, 1, 2}, {1, 3, 2}};
++    int                         count = 0;
++    for (int i = 0; i < vertices - 2; ++i)
++    {
++        const unsigned short *t = triangles[i];
++        if (TriangleInRange(&vertex_cur[t[0]], &vertex_cur[t[1]], &vertex_cur[t[2]]))
++        {
++            for (int j = 0; j < 3; ++j)
++            {
++                index_cur[count++] = n_vertices + t[j];
++            }
++        }
++    }
++    return count;
++}
++
++int Draw_PushPrim(u_long *packets, int max_len)
++{
++    int     len = max_len;
++    int     code = (int)(*packets >> 24) & 0xFF;
++    bool    isPoly = !(code & 0x40);
++    bool    isLine = (code & 0x40) && !(code & 0x20);
++    bool    isTile = (code & 0x40) && (code & 0x20);
++    bool    isTextured = (code & TEXTURED) != 0;
++    bool    isGouraud = (code & GOURAUD) != 0;
++    bool    isShadeTex = !((code & 1) && isTextured && !isLine);
++    u16     tpage = -1, clut = -1, pad2, pad3;
++    Vertex *v;
++
++    if (preserve_masked || (code & SEMITRANSP))
++    {
+         Draw_FlushBuffer();
+     }
+     FlushTextureFeedback(packets, max_len, code);
+@@ -1092,18 +1138,23 @@ int Draw_PushPrim(u_long* packets, int max_len) {
+     // Gouraud read-ahead can write a colour into a fifth vertex slot.
+     Draw_EnsureBufferWillNotOverflow(5, 6);
+     v = vertex_cur;
+-    if (isShadeTex) {
++    if (isShadeTex)
++    {
+         v->r = (unsigned char)(*packets >> 0);
+         v->g = (unsigned char)(*packets >> 8);
+         v->b = (unsigned char)(*packets >> 16);
+-    } else {
++    }
++    else
++    {
+         v->r = v->g = v->b = 0x80;
+     }
+     v->a = code & SEMITRANSP ? 0x80 : 0xFF;
+     packets++;
+     len--;
+-    if (isPoly) {
+-        if (code & TRIANGLE) {
++    if (isPoly)
++    {
++        if (code & TRIANGLE)
++        {
+             int wr, nVertices, nIndices;
+             wr = writePacket(v++, code, len, packets, &clut);
+             packets += wr;
+@@ -1115,66 +1166,78 @@ int Draw_PushPrim(u_long* packets, int max_len) {
+             packets += wr;
+             len -= wr;
+ 
+-            index_cur[0] = n_vertices + 0;
+-            index_cur[1] = n_vertices + 1;
+-            index_cur[2] = n_vertices + 2;
+-            if (code & EXTRA_VERTEX) {
+-                index_cur[3] = n_vertices + 1;
+-                index_cur[4] = n_vertices + 3;
+-                index_cur[5] = n_vertices + 2;
++            if (code & EXTRA_VERTEX)
++            {
+                 nVertices = 4;
+-                nIndices = 6;
+                 wr = writePacket(v, code, len, packets, &pad3);
+                 packets += wr;
+                 len -= wr;
+-            } else {
++            }
++            else
++            {
+                 nVertices = 3;
+-                nIndices = 3;
+             }
+-            if (isGouraud && wr == 2 + isTextured) {
++            if (isGouraud && wr == 2 + isTextured)
++            {
+                 packets--;
+                 len++;
+             }
+ 
+-            if (isTextured) {
++            nIndices = PolygonIndices(nVertices);
++            if (nIndices == 0)
++            {
++                return max_len - len;
++            }
++
++            if (isTextured)
++            {
+                 FixupFlipUV(vertex_cur, code & EXTRA_VERTEX);
+-            } else {
++            }
++            else
++            {
+                 clut = -1;
+                 tpage = cur_tpage | TPAGE_NOTEXTURE;
+             }
+-            if (CanPolyDither(isGouraud, isTextured, isShadeTex)) {
++            if (CanPolyDither(isGouraud, isTextured, isShadeTex))
++            {
+                 tpage |= TPAGE_DITHER;
+             }
+-            if (!isGouraud || !isShadeTex) {
+-                VRGBA(vertex_cur[1]) = VRGBA(vertex_cur[2]) =
+-                    VRGBA(vertex_cur[3]) = VRGBA(vertex_cur[0]);
++            if (!isGouraud || !isShadeTex)
++            {
++                VRGBA(vertex_cur[1]) = VRGBA(vertex_cur[2]) = VRGBA(vertex_cur[3]) = VRGBA(vertex_cur[0]);
+             }
+ 
+             SET_TC_ALL(vertex_cur, tpage, clut);
+             Draw_EnqueueBuffer(nVertices, nIndices);
+-        } else {
++        }
++        else
++        {
+             // shouldn't happen on a normal PSX application
+             WARNF("code %02X not supported", code);
+         }
+-    } else if (isLine) {
++    }
++    else if (isLine)
++    {
+         bool padding = true;
+-        int nPoints = ((code >> 2) & 3) + 1;
+-        if (nPoints == 1) {
++        int  nPoints = ((code >> 2) & 3) + 1;
++        if (nPoints == 1)
++        {
+             padding = false;
+             nPoints++; // don't ask, have faith
+         }
+ 
+         // accumulate line points first, then convert them to triangles
+-        short px[4], py[4];
++        short         px[4], py[4];
+         unsigned char cr[4], cg[4], cb[4], ca[4];
+-        int parsed = 0;
++        int           parsed = 0;
+         cr[0] = v->r;
+         cg[0] = v->g;
+         cb[0] = v->b;
+         ca[0] = v->a;
+-        for (int i = 0; len > 0 && i < nPoints; i++) {
+-            px[i] = s11(((short*)packets)[0]);
+-            py[i] = s11(((short*)packets)[1]);
++        for (int i = 0; len > 0 && i < nPoints; i++)
++        {
++            px[i] = s11(((short *)packets)[0]);
++            py[i] = s11(((short *)packets)[1]);
+             packets++;
+             len--;
+             parsed = i + 1;
+@@ -1210,6 +1273,9 @@ int Draw_PushPrim(u_long* packets, int max_len) {
+                 short y1 = py[s + 1];
+                 int dx = x1 - x0;
+                 int dy = y1 - y0;
++                if (abs(dx) >= 1024 || abs(dy) >= 512) {
++                    continue;
++                }
+ 
+                 // decides to thicken horizontally or vertically
+                 short ox, oy, ex, ey;
+@@ -1271,7 +1337,9 @@ int Draw_PushPrim(u_long* packets, int max_len) {
+                 }
+             }
+         }
+-    } else if (isTile) {
++    }
++    else if (isTile)
++    {
+         int x, y, w, h, tu, tv;
+         x = s11(((short*)packets)[0]);
+         y = s11(((short*)packets)[1]);
+@@ -1412,16 +1480,16 @@ void Draw_ClearImage(PS1_RECT* rect, u_char r, u_char g, u_char b) {
+         quad[i].a = 0;
+     }
+ 
+-    Vertex* map = SDL_MapGPUTransferBuffer(device, vtx_transfer, true);
++    Vertex* map = SDL_MapGPUTransferBuffer(device, clear_transfer, true);
+     if (!map) {
+         ERRORF("SDL_MapGPUTransferBuffer: %s", SDL_GetError());
+         return;
+     }
+     memcpy(map, quad, sizeof(quad));
+-    SDL_UnmapGPUTransferBuffer(device, vtx_transfer);
++    SDL_UnmapGPUTransferBuffer(device, clear_transfer);
+ 
+     SDL_GPUCopyPass* copy = SDL_BeginGPUCopyPass(cmd);
+-    const SDL_GPUTransferBufferLocation src = {.transfer_buffer = vtx_transfer};
++    const SDL_GPUTransferBufferLocation src = {.transfer_buffer = clear_transfer};
+     const SDL_GPUBufferRegion dst = {
+         .buffer = clear_vbuf, .size = sizeof(quad)};
+     SDL_UploadToGPUBuffer(copy, &src, &dst, true);
+@@ -1638,27 +1706,36 @@ void Draw_FlushBuffer(void) {
+         return;
+     }
+ 
+-    u8* map = SDL_MapGPUTransferBuffer(device, vtx_transfer, true);
++    if (stream_vertices + n_vertices > STREAM_VERTEX_CAPACITY ||
++        stream_indices + n_indices > STREAM_INDEX_CAPACITY) {
++        stream_vertices = stream_indices = 0;
++        stream_cycle = true;
++    }
++    u8* map = SDL_MapGPUTransferBuffer(device, vtx_transfer, stream_cycle);
+     if (!map) {
+         ERRORF("SDL_MapGPUTransferBuffer: %s", SDL_GetError());
+         return;
+     }
+     const Uint32 vtx_size = (Uint32)(sizeof(Vertex) * n_vertices);
+     const Uint32 idx_size = (Uint32)(sizeof(*index_buf) * n_indices);
+-    const Uint32 idx_offset = MAX_VERTEX_COUNT * sizeof(Vertex);
+-    memcpy(map, vertex_buf, vtx_size);
+-    memcpy(map + idx_offset, index_buf, idx_size);
++    const Uint32 vtx_offset = stream_vertices * sizeof(Vertex);
++    const Uint32 idx_offset = stream_indices * sizeof(*index_buf);
++    memcpy(map + vtx_offset, vertex_buf, vtx_size);
++    memcpy(map + STREAM_VERTEX_BYTES + idx_offset, index_buf, idx_size);
+     SDL_UnmapGPUTransferBuffer(device, vtx_transfer);
+ 
+     SDL_GPUCopyPass* copy = SDL_BeginGPUCopyPass(cmd);
+     const SDL_GPUTransferBufferLocation vtx_src = {
+-        .transfer_buffer = vtx_transfer};
+-    const SDL_GPUBufferRegion vtx_dst = {.buffer = vbuf, .size = vtx_size};
+-    SDL_UploadToGPUBuffer(copy, &vtx_src, &vtx_dst, true);
++        .transfer_buffer = vtx_transfer, .offset = vtx_offset};
++    const SDL_GPUBufferRegion vtx_dst = {
++        .buffer = vbuf, .offset = vtx_offset, .size = vtx_size};
++    SDL_UploadToGPUBuffer(copy, &vtx_src, &vtx_dst, stream_cycle);
+     const SDL_GPUTransferBufferLocation idx_src = {
+-        .transfer_buffer = vtx_transfer, .offset = idx_offset};
+-    const SDL_GPUBufferRegion idx_dst = {.buffer = ibuf, .size = idx_size};
+-    SDL_UploadToGPUBuffer(copy, &idx_src, &idx_dst, true);
++        .transfer_buffer = vtx_transfer, .offset = STREAM_VERTEX_BYTES + idx_offset};
++    const SDL_GPUBufferRegion idx_dst = {
++        .buffer = ibuf, .offset = idx_offset, .size = idx_size};
++    SDL_UploadToGPUBuffer(copy, &idx_src, &idx_dst, stream_cycle);
++    stream_cycle = false;
+     if ((batch_has_texture || batch_reads_destination) &&
+         vram_dirty.w > 0 && vram_dirty.h > 0) {
+         const SDL_GPUTextureLocation vram_src = {.texture = vram_render,
+@@ -1697,9 +1774,9 @@ void Draw_FlushBuffer(void) {
+         scissor_rect.x * (int)internal_res, scissor_rect.y * (int)internal_res,
+         scissor_rect.w * (int)internal_res, scissor_rect.h * (int)internal_res};
+     SDL_SetGPUScissor(pass, &scaled_scissor);
+-    const SDL_GPUBufferBinding vb = {.buffer = vbuf};
++    const SDL_GPUBufferBinding vb = {.buffer = vbuf, .offset = vtx_offset};
+     SDL_BindGPUVertexBuffers(pass, 0, &vb, 1);
+-    const SDL_GPUBufferBinding ib = {.buffer = ibuf};
++    const SDL_GPUBufferBinding ib = {.buffer = ibuf, .offset = idx_offset};
+     SDL_BindGPUIndexBuffer(pass, &ib, SDL_GPU_INDEXELEMENTSIZE_16BIT);
+     const SDL_GPUTextureSamplerBinding sampler_binding = {
+         .texture = vram_sample, .sampler = vram_sampler};
+@@ -1721,5 +1798,7 @@ void Draw_FlushBuffer(void) {
+         MarkVramDirty(scissor_rect);
+     }
+     SyncScaledVramToNative();
++    stream_vertices += n_vertices;
++    stream_indices += n_indices;
+     Draw_ResetBuffer();
+ }
+diff --git a/psyz/src/platform/sdl3_software.c b/psyz/src/platform/sdl3_software.c
+index b6f6c6f..7151303 100644
+--- a/psyz/src/platform/sdl3_software.c
++++ b/psyz/src/platform/sdl3_software.c
+@@ -11,6 +11,7 @@ typedef struct {
+ 
+ typedef struct {
+     int x, y;
++    Point raw;
+     int u, v;
+     int r, g, b;
+ } SwVertex;
+@@ -165,15 +166,22 @@ static bool IsTopLeft(const SwVertex* a, const SwVertex* b) {
+     return dy < 0 || (dy == 0 && dx > 0);
+ }
+ 
+-static void RasterTriangle(
+-    SwVertex a, SwVertex b, SwVertex c, bool textured, bool raw_texture,
+-    bool semi, bool gouraud, u16 tpage, u16 clut, bool centered) {
+-    int64_t area =
+-        (int64_t)(b.x - a.x) * (c.y - a.y) - (int64_t)(b.y - a.y) * (c.x - a.x);
+-    if (!area) {
++static void RasterTriangle(SwVertex a, SwVertex b, SwVertex c, bool textured, bool raw_texture, bool semi, bool gouraud,
++                           u16 tpage, u16 clut, bool centered)
++{
++    if (!centered &&
++        (Max3(a.raw.x, b.raw.x, c.raw.x) - Min3(a.raw.x, b.raw.x, c.raw.x) >= 1024 ||
++         Max3(a.raw.y, b.raw.y, c.raw.y) - Min3(a.raw.y, b.raw.y, c.raw.y) >= 512))
++    {
+         return;
+     }
+-    if (area < 0) {
++    int64_t area = (int64_t)(b.x - a.x) * (c.y - a.y) - (int64_t)(b.y - a.y) * (c.x - a.x);
++    if (!area)
++    {
++        return;
++    }
++    if (area < 0)
++    {
+         SwVertex swap = b;
+         b = c;
+         c = swap;
+@@ -235,8 +243,9 @@ static void RasterTriangle(
+ 
+ static SwVertex VertexXY(u32 word, u32 color) {
+     SwVertex v = {0};
+-    v.x = Sign11(word) + draw_offset.x;
+-    v.y = Sign11(word >> 16) + draw_offset.y;
++    v.raw = (Point){Sign11(word), Sign11(word >> 16)};
++    v.x = v.raw.x + draw_offset.x;
++    v.y = v.raw.y + draw_offset.y;
+     if (grid_source != grid_target) {
+         v.x = draw_offset.x +
+               (v.x - draw_offset.x) * (int)grid_target / (int)grid_source;
+@@ -247,12 +256,17 @@ static SwVertex VertexXY(u32 word, u32 color) {
+     return v;
+ }
+ 
+-static void DrawLine(SwVertex a, SwVertex b, bool semi, u16 tpage) {
++static void DrawLine(SwVertex a, SwVertex b, bool semi, u16 tpage)
++{
+     int dx = abs(b.x - a.x);
+     int dy = abs(b.y - a.y);
+-    if (!dx && !dy) {
+-        WritePixel(a.x, a.y, PackColor(a.r >> 3, a.g >> 3, a.b >> 3, false),
+-                   semi, (tpage >> 5) & 3);
++    if (abs(b.raw.x - a.raw.x) >= 1024 || abs(b.raw.y - a.raw.y) >= 512)
++    {
++        return;
++    }
++    if (!dx && !dy)
++    {
++        WritePixel(a.x, a.y, PackColor(a.r >> 3, a.g >> 3, a.b >> 3, false), semi, (tpage >> 5) & 3);
+         return;
+     }
+     int ox, oy, ex, ey;
+diff --git a/psyz/src/psyz/libapi.c b/psyz/src/psyz/libapi.c
+index b81b60c..8b50fa3 100644
+--- a/psyz/src/psyz/libapi.c
++++ b/psyz/src/psyz/libapi.c
+@@ -70,6 +70,9 @@ int VSync(int mode) {
+         }
+     }
+     n = mode > 0 ? mode : 1;
++#ifdef PSYZ_POLL_IRQ_ONLY
++    Psyz_AudioPump();
++#endif
+     elapsed = Psyz_VideoVSync(0);
+     ReadPadsOnVsync(); // this is done on vsync by the BIOS
+     if (g_PsyzVsyncCb) {
+diff --git a/psyz/src/psyz/psyz_spu.c b/psyz/src/psyz/psyz_spu.c
+index 2a976a5..c6a0951 100644
+--- a/psyz/src/psyz/psyz_spu.c
++++ b/psyz/src/psyz/psyz_spu.c
+@@ -50,6 +50,7 @@ static struct {
+ } spu;
+ 
+ static atomic_uint spu_irq_latched;
++static atomic_uint spu_irq_service_pending;
+ 
+ static void deliver_spu_irq(void) {
+     if (atomic_load(&spu_irq_latched)) {
+@@ -62,6 +63,7 @@ static void check_spu_irq(unsigned int offset, unsigned int size) {
+     unsigned int distance = (irq_address - offset) & (PSYZ_SPU_RAM_SIZE - 1);
+     if ((_spu_RXX->rxx.spucnt & 0x40) && distance < size &&
+         !atomic_exchange(&spu_irq_latched, 1)) {
++        atomic_store(&spu_irq_service_pending, 1);
+         Psyz_KernelPost(deliver_spu_irq);
+     }
+ }
+@@ -78,6 +80,7 @@ void Psyz_SpuInit(void) {
+ 
+ static void spu_reset(void) {
+     atomic_store(&spu_irq_latched, 0);
++    atomic_store(&spu_irq_service_pending, 0);
+     _spu_RXX->rxx.spustat = 0;
+     _spu_RXX->rxx.main_vol.left = _spu_RXX->rxx.main_vol.right = 0;
+     _spu_RXX->rxx.main_volx.left = _spu_RXX->rxx.main_volx.right = 0;
+@@ -519,3 +522,25 @@ void Psyz_SpuPullSamples(short* out, int num_frames) {
+         spu_tick(&out[i * 2]);
+     }
+ }
++
++static void service_spu_irq(void (*service)(void)) {
++    if (atomic_exchange(&spu_irq_service_pending, 0)) {
++        Psyz_KernelPoll();
++        if (service) {
++            service();
++        }
++    }
++}
++
++void Psyz_SpuPullSamplesServiced(short* out, int num_frames,
++                               void (*service)(void)) {
++    if (!spu.initialized) {
++        memset(out, 0, num_frames * 2 * sizeof(short));
++        return;
++    }
++    service_spu_irq(service);
++    for (int i = 0; i < num_frames; i++) {
++        spu_tick(&out[i * 2]);
++        service_spu_irq(service);
++    }
++}

@@ -1,0 +1,25 @@
+diff --git a/source/chara/torture/boxall.c b/source/chara/torture/boxall.c
+index cf7355872..d6a7c4a20 100644
+--- a/source/chara/torture/boxall.c
++++ b/source/chara/torture/boxall.c
+@@ -48,7 +48,7 @@ static void DrawItemText(Work *work)
+     LINE_F4 *text_line;
+     int      x, y;
+ 
+-    if (GM_Camera.first_person == 0)
++    if (GM_Camera.first_person == 0 || GM_PlayerControl == NULL)
+     {
+         work->f104 = 0;
+         return;
+@@ -167,6 +167,11 @@ static int HasCollectedItem(Work *work)
+     int     dist;
+     int     py, y, dy;
+ 
++    if (GM_PlayerControl == NULL)
++    {
++        return 0;
++    }
++
+     pos = work->control.mov;
+     pos.vy = 0;
+ 

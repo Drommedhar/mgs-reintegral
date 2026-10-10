@@ -1,0 +1,8 @@
+.lines -e
+$$ Incoming fixture only: s15c sub_8A59 sets max life 768. s19a restores life from max.
+$$ Story 284 and countdown 600 match the original garage-to-road handoff. Variant flag selects alternate resources.
+bu /1 mgs_integral_native!MgsNativeReloadOverlay "ew mgs_integral_native!var_buf+a 11c; ew mgs_integral_native!var_buf+1ec 258; eb mgs_integral_native!var_buf+435 1; ew mgs_integral_native!linkvarbuf+16 300; ew mgs_integral_native!linkvarbuf+18 300; .echo FIXTURE alternate escape incoming story284 countdown600 health768; gc"
+sxe -c "r;kv;q" av
+sxe -c "r;kv;q" dz
+g
+q

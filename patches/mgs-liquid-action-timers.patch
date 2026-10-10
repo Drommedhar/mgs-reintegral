@@ -1,0 +1,40 @@
+diff --git a/source/animal/liquid/liquid_native.h b/source/animal/liquid/liquid_native.h
+--- a/source/animal/liquid/liquid_native.h
++++ b/source/animal/liquid/liquid_native.h
+@@ -39,7 +39,7 @@
+     SVECTOR        capture_position;
+     int            field_928;
+     LiquidAction   action;
+-    LiquidUpdate   secondary_action;
++    LiquidAction   secondary_action;
+     int            field_934;
+     int            field_938;
+     int            field_93C;
+diff --git a/source/animal/liquid/liquid_action.c b/source/animal/liquid/liquid_action.c
+--- a/source/animal/liquid/liquid_action.c
++++ b/source/animal/liquid/liquid_action.c
+@@ -2381,7 +2381,7 @@
+     int          v2;
+     LiquidAction action;
+     int          v4;
+-    LiquidUpdate secondary_action;
++    LiquidAction secondary_action;
+     int          v6;
+     int          v7;
+     short        v8;
+@@ -2409,12 +2409,12 @@
+         action = liquid_800C82A4;
+         work->action = liquid_800C82A4;
+     }
+-    ((void (*)(LiquidWork *))action)(work);
++    action(work, v4);
+     secondary_action = work->secondary_action;
+     if (secondary_action != NULL)
+     {
+-        ++work->field_938;
+-        secondary_action(work);
++        int tick = work->field_938++;
++        secondary_action(work, tick);
+     }
+     work->target->damaged = 0;
+     liquid_800CC1F0(work);

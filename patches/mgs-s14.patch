@@ -1,0 +1,3487 @@
+diff --git a/source/overlays/s14e/animal/zako14/native.h b/source/overlays/s14e/animal/zako14/native.h
+new file mode 100644
+index 000000000..393857ef0
+--- /dev/null
++++ b/source/overlays/s14e/animal/zako14/native.h
+@@ -0,0 +1,116 @@
++#ifndef MGS_S14E_ZAKO_NATIVE_H
++#define MGS_S14E_ZAKO_NATIVE_H
++
++#include "animal/zako14/zako.h"
++
++extern short     Z14_ActionTable[53];
++extern COMMANDER ZAKO14Command;
++extern TOP       ZAKO14TOPCOMMAND;
++extern int       ZAKO14_Unknown, ZAKO14_GameFlag, ZAKO14_PlayerAddress, ZAKO14_PlayerMap;
++extern SVECTOR   ZAKO14_PlayerPosition;
++
++static inline void SetAction(Work *work, int action, int interp)
++{
++    extern short Z14_ActionTable[];
++
++    work->act.motion1 = action;
++    GM_ConfigObjectAction(&(work->body), Z14_ActionTable[action], 0, interp);
++}
++
++static inline void SetAction2(Work *work, int action, int interp, u_long mask)
++{
++    extern short Z14_ActionTable[];
++
++    work->act.motion2 = action;
++    GM_ConfigObjectOverride(&(work->body), Z14_ActionTable[action], 0, interp, mask);
++}
++
++static inline void SetMode(Work *work, ACTION action)
++{
++    work->action = action;
++    work->time = 0;
++
++    work->control.turn.vx = work->control.turn.vz = 0;
++    GM_ConfigMotionAdjust(&(work->body), NULL);
++}
++
++static inline void SetMode2(Work *work, ACTION action)
++{
++    if (work->action2 == NULL)
++    {
++        work->action2 = action;
++        work->time2 = 0;
++    }
++
++    work->control.turn.vx = work->control.turn.vz = 0;
++    GM_ConfigMotionAdjust(&(work->body), NULL);
++}
++
++static inline void SetModeNoAdjust(Work *work, ACTION action)
++{
++    work->action = action;
++    work->time = 0;
++
++    work->control.turn.vx = work->control.turn.vz = 0;
++}
++
++static inline void UnsetMode(Work *work)
++{
++    SetAction2(work, 0, 4, 0);
++    work->action2 = NULL;
++    work->time2 = 0;
++    work->act.motion2 = 0;
++    work->control.turn.vx = work->control.turn.vz = 0;
++}
++
++int  Z14_CheckCapture(Work *work);
++int  Z14_CheckDown(Work *work);
++int  Z14_VectorSize(SVECTOR *vec);
++int  Z14_CheckPower(Work *work);
++int  Z14_CheckStun(Work *work);
++int  Z14_CheckDamage(Work *work);
++void s14e_800C6E6C(Work *work);
++int  s14e_800C6F40(int from, int to);
++void Z14_ReviseReadyGun(Work *work);
++int  Z14_AttackForce(Work *work);
++void s14e_800C712C(Work *work);
++int  s14e_800C7194(Work *work);
++void s14e_800C7398(Work *work, int time);
++void s14e_800C7550(Work *work, int time);
++void s14e_800C77F8(Work *work, int time);
++void s14e_800C7888(Work *work, int time);
++void s14e_800C7970(Work *work, int time);
++void Z14_ActReadyGun(Work *work, int time);
++void s14e_800C7AEC(Work *work, int time);
++void s14e_800C7B9C(Work *work, int time);
++void Z14_ActGrenade(Work *work, int time);
++void s14e_800C7E28(Work *work, int time);
++void s14e_800C7F00(Work *work, int time);
++void s14e_800C7FA8(Work *work, int time);
++void s14e_800C82D0(Work *work);
++void s14e_800C8350(Work *work, int time);
++void s14e_800C86D4(Work *work, int time);
++void s14e_800C8748(Work *work, int time);
++void s14e_800C8898(Work *work, int time);
++void s14e_800C8A10(Work *work, int time);
++void s14e_800C8AD8(Work *work, int time);
++void s14e_800C8BE8(Work *work, int time);
++void s14e_800C8CF8(Work *work, int time);
++void s14e_800C924C(Work *work, int time);
++void s14e_800C94A8(Work *work, int time);
++void s14e_800C95B8(Work *work, int time);
++void ZAKO14_ActionUpdate(Work *work);
++void s14e_800C9838(Work *work, int time);
++void s14e_800C9904(Work *work, int time);
++void s14e_800C99D0(Work *work, int time);
++void s14e_800C9A68(Work *work, int time);
++void s14e_800C9B00(Work *work, int time);
++void s14e_800C9BB4(Work *work, int time);
++void s14e_800C9C7C(Work *work, int time);
++void s14e_800C9D20(Work *work, int time);
++void s14e_800C9DE8(Work *work, int time);
++void s14e_800C9FC0(Work *work);
++void s14e_800CA000(Work *work, int time);
++void s14e_800CA148(Work *work, int time);
++
++#endif
+diff --git a/source/overlays/s14e/animal/zako14/core.c b/source/overlays/s14e/animal/zako14/core.c
+new file mode 100644
+index 000000000..a7c8d1e0f
+--- /dev/null
++++ b/source/overlays/s14e/animal/zako14/core.c
+@@ -0,0 +1,495 @@
++#include "native.h"
++#include "strcode.h"
++#include "libgcl/libgcl.h"
++#include "chara/snake/shadow.h"
++#include "enemy/glight.h"
++
++static const int     ChaseDis[] = {3000, 4000, 7000, 8000, 8000, 8000, 8000, 8000};
++static const u_short time_data[] = {300, 15, 30, 60, 90, 0, 32001, 30000};
++
++static void ChangeModel(DG_OBJS *objs, DG_DEF *def)
++{
++    DG_OBJ *obj;
++    int     i;
++
++    DG_FreeObjsPacket(objs, 0);
++    DG_FreeObjsPacket(objs, 1);
++
++    objs->def = def;
++    obj = objs->objs;
++    for (i = 0; i < 16; i++)
++    {
++        obj->model = &def->models[i];
++        obj->n_packs = def->models[i].n_faces;
++        obj++;
++    }
++}
++
++static void CheckModel(Work *work)
++{
++    if (work->field_9E4 != 0)
++    {
++        if (work->param.low_poly == 1)
++        {
++            if ((GM_GameStatus & STATE_CAM_CHANGE) || GM_Camera.first_person)
++            {
++                if (work->lod != 1)
++                {
++                    work->lod = 1;
++                    ChangeModel(work->body.objs, work->lod_models[1]);
++                }
++            }
++            else
++            {
++                if (work->lod != 0)
++                {
++                    work->lod = 0;
++                    ChangeModel(work->body.objs, work->lod_models[0]);
++                }
++            }
++        }
++
++        DG_VisibleObjs(work->body.objs);
++        DG_VisibleObjs(work->weapon.objs);
++        *work->shadow_enable = 1;
++        *work->glight_enable = 1;
++    }
++    else
++    {
++        DG_InvisibleObjs(work->body.objs);
++        DG_InvisibleObjs(work->weapon.objs);
++        *work->shadow_enable = 0;
++        *work->glight_enable = 0;
++    }
++}
++
++static void Act(Work *work)
++{
++    VECTOR   scale;
++    CONTROL *control;
++    TARGET  *trg, *touch;
++
++    control = &work->control;
++    if (GM_CheckMessage(work, control->name, HASH_KILL))
++    {
++        GV_DestroyActor(work);
++        return;
++    }
++
++    if (work->field_C34 == 0)
++    {
++        Zako14PushMove(work);
++
++        GM_ActControl(control);
++        GM_ActObject2(&work->body);
++        GM_ActObject2(&work->weapon);
++        DG_GetLightMatrix2(&control->mov, work->light);
++
++        Zako14ActionMain(work);
++
++        trg = work->target;
++        GM_MoveTarget(trg, &control->mov);
++        GM_PushTarget(trg);
++
++        if (trg->class & TARGET_TOUCH)
++        {
++            touch = &work->touch;
++            if (touch->class & TARGET_TOUCH)
++            {
++                if (touch->damaged & TARGET_TOUCH)
++                    touch->damaged &= ~TARGET_TOUCH;
++                GM_MoveTarget(touch, &control->mov);
++                GM_TouchTarget(touch);
++            }
++        }
++
++        scale.vx = scale.vy = scale.vz = work->scale;
++        ScaleMatrix(&work->body.objs->world, &scale);
++    }
++
++    CheckModel(work);
++    if (ZAKO14_GameFlag == 15 && ZAKO14Command.watchers[work->param.index].field_4 == 1)
++        GV_DestroyActor(work);
++}
++
++static void InitTarget(Work *work)
++{
++    TARGET *trg, *trg2;
++    int     life, faint;
++
++    trg = work->target;
++    life = work->param.life;
++    faint = work->param.faint;
++    GM_SetTarget(trg, TARGET_FLAG, ENEMY_SIDE, &ZAKO14_TARGET_SIZE);
++    GM_SetPowerTarget(trg, POWER_DECREASE, -1, life, faint, &ZAKO14_TARGET_FORCE);
++    GM_SetCaptureTarget(trg, -1, faint, NULL, NULL);
++    GM_SetC4Target(trg, &work->body.objs->objs[1].world);
++    work->param.unknown = work->param.life;
++
++    trg2 = &work->attack;
++    GM_SetTarget(trg2, TARGET_POWER, PLAYER_SIDE, &ZAKO14_ATTACK_SIZE);
++    GM_SetPowerTarget(trg2, POWER_CONST | POWER_EXPLODE, 5, 0, 3, &ZAKO14_ATTACK_FORCE);
++
++    trg2 = &work->touch;
++    GM_SetTarget(trg2, TARGET_TOUCH, ENEMY_SIDE, &ZAKO14_TOUCH_SIZE);
++    GM_SetPowerTarget(trg2, POWER_CONST | POWER_EXPLODE, 5, 0, 0, &ZAKO14_TOUCH_FORCE);
++}
++
++static void InitAct(Work *work)
++{
++    ACT *act;
++
++    act = &work->act;
++    GV_ZeroMemory(act, sizeof(ACT));
++    act->field_00 = 0;
++    act->field_1C = 450;
++    act->field_1E = 1;
++
++    work->action = NULL;
++    work->action2 = NULL;
++    work->time = 0;
++    work->time2 = 0;
++}
++
++static int InitState(Work *work, int name, int where)
++{
++    SVECTOR  indices;
++    CONTROL *control;
++    OBJECT  *body, *weapon;
++    char    *opt;
++
++    control = &work->control;
++    if (GM_InitControl(control, name, where) < 0)
++        return -1;
++
++    {
++        char *position = GCL_GetOption('p');
++        char *direction = GCL_GetOption('d');
++        GM_ConfigControlString(control, position, direction);
++    }
++    GM_ConfigControlAttribute(control, RADAR_VISIBLE | RADAR_SIGHT | RADAR_ALL_MAP);
++    GM_ConfigControlInterp(control, 4);
++    control->seg_flag = HZD_SEG_NO_NAVIGATE;
++    GM_ConfigControlTrapCheck(control);
++
++    body = &work->body;
++    weapon = &work->weapon;
++
++    GM_InitObject(body, KMD_IPPANHEI, 813, 43169);
++    GM_ConfigObjectJoint(body);
++    GM_ConfigMotionControl(body, &work->m_ctrl, 43169, work->m_segs1, work->m_segs2, control, work->rots);
++    GM_ConfigObjectLight(body, work->light);
++
++    work->param.low_poly = 0;
++    opt = GCL_GetOption('y');
++    if (opt != NULL)
++        work->param.low_poly = GCL_StrToInt(opt);
++    if (work->param.low_poly == 1)
++    {
++        work->lod_models[1] = body->objs->def;
++        work->lod_models[0] = GV_GetCache(GV_CacheID(KMD_LOPRYHEI, 'k'));
++        work->lod = 1;
++    }
++
++    work->hom = GM_SetHomingTarget(&body->objs->objs[6].world, control);
++
++    GM_InitObject(weapon, KMD_FAMAS, 109, 0);
++    GM_ConfigObjectLight(weapon, work->light);
++    GM_ConfigObjectRoot(weapon, body, 4);
++
++    indices.vx = 0;
++    indices.vy = 6;
++    indices.vz = 12;
++    indices.pad = 15;
++    work->shadow = NewShadow2(control, body, indices, &work->shadow_enable);
++    work->glight = NewGunLight(&body->objs->objs[4].world, &work->glight_enable);
++
++    ZAKO14_SetPutChar(work, 0);
++    InitAct(work);
++    return 0;
++}
++
++static void FreeState(Work *work)
++{
++    ZAKO14ResetWorkID(work->param.index);
++    GM_FreeControl(&work->control);
++    GM_FreeObject(&work->body);
++    GM_FreeObject(&work->weapon);
++    GM_FreeTarget(work->target);
++    GV_DestroyActor(work->glight);
++    GV_DestroyActor(work->shadow);
++    GM_ResetHomingTarget(work->hom);
++}
++
++static void Die(Work *work)
++{
++    FreeState(work);
++}
++
++static int ReadNodes(Work *work)
++{
++    HZD_PAT *route;
++    HZD_PTP *point;
++    int      i;
++
++    route = work->control.map->hzd->def->routes;
++    route += work->param.root;
++
++    work->n_nodes = route->n_points;
++    if (work->n_nodes <= 0)
++        return -1;
++
++    point = route->points;
++    for (i = 0; i < work->n_nodes; i++)
++    {
++        work->nodes[i].vx = point->x;
++        work->nodes[i].vy = point->y;
++        work->nodes[i].vz = point->z;
++        work->nodes[i].pad = point->command;
++        point++;
++    }
++
++    return 0;
++}
++
++static int ReadDir(char *opt, short *data)
++{
++    int   count;
++    char *str;
++
++    count = 0;
++    while ((str = GCL_NextStr()) != NULL)
++    {
++        *data = GCL_StrToInt(str);
++        data++;
++        count++;
++    }
++    return count;
++}
++
++static int ReadTime(char *opt, int *data)
++{
++    int   count;
++    char *str;
++
++    count = 0;
++    while ((str = GCL_NextStr()) != NULL)
++    {
++        *data = GCL_StrToInt(str);
++        data++;
++        count++;
++    }
++
++    return count;
++}
++
++static int InitTables(Work *work)
++{
++    int   i;
++    char *opt;
++
++    for (i = 0; i < 8; i++)
++    {
++        work->acttime[i] = time_data[i];
++    }
++
++    opt = GCL_GetOption('t');
++    if (opt)
++    {
++        if (ReadTime(opt, &work->acttime[1]) > 4)
++        {
++            printf("Err Err Err  Set time Over\n");
++            return -1;
++        }
++    }
++
++    for (i = 0; i < 4; i++)
++    {
++        work->dir[i] = i * 1024;
++    }
++
++    opt = GCL_GetOption('i');
++    if (opt)
++    {
++        if (ReadDir(opt, work->dir) > 4)
++        {
++            printf("Err Err Err  Set Dir Over\n");
++            return -1;
++        }
++    }
++
++    return 0;
++}
++
++static void InitParameters(Work *work)
++{
++    char *opt;
++    work->param.root = 0;
++    opt = GCL_GetOption('r');
++    if (opt != NULL)
++    {
++        work->param.root = GCL_StrToInt(opt);
++    }
++
++    work->param.life = 768;
++    opt = GCL_GetOption('l');
++    if (opt != NULL)
++    {
++        work->param.life = GCL_StrToInt(opt);
++    }
++
++    work->param.faint = 7;
++    opt = GCL_GetOption('f');
++    if (opt != NULL)
++    {
++        work->param.faint = GCL_StrToInt(opt);
++    }
++
++    work->param.damage = 64;
++    opt = GCL_GetOption('z');
++    if (opt != NULL)
++    {
++        work->param.damage = GCL_StrToInt(opt);
++    }
++
++    work->param.blood = 65;
++    opt = GCL_GetOption('b');
++    if (opt != NULL)
++    {
++        work->param.blood = GCL_StrToInt(opt);
++    }
++
++    printf(" low[pory=%d\n", work->param.low_poly);
++
++    work->param.g_flag = 255;
++    opt = GCL_GetOption('g');
++    if (opt != NULL)
++    {
++        work->param.g_flag = GCL_StrToInt(opt);
++    }
++
++    if (work->param.blood == 90)
++    {
++        work->param.g_flag = 0;
++    }
++
++    work->chase_dis = ChaseDis[work->param.index];
++    work->chase_index = work->param.index;
++
++    work->param.next = 255;
++    opt = GCL_GetOption('n');
++    if (opt != NULL)
++    {
++        work->param.next = GCL_StrToInt(opt);
++    }
++
++    work->param.area = 'A';
++    opt = GCL_GetOption('a');
++    if (opt != NULL)
++    {
++        work->param.area = GCL_StrToInt(opt);
++    }
++
++    if (work->param.area == 'S')
++    {
++        ZAKO14_SetPutChar(work, 1);
++    }
++
++    work->scale = 4096;
++    opt = GCL_GetOption('s');
++    if (opt != NULL)
++    {
++        work->scale += GCL_StrToInt(opt);
++    }
++
++    work->param.item = 1;
++}
++
++static void GetResources(Work *work, int name, int where)
++{
++    int addr, i;
++
++    InitState(work, name, where);
++
++    work->param.index = ZAKO14SetWorkID(work);
++    if (work->param.index < 0)
++    {
++        printf("Err not enough work !!\n");
++    }
++
++    InitTables(work);
++
++    InitParameters(work);
++
++    if (ReadNodes(work) < 0)
++    {
++        fprintf(1, "watchar.c : action point Err\n");
++    }
++
++    work->target = GM_AllocTarget();
++    if (work->target != NULL)
++    {
++        InitTarget(work);
++    }
++
++    work->think1 = 0;
++    work->think2 = 0;
++    work->think3 = 0;
++    work->think4 = 0;
++    work->count3 = 0;
++    work->l_count = 0;
++    work->t_count = 0;
++    work->mark_time = 0;
++    work->next_node = 0;
++    work->search_flag = 0;
++    work->act_status = 0;
++
++    work->target_pos = work->nodes[0];
++    work->target_addr = HZD_GetAddress(work->control.map->hzd, &work->target_pos, -1);
++    work->target_map = GM_CurrentMap;
++    work->alert_level = 0;
++
++    work->field_9E4 = 1;
++    work->vision.range = 512;
++    work->vision.facedir = 0;
++    work->field_B9C = 0;
++    work->pad.sound = 0;
++    work->pad.time = 0;
++    work->vision.length = ZAKO14_EYE_LENGTH;
++    work->player_pos = ZAKO14_NO_POINT;
++    work->subweapon = NULL;
++    work->control.mov = work->nodes[0];
++    work->field_C44 = 0;
++    work->param.c_root = 0;
++    work->param.c_next = work->param.next;
++
++    for (i = 0; i < 8; i++)
++    {
++        work->modetime[i] = 0;
++    }
++
++    work->modetime[7] = 0x7;
++    work->modetime[4] = 0xFF;
++
++    GM_ConfigControlRadarparam(&work->control, 0, 512, ZAKO14_EYE_LENGTH, 0);
++
++    work->start_pos = work->nodes[0];
++    work->start_map = GM_CurrentMap;
++
++    addr = HZD_GetAddress(work->control.map->hzd, &work->control.mov, -1);
++    work->field_BE8 = addr;
++    work->next_addr = addr;
++    work->last_addr = addr;
++    work->next_pos = work->start_pos;
++}
++
++void *NewZako14(int name, int where)
++{
++    Work *work = GV_NewActor(GV_ACTOR_PREV, sizeof(Work));
++    if (work != NULL)
++    {
++        GV_SetNamedActor(work, Act, Die, "zako14.c");
++        GetResources(work, name, where);
++    }
++    return work;
++}
+diff --git a/source/overlays/s14e/animal/zako14/action.c b/source/overlays/s14e/animal/zako14/action.c
+new file mode 100644
+index 000000000..d3a090faf
+--- /dev/null
++++ b/source/overlays/s14e/animal/zako14/action.c
+@@ -0,0 +1,660 @@
++#include "native.h"
++
++#include "enemy/grnad_e.h"
++#include "game/vibrate.h"
++
++void s14e_800C7550(Work *work, int time);
++void s14e_800C77F8(Work *work, int time);
++void s14e_800C7888(Work *work, int time);
++void s14e_800C7970(Work *work, int time);
++void Z14_ActReadyGun(Work *work, int time);
++void s14e_800C7AEC(Work *work, int time);
++void s14e_800C7B9C(Work *work, int time);
++void Z14_ActGrenade(Work *work, int time);
++void s14e_800C7E28(Work *work, int time);
++void s14e_800C7FA8(Work *work, int time);
++void s14e_800C8350(Work *work, int time);
++void s14e_800C86D4(Work *work, int time);
++void s14e_800C8748(Work *work, int time);
++void s14e_800C8898(Work *work, int time);
++void s14e_800C8A10(Work *work, int time);
++void s14e_800C8AD8(Work *work, int time);
++void s14e_800C8BE8(Work *work, int time);
++void s14e_800C8CF8(Work *work, int time);
++void s14e_800C924C(Work *work, int time);
++void s14e_800C94A8(Work *work, int time);
++void s14e_800C95B8(Work *work, int time);
++void s14e_800C9838(Work *work, int time);
++void s14e_800C9904(Work *work, int time);
++void s14e_800C99D0(Work *work, int time);
++void s14e_800C9A68(Work *work, int time);
++void s14e_800C9B00(Work *work, int time);
++void s14e_800C9BB4(Work *work, int time);
++void s14e_800C9C7C(Work *work, int time);
++void s14e_800C9D20(Work *work, int time);
++void s14e_800C9DE8(Work *work, int time);
++void s14e_800CA000(Work *work, int time);
++void s14e_800CA148(Work *work, int time);
++
++short Z14_ActionTable[] = {19, 20, 10, 22, 9,  34, 35, 36, 45, 13, 12, 26, 15, 14, 16, 27, 8, 46,
++                           19, 21, 30, 31, 32, 33, 37, 19, 19, 25, 5,  2,  42, 4,  39, 40, 6, 7,
++                           38, 3,  41, 17, 18, 43, 23, 24, 28, 29, 0,  1,  51, 17, 18, 43, 22};
++
++int Z14_CheckCapture(Work *work)
++{
++    TARGET *target;
++
++    target = work->target;
++    if (target->damaged & TARGET_CAPTURE)
++    {
++        if (target->a_mode == 36)
++        {
++            SetMode(work, s14e_800C7FA8);
++        }
++        else
++        {
++            SetMode(work, s14e_800C8350);
++        }
++
++        target->damaged = 0;
++        return 1;
++    }
++
++    return 0;
++}
++
++int Z14_CheckDown(Work *work)
++{
++    int down;
++
++    down = work->target->damaged & TARGET_DOWN;
++    return down != 0;
++}
++
++int Z14_VectorSize(SVECTOR *vec)
++{
++    return ABS(vec->vx) + ABS(vec->vy) + ABS(vec->vz);
++}
++
++int Z14_CheckPower(Work *work)
++{
++    TARGET *target;
++
++    target = work->target;
++    if (!(target->damaged & TARGET_POWER))
++        return 0;
++
++    switch (target->a_mode)
++    {
++    case 3:
++        target->force = DG_ZeroVector;
++        if (target->faint <= 0)
++        {
++            work->act.field_14 = 1;
++            SetMode(work, s14e_800C8CF8);
++        }
++        else
++        {
++            SetMode(work, s14e_800C8BE8);
++        }
++        break;
++    case 4:
++        work->act.field_14 = 0;
++        SetMode(work, s14e_800C8CF8);
++        break;
++    case 1:
++        target->force = DG_ZeroVector;
++        if (target->vital <= 0 || work->param.unknown - target->vital >= 192)
++        {
++            work->act.field_14 = 1;
++            SetMode(work, s14e_800C8CF8);
++        }
++        else
++        {
++            SetMode(work, s14e_800C8BE8);
++        }
++        break;
++    case 2:
++        if (Z14_VectorSize(&target->force) < 100)
++        {
++            work->act.field_14 = 3;
++        }
++        else
++        {
++            work->act.field_14 = 2;
++        }
++        SetMode(work, s14e_800C8CF8);
++        break;
++    case 5:
++        work->act.field_14 = 3;
++        SetMode(work, s14e_800C8CF8);
++        break;
++    case 8:
++        SetMode(work, s14e_800C86D4);
++        break;
++    case 9:
++        SetMode(work, s14e_800C8748);
++        break;
++    }
++
++    target->damage = 0;
++    target->damaged = 0;
++    return 1;
++}
++
++int Z14_CheckStun(Work *work)
++{
++    if (work->control.levels[0] == 0)
++        return 0;
++    work->target->vital = 0;
++    SetAction(work, 39, 4);
++    SetMode(work, s14e_800C924C);
++    return 1;
++}
++
++static int Z14_CheckStunGrenade(Work *work)
++{
++    if (!(GM_GameStatus & STATE_STUN))
++        return 0;
++    SetMode(work, s14e_800C8748);
++    return 1;
++}
++
++int Z14_CheckDamage(Work *work)
++{
++    int capture, stun;
++    if (Z14_CheckPower(work))
++    {
++        work->target->class = TARGET_AVAIL;
++        return 1;
++    }
++    capture = Z14_CheckCapture(work);
++    stun = Z14_CheckStunGrenade(work);
++    if (capture | stun)
++    {
++        work->target->class = TARGET_AVAIL;
++        return 1;
++    }
++    return 0;
++}
++
++void s14e_800C6E6C(Work *work)
++{
++    SVECTOR *mov;
++
++    mov = &work->control.mov;
++    setVector(mov, 30000, 30000, 30000);
++    work->param.item = 1;
++    work->think3 = 1;
++    work->field_9E4 = 0;
++    work->think1 = 0;
++    work->think2 = 0;
++    work->think4 = 0;
++    work->count3 = 0;
++    work->next_node = work->n_nodes - 1;
++    work->target_addr = work->field_BE8;
++    work->target_pos = work->start_pos;
++    work->vision.range = 512;
++    work->vision.length = ZAKO14_EYE_LENGTH;
++    work->alert_level = 0;
++    work->vision.facedir = 0;
++    work->pad.sound = 0;
++    work->pad.field_4 = 1;
++    work->field_C44 = 0;
++    work->target_map = work->start_map;
++    work->next_pos = work->start_pos;
++    work->last_addr = work->next_addr = work->field_BE8;
++}
++
++int s14e_800C6F40(int from, int to)
++{
++    int diff;
++
++    if (to < 0)
++        return 0;
++    if (from < 0)
++        return 0;
++    diff = GV_DiffDirS(from, to);
++    if (diff < -896 || diff > 896)
++        return 0;
++    if (diff >= 0)
++        return 1;
++    return 2;
++}
++
++void Z14_ReviseReadyGun(Work *work)
++{
++    int h1, h2, ang, rotx;
++
++    h1 = GM_PlayerBody->objs->objs[6].world.t[1];
++    h2 = work->body.objs->objs[6].world.t[1];
++    ang = ratan2(work->sn_dis, h1 - h2) & 4095;
++    rotx = GV_NearExp8(work->adjust[2].vx, ang - 1024);
++    work->adjust[2].vx = rotx;
++    work->adjust[6].vx = rotx;
++
++    if (rotx < 0)
++    {
++        work->adjust[7].vx = rotx * 3;
++    }
++    else
++    {
++        work->adjust[7].vx = rotx * 3 / 2;
++    }
++}
++
++int Z14_AttackForce(Work *work)
++{
++    SVECTOR svec;
++    SVECTOR rp_shift = {-200, 100, 600};
++    SVECTOR force = {5, 0, 100};
++    SVECTOR size = {1000, 1000, 1000};
++    TARGET *target;
++
++    target = &work->punch;
++    GM_SetTarget(target, TARGET_POWER, ENEMY_SIDE, &size);
++
++    DG_SetPos2(&work->control.mov, &work->control.rot);
++    DG_RotVector(&force, &svec, 1);
++    GM_SetPowerTarget(target, POWER_ONCE, 2, 32, 1, &svec);
++
++    DG_PutVector(&rp_shift, &target->center, 1);
++    return GM_PowerTarget(target);
++}
++
++void s14e_800C712C(Work *work)
++{
++    TARGET *target;
++
++    target = &work->attack;
++    GM_SetPowerTarget(target, POWER_CONST | POWER_EXPLODE, 5, 0, 3, &ZAKO14_ATTACK_FORCE);
++    GM_MoveTarget(target, &work->control.mov);
++    GM_PowerTarget(target);
++}
++
++int s14e_800C7194(Work *work)
++{
++    static const struct
++    {
++        int    flag;
++        ACTION action;
++    } overrides[] = {{1, s14e_800C9838},        {2, s14e_800C9904},        {4, s14e_800C99D0},
++                     {0x2000, s14e_800C9A68},   {0x40, s14e_800C9B00},     {0x80, s14e_800C9BB4},
++                     {0x400, s14e_800C9C7C},    {0x800, s14e_800C9D20},    {0x200, s14e_800C9DE8},
++                     {0x800000, s14e_800CA000}, {0x1000000, s14e_800CA148}};
++    int press = work->pad.press;
++    for (unsigned index = 0; index < sizeof(overrides) / sizeof(overrides[0]); ++index)
++    {
++        if (press & overrides[index].flag)
++        {
++            SetMode2(work, overrides[index].action);
++            return 0;
++        }
++    }
++    if (press & 0x100)
++        SetMode(work, s14e_800C77F8);
++    else if (press & 0x20)
++        SetMode(work, s14e_800C7888);
++    else if (press & 0x400000)
++        SetMode(work, s14e_800C7970);
++    else if (press & 0x30000)
++    {
++        SetMode(work, Z14_ActReadyGun);
++        work->adjust[2].vx = 0;
++    }
++    else
++        return 0;
++    return 1;
++}
++
++void s14e_800C7398(Work *work, int time)
++{
++    work->target->class |= TARGET_FLAG;
++    work->act_status |= 0x1;
++    if (ZAKO14Command.alert_mode == 0)
++        work->target->class |= TARGET_C4;
++    work->vision.length = ZAKO14_EYE_LENGTH;
++
++    if (time == 0)
++        SetAction(work, 0, 4);
++
++    if (Z14_CheckDamage(work) || Z14_CheckStun(work) || s14e_800C7194(work))
++    {
++        UnsetMode(work);
++        return;
++    }
++
++    if (work->pad.dir >= 0)
++    {
++        if (GV_DiffDirAbs(work->control.rot.vy, work->pad.dir) < 256)
++        {
++            if (work->pad.field_4 & 1)
++            {
++                SetAction(work, 2, 4);
++            }
++            else
++            {
++                SetAction(work, 1, 4);
++            }
++
++            SetMode(work, s14e_800C7550);
++        }
++        else
++        {
++            work->control.turn.vy = work->pad.dir;
++        }
++    }
++
++    work->vision.facedir = work->control.rot.vy;
++}
++
++void s14e_800C7550(Work *work, int time)
++{
++    CONTROL *ctrl;
++    SVECTOR *vecs;
++    int      dir, motion, touches, touch, touch2, size;
++
++    work->target->class |= TARGET_FLAG;
++    if (ZAKO14Command.alert_mode == 0)
++        work->target->class |= TARGET_C4;
++    work->vision.length = ZAKO14_EYE_LENGTH;
++
++    if (Z14_CheckDamage(work) || Z14_CheckStun(work))
++    {
++        UnsetMode(work);
++        return;
++    }
++
++    if (s14e_800C7194(work))
++    {
++        UnsetMode(work);
++        return;
++    }
++
++    ctrl = &work->control;
++    vecs = ctrl->vecs;
++    dir = work->pad.dir;
++    motion = work->act.motion1;
++    touch = -1;
++
++    if ((work->pad.field_4 & 1) && motion != 2)
++    {
++        SetAction(work, 2, 4);
++    }
++
++    if (dir < 0)
++    {
++        SetMode(work, s14e_800C7398);
++        UnsetMode(work);
++        return;
++    }
++
++    touches = ctrl->n_touches;
++
++    if (touches > 0)
++    {
++        touch = GV_VecDir2(vecs);
++        if (touches > 1)
++        {
++            touch2 = GV_VecDir2(&ctrl->vecs[1]);
++            if (GV_DiffDirAbs(dir, touch2) < GV_DiffDirAbs(dir, touch))
++            {
++                touch = touch2;
++            }
++        }
++    }
++
++    switch (s14e_800C6F40(dir, touch))
++    {
++    case 1:
++        dir = (touch - 1024) & 4095;
++        break;
++    case 2:
++        dir = (touch + 1024) & 4095;
++        break;
++    }
++
++    if (work->body.objs->bound_mode == 0)
++        ctrl->rot.vy = dir;
++    ctrl->turn.vy = dir;
++
++    size = 0;
++    if (motion == 1)
++    {
++        size = 50;
++    }
++    else if (motion == 2)
++    {
++        size = 100;
++    }
++
++    ctrl->step.vx = size * rsin(dir) / 4096;
++    ctrl->step.vz = size * rcos(dir) / 4096;
++    work->vision.facedir = work->control.rot.vy;
++}
++
++void s14e_800C77F8(Work *work, int time)
++{
++    if (time == 0)
++    {
++        work->act.field_14 = 3;
++        SetAction(work, 35, 4);
++    }
++
++    if (!Z14_CheckDamage(work) && work->body.is_end)
++    {
++        work->pad.field_8 = 0;
++        SetMode(work, s14e_800C8898);
++    }
++}
++
++void s14e_800C7888(Work *work, int time)
++{
++    CONTROL *ctrl;
++
++    ctrl = &work->control;
++
++    work->target->class |= TARGET_FLAG;
++    work->vision.length = ZAKO14_EYE_LENGTH;
++
++    if (time == 0)
++        SetAction(work, 16, 4);
++
++    if (!Z14_CheckDamage(work))
++    {
++        if (work->body.is_end || !(work->pad.press & 0x20))
++        {
++            SetMode(work, s14e_800C7398);
++        }
++        else
++        {
++            ctrl->turn.vy = work->sn_dir;
++            ctrl->step.vx = 0;
++            ctrl->step.vz = 0;
++            work->vision.facedir = work->control.rot.vy;
++        }
++    }
++}
++
++void s14e_800C7970(Work *work, int time)
++{
++    /* Original routine 800C7970 returns without changing state. */
++}
++
++void Z14_ActReadyGun(Work *work, int time)
++{
++    int press;
++
++    work->target->class |= TARGET_FLAG;
++    work->vision.length = ZAKO14_EYE_LENGTH;
++
++    press = work->pad.press;
++
++    if (time == 0)
++    {
++        if (press & 0x10000)
++        {
++            SetAction(work, 3, 4);
++        }
++        else
++        {
++            SetAction(work, 5, 4);
++        }
++
++        GM_ConfigMotionAdjust(&work->body, work->adjust);
++    }
++
++    Z14_ReviseReadyGun(work);
++    if (Z14_CheckDamage(work))
++        return;
++
++    if (!(press & 0x30000))
++    {
++        SetMode(work, s14e_800C7398);
++        return;
++    }
++
++    if (press & 0x40000)
++    {
++        SetModeNoAdjust(work, s14e_800C7AEC);
++        return;
++    }
++
++    if (press & 0x80000)
++    {
++        SetMode(work, s14e_800C7B9C);
++        return;
++    }
++
++    if (press & 0x100000)
++    {
++        SetModeNoAdjust(work, Z14_ActGrenade);
++        return;
++    }
++
++    if (press & 0x200000)
++    {
++        SetModeNoAdjust(work, s14e_800C7E28);
++        return;
++    }
++
++    work->control.turn.vy = work->pad.dir;
++    work->vision.facedir = work->control.rot.vy;
++}
++
++void s14e_800C7AEC(Work *work, int time)
++{
++    work->target->class |= TARGET_FLAG;
++    work->vision.length = ZAKO14_EYE_LENGTH;
++
++    if (time == 0)
++    {
++        SetAction(work, 4, 0);
++        ZAKO14_SetPutChar(work, 3);
++        GM_ConfigMotionAdjust(&work->body, work->adjust);
++    }
++
++    Z14_ReviseReadyGun(work);
++    if (!Z14_CheckDamage(work))
++        SetModeNoAdjust(work, Z14_ActReadyGun);
++}
++
++void s14e_800C7B9C(Work *work, int time)
++{
++    work->target->class |= TARGET_FLAG;
++    work->vision.length = ZAKO14_EYE_LENGTH;
++    if (time == 0)
++    {
++        SetAction(work, 5, 4);
++        work->control.turn.vy = work->pad.dir;
++    }
++    if (Z14_CheckDamage(work) || time < 16)
++        return;
++    if (time < 31 || (time >= 61 && time < 76))
++        work->control.rot.vy = (work->control.rot.vy - 32) & 4095;
++    else if (time < 61)
++        work->control.rot.vy = (work->control.rot.vy + 32) & 4095;
++    if (!(time & 1))
++    {
++        GM_SeSet(&work->control.mov, 46);
++        ZAKO14_SetPutChar(work, 3);
++    }
++    if (time >= 77)
++        SetMode(work, Z14_ActReadyGun);
++    work->control.turn.vy = work->control.rot.vy;
++}
++
++void Z14_ActGrenade(Work *work, int time)
++{
++    work->target->class |= TARGET_FLAG;
++    work->vision.length = ZAKO14_EYE_LENGTH;
++
++    if (time == 0)
++    {
++        SetAction(work, 7, 4);
++        work->subweapon =
++            NewGrenadeEnemy(&work->control, &work->body, 9, &work->trigger, &GM_PlayerPosition, ENEMY_SIDE);
++    }
++
++    if (time > 4)
++        work->trigger |= 1;
++    if (time == 17)
++        GM_SeSet(&work->control.mov, SE_PINNUKI);
++    if (time == 45)
++        work->trigger |= 4;
++
++    if (Z14_CheckDamage(work))
++    {
++        GV_DestroyActor(work->subweapon);
++        return;
++    }
++
++    if (work->body.is_end)
++    {
++        GV_DestroyActor(work->subweapon);
++        SetMode(work, Z14_ActReadyGun);
++    }
++}
++
++void s14e_800C7E28(Work *work, int time)
++{
++    work->target->class |= TARGET_FLAG;
++    work->vision.length = ZAKO14_EYE_LENGTH;
++
++    if (time == 0)
++    {
++        SetAction(work, 8, 0);
++    }
++
++    if (time == 3 && Z14_AttackForce(work) != 0)
++    {
++        GM_SeSet(&work->control.mov, SE_HIT);
++    }
++
++    work->control.turn.vy = work->sn_dir;
++
++    if (!Z14_CheckDamage(work) && work->body.is_end)
++    {
++        SetMode(work, Z14_ActReadyGun);
++    }
++}
++
++void s14e_800C7F00(Work *work, int time)
++{
++    work->vision.length = 0;
++
++    if (time == 0)
++    {
++        SetAction(work, 21, 4);
++    }
++
++    if (!Z14_CheckDamage(work))
++    {
++        work->target->class |= TARGET_FLAG;
++        if (work->body.is_end)
++        {
++            work->field_8FC = 1;
++            SetMode(work, s14e_800C7398);
++        }
++    }
++}
+diff --git a/source/overlays/s14e/animal/zako14/damage.c b/source/overlays/s14e/animal/zako14/damage.c
+new file mode 100644
+index 000000000..6b1033487
+--- /dev/null
++++ b/source/overlays/s14e/animal/zako14/damage.c
+@@ -0,0 +1,732 @@
++#include "native.h"
++#include "game/vibrate.h"
++
++static u_char  VibH[] = {1, 4, 0, 0};
++static u_char  VibL[] = {255, 4, 0, 0};
++static SVECTOR Z14_CaptureOffset = {-150, 0, 300};
++
++void s14e_800C7FA8(Work *work, int time)
++{
++    TARGET  *target;
++    CONTROL *control;
++
++    target = work->target;
++    control = &work->control;
++
++    work->act.field_1E = 0;
++    work->act_status |= 0x8;
++
++    if (time == 0)
++    {
++        work->act.field_14 = 6;
++        SetAction(work, 31, 4);
++    }
++
++    if (time > 7 && time < 20)
++    {
++        s14e_800C712C(work);
++    }
++
++    if (work->act.motion1 == 31)
++    {
++        if (time == 22)
++        {
++            if ((control->mov.vy - control->levels[0]) < 2000)
++            {
++                GM_SeSet(&control->mov, SE_V_ENE_PUNCHED);
++                GM_SeSet(&control->mov, SE_HIT_FLOOR);
++                ZAKO14_PutBlood(work, 6, 0);
++                GM_SetNoise(100, 4, &control->mov);
++            }
++            else if ((control->mov.vy - control->levels[0]) > 3000 || control->levels[0] < 0 ||
++                     control->mov.vz > 2000 || control->mov.vx < -4000 || control->mov.vx > 4000)
++            {
++                work->target->vital = 0;
++                GM_SeSet(&control->mov, 142);
++            }
++        }
++
++        if (work->body.is_end)
++        {
++            if (control->grounded == 0)
++            {
++                SetAction(work, 40, 4);
++            }
++            else
++            {
++                SetMode(work, s14e_800C8898);
++            }
++        }
++    }
++    else if (control->grounded != 0)
++    {
++        GM_SeSet(&control->mov, 141);
++        GM_SeSet(&control->mov, SE_HIT_FLOOR);
++        GM_SetNoise(100, 4, &control->mov);
++        ZAKO14_PutBlood(work, 6, 1);
++
++        if (work->target->vital <= 0)
++        {
++            SetMode(work, s14e_800C94A8);
++        }
++        else
++        {
++            SetMode(work, s14e_800C8898);
++        }
++    }
++
++    if (time < 24)
++    {
++        control->turn = *target->field_1C;
++    }
++
++    if (time < 22)
++    {
++        work->control.hzd_height = -32767;
++    }
++}
++
++void s14e_800C82D0(Work *work)
++{
++    SVECTOR pos;
++
++    work->control.turn = GM_PlayerControl->rot;
++    DG_SetPos2(&GM_PlayerPosition, &GM_PlayerControl->rot);
++    DG_PutVector(&Z14_CaptureOffset, &pos, 1);
++    GV_SubVec3(&pos, &work->control.mov, &work->control.step);
++}
++
++static void ApplyCapturedDamage(Work *work)
++{
++    TARGET *target = work->target;
++    if (target->damaged & TARGET_POWER)
++    {
++        ZAKO14_PutBlood(work, 5, 0);
++        GM_SeSet(&work->control.mov, SE_V_ENE_GRABBED);
++
++        target->force = DG_ZeroVector;
++        target->damage = 0;
++        target->damaged = 0;
++
++        if (target->vital <= 0)
++        {
++            if (target->a_mode == 1)
++            {
++                work->field_C44 = 1;
++            }
++
++            work->act.field_14 = 5;
++            target->side = ENEMY_SIDE;
++            SetMode(work, s14e_800C8CF8);
++            target->captured = 0;
++        }
++    }
++}
++
++void s14e_800C8350(Work *work, int time)
++{
++    TARGET *target;
++    int     motion;
++
++    target = work->target;
++    motion = work->act.motion1;
++
++    work->act.field_1E = 0;
++    work->act_status |= 0xC;
++
++    if (time == 0)
++    {
++        work->field_B5A = target->faint;
++        GM_SeSet(&work->control.mov, SE_V_ENE_GRABBED);
++    }
++
++    if (work->field_B5A != target->faint)
++    {
++        GM_SeSet(&work->control.mov, SE_V_ENE_GRABBED);
++        work->field_B5A = target->faint;
++    }
++
++    ApplyCapturedDamage(work);
++
++    switch (GM_PlayerAction)
++    {
++    case 7:
++    case 13:
++        if (motion != 27 && motion != 48)
++        {
++            target->side = PLAYER_SIDE;
++            SetAction(work, 27, 4);
++            work->field_B5C = 0;
++        }
++
++        if (work->field_B5C == 15 && target->faint > 0)
++        {
++            SetAction(work, 48, 4);
++        }
++
++        if (motion == 48 && !(work->field_B5C & 7))
++        {
++            NewPadVibration(VibH, 1);
++            NewPadVibration(VibL, 2);
++        }
++
++        if (work->field_B5C >= 31)
++            target->captured = 0;
++        work->control.turn = GM_PlayerControl->rot;
++        s14e_800C82D0(work);
++        work->field_B5C++;
++        break;
++    case 38:
++        if (motion != 28)
++        {
++            target->side = PLAYER_SIDE;
++            SetAction(work, 28, 4);
++        }
++
++        work->control.turn = GM_PlayerControl->rot;
++        s14e_800C82D0(work);
++        break;
++    case 39:
++        work->act.field_14 = 4;
++        target->side = ENEMY_SIDE;
++        target->vital = 0;
++        SetMode(work, s14e_800C8CF8);
++        return;
++    default:
++        work->act.field_14 = 5;
++        target->side = ENEMY_SIDE;
++        SetMode(work, s14e_800C8CF8);
++        return;
++    }
++
++    if (work->sn_dis > 800)
++    {
++        target->captured = 0;
++    }
++
++    work->target->class |= (TARGET_POWER | TARGET_SEEK);
++    work->vision.facedir = work->control.rot.vy;
++}
++
++void s14e_800C86D4(Work *work, int time)
++{
++    if (time == 0)
++    {
++        SetAction(work, 38, 4);
++    }
++
++    if (work->body.is_end)
++    {
++        SetMode(work, s14e_800C94A8);
++    }
++}
++
++void s14e_800C8748(Work *work, int time)
++{
++    CONTROL *control;
++    int      start;
++
++    control = &work->control;
++
++    work->act.field_1E = 0;
++    work->vision.length = 0;
++    work->act_status |= 0x8;
++
++    if (time == 0)
++    {
++        SetAction(work, 32, 4);
++        work->target->faint = 0;
++    }
++
++    if (!Z14_CheckDamage(work))
++    {
++        start = 10;
++
++        if (time == start)
++        {
++            work->act.field_14 = 1;
++            SetAction(work, 37, 4);
++        }
++        else
++        {
++            work->target->class |= TARGET_FLAG;
++        }
++
++        if (time == (start + 24))
++        {
++            GM_SeSet(&control->mov, SE_ENEMY_COLLAPSE);
++        }
++
++        if (time == (start + 46))
++        {
++            GM_SeSet(&control->mov, SE_HIT_FLOOR);
++        }
++
++        if (time >= (start + 50) && work->body.is_end)
++        {
++            SetMode(work, s14e_800C8898);
++        }
++    }
++}
++
++void s14e_800C8898(Work *work, int time)
++{
++    int x;
++
++    work->act_status |= 0x20;
++
++    if (time == 0)
++    {
++        if (work->act.field_14 < 3)
++        {
++            if (work->act.field_14 == 1)
++            {
++                SetAction(work, 41, 4);
++            }
++            else
++            {
++                SetAction(work, 39, 4);
++            }
++        }
++        else
++        {
++            SetAction(work, 40, 4);
++        }
++
++        x = work->control.mov.vx % 30;
++        if (x < 0)
++            x = -x;
++        work->field_B5A = x + 10;
++    }
++
++    if (Z14_CheckDown(work))
++    {
++        SetMode(work, s14e_800C8A10);
++    }
++    else if (work->field_B5A < time)
++    {
++        if (work->target->faint <= 0)
++        {
++            work->target->faint = work->param.faint;
++        }
++
++        SetMode(work, s14e_800C8AD8);
++    }
++}
++
++void s14e_800C8A10(Work *work, int time)
++{
++    if (time == 0)
++    {
++        if (work->act.field_14 < 3)
++        {
++            SetAction(work, 46, 4);
++        }
++        else
++        {
++            SetAction(work, 47, 4);
++        }
++
++        GM_SeSet(&work->control.mov, SE_ITEM_CURSOR);
++    }
++
++    if (time == 4)
++    {
++        ZAKO14_PutItem(work);
++    }
++
++    if (work->body.is_end)
++    {
++        SetMode(work, s14e_800C94A8);
++    }
++}
++
++void s14e_800C8AD8(Work *work, int time)
++{
++    work->act.field_1E = 0;
++    work->act_status |= 0x8;
++
++    if (time == 0)
++    {
++        if (work->act.field_14 < 3)
++        {
++            if (work->field_B5A >= 150)
++            {
++                SetAction(work, 44, 4);
++            }
++            else
++            {
++                SetAction(work, 42, 4);
++            }
++        }
++        else
++        {
++            if (work->field_B5A >= 150)
++            {
++                SetAction(work, 45, 4);
++            }
++            else
++            {
++                SetAction(work, 43, 4);
++            }
++        }
++    }
++
++    if (work->body.is_end)
++    {
++        work->param.unknown = work->target->vital;
++        SetMode(work, s14e_800C7398);
++    }
++}
++
++void s14e_800C8BE8(Work *work, int time)
++{
++    TARGET *target;
++
++    work->target->class |= TARGET_FLAG;
++    work->act.field_1E = 0;
++    work->vision.length = ZAKO14_EYE_LENGTH;
++    work->act_status |= 0x8;
++
++    if (!Z14_CheckDamage(work))
++    {
++        target = work->target;
++
++        if (time == 0)
++        {
++            SetAction(work, 15, 4);
++            GM_SeSet(&work->control.mov, SE_V_ENE_PUNCHED);
++
++            if (target->a_mode == 3)
++            {
++                GM_SeSet(&work->control.mov, SE_PUNCH_HIT);
++                ZAKO14_PutFog(work);
++            }
++            else
++            {
++                ZAKO14_PutBlood(work, 5, 0);
++            }
++        }
++
++        if (work->body.is_end)
++        {
++            SetMode(work, s14e_800C7398);
++        }
++    }
++}
++
++static void InitKnockdown(Work *work)
++{
++    ACT     *act = &work->act;
++    CONTROL *control = &work->control;
++
++    switch (act->field_14)
++    {
++    case 0:
++        GM_SeSet(&control->mov, SE_PUNCH_HIT);
++        SetAction(work, 34, 4);
++        GM_SeSet(&control->mov, SE_V_ENE_PUNCHED);
++        ZAKO14_PutBlood(work, 5, 0);
++        work->field_B5A = 17;
++        break;
++    case 1:
++        SetAction(work, 37, 4);
++        if (work->target->vital <= 0)
++            ZAKO14_PutBlood(work, 6, GM_Weapon == WP_Rifle ? 2 : 1);
++        else
++            ZAKO14_PutBlood(work, 5, 0);
++        GM_SeSet(&control->mov, 141);
++        work->field_B5A = 46;
++        break;
++    case 3:
++        GM_SeSet(&control->mov, 38);
++        SetAction(work, 35, 4);
++        ZAKO14_PutBlood(work, 5, 0);
++        work->field_B5A = 17;
++        break;
++    case 2:
++        GM_SeSet(&control->mov, 142);
++        SetAction(work, 36, 4);
++        ZAKO14_PutBlood(work, 5, 0);
++        work->field_B5A = 22;
++        break;
++    case 4:
++        GM_SeSet(&control->mov, SE_V_ENE_SNAPPED);
++        SetAction(work, 29, 4);
++        work->field_B5A = 67;
++        break;
++    case 5:
++        SetAction(work, 30, 4);
++        work->field_B5A = 15;
++        break;
++    }
++}
++
++static void ApplyKnockdownStep(Work *work, int time)
++{
++    ACT     *act = &work->act;
++    CONTROL *control = &work->control;
++    switch (act->field_14)
++    {
++    case 0:
++        if (time < 12)
++        {
++            control->turn.vy += 170;
++        }
++
++        if (time > 6 && time < 30)
++        {
++            s14e_800C712C(work);
++        }
++
++        if (time < 20)
++        {
++            work->control.hzd_height = -32767;
++        }
++        break;
++    case 1:
++        if (time == 24)
++        {
++            GM_SeSet(&control->mov, SE_ENEMY_COLLAPSE);
++        }
++        break;
++    case 3:
++        if (time > 6 && time < 30)
++        {
++            s14e_800C712C(work);
++        }
++
++        if (time < 15)
++        {
++            control->hzd_height = -32767;
++        }
++        break;
++    case 2:
++        if (time > 6 && time < 30)
++        {
++            s14e_800C712C(work);
++        }
++
++        if (time < 20)
++        {
++            control->hzd_height = -32767;
++        }
++        break;
++    case 4:
++    case 5:
++        work->act_status |= 0x4;
++        break;
++    }
++}
++
++void s14e_800C8CF8(Work *work, int time)
++{
++    ACT     *act;
++    CONTROL *control;
++
++    work->act.field_1E = 0;
++    work->act_status |= 0x8;
++
++    control = &work->control;
++    control->step = work->target->force;
++
++    if (time == 0)
++        InitKnockdown(work);
++
++    ApplyKnockdownStep(work, time);
++
++    if (time > 16 && control->grounded != 0)
++    {
++        control->step = DG_ZeroVector;
++    }
++
++    if (time == work->field_B5A)
++    {
++        if ((control->mov.vy - control->levels[0]) < 2000)
++        {
++            GM_SeSet(&control->mov, SE_HIT_FLOOR);
++            GM_SetNoise(100, 4, &control->mov);
++            ZAKO14_PutBlood(work, 6, 0);
++        }
++        else if ((control->mov.vy - control->levels[0]) > 3000 || control->levels[0] < 0 || control->mov.vz > 2000 ||
++                 control->mov.vx < -4000 || control->mov.vx > 4000)
++        {
++            work->target->vital = 0;
++            SetMode(work, s14e_800C924C);
++            return;
++        }
++    }
++
++    if (work->body.is_end)
++    {
++        work->act.field_1E = 1;
++        work->target->force = DG_ZeroVector;
++
++        if (work->target->vital <= 0)
++        {
++            SetMode(work, s14e_800C94A8);
++        }
++        else
++        {
++            SetMode(work, s14e_800C8898);
++        }
++    }
++}
++
++void s14e_800C924C(Work *work, int time)
++{
++    CONTROL *control;
++
++    work->act.field_1E = 0;
++    work->act_status |= 0x8;
++
++    control = &work->control;
++    control->step = work->target->force;
++
++    if (time == 0 && work->act.field_14 != 2)
++        GM_SeSet(&control->mov, 142);
++    if (time > 16 && control->grounded)
++        control->step = DG_ZeroVector;
++
++    if (work->act.motion1 < 39)
++    {
++        if (work->body.is_end)
++        {
++            if (work->act.field_14 < 3)
++            {
++                if (work->act.field_14 == 1)
++                {
++                    SetAction(work, 41, 4);
++                }
++                else
++                {
++                    SetAction(work, 39, 4);
++                }
++            }
++            else
++            {
++                SetAction(work, 40, 4);
++            }
++        }
++    }
++    else if (control->grounded)
++    {
++        work->act.field_1E = 1;
++        work->target->force = DG_ZeroVector;
++        GM_SeSet(&control->mov, SE_HIT_FLOOR);
++        ZAKO14_PutBlood(work, 6, 1);
++        SetMode(work, s14e_800C94A8);
++    }
++
++    if (time >= 91)
++    {
++        work->act.field_1E = 1;
++        work->target->force = DG_ZeroVector;
++        GM_SeSet(&control->mov, SE_HIT_FLOOR);
++        ZAKO14_PutBlood(work, 6, 1);
++        SetMode(work, s14e_800C94A8);
++    }
++}
++
++void s14e_800C94A8(Work *work, int time)
++{
++    work->act_status |= 0x40;
++    if (time == 0)
++    {
++        SetAction(work, work->act.field_14 >= 3 ? 50 : work->act.field_14 == 1 ? 51 : 49, 4);
++        GM_ConfigControlAttribute(&work->control, 0);
++        work->alert_level = 0;
++    }
++    if (time == 4)
++        ZAKO14_PutItem(work);
++    work->field_9E4 = (time & 2) == 0;
++    if (time >= 9)
++        SetMode(work, s14e_800C95B8);
++}
++
++void s14e_800C95B8(Work *work, int time)
++{
++    work->act_status |= 0x40;
++
++    if (time == 0)
++    {
++        work->field_9E4 = 0;
++        work->control.mov = ZAKO14_NO_POINT;
++        ZAKO14Command.watchers[work->param.index].field_4 = 1;
++        if (work->field_C44 == 0)
++            GM_EnemyKillCount++;
++    }
++
++    if (ZAKO14Command.watchers[work->param.index].field_4 == 2)
++    {
++        s14e_800C6E6C(work);
++        SetMode(work, s14e_800C7398);
++    }
++}
++
++void ZAKO14_ActionUpdate(Work *work)
++{
++    ACT     *act;
++    CONTROL *control;
++    ACTION   action;
++    int      time;
++
++    act = &work->act;
++    control = &work->control;
++
++    work->trigger = 0;
++    work->vision.length = 0;
++    work->target->class = TARGET_AVAIL;
++    work->field_8FC = 0;
++    work->act_status = 0;
++    work->field_C38 = 0;
++
++    action = work->action;
++
++    control->height = (work->body.height * work->scale) / 4096;
++    control->hzd_height = control->levels[0] + 750;
++
++    time = work->time++;
++
++    if (action == NULL)
++    {
++        action = s14e_800C7398;
++        work->action = s14e_800C7398;
++    }
++
++    action(work, time);
++
++    action = work->action2;
++    if (work->action2 != NULL)
++    {
++        time = work->time2++;
++        action(work, time);
++    }
++
++    if (act->field_1E == 0)
++    {
++        control->r_sphere = GV_NearExp2(control->r_sphere, act->field_1C);
++    }
++    else
++    {
++        control->r_sphere = -1;
++    }
++
++    if (work->target->class & TARGET_POWER)
++    {
++        work->hom->flag = 1;
++    }
++    else
++    {
++        work->hom->flag = 0;
++    }
++
++    if (act->field_04 < 0 && control->grounded)
++        act->field_04 = 0;
++
++    act->field_04 -= 16;
++    control->step.vy = act->field_04;
++
++    if (work->mark_time > 0)
++        work->mark_time--;
++}
+diff --git a/source/overlays/s14e/animal/zako14/override.c b/source/overlays/s14e/animal/zako14/override.c
+new file mode 100644
+index 000000000..84f10ddaf
+--- /dev/null
++++ b/source/overlays/s14e/animal/zako14/override.c
+@@ -0,0 +1,234 @@
++#include "native.h"
++
++void AN_Sleep(SVECTOR *pos);
++void AN_Unknown_800C3B7C(MATRIX *world);
++
++static SVECTOR BreathPos = {0, -700, 900};
++
++void s14e_800C9838(Work *work, int time)
++{
++    if (time == 0)
++        SetAction2(work, 9, 4, 0x3FE);
++
++    if (!(work->pad.press & 0x1))
++    {
++        UnsetMode(work);
++    }
++    else if (time < 4)
++    {
++        work->vision.facedir = (work->control.rot.vy - time * 256) & 4095;
++    }
++    else
++    {
++        work->vision.facedir = (work->control.rot.vy - 1024) & 4095;
++    }
++}
++
++void s14e_800C9904(Work *work, int time)
++{
++    if (time == 0)
++        SetAction2(work, 10, 4, 0x3FE);
++
++    if (!(work->pad.press & 0x2))
++    {
++        UnsetMode(work);
++    }
++    else if (time < 4)
++    {
++        work->vision.facedir = (work->control.rot.vy + time * 256) & 4095;
++    }
++    else
++    {
++        work->vision.facedir = (work->control.rot.vy + 1024) & 4095;
++    }
++}
++
++void s14e_800C99D0(Work *work, int time)
++{
++    work->vision.length = 3000;
++
++    if (time == 0)
++        SetAction2(work, 11, 4, 0x3FE);
++    if (!(work->pad.press & 0x4))
++        UnsetMode(work);
++}
++
++void s14e_800C9A68(Work *work, int time)
++{
++    work->vision.length = 3000;
++
++    if (time == 0)
++        SetAction2(work, 14, 4, 0x3FE);
++    if (!(work->pad.press & 0x2000))
++        UnsetMode(work);
++}
++
++void s14e_800C9B00(Work *work, int time)
++{
++    work->vision.length = 0;
++
++    if (time == 0)
++    {
++        SetAction2(work, 24, 4, 0x3FE);
++        GM_SeSet(&work->control.mov, SE_V_ENE_SNEEZE);
++    }
++
++    if (work->body.time2 != 0 || !(work->pad.press & 0x40))
++    {
++        work->pad.time = 0;
++        UnsetMode(work);
++    }
++}
++
++void s14e_800C9BB4(Work *work, int time)
++{
++    work->vision.length = 0;
++
++    if (time == 0)
++        SetAction2(work, 22, 4, 0x3FE);
++    if (time == 60)
++        GM_SeSet(&work->control.mov, SE_V_ENE_YAWN);
++
++    if (work->body.time2 != 0 || !(work->pad.press & 0x80))
++    {
++        work->pad.time = 0;
++        UnsetMode(work);
++    }
++}
++
++void s14e_800C9C7C(Work *work, int time)
++{
++    if (time == 0)
++        SetAction2(work, 23, 4, 0x3FE);
++
++    if (work->body.time2 != 0 || !(work->pad.press & 0x400))
++    {
++        work->pad.time = 0;
++        UnsetMode(work);
++    }
++}
++
++void s14e_800C9D20(Work *work, int time)
++{
++    work->vision.length = 0;
++
++    if (time == 0)
++        SetAction2(work, 19, 4, 0x3FE);
++    if (time == 90)
++        GM_SeSet(&work->control.mov, SE_V_ENE_YAWN);
++
++    if (work->body.time2 != 0 || !(work->pad.press & 0x800))
++    {
++        work->pad.time = 0;
++        UnsetMode(work);
++    }
++}
++
++void s14e_800C9DE8(Work *work, int time)
++{
++    SVECTOR pos;
++
++    work->vision.length = 0;
++
++    if (time == 0)
++        SetAction2(work, 19, 4, 0x3FE);
++    if (time == 90)
++        GM_SeSet(&work->control.mov, SE_V_ENE_YAWN);
++    if (time == 110)
++        SetAction2(work, 20, 4, 0x3FE);
++
++    if (time > 110)
++    {
++        work->act_status |= 0x10;
++
++        if (work->m_ctrl.info2.frame == 30)
++        {
++            pos = work->control.mov;
++            pos.vy += 500;
++            AN_Sleep(&pos);
++            GM_SeSet(&work->control.mov, SE_V_ENE_SNORE);
++
++            if (work->sn_dis < 1000 && (GM_PlayerStatus & PLAYER_WATCH) && GV_RandU(12) > 10)
++            {
++                work->pad.sound = 240;
++            }
++        }
++
++        if (work->pad.press & 0x1000)
++        {
++            SetMode(work, s14e_800C7F00);
++            UnsetMode(work);
++            return;
++        }
++    }
++
++    if (!(work->pad.press & 0x200))
++    {
++        UnsetMode(work);
++    }
++}
++
++static void s14e_800C9FC0(Work *work)
++{
++    MATRIX world;
++
++    DG_SetPos(&work->body.objs->objs[6].world);
++    DG_MovePos(&BreathPos);
++    ReadRotMatrix(&world);
++    AN_Unknown_800C3B7C(&world);
++}
++
++void s14e_800CA000(Work *work, int time)
++{
++    int cont;
++
++    work->vision.length = 3000;
++    work->act_status |= 0x80;
++
++    if (time == 0)
++        SetAction2(work, 25, 4, 0x3FE);
++
++    if (time >= 1000 && time <= 1209)
++    {
++        cont = time - 1000;
++        if (cont == 0 || cont == 4 || cont == 8 || cont == 12 || cont == 20 || cont == 28 || cont == 36 || cont == 48 ||
++            cont == 60)
++        {
++            GM_SeSet(&work->control.mov, SE_WET_STEP);
++            s14e_800C9FC0(work);
++        }
++    }
++    else if (time > 30 && (time & 0x1))
++    {
++        GM_SeSet(&work->control.mov, SE_WET_STEP);
++        if (time > 45)
++            s14e_800C9FC0(work);
++    }
++
++    if (!(work->pad.press & 0x800000))
++        UnsetMode(work);
++}
++
++void s14e_800CA148(Work *work, int time)
++{
++    work->vision.length = 3000;
++
++    if (time == 0)
++        SetAction2(work, 25, 4, 0x3FE);
++    if (time == 186)
++        SetAction2(work, 26, 4, 0xFFFF);
++
++    if (time == 0 || time == 4 || time == 8 || time == 12 || time == 20 || time == 28 || time == 36 || time == 48 ||
++        time == 60 || time == 120 || time == 122 || time == 124 || time == 126 || time == 180 || time == 182 ||
++        time == 184 || time == 186)
++    {
++        GM_SeSet(&work->control.mov, SE_WET_STEP);
++        s14e_800C9FC0(work);
++    }
++
++    if ((time > 186 && work->body.time2 != 0) || !(work->pad.press & 0x1000000))
++    {
++        work->pad.time = 0;
++        UnsetMode(work);
++    }
++}
+diff --git a/source/overlays/s14e/animal/zako14/put.c b/source/overlays/s14e/animal/zako14/put.c
+new file mode 100644
+index 000000000..e8cb70ef7
+--- /dev/null
++++ b/source/overlays/s14e/animal/zako14/put.c
+@@ -0,0 +1,239 @@
++#include "native.h"
++
++#include "anime/animconv/anime.h"
++#include "enemy/l_sight.h"
++#include "game/item.h"
++#include "okajima/blood.h"
++#include "okajima/bullet.h"
++
++extern void *AN_Breath(MATRIX *world);
++extern void *AN_Fog(SVECTOR *pos);
++extern void *AN_HeadMark(MATRIX *world, int mark);
++
++static void Z14_PutSound(Work *work);
++static void Z14_PutBreath(Work *work);
++static void Z14_PutLaserSight(Work *work);
++static void Z14_PutBullet(Work *work);
++
++static SVECTOR BloodPos = {0, 0, 100};
++static SVECTOR BloodRot = {-1024, 0, 0};
++
++static SVECTOR FogPos = {0, 0, 100};
++static SVECTOR FogRot = {-1024, 0, 0};
++
++static void *PutChars[] = {
++    Z14_PutSound,
++    Z14_PutBreath,
++    Z14_PutLaserSight,
++    Z14_PutBullet,
++};
++
++static SVECTOR BulletPos = {5, -500, 80};
++
++void ZAKO14_PutBlood(Work *work, int unit, int count)
++{
++    MATRIX world;
++
++    DG_SetPos(&work->body.objs->objs[unit].world);
++    DG_MovePos(&BloodPos);
++    DG_RotatePos(&BloodRot);
++    ReadRotMatrix(&world);
++    NewBlood(&world, count);
++}
++
++void ZAKO14_PutFog(Work *work)
++{
++    MATRIX  world;
++    SVECTOR pos;
++
++    DG_SetPos(&work->body.objs->objs[1].world);
++    DG_MovePos(&FogPos);
++    DG_RotatePos(&FogRot);
++    ReadRotMatrix(&world);
++    DG_COPY_VEC(&pos, (VECTOR *)world.t);
++    AN_Fog(&pos);
++}
++
++void ZAKO14_PutItem(Work *work)
++{
++    SVECTOR   step = work->act.field_0C;
++    ITEM_INFO info;
++    step.vx += GV_RandU(10);
++    step.vy += 100;
++    step.vz += GV_RandU(10);
++    GV_RandU(4);
++    info.type = 2;
++    if (GM_Weapons[WP_Famas] >= 0)
++    {
++        info.message = "FA-MAS/BULLET * 25";
++        info.id = WP_Famas;
++        info.num = 25;
++    }
++    else
++    {
++        info.message = "SOCOM/BULLET * 12";
++        info.id = WP_Socom;
++        info.num = 12;
++    }
++    info.time = 900;
++    NewItemPut(&work->control.mov, &step, &info);
++}
++
++void ZAKO14_PutMark(Work *work, int mark)
++{
++    MATRIX *world;
++
++    if (!(work->control.map->index & GM_PlayerMap))
++        return;
++    world = &work->body.objs->objs[6].world;
++
++    if (mark == 0)
++        GM_SeSet(&work->control.mov, SE_EXCLAMATION);
++    if (work->mark_time != 0)
++        GV_DestroyActor(work->mark);
++
++    work->mark = AN_HeadMark(world, mark);
++    work->mark_time = 30;
++}
++
++static void Z14_PutSound(Work *work)
++{
++    int action = work->act.motion1;
++    int frame = work->m_ctrl.info1.frame;
++    int left = 160 + (work->param.index % 4) * 2;
++    if ((action == 1 && frame == 22) || (action == 2 && frame == 16))
++        GM_SeSet(&work->control.mov, left + 1);
++    else if ((action == 1 && frame == 11) || (action == 2 && frame == 8))
++        GM_SeSet(&work->control.mov, left);
++}
++
++static void Z14_PutBreath(Work *work)
++{
++    int frame;
++
++    if (ZAKO14Command.alert_mode == 1)
++        return;
++    if (!(work->control.map->index & GM_PlayerMap))
++        return;
++
++    if (work->act.motion2 == 20)
++    {
++        if (work->m_ctrl.info2.frame == 31)
++        {
++            AN_Breath(&work->body.objs->objs[6].world);
++        }
++    }
++    else if (work->act.motion2 == 22)
++    {
++        frame = work->m_ctrl.info2.frame;
++        if (frame == 15 || frame == 35 || frame == 50 || frame == 60 || frame == 70 || frame == 74 || frame == 78)
++        {
++            AN_Breath(&work->body.objs->objs[6].world);
++        }
++    }
++    else if (work->act.motion2 == 19)
++    {
++        frame = work->m_ctrl.info2.frame;
++        if (frame == 30 || frame == 40 || frame == 50 || frame == 60 || frame == 70 || frame == 80 || frame == 90 ||
++            frame == 95 || frame == 100 || frame == 105)
++        {
++            AN_Breath(&work->body.objs->objs[6].world);
++        }
++    }
++    else
++    {
++        if ((GV_Time % 64) == (work->param.index * 16))
++        {
++            AN_Breath(&work->body.objs->objs[6].world);
++        }
++    }
++}
++
++static void Z14_PutLaserSight(Work *work)
++{
++    if (work->vision.pad != 2)
++        return;
++    NewLSight(&GM_PlayerPosition, &work->control.mov, MAKE_RGB(143, 0, 0));
++}
++
++static void Z14_PutBullet(Work *work)
++{
++    SVECTOR rot;
++    MATRIX  bullet_pos;
++    MATRIX *world;
++    int     flag;
++
++    rot = DG_ZeroVector;
++    rot.vz = GV_RandU(128);
++
++    world = &work->body.objs->objs[4].world;
++    DG_SetPos(world);
++    DG_MovePos(&BulletPos);
++    DG_RotatePos(&rot);
++    rot.vx = GV_RandS(16) + 1024;
++    rot.vz = 0;
++    DG_RotatePos(&rot);
++    ReadRotMatrix(&bullet_pos);
++
++    if (GV_Time % 4)
++    {
++        flag = BULLET_RECOILSPARK;
++        NewBulletEx(flag, &bullet_pos, ENEMY_SIDE, 1, 0, 10, work->param.damage, 10000, 750);
++    }
++    else
++    {
++        flag = BULLET_RECOILSPARK | BULLET_NO_HZD;
++        NewBulletEx(flag, &bullet_pos, ENEMY_SIDE, 1, 0, 10, work->param.damage, 10000, 750);
++    }
++
++    GM_SeSetMode(&work->control.mov, SE_ENEMY_SHOT, GM_SEMODE_BOMB);
++    AN_BulletSmoke(world, 0);
++    AN_FamasFlash(&bullet_pos);
++
++    ZAKO14_ClearPutChar(work, Z14_PutBullet);
++}
++
++int ZAKO14_SetPutChar(Work *work, int index)
++{
++    int i;
++
++    for (i = 0; i < 8; i++)
++    {
++        if (work->putchar[i] == NULL)
++        {
++            work->putchar[i] = PutChars[index];
++            return 1;
++        }
++    }
++
++    return 0;
++}
++
++int ZAKO14_ClearPutChar(Work *work, void *func)
++{
++    int i;
++
++    for (i = 0; i < 8; i++)
++    {
++        if (work->putchar[i] == func)
++        {
++            work->putchar[i] = NULL;
++            return 1;
++        }
++    }
++
++    return 0;
++}
++
++void ZAKO14_ExecPutChars(Work *work)
++{
++    int i;
++    void (*func)(Work *);
++
++    for (i = 0; i < 8; i++)
++    {
++        func = work->putchar[i];
++        if (func != NULL)
++            func(work);
++    }
++}
+diff --git a/source/overlays/s14e/animal/zako14/zk11aact.c b/source/overlays/s14e/animal/zako14/zk11aact.c
+new file mode 100644
+index 000000000..13ca913a0
+--- /dev/null
++++ b/source/overlays/s14e/animal/zako14/zk11aact.c
+@@ -0,0 +1,314 @@
++#include "native.h"
++
++#include "enemy/asiato.h"
++
++static void Z14_SetRadarParam(Work *work)
++{
++    VISION            *vision;
++    RADAR_SIGHT_PARAM *r_param;
++
++    vision = &work->vision;
++    r_param = &work->control.radar_param;
++
++    r_param->dir = vision->facedir;
++    r_param->dis = vision->length;
++    r_param->range = vision->range * 2;
++    r_param->r = 0;
++}
++
++static void Z14_CheckTarget(Work *work)
++{
++    if (work->modetime[7] & 0x4)
++    {
++        if (work->target->damaged & (TARGET_CAPTURE | TARGET_POWER))
++        {
++            work->modetime[6] |= 0x4;
++        }
++        else if ((work->touch.damaged & TARGET_TOUCH) &&
++                 (GM_PlayerStatus & (PLAYER_MOVE | PLAYER_CB_BOX)) != PLAYER_CB_BOX)
++        {
++            work->modetime[6] |= 0xC;
++        }
++    }
++}
++
++static int Z14_ZoneDist(HZD_HDL *hzd, SVECTOR *vec1, SVECTOR *vec2)
++{
++    int from, to;
++
++    from = HZD_GetAddress(hzd, vec1, -1);
++    to = HZD_GetAddress(hzd, vec2, -1);
++    from &= 0xFF;
++    to &= 0xFF;
++    return HZD_ZoneDistance(hzd, from, to);
++}
++
++static void Z14_CheckNoise(Work *work)
++{
++    CONTROL *control;
++
++    if (!(work->modetime[7] & 0x1))
++        return;
++    if (work->act_status & 0x68)
++        return;
++
++    control = &work->control;
++    if (!(control->map->index & GM_PlayerMap))
++        return;
++    if (GM_NoisePower == 0)
++        return;
++
++    switch (GM_NoisePower)
++    {
++    case 5:
++        if (GV_DiffVec3(&GM_NoisePosition, &control->mov) < 500)
++            work->modetime[6] |= 0x1;
++        break;
++    case 200:
++        if (GV_DiffVec3(&GM_NoisePosition, &control->mov) < 8000)
++            work->modetime[6] |= 0x1;
++        break;
++    case 100:
++        if (GV_DiffVec3(&GM_NoisePosition, &control->mov) >= 8000)
++            break;
++        if (Z14_ZoneDist(control->map->hzd, &control->mov, &GM_NoisePosition) >= 300)
++            break;
++        work->modetime[6] |= 0x1;
++        GM_NoiseLength = 0;
++        GM_NoisePower = 0;
++        break;
++    case 255:
++        work->modetime[6] |= 0x1;
++        break;
++    }
++}
++
++static void Z14_CheckBox(Work *work)
++{
++    if (!(work->modetime[7] & 0x2))
++        return;
++    if (work->vision.pad != 2)
++        return;
++    if (!(GM_PlayerStatus & PLAYER_CB_BOX))
++        return;
++
++    if (GV_DiffVec3(&work->player_pos, &GM_PlayerPosition) > 50 || work->player_dir != GM_WhereList[0]->rot.vy)
++    {
++        if (ZAKO14Command.alert_mode == 1)
++            return;
++        work->player_pos = GM_PlayerPosition;
++        work->player_dir = GM_WhereList[0]->rot.vy;
++        work->modetime[6] |= 0x2;
++    }
++    else if (GV_DiffVec3(&work->control.mov, &GM_PlayerPosition) < 1500)
++    {
++        work->modetime[6] |= 0x40;
++    }
++
++    work->vision.pad = 0;
++    work->modetime[6] |= 0x80;
++}
++
++static void Z14_CheckAsiato(Work *work)
++{
++    HZD_HDL *hzd;
++    SVECTOR *pos;
++    VISION  *vis;
++
++    if (!(work->modetime[7] & 0x10) || work->think2 == 5)
++        return;
++
++    hzd = work->control.map->hzd;
++    pos = &work->control.mov;
++    vis = &work->vision;
++
++    if (AsiatoCheck(hzd, pos) && SearchNearAsiato(hzd, pos, vis->facedir, vis->range, vis->length) >= 0)
++    {
++        work->modetime[6] |= 0x10;
++    }
++}
++
++static void Z14_CheckAlert(Work *work)
++{
++    work->modetime[6] = 0;
++    Z14_CheckNoise(work);
++
++    if (ZAKO14Command.alert_mode != 1)
++    {
++        Z14_CheckTarget(work);
++        Z14_CheckBox(work);
++        Z14_CheckAsiato(work);
++    }
++}
++
++static void Z14_UpdateAlert(Work *work)
++{
++    switch (work->vision.pad)
++    {
++    case 0:
++        if (work->field_B9C != 2 || !(GM_PlayerStatus & PLAYER_INTRUDE) || work->vision.length == 0)
++        {
++            work->field_B9C = 0;
++            work->alert_level -= 4;
++        }
++        break;
++    case 1:
++        work->field_B9C = 1;
++        work->alert_level--;
++        break;
++    case 2:
++        work->field_B9C = 2;
++        work->alert_level++;
++        break;
++    }
++
++    if (work->alert_level < 0)
++    {
++        work->alert_level = 0;
++    }
++    else if (work->alert_level > 255)
++    {
++        work->alert_level = 255;
++    }
++}
++
++static void Z14_CheckVision(Work *work)
++{
++    SVECTOR  tmp;
++    CONTROL *control;
++    SVECTOR *pos;
++    int      dir, dis, height;
++    MAP     *map;
++
++    control = &work->control;
++    pos = &GM_PlayerPosition;
++    GV_SubVec3(pos, &control->mov, &tmp);
++
++    dir = GV_VecDir2(&tmp);
++    work->sn_dir = dir;
++
++    dis = GV_VecLen3(&tmp);
++    work->sn_dis = dis;
++
++    height = ABS(pos->vy - work->control.mov.vy);
++
++    if (!(work->control.map->index & GM_PlayerMap))
++    {
++        work->vision.pad = 0;
++        return;
++    }
++
++    if (GM_PlayerStatus & PLAYER_INTRUDE)
++    {
++        work->vision.pad = 0;
++        return;
++    }
++
++    if ((ZAKO14Command.time % ZAKO14Command.n_watchers) != work->param.index)
++    {
++        return;
++    }
++
++    if (dis > (ZAKO14_EYE_LENGTH + 2000))
++    {
++        work->vision.pad = 0;
++        return;
++    }
++
++    if (height > 2000)
++    {
++        work->vision.pad = 0;
++        return;
++    }
++
++    if (dis >= 500 && GV_DiffDirAbs(work->vision.facedir, dir) >= work->vision.range)
++    {
++        work->vision.pad = 0;
++        return;
++    }
++
++    map = work->control.map;
++    if (!HZD_OnlineHazardCheck(map->hzd, pos, &control->mov, HZD_CHK_ALL, HZD_SEG_NO_PLAYER) &&
++        !GM_OnlineTargetCheckAny(&control->mov, pos, map->index, &tmp))
++    {
++        if (dis > work->vision.length)
++        {
++            work->vision.pad = 1;
++        }
++        else
++        {
++            work->vision.pad = 2;
++        }
++    }
++    else
++    {
++        work->vision.pad = 0;
++    }
++}
++
++void Zako14ActionMain(Work *work)
++{
++    if (work->act.motion1 <= 48)
++    {
++        Z14_SetRadarParam(work);
++        Z14_CheckVision(work);
++        Z14_CheckAlert(work);
++        Z14_UpdateAlert(work);
++        Zako14Think(work);
++        ZAKO14_ExecPutChars(work);
++    }
++
++    ZAKO14_ActionUpdate(work);
++}
++
++void Zako14PushMove(Work *work)
++{
++    TARGET  *trg;
++    int      turn, motion1;
++    CONTROL *control;
++
++    trg = work->target;
++    turn = 0;
++
++    if (!(trg->damaged & TARGET_PUSH))
++        return;
++
++    GV_AddVec3(&trg->offset, &work->control.step, &work->control.step);
++    trg->damaged &= ~TARGET_PUSH;
++
++    motion1 = work->act.motion1;
++    if (motion1 == 1 || motion1 == 2)
++    {
++        if (trg->offset.pad != 0)
++        {
++            if (GV_Time & 256)
++            {
++                if (work->param.index & 1)
++                {
++                    turn = trg->offset.pad * 1024;
++                }
++                else
++                {
++                    turn = (trg->offset.pad + 2) * 1024;
++                }
++            }
++            else
++            {
++                if (work->param.index & 1)
++                {
++                    turn = (trg->offset.pad + 2) * 1024;
++                }
++                else
++                {
++                    turn = trg->offset.pad * 1024;
++                }
++            }
++
++            turn &= 4095;
++        }
++
++        control = &work->control;
++        control->turn.vy = turn;
++        control->r_sphere = GV_NearExp2(control->r_sphere, work->act.field_1C);
++    }
++}
+diff --git a/source/overlays/s14e/animal/zako14/think_native.c b/source/overlays/s14e/animal/zako14/think_native.c
+new file mode 100644
+index 000000000..ea32df628
+--- /dev/null
++++ b/source/overlays/s14e/animal/zako14/think_native.c
+@@ -0,0 +1,516 @@
++#include "native.h"
++#include "enemy/eyeflash.h"
++
++static const SVECTOR ThrowPositions[3] = {{5750, 0, -1000, 0}, {6250, 0, 500, 0}, {5750, 0, 2000, 0}};
++static const int     AttackPhases[4][16] = {{0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0},
++                                            {0, 0, 1, 0, 1, 2, 0, 1, 2, 0, 0, 1, 0, 0, 0, 0},
++                                            {0, 1, 2, 0, 0, 1, 0, 0, 1, 0, 1, 2, 0, 0, 0, 0},
++                                            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
++static const int     RoutePhases[4][16] = {{0, 0, 3, 3, 3, 2, 2, 2, 3, 3, 3, 0, 0, 0, 0, 0},
++                                           {1, 1, 2, 2, 32, 32, 3, 9, 9, 2, 2, 1, 0, 0, 0, 0},
++                                           {3, 23, 23, 0, 0, 1, 1, 1, 0, 0, 6, 6, 0, 0, 0, 0},
++                                           {2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
++
++static void TargetPlayer(Work *work)
++{
++    work->target_addr = ZAKO14_PlayerAddress;
++    work->target_pos = ZAKO14_PlayerPosition;
++    work->target_map = ZAKO14_PlayerMap;
++}
++
++static void TargetNext(Work *work)
++{
++    int      next = (unsigned char)work->param.next;
++    HZD_ZON *zone = &work->control.map->hzd->def->zones[next];
++    work->target_addr = next | (next << 8);
++    work->target_pos.vx = zone->x;
++    work->target_pos.vy = zone->y;
++    work->target_pos.vz = zone->z;
++    work->target_map = work->start_map;
++}
++
++static void ResetRoute(Work *work)
++{
++    work->think1 = 0;
++    if ((unsigned char)work->param.next == 255)
++    {
++        work->think2 = 1;
++        work->think3 = 4;
++    }
++    else
++    {
++        work->think2 = 3;
++        work->think3 = 16;
++        TargetNext(work);
++    }
++    work->count3 = 0;
++    work->pad.field_4 = 1;
++}
++
++static void ResetThink(Work *work)
++{
++    work->think1 = 0;
++    work->think2 = 0;
++    work->think3 = 0;
++    work->count3 = 0;
++    work->pad.field_4 = 1;
++}
++
++static int Direction(SVECTOR *from, const SVECTOR *to)
++{
++    SVECTOR difference;
++    GV_SubVec3((SVECTOR *)to, from, &difference);
++    difference.vy = 0;
++    return GV_VecDir2(&difference);
++}
++
++static int Navigate(Work *work)
++{
++    HZD_HDL *hzd = work->control.map->hzd;
++    HZD_ZON *zone;
++    SVECTOR  difference;
++    int      target, current, reached, route;
++    if (work->target_map == work->control.map->index)
++        target = work->target_addr;
++    else
++    {
++        route = ZAKO14FindRoute(work->control.map->index, work->target_map);
++        zone = &hzd->def->zones[route];
++        work->target_pos.vx = zone->x;
++        work->target_pos.vy = zone->y;
++        work->target_pos.vz = zone->z;
++        target = route | (route << 8);
++    }
++    current = HZD_GetAddress(hzd, &work->control.mov, work->current_addr);
++    work->current_addr = current;
++    reached = HZD_ReachTo(hzd, current, work->next_addr);
++    if (target != work->last_addr || reached <= 0)
++    {
++        work->last_addr = target;
++        if (HZD_ReachTo(hzd, current, target) >= 2)
++        {
++            route = HZD_Navigate(hzd, current, target, &work->control.mov);
++            zone = &hzd->def->zones[route];
++            work->next_pos.vx = zone->x;
++            work->next_pos.vy = zone->y;
++            work->next_pos.vz = zone->z;
++            route = (unsigned char)route;
++            work->next_addr = route | (route << 8);
++        }
++        else if (work->target_map == work->control.map->index)
++        {
++            work->next_pos = work->target_pos;
++            work->next_addr = target;
++            GV_SubVec3(&work->next_pos, &work->control.mov, &difference);
++            work->pad.dir = GV_VecDir2(&difference);
++            return -1;
++        }
++        else
++        {
++            route = ZAKO14FindRoute(work->target_map, work->control.map->index);
++            work->control.map = GM_GetMap(work->target_map);
++            zone = &work->control.map->hzd->def->zones[route];
++            work->control.mov.vx = zone->x;
++            work->control.mov.vy = zone->y;
++            work->control.mov.vz = zone->z;
++            work->current_addr = -1;
++            work->last_addr = -1;
++            return work->control.rot.vy;
++        }
++    }
++    GV_SubVec3(&work->next_pos, &work->control.mov, &difference);
++    return GV_VecDir2(&difference);
++}
++
++static int AlertFlash(Work *work)
++{
++    if (work->count3 == 0)
++    {
++        ZAKO14_PutMark(work, 0);
++        GM_SeSet(&work->control.mov, 83);
++        NewEyeflash(&work->body.objs->objs[6].world, &work->control.mov, "kirari01", 0);
++    }
++    if ((unsigned)work->count3 >= 20)
++        return 1;
++    work->pad.press |= 0x20;
++    ++work->count3;
++    return 0;
++}
++
++static int AlertMark(Work *work)
++{
++    if (work->count3 == 0)
++    {
++        GM_SeSet(&work->control.mov, 83);
++        ZAKO14_PutMark(work, 0);
++    }
++    if ((unsigned)work->count3 >= 21)
++        return 1;
++    ++work->count3;
++    return 0;
++}
++
++static int FollowRoute(Work *work)
++{
++    if (!(work->count3 & 31))
++    {
++        work->current_addr = -1;
++        work->last_addr = -1;
++        Navigate(work);
++    }
++    work->pad.dir = Navigate(work);
++    if (work->pad.dir < 0)
++        return 1;
++    ++work->count3;
++    return 0;
++}
++
++static int Approach(Work *work, int distance)
++{
++    int     x = work->target_pos.vx - work->control.mov.vx;
++    int     z = work->target_pos.vz - work->control.mov.vz;
++    SVECTOR difference = {x, 0, z, 0};
++    if (-distance < x && x < distance && -distance < z && z < distance)
++        return 1;
++    work->pad.dir = GV_VecDir2(&difference);
++    ++work->count3;
++    return 0;
++}
++
++static int ApproachPlayer(Work *work)
++{
++    HZD_HDL *hzd;
++    TargetPlayer(work);
++    if (work->control.map->index != work->target_map)
++        return -1;
++    if (work->count3 & 16)
++    {
++        hzd = work->control.map->hzd;
++        work->current_addr = HZD_GetAddress(hzd, &work->control.mov, -1);
++        if (HZD_ReachTo(hzd, work->current_addr, work->target_addr) >= 2)
++            return -1;
++    }
++    return Approach(work, 1500);
++}
++
++static int FireBurst(Work *work)
++{
++    int count = work->count3;
++    work->pad.press |= 0x10000;
++    work->pad.dir = work->sn_dir;
++    if (count == 0)
++        work->count3 = GV_RandU(8);
++    if (count < 9 && !(count & 1))
++        work->pad.press |= 0x40000;
++    if (count >= 12)
++        return 1;
++    ++work->count3;
++    return 0;
++}
++
++static int FireSweep(Work *work)
++{
++    work->pad.press |= 0x20000;
++    if (work->count3 == 0)
++        work->pad.press |= 0x80000;
++    if ((unsigned)work->count3 >= 81)
++        return 1;
++    switch (work->param.next)
++    {
++    case 0:
++        work->pad.dir = 1536;
++        break;
++    case 1:
++        work->pad.dir = 512;
++        break;
++    case 2:
++        work->pad.dir = 3584;
++        break;
++    case 3:
++        work->pad.dir = 2560;
++        break;
++    case 6:
++        work->pad.dir = 1024;
++        break;
++    case 9:
++        work->pad.dir = 2048;
++        break;
++    case 23:
++        work->pad.dir = 3072;
++        break;
++    case 32:
++        work->pad.dir = 0;
++        break;
++    }
++    ++work->count3;
++    return 0;
++}
++
++static int ThrowGrenade(Work *work)
++{
++    const SVECTOR *position = &ThrowPositions[work->param.index];
++    work->pad.press |= 0x10000;
++    if (work->count3 == 30)
++    {
++        work->pad.press |= 0x100000;
++        work->field_C04 = *position;
++    }
++    else if (work->body.is_end)
++        return 1;
++    work->pad.dir = Direction(&work->control.mov, position);
++    ++work->count3;
++    return 0;
++}
++
++static int Melee(Work *work)
++{
++    work->pad.press |= 0x10000;
++    if (work->count3 == 0)
++        work->pad.press |= 0x200000;
++    else if (work->field_8FC || (unsigned)work->count3 >= 31)
++        return 1;
++    work->pad.dir = work->sn_dir;
++    ++work->count3;
++    return 0;
++}
++
++static int FireRepeated(Work *work)
++{
++    work->pad.press |= 0x10000;
++    work->pad.dir = work->sn_dir;
++    if (work->count3 < 10 && !(work->count3 & 1))
++        work->pad.press |= 0x40000;
++    if (work->count3 >= 20)
++        return 1;
++    ++work->count3;
++    return 0;
++}
++
++static int Aim(Work *work)
++{
++    if (work->count3 >= 201)
++        return 1;
++    work->pad.press |= 0x10000;
++    work->pad.dir = work->sn_dir;
++    ++work->count3;
++    return 0;
++}
++
++static int ApproachMelee(Work *work)
++{
++    if (work->sn_dis < 800)
++    {
++        work->pad.press |= 0x10000;
++        return 1;
++    }
++    work->pad.dir = work->sn_dir;
++    ++work->count3;
++    return 0;
++}
++
++static int ChooseAttack(Work *work)
++{
++    work->pad.press |= 0x10000;
++    work->pad.dir = work->sn_dir;
++    if (work->count3 == 16)
++        work->count3 += GV_RandU(14);
++    if ((unsigned)work->count3 >= 33)
++    {
++        switch (AttackPhases[work->param.index][ZAKO14_GameFlag])
++        {
++        case 0:
++            return work->sn_dis < 800 && !(GM_PlayerStatus & 0x1060) ? 10 : 6;
++        case 1:
++            return 14;
++        case 2:
++            return 7;
++        case 3:
++            return 12;
++        case 4:
++            return 13;
++        }
++    }
++    ++work->count3;
++    return 0;
++}
++
++static int ChooseRoute(Work *work)
++{
++    work->pad.press |= 0x10000;
++    work->pad.dir = work->sn_dir;
++    work->param.next = RoutePhases[work->param.index][ZAKO14_GameFlag];
++    return 15;
++}
++
++static void ReactAlert(Work *work)
++{
++    switch (work->think3)
++    {
++    case 1:
++        if (!AlertFlash(work))
++            return;
++        ResetRoute(work);
++        work->pad.sound = ZAKO14Command.alert_mode ? 246 : 240;
++        break;
++    case 2:
++        if (!AlertMark(work))
++            return;
++        work->think1 = 0;
++        work->think2 = 3;
++        work->think3 = 16;
++        work->pad.field_4 = 1;
++        work->count3 = 0;
++        work->pad.sound = 240;
++        break;
++    case 3:
++        if (!AlertMark(work))
++            return;
++        ResetRoute(work);
++        work->pad.sound = 240;
++        break;
++    default:
++        return;
++    }
++    work->alert_level = 255;
++}
++
++static void Attack(Work *work)
++{
++    int next = 0;
++    switch (work->think3)
++    {
++    case 6:
++        if (FireBurst(work))
++            next = 14;
++        break;
++    case 7:
++        if (FireSweep(work))
++            next = 14;
++        break;
++    case 9:
++        if (ThrowGrenade(work))
++            ResetThink(work);
++        break;
++    case 10:
++        if (Melee(work))
++            next = 14;
++        break;
++    case 11:
++        if (FireRepeated(work))
++            next = 14;
++        break;
++    case 12:
++        if (Aim(work))
++            next = 14;
++        break;
++    case 13:
++        if (ApproachMelee(work))
++            next = 10;
++        break;
++    case 14:
++        work->think3 = ChooseRoute(work);
++        work->count3 = 0;
++        if (!HZD_InsideZone(work->control.map->hzd, &work->control.mov, (unsigned char)work->param.next))
++            ResetRoute(work);
++        break;
++    case 15:
++        next = ChooseAttack(work);
++        break;
++    }
++    if (next)
++    {
++        work->think3 = next;
++        work->count3 = 0;
++    }
++    if (work->vision.pad == 2)
++    {
++        ZAKO14SetGopointLast();
++        work->alert_level = 255;
++    }
++}
++
++static void CheckMeleeRange(Work *work)
++{
++    if (work->sn_dis < 800 && GM_PlayerStance == STAND)
++    {
++        work->think2 = 2;
++        work->think3 = 10;
++        work->count3 = 0;
++        work->pad.press |= 0x10000;
++        work->pad.dir = work->sn_dir;
++    }
++}
++
++static void Chase(Work *work)
++{
++    int result;
++    if (work->think3 == 4)
++    {
++        TargetPlayer(work);
++        if (FollowRoute(work))
++        {
++            work->think3 = 5;
++            work->count3 = 0;
++        }
++    }
++    else if (work->think3 == 5)
++    {
++        result = ApproachPlayer(work);
++        if (result < 0)
++        {
++            work->think3 = 4;
++            work->count3 = 0;
++        }
++        else if (result > 0)
++        {
++            work->think2 = 2;
++            work->think3 = 14;
++            work->count3 = 0;
++        }
++    }
++    CheckMeleeRange(work);
++    if (work->vision.pad == 2)
++        work->alert_level = 255;
++    ZAKO14SetGopointLast();
++}
++
++static void MoveToRoute(Work *work)
++{
++    if (work->think3 == 16 && FollowRoute(work))
++    {
++        work->think2 = 2;
++        work->think3 = 14;
++        work->count3 = 0;
++    }
++    CheckMeleeRange(work);
++}
++
++void Zako14Think(Work *work)
++{
++    work->pad.dir = -1;
++    work->control.radar_atr = 5;
++    work->pad.press = 0;
++    work->alert_level = 255;
++    if (work->think1 != 0)
++        return;
++    work->act.field_1E = 1;
++    switch (work->think2)
++    {
++    case 0:
++        if (work->think3 == 0)
++            ResetRoute(work);
++        break;
++    case 1:
++        Chase(work);
++        break;
++    case 2:
++        Attack(work);
++        break;
++    case 3:
++        MoveToRoute(work);
++        break;
++    case 4:
++        ReactAlert(work);
++        break;
++    }
++}
+diff --git a/source/stage/s14e.c b/source/stage/s14e.c
+index 0c5826810..93b64dfea 100644
+--- a/source/stage/s14e.c
++++ b/source/stage/s14e.c
+@@ -2,32 +2,31 @@
+ #include "charalst.h"
+ 
+ CHARA _StageCharacterEntries[] = {
+-    { 0x7a05, (NEWCHARA *)0x800db738 }, //  CHARA_CINEMA,       /* chara シネマスクリーン */
+-    { 0xec77, (NEWCHARA *)0x800c4aac }, //  CHARA_WALL,         /* chara 障害物 */
+-    { 0x5a50, (NEWCHARA *)0x800d7db0 }, //  CHARA_GASEFFECT,    /* chara ガス効果 */
+-    { 0x92bc, (NEWCHARA *)0x800c58e4 }, //  CHARA_ASIOTOKUN,    /* chara 足音君 */
+-    { 0xd6fb, (NEWCHARA *)0x800d8604 }, //  CHARA_FOG,          /* chara 黒フォグ */
+-    { 0x1ad3, (NEWCHARA *)0x800c41b0 }, //  CHARA_TEXTURE,      /* chara テクスチャ */
+-    { 0x2abc, (NEWCHARA *)0x800d7274 }, //  CHARA_ELEVATOR,     /* chara エレベータ */
+-    { 0x6865, (NEWCHARA *)0x800d5a58 }, //  CHARA_TEXSCROLL,    /* chara テクスチャスクロール */
+-    { 0xa12e, (NEWCHARA *)0x800daf5c }, //  CHARA_FADEIO,       /* chara フェードイン・アウト */
+-    { 0x8e74, (NEWCHARA *)0x800cf44c }, //  CHARA_ZAKO14COM,    /* chara ざこ１４コマンダー */
+-    { 0x31e7, (NEWCHARA *)0x800c66cc }, //  CHARA_ZAKO14,       /* chara ざこ１４ */
+-    { 0x9ab9, (NEWCHARA *)0x800d4d50 }, //  CHARA_ELEVCROW,     /* chara エレベーターのカラス */
+-    { 0xa9c5, (NEWCHARA *)0x800d16f8 }, //  CHARA_CAMERAGUN,    /* chara カメラ付随ガン */
+-    { 0x7bc2, (NEWCHARA *)0x800dbeb0 }, //  CHARA_CAMERASHAKE,  /* chara カメラ揺らし */
+-    { 0xfed1, (NEWCHARA *)0x8005d508 }, //  CHARA_PADVIBRATE,   /* chara パッド振動 */
+-    { 0x4170, (NEWCHARA *)0x800c4420 }, //  CHARA_SNEBREATH,    /* chara スネーク息 */
+-    { 0x3c0c, (NEWCHARA *)0x8006b76c }, //  CHARA_CLAYMORE,     /* chara クレイモア地雷 */
+-    { 0x6471, (NEWCHARA *)0x800dc0b8 }, //  CHARA_BUTTONCHECK,  /* chara ボタンチェッカー */
+-    { 0xb103, (NEWCHARA *)0x800db968 }, //  CHARA_DYNWALL,      /* chara 透明壁 */
+-    { 0x3f9a, (NEWCHARA *)0x800dbc28 }, //  CHARA_ENV_SOUND,    /* chara 環境音 */
+-
+-    { 0x0003, (NEWCHARA *)0x800daec4 }, //  DEMO_FADEIN,
+-    { 0x0004, (NEWCHARA *)0x800daec4 }, //  DEMO_FADEOUT,
+-    { 0x000f, (NEWCHARA *)0x800c5288 }, //  DEMO_SHADOW,
+-    { 0x0025, (NEWCHARA *)0x800d2c2c }, //  DEMO_BLUR,
+-    { 0x0045, (NEWCHARA *)0x800dc14c }, //  DEMO_FAMASLIGHT,
++    CHARA_CINEMA,
++    CHARA_WALL,
++    CHARA_GASEFFECT,
++    CHARA_ASIOTOKUN,
++    CHARA_FOG,
++    CHARA_TEXTURE,
++    CHARA_ELEVATOR,
++    CHARA_TEXSCROLL,
++    CHARA_FADEIO,
++    CHARA_ZAKO14COM,
++    CHARA_ZAKO14,
++    CHARA_ELEVCROW,
++    CHARA_CAMERAGUN,
++    CHARA_CAMERASHAKE,
++    CHARA_PADVIBRATE,
++    CHARA_SNEBREATH,
++    CHARA_CLAYMORE,
++    CHARA_BUTTONCHECK,
++    CHARA_DYNWALL,
++    CHARA_ENV_SOUND,
++    DEMO_FADEIN,
++    DEMO_FADEOUT,
++    DEMO_SHADOW,
++    DEMO_BLUR,
++    DEMO_FAMASLIGHT,
+ 
+     CHARA_END
+ };
+diff --git a/build/linker_command_file.txt b/build/linker_command_file.txt
+--- a/build/linker_command_file.txt
++++ b/build/linker_command_file.txt
+@@ -2714,16 +2714,20 @@
+     include "{{OBJ_DIR}}\enemy\wall.obj", overlay
+     include "{{OBJ_DIR}}\enemy\demokage.obj", overlay
+     include "{{OBJ_DIR}}\enemy\asioto.obj", overlay
+-    include "{{OBJ_DIR}}\overlays\s14e\animal\zako14\zako14.obj", overlay
+-    include "{{OBJ_DIR}}\enemy\glight.obj", overlay
+-    include "{{OBJ_DIR}}\overlays\s14e\animal\zako14\zako14_data.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s14e\animal\zako14\core.obj", overlay
++    include "{{OBJ_DIR}}\enemy\glight.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s14e\animal\zako14\action.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s14e\animal\zako14\damage.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s14e\animal\zako14\override.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s14e\animal\zako14\put.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s14e\animal\zako14\zk11aact.obj", overlay
+     include "{{OBJ_DIR}}\anime\effect\mark.obj", overlay
+     include "{{OBJ_DIR}}\anime\effect\fog.obj", overlay
+     include "{{OBJ_DIR}}\anime\effect\sleep.obj", overlay
+     include "{{OBJ_DIR}}\enemy\asiato.obj", overlay
+     include "{{OBJ_DIR}}\enemy\l_sight.obj", overlay
+     include "{{OBJ_DIR}}\enemy\grnad_e.obj", overlay
+-    include "{{OBJ_DIR}}\overlays\s14e\animal\zako14\think.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s14e\animal\zako14\think_native.obj", overlay
+     include "{{OBJ_DIR}}\enemy\eyeflash.obj", overlay
+     include "{{OBJ_DIR}}\animal\zako14\zako14com.obj", overlay
+     include "{{OBJ_DIR}}\okajima\guncame.obj", overlay
+@@ -2737,40 +2741,8 @@
+     include "{{OBJ_DIR}}\takabe\gas_efct.obj", overlay
+     include "{{OBJ_DIR}}\takabe\object.obj", overlay
+ 
+-    include "{{OBJ_DIR}}\overlays\s14e\overlay3.obj", overlay
+-
+-    ; include "{{OBJ_DIR}}\takabe\fog.obj", overlay
+-    ; include "{{OBJ_DIR}}\takabe\libdg2.obj", overlay
+-    include "{{OBJ_DIR}}\overlays\s14e\s14e_800D8470.obj", overlay
+-    include "{{OBJ_DIR}}\overlays\s14e\s14e_800D84DC.obj", overlay
+-    include "{{OBJ_DIR}}\overlays\s14e\s14e_800D852C.obj", overlay
+-    include "{{OBJ_DIR}}\overlays\s14e\s14e_800D8604.obj", overlay
+-    include "{{OBJ_DIR}}\overlays\s14e\s14e_800D8698.obj", overlay
+-    include "{{OBJ_DIR}}\overlays\s14e\s14e_800D87D0.obj", overlay
+-    include "{{OBJ_DIR}}\overlays\s14e\s14e_800D8848.obj", overlay
+-    include "{{OBJ_DIR}}\overlays\s14e\s14e_800D8850.obj", overlay
+-    include "{{OBJ_DIR}}\overlays\s14e\s14e_800D8878.obj", overlay
+-    include "{{OBJ_DIR}}\overlays\s14e\s14e_800D88C0.obj", overlay
+-    include "{{OBJ_DIR}}\overlays\s14e\s14e_800D8910.obj", overlay
+-    include "{{OBJ_DIR}}\overlays\s14e\s14e_800D8968.obj", overlay
+-    include "{{OBJ_DIR}}\overlays\s14e\s14e_800D89B8.obj", overlay
+-    include "{{OBJ_DIR}}\overlays\s14e\s14e_800D8A10.obj", overlay
+-    include "{{OBJ_DIR}}\overlays\s14e\s14e_800D8AA8.obj", overlay
+-    include "{{OBJ_DIR}}\overlays\s14e\s14e_800D8D08.obj", overlay
+-    include "{{OBJ_DIR}}\overlays\s14e\s14e_800D8D2C.obj", overlay
+-    include "{{OBJ_DIR}}\overlays\s14e\s14e_800D96E8.obj", overlay
+-    include "{{OBJ_DIR}}\overlays\s14e\s14e_800D9750.obj", overlay
+-    include "{{OBJ_DIR}}\overlays\s14e\s14e_800D981C.obj", overlay
+-    include "{{OBJ_DIR}}\overlays\s14e\s14e_800D9964.obj", overlay
+-    include "{{OBJ_DIR}}\overlays\s14e\s14e_800D99F8.obj", overlay
+-    include "{{OBJ_DIR}}\overlays\s14e\s14e_800D9AFC.obj", overlay
+-    include "{{OBJ_DIR}}\overlays\s14e\s14e_800D9D3C.obj", overlay
+-    include "{{OBJ_DIR}}\overlays\s14e\s14e_800DA2A4.obj", overlay
+-    include "{{OBJ_DIR}}\overlays\s14e\s14e_800DA3B4.obj", overlay
+-    include "{{OBJ_DIR}}\overlays\s14e\s14e_800DA460.obj", overlay
+-    include "{{OBJ_DIR}}\overlays\s14e\s14e_800DA50C.obj", overlay
+-    include "{{OBJ_DIR}}\overlays\s14e\s14e_800DA674.obj", overlay
+-    include "{{OBJ_DIR}}\overlays\s14e\s14e_800DA720.obj", overlay
++    include "{{OBJ_DIR}}\takabe\fog.obj", overlay
++    include "{{OBJ_DIR}}\takabe\libdg2.obj", overlay
+ 
+     include "{{OBJ_DIR}}\takabe\fadeio.obj", overlay
+     include "{{OBJ_DIR}}\takabe\cinema.obj", overlay

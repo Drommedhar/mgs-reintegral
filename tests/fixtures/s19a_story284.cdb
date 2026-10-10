@@ -1,0 +1,13 @@
+.lines -e
+bu /1 mgs_integral_native!MgsNativeReloadOverlay "ew mgs_integral_native!var_buf+a 11c; .echo FIXTURE garage incoming story284 - original GCL supplies map and player position; gc"
+bu /1 mgs_integral_native!Garage_800D86E0 ".echo OBSERVED original garage drum constructor; gc"
+bu /1 mgs_integral_native!Garage_800D9B28 ".echo OBSERVED original parked jeep constructor; gc"
+bu /1 mgs_integral_native!Garage_800DC414 ".echo OBSERVED original garage gate constructor; gc"
+bu /1 mgs_integral_native!Garage_800DA684 ".echo OBSERVED original parked Snake constructor; gc"
+bu /1 mgs_integral_native!Garage_800DB89C ".echo OBSERVED original parked companion constructor; gc"
+bu /1 mgs_integral_native!s19a_800CDBF4 ".echo OBSERVED original garage guard constructor; gc"
+bu /1 mgs_integral_native!s19a_800D7724 ".echo OBSERVED original garage commander constructor; gc"
+sxe -c "r;kv;q" av
+sxe -c "r;kv;q" dz
+g
+q

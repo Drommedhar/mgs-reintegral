@@ -1,0 +1,8842 @@
+{
+  "scope": "Integral main executable; VR excluded; class identities are not function equivalence",
+  "configured_stages": [
+    "title",
+    "abst",
+    "s00a",
+    "s01a",
+    "d00a",
+    "d01a",
+    "s02a",
+    "s02b",
+    "s02c",
+    "s02d",
+    "s02e",
+    "s03a",
+    "s03b",
+    "s03c",
+    "s03e",
+    "s04a",
+    "s04b",
+    "s04c",
+    "s06a",
+    "s05a",
+    "s11a",
+    "s03d",
+    "s07a",
+    "s07b",
+    "s07br",
+    "s07c",
+    "s08a",
+    "s08b",
+    "s08br",
+    "s09a",
+    "s10a",
+    "s10ar",
+    "s11c",
+    "s11e",
+    "s11i",
+    "s12a",
+    "s12b",
+    "s12c",
+    "s13a",
+    "s15b",
+    "s15c",
+    "s16a",
+    "s16b",
+    "s16c",
+    "s16d",
+    "s20a",
+    "s20ar",
+    "change",
+    "d03a",
+    "d11c",
+    "d16e",
+    "opening",
+    "preope",
+    "option",
+    "roll",
+    "ending",
+    "endingr",
+    "s15a",
+    "s03ar",
+    "s03er",
+    "s04br",
+    "s07cr",
+    "s08c",
+    "s08cr",
+    "s09ar",
+    "s11g",
+    "s14e",
+    "s11h",
+    "s11b",
+    "s18a",
+    "s18ar",
+    "s17a",
+    "s17ar",
+    "d18a",
+    "d18ar",
+    "s11d",
+    "s19a",
+    "s19ar",
+    "s19b",
+    "s19br",
+    "demosel",
+    "select",
+    "select1",
+    "select2",
+    "select3",
+    "select4",
+    "selectd",
+    "sound",
+    "s03dr",
+    "rank",
+    "brf",
+    "camera"
+  ],
+  "unique_constructor_tables": 72,
+  "game_translation_units": 738,
+  "resident_selection_units": 166,
+  "constructor_entries": 1715,
+  "unselected_main_tables": [],
+  "nonterminal_null_bindings": [],
+  "constructors": {
+    "title": [
+      {
+        "class_id": 53113,
+        "function": "NewOpen"
+      },
+      {
+        "class_id": 54350,
+        "function": "NewVrWindow"
+      },
+      {
+        "class_id": 41653,
+        "function": "Safety_800C47A0"
+      },
+      {
+        "class_id": 34017,
+        "function": "NewFontText"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "abst": [
+      {
+        "class_id": 21447,
+        "function": "NewLoadData"
+      },
+      {
+        "class_id": 22127,
+        "function": "NewAbstract"
+      },
+      {
+        "class_id": 18804,
+        "function": "NewAbstractDemo1"
+      },
+      {
+        "class_id": 18805,
+        "function": "NewAbstractDemo2"
+      },
+      {
+        "class_id": 53106,
+        "function": "NewAbstractChange"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s00a": [
+      {
+        "class_id": 25514,
+        "function": "NewRipples"
+      },
+      {
+        "class_id": 52216,
+        "function": "NewPadControl"
+      },
+      {
+        "class_id": 65233,
+        "function": "NewPadVibrationGcl"
+      },
+      {
+        "class_id": 16752,
+        "function": "NewSnakeBreath"
+      },
+      {
+        "class_id": 16282,
+        "function": "NewEnvironmentSoundSet"
+      },
+      {
+        "class_id": 31682,
+        "function": "NewCameraShake"
+      },
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 16087,
+        "function": "NewPadDemo"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 708,
+        "function": "NewAsiatoKun"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 47698,
+        "function": "NewShakeModelGCL"
+      },
+      {
+        "class_id": 12494,
+        "function": "NewPatrolLamp"
+      },
+      {
+        "class_id": 50903,
+        "function": "NewCommander"
+      },
+      {
+        "class_id": 56227,
+        "function": "NewWaterArea"
+      },
+      {
+        "class_id": 28314,
+        "function": "NewSnakeWatcher"
+      },
+      {
+        "class_id": 5900,
+        "function": "NewSmoke"
+      },
+      {
+        "class_id": 13029,
+        "function": "NewEmitter"
+      },
+      {
+        "class_id": 10940,
+        "function": "NewElevator"
+      },
+      {
+        "class_id": 54437,
+        "function": "NewMouse"
+      },
+      {
+        "class_id": 33258,
+        "function": "NewRippleSurface"
+      },
+      {
+        "class_id": 32759,
+        "function": "NewTelopSet"
+      },
+      {
+        "class_id": 6658,
+        "function": "NewBubbleS"
+      },
+      {
+        "class_id": 23908,
+        "function": "NewFewDamageSet"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s01a": [
+      {
+        "class_id": 44795,
+        "function": "NewToBeContinued"
+      },
+      {
+        "class_id": 4013,
+        "function": "NewMotionSoundEffect"
+      },
+      {
+        "class_id": 46310,
+        "function": "NewDemoCancel"
+      },
+      {
+        "class_id": 31682,
+        "function": "NewCameraShake"
+      },
+      {
+        "class_id": 65233,
+        "function": "NewPadVibrationGcl"
+      },
+      {
+        "class_id": 23120,
+        "function": "NewGasEffectSet"
+      },
+      {
+        "class_id": 16752,
+        "function": "NewSnakeBreath"
+      },
+      {
+        "class_id": 16282,
+        "function": "NewEnvironmentSoundSet"
+      },
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 59774,
+        "function": "NewDemoDoll"
+      },
+      {
+        "class_id": 52026,
+        "function": "NewTruckTrap"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 708,
+        "function": "NewAsiatoKun"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 28304,
+        "function": "NewCamera_800D67F8"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 16087,
+        "function": "NewPadDemo"
+      },
+      {
+        "class_id": 50903,
+        "function": "NewCommander"
+      },
+      {
+        "class_id": 28314,
+        "function": "NewSnakeWatcher"
+      },
+      {
+        "class_id": 29674,
+        "function": "NewSphere"
+      },
+      {
+        "class_id": 5900,
+        "function": "NewSmoke"
+      },
+      {
+        "class_id": 33157,
+        "function": "NewBlinkTexture"
+      },
+      {
+        "class_id": 18449,
+        "function": "NewMovingObject"
+      },
+      {
+        "class_id": 62735,
+        "function": "NewSearchlight"
+      },
+      {
+        "class_id": 6371,
+        "function": "NewSnow"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "d00a": [
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 47698,
+        "function": "NewShakeModelGCL"
+      },
+      {
+        "class_id": 12494,
+        "function": "NewPatrolLamp"
+      },
+      {
+        "class_id": 50903,
+        "function": "NewCommander"
+      },
+      {
+        "class_id": 36421,
+        "function": "NewWaterView"
+      },
+      {
+        "class_id": 28314,
+        "function": "NewSnakeWatcher"
+      },
+      {
+        "class_id": 5900,
+        "function": "NewSmoke"
+      },
+      {
+        "class_id": 13029,
+        "function": "NewEmitter"
+      },
+      {
+        "class_id": 10940,
+        "function": "NewElevator"
+      },
+      {
+        "class_id": 54437,
+        "function": "NewMouse"
+      },
+      {
+        "class_id": 33258,
+        "function": "NewRippleSurface"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 5,
+        "function": "NewTelop"
+      },
+      {
+        "class_id": 14,
+        "function": "AN_Breath"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 18,
+        "function": "NewBubbleT"
+      },
+      {
+        "class_id": 19,
+        "function": "NewBubbleP_800D9D94"
+      },
+      {
+        "class_id": 37,
+        "function": "NewBlurSet"
+      },
+      {
+        "class_id": 43,
+        "function": "NewKetchap_s"
+      },
+      {
+        "class_id": 55,
+        "function": "NewRedAlert2"
+      },
+      {
+        "class_id": 56,
+        "function": "RedAlert_800C4F48"
+      },
+      {
+        "class_id": 68,
+        "function": "NewBlurPure"
+      },
+      {
+        "class_id": 69,
+        "function": "NewFamasLight"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "d01a": [
+      {
+        "class_id": 12494,
+        "function": "NewPatrolLamp"
+      },
+      {
+        "class_id": 29674,
+        "function": "NewSphere"
+      },
+      {
+        "class_id": 5900,
+        "function": "NewSmoke"
+      },
+      {
+        "class_id": 13029,
+        "function": "NewEmitter"
+      },
+      {
+        "class_id": 18449,
+        "function": "NewMovingObject"
+      },
+      {
+        "class_id": 62735,
+        "function": "NewSearchlight"
+      },
+      {
+        "class_id": 6371,
+        "function": "NewSnow"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 14,
+        "function": "AN_Breath"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 30,
+        "function": "NewWindcrcl_800CF6BC"
+      },
+      {
+        "class_id": 33,
+        "function": "NewFocusView"
+      },
+      {
+        "class_id": 37,
+        "function": "NewBlurSet"
+      },
+      {
+        "class_id": 69,
+        "function": "NewFamasLight"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s02a": [
+      {
+        "class_id": 4013,
+        "function": "NewMotionSoundEffect"
+      },
+      {
+        "class_id": 56715,
+        "function": "NewIntrudeCamera"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 49406,
+        "function": "NewBubbleDSn"
+      },
+      {
+        "class_id": 65233,
+        "function": "NewPadVibrationGcl"
+      },
+      {
+        "class_id": 23120,
+        "function": "NewGasEffectSet"
+      },
+      {
+        "class_id": 62659,
+        "function": "NewPutObject"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 47698,
+        "function": "NewShakeModelGCL"
+      },
+      {
+        "class_id": 13059,
+        "function": "NewDuctMouse"
+      },
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 56227,
+        "function": "NewWaterArea"
+      },
+      {
+        "class_id": 6658,
+        "function": "NewBubbleS"
+      },
+      {
+        "class_id": 33258,
+        "function": "NewRippleSurface"
+      },
+      {
+        "class_id": 57939,
+        "function": "NewElevatorPanel"
+      },
+      {
+        "class_id": 50903,
+        "function": "NewCommander"
+      },
+      {
+        "class_id": 28314,
+        "function": "NewSnakeWatcher"
+      },
+      {
+        "class_id": 28304,
+        "function": "NewCamera_800D67F8"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 23908,
+        "function": "NewFewDamageSet"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 33,
+        "function": "NewFocusView"
+      },
+      {
+        "class_id": 37,
+        "function": "NewBlurSet"
+      },
+      {
+        "class_id": 69,
+        "function": "NewFamasLight"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s02b": [
+      {
+        "class_id": 65233,
+        "function": "NewPadVibrationGcl"
+      },
+      {
+        "class_id": 52216,
+        "function": "NewPadControl"
+      },
+      {
+        "class_id": 4013,
+        "function": "NewMotionSoundEffect"
+      },
+      {
+        "class_id": 56715,
+        "function": "NewIntrudeCamera"
+      },
+      {
+        "class_id": 23120,
+        "function": "NewGasEffectSet"
+      },
+      {
+        "class_id": 62659,
+        "function": "NewPutObject"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 47698,
+        "function": "NewShakeModelGCL"
+      },
+      {
+        "class_id": 13059,
+        "function": "NewDuctMouse"
+      },
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 56227,
+        "function": "NewWaterArea"
+      },
+      {
+        "class_id": 6658,
+        "function": "NewBubbleS"
+      },
+      {
+        "class_id": 33258,
+        "function": "NewRippleSurface"
+      },
+      {
+        "class_id": 57939,
+        "function": "NewElevatorPanel"
+      },
+      {
+        "class_id": 50903,
+        "function": "NewCommander"
+      },
+      {
+        "class_id": 28314,
+        "function": "NewSnakeWatcher"
+      },
+      {
+        "class_id": 985,
+        "function": "NewShutter"
+      },
+      {
+        "class_id": 28304,
+        "function": "NewCamera_800D67F8"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 23908,
+        "function": "NewFewDamageSet"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 33,
+        "function": "NewFocusView"
+      },
+      {
+        "class_id": 66,
+        "function": "NewGasEffect"
+      },
+      {
+        "class_id": 68,
+        "function": "NewBlurPure"
+      },
+      {
+        "class_id": 69,
+        "function": "NewFamasLight"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s02c": [
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 4013,
+        "function": "NewMotionSoundEffect"
+      },
+      {
+        "class_id": 56715,
+        "function": "NewIntrudeCamera"
+      },
+      {
+        "class_id": 49406,
+        "function": "NewBubbleDSn"
+      },
+      {
+        "class_id": 21183,
+        "function": "NewKikenKun"
+      },
+      {
+        "class_id": 65233,
+        "function": "NewPadVibrationGcl"
+      },
+      {
+        "class_id": 31682,
+        "function": "NewCameraShake"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 23120,
+        "function": "NewGasEffectSet"
+      },
+      {
+        "class_id": 47698,
+        "function": "NewShakeModelGCL"
+      },
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 62659,
+        "function": "NewPutObject"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 61095,
+        "function": "NewWaterSurface"
+      },
+      {
+        "class_id": 50903,
+        "function": "NewCommander"
+      },
+      {
+        "class_id": 28314,
+        "function": "NewSnakeWatcher"
+      },
+      {
+        "class_id": 56227,
+        "function": "NewWaterArea"
+      },
+      {
+        "class_id": 6658,
+        "function": "NewBubbleS"
+      },
+      {
+        "class_id": 33258,
+        "function": "NewRippleSurface"
+      },
+      {
+        "class_id": 28304,
+        "function": "NewCamera_800D67F8"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 23908,
+        "function": "NewFewDamageSet"
+      },
+      {
+        "class_id": 17312,
+        "function": "NewIrSensor"
+      },
+      {
+        "class_id": 23120,
+        "function": "NewGasEffectSet"
+      },
+      {
+        "class_id": 36186,
+        "function": "NewGasDamage"
+      },
+      {
+        "class_id": 57939,
+        "function": "NewElevatorPanel"
+      },
+      {
+        "class_id": 985,
+        "function": "NewShutter"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s02d": [
+      {
+        "class_id": 65233,
+        "function": "NewPadVibrationGcl"
+      },
+      {
+        "class_id": 52216,
+        "function": "NewPadControl"
+      },
+      {
+        "class_id": 4013,
+        "function": "NewMotionSoundEffect"
+      },
+      {
+        "class_id": 56715,
+        "function": "NewIntrudeCamera"
+      },
+      {
+        "class_id": 23120,
+        "function": "NewGasEffectSet"
+      },
+      {
+        "class_id": 47698,
+        "function": "NewShakeModelGCL"
+      },
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 62659,
+        "function": "NewPutObject"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 61095,
+        "function": "NewWaterSurface"
+      },
+      {
+        "class_id": 50903,
+        "function": "NewCommander"
+      },
+      {
+        "class_id": 28314,
+        "function": "NewSnakeWatcher"
+      },
+      {
+        "class_id": 56227,
+        "function": "NewWaterArea"
+      },
+      {
+        "class_id": 6658,
+        "function": "NewBubbleS"
+      },
+      {
+        "class_id": 33258,
+        "function": "NewRippleSurface"
+      },
+      {
+        "class_id": 28304,
+        "function": "NewCamera_800D67F8"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 23908,
+        "function": "NewFewDamageSet"
+      },
+      {
+        "class_id": 17312,
+        "function": "NewIrSensor"
+      },
+      {
+        "class_id": 23120,
+        "function": "NewGasEffectSet"
+      },
+      {
+        "class_id": 36186,
+        "function": "NewGasDamage"
+      },
+      {
+        "class_id": 57939,
+        "function": "NewElevatorPanel"
+      },
+      {
+        "class_id": 985,
+        "function": "NewShutter"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s02e": [
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 4013,
+        "function": "NewMotionSoundEffect"
+      },
+      {
+        "class_id": 56715,
+        "function": "NewIntrudeCamera"
+      },
+      {
+        "class_id": 49406,
+        "function": "NewBubbleDSn"
+      },
+      {
+        "class_id": 21183,
+        "function": "NewKikenKun"
+      },
+      {
+        "class_id": 65233,
+        "function": "NewPadVibrationGcl"
+      },
+      {
+        "class_id": 31682,
+        "function": "NewCameraShake"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 23120,
+        "function": "NewGasEffectSet"
+      },
+      {
+        "class_id": 47698,
+        "function": "NewShakeModelGCL"
+      },
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 62659,
+        "function": "NewPutObject"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 61095,
+        "function": "NewWaterSurface"
+      },
+      {
+        "class_id": 50903,
+        "function": "NewCommander"
+      },
+      {
+        "class_id": 28314,
+        "function": "NewSnakeWatcher"
+      },
+      {
+        "class_id": 56227,
+        "function": "NewWaterArea"
+      },
+      {
+        "class_id": 6658,
+        "function": "NewBubbleS"
+      },
+      {
+        "class_id": 33258,
+        "function": "NewRippleSurface"
+      },
+      {
+        "class_id": 28304,
+        "function": "NewCamera_800D67F8"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 23908,
+        "function": "NewFewDamageSet"
+      },
+      {
+        "class_id": 17312,
+        "function": "NewIrSensor"
+      },
+      {
+        "class_id": 23120,
+        "function": "NewGasEffectSet"
+      },
+      {
+        "class_id": 36186,
+        "function": "NewGasDamage"
+      },
+      {
+        "class_id": 57939,
+        "function": "NewElevatorPanel"
+      },
+      {
+        "class_id": 985,
+        "function": "NewShutter"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s03a": [
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 59774,
+        "function": "NewDemoDoll"
+      },
+      {
+        "class_id": 4492,
+        "function": "NewFindTrap"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 57939,
+        "function": "NewElevatorPanel"
+      },
+      {
+        "class_id": 62917,
+        "function": "NewUji"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 101,
+        "function": "NewMosaicSet"
+      },
+      {
+        "class_id": 43461,
+        "function": "NewGunCamera"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 23120,
+        "function": "NewGasEffectSet"
+      },
+      {
+        "class_id": 17124,
+        "function": "NewHiyokoGcl"
+      },
+      {
+        "class_id": 20807,
+        "function": "NewPoint"
+      },
+      {
+        "class_id": 52216,
+        "function": "NewPadControl"
+      },
+      {
+        "class_id": 56715,
+        "function": "NewIntrudeCamera"
+      },
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 4013,
+        "function": "NewMotionSoundEffect"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 11,
+        "function": "NewBulletEx"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 33,
+        "function": "NewFocusView"
+      },
+      {
+        "class_id": 37,
+        "function": "NewBlurSet"
+      },
+      {
+        "class_id": 40,
+        "function": "NewSepia_800C5214"
+      },
+      {
+        "class_id": 55,
+        "function": "NewRedAlert2"
+      },
+      {
+        "class_id": 56,
+        "function": "RedAlert_800C4F48"
+      },
+      {
+        "class_id": 66,
+        "function": "NewGasEffect"
+      },
+      {
+        "class_id": 68,
+        "function": "NewBlurPure"
+      },
+      {
+        "class_id": 76,
+        "function": "NewTelop2"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s03b": [
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 58888,
+        "function": "NewTorture"
+      },
+      {
+        "class_id": 10785,
+        "function": "NewTortureBed"
+      },
+      {
+        "class_id": 59774,
+        "function": "NewDemoDoll"
+      },
+      {
+        "class_id": 1292,
+        "function": "NewTortureOcelot"
+      },
+      {
+        "class_id": 47511,
+        "function": "NewDoor"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 63307,
+        "function": "NewAllItemBox"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 5,
+        "function": "NewTelop"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 33,
+        "function": "NewFocusView"
+      },
+      {
+        "class_id": 37,
+        "function": "NewBlurSet"
+      },
+      {
+        "class_id": 40,
+        "function": "NewSepia_800C5214"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s03c": [
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 7929,
+        "function": "NewJohnny"
+      },
+      {
+        "class_id": 48998,
+        "function": "NewPrisonOtacon"
+      },
+      {
+        "class_id": 55517,
+        "function": "NewPrisonNinja"
+      },
+      {
+        "class_id": 41988,
+        "function": "NewPrisonSnake"
+      },
+      {
+        "class_id": 10146,
+        "function": "NewPrisonSnake2"
+      },
+      {
+        "class_id": 62917,
+        "function": "NewUji"
+      },
+      {
+        "class_id": 63307,
+        "function": "NewAllItemBox"
+      },
+      {
+        "class_id": 10785,
+        "function": "NewTortureBed"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 43461,
+        "function": "NewGunCamera"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 23120,
+        "function": "NewGasEffectSet"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 33,
+        "function": "NewFocusView"
+      },
+      {
+        "class_id": 37,
+        "function": "NewBlurSet"
+      },
+      {
+        "class_id": 40,
+        "function": "NewSepia_800C5214"
+      },
+      {
+        "class_id": 68,
+        "function": "NewBlurPure"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s03e": [
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 57939,
+        "function": "NewElevatorPanel"
+      },
+      {
+        "class_id": 62917,
+        "function": "NewUji"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 43461,
+        "function": "NewGunCamera"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 56715,
+        "function": "NewIntrudeCamera"
+      },
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 4013,
+        "function": "NewMotionSoundEffect"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s04a": [
+      {
+        "class_id": 57939,
+        "function": "NewElevatorPanel"
+      },
+      {
+        "class_id": 50903,
+        "function": "NewCommander"
+      },
+      {
+        "class_id": 28314,
+        "function": "NewSnakeWatcher"
+      },
+      {
+        "class_id": 13029,
+        "function": "NewEmitter"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 22768,
+        "function": "NewDummyWall"
+      },
+      {
+        "class_id": 17312,
+        "function": "NewIrSensor"
+      },
+      {
+        "class_id": 40192,
+        "function": "NewDummyFloor"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 65233,
+        "function": "NewPadVibrationGcl"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s04b": [
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 1455,
+        "function": "NewOcelotBoss"
+      },
+      {
+        "class_id": 32458,
+        "function": "NewWire"
+      },
+      {
+        "class_id": 39304,
+        "function": "NewArmsTechPresident"
+      },
+      {
+        "class_id": 47519,
+        "function": "NewCape"
+      },
+      {
+        "class_id": 43461,
+        "function": "NewGunCamera"
+      },
+      {
+        "class_id": 22768,
+        "function": "NewDummyWall"
+      },
+      {
+        "class_id": 3529,
+        "function": "NewVoiceSystem"
+      },
+      {
+        "class_id": 15372,
+        "function": "NewScenarioJirai"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 13395,
+        "function": "NewMovieGCL"
+      },
+      {
+        "class_id": 28959,
+        "function": "NewLifeUp"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 1,
+        "function": "NewBlast"
+      },
+      {
+        "class_id": 2,
+        "function": "AN_Smoke_800CE08C"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 5,
+        "function": "NewTelop"
+      },
+      {
+        "class_id": 9,
+        "function": "NewBlood"
+      },
+      {
+        "class_id": 10,
+        "function": "NewSplash_800C8D6C"
+      },
+      {
+        "class_id": 13,
+        "function": "NewKetchap_s"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 17,
+        "function": "s08c_800C4194"
+      },
+      {
+        "class_id": 26,
+        "function": "NewKogaku2"
+      },
+      {
+        "class_id": 27,
+        "function": "NewKogaku3"
+      },
+      {
+        "class_id": 29,
+        "function": "NewPlasma_800CD1A4"
+      },
+      {
+        "class_id": 33,
+        "function": "NewFocusView"
+      },
+      {
+        "class_id": 37,
+        "function": "NewBlurSet"
+      },
+      {
+        "class_id": 45,
+        "function": "NewDemoKatana"
+      },
+      {
+        "class_id": 54,
+        "function": "NewAnime_8005E6A4"
+      },
+      {
+        "class_id": 60,
+        "function": "NewSpark2_800CA714"
+      },
+      {
+        "class_id": 61,
+        "function": "NewSpark"
+      },
+      {
+        "class_id": 72,
+        "function": "NewBloodDrip"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s04c": [
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 1455,
+        "function": "NewOcelotBoss"
+      },
+      {
+        "class_id": 32458,
+        "function": "NewWire"
+      },
+      {
+        "class_id": 39304,
+        "function": "NewArmsTechPresident"
+      },
+      {
+        "class_id": 47519,
+        "function": "NewCape"
+      },
+      {
+        "class_id": 43461,
+        "function": "NewGunCamera"
+      },
+      {
+        "class_id": 22768,
+        "function": "NewDummyWall"
+      },
+      {
+        "class_id": 3529,
+        "function": "NewVoiceSystem"
+      },
+      {
+        "class_id": 15372,
+        "function": "NewScenarioJirai"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 13395,
+        "function": "NewMovieGCL"
+      },
+      {
+        "class_id": 28959,
+        "function": "NewLifeUp"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 14,
+        "function": "AN_Breath"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 33,
+        "function": "NewFocusView"
+      },
+      {
+        "class_id": 37,
+        "function": "NewBlurSet"
+      },
+      {
+        "class_id": 40,
+        "function": "NewSepia_800C5214"
+      },
+      {
+        "class_id": 68,
+        "function": "NewBlurPure"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s06a": [
+      {
+        "class_id": 65233,
+        "function": "NewPadVibrationGcl"
+      },
+      {
+        "class_id": 52026,
+        "function": "NewTruckTrap"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 13029,
+        "function": "NewEmitter"
+      },
+      {
+        "class_id": 59774,
+        "function": "NewDemoDoll"
+      },
+      {
+        "class_id": 28304,
+        "function": "NewCamera_800D67F8"
+      },
+      {
+        "class_id": 50903,
+        "function": "NewCommander"
+      },
+      {
+        "class_id": 28314,
+        "function": "NewSnakeWatcher"
+      },
+      {
+        "class_id": 985,
+        "function": "NewShutter"
+      },
+      {
+        "class_id": 23120,
+        "function": "NewGasEffectSet"
+      },
+      {
+        "class_id": 23908,
+        "function": "NewFewDamageSet"
+      },
+      {
+        "class_id": 57939,
+        "function": "NewElevatorPanel"
+      },
+      {
+        "class_id": 12494,
+        "function": "NewPatrolLamp"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 28959,
+        "function": "NewLifeUp"
+      },
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 31682,
+        "function": "NewCameraShake"
+      },
+      {
+        "class_id": 33157,
+        "function": "NewBlinkTexture"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s05a": [
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 6371,
+        "function": "NewSnow"
+      },
+      {
+        "class_id": 42741,
+        "function": "NewSnowStorm"
+      },
+      {
+        "class_id": 40305,
+        "function": "NewM1E1"
+      },
+      {
+        "class_id": 54764,
+        "function": "s05a_800E1134"
+      },
+      {
+        "class_id": 985,
+        "function": "NewShutter"
+      },
+      {
+        "class_id": 15372,
+        "function": "NewScenarioJirai"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 48865,
+        "function": "NewSphere2"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 43461,
+        "function": "NewGunCamera"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 31682,
+        "function": "NewCameraShake"
+      },
+      {
+        "class_id": 708,
+        "function": "NewAsiatoKun"
+      },
+      {
+        "class_id": 23120,
+        "function": "NewGasEffectSet"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 44908,
+        "function": "NewDynamicFloorSet"
+      },
+      {
+        "class_id": 16752,
+        "function": "NewSnakeBreath"
+      },
+      {
+        "class_id": 65233,
+        "function": "NewPadVibrationGcl"
+      },
+      {
+        "class_id": 52216,
+        "function": "NewPadControl"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 5,
+        "function": "NewTelop"
+      },
+      {
+        "class_id": 12,
+        "function": "NewAnime_8005E258"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 33,
+        "function": "NewFocusView"
+      },
+      {
+        "class_id": 37,
+        "function": "NewBlurSet"
+      },
+      {
+        "class_id": 47,
+        "function": "AN_Smoke_800CE164"
+      },
+      {
+        "class_id": 48,
+        "function": "NewBlastLine"
+      },
+      {
+        "class_id": 49,
+        "function": "NewSmokeLn_800CDFA4"
+      },
+      {
+        "class_id": 50,
+        "function": "s05a_800DBF58"
+      },
+      {
+        "class_id": 68,
+        "function": "NewBlurPure"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s11a": [
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 22220,
+        "function": "NewCamera2Set"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 24314,
+        "function": "NewZako11ACommander"
+      },
+      {
+        "class_id": 42504,
+        "function": "NewZako11A"
+      },
+      {
+        "class_id": 24537,
+        "function": "NewRasen2"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 23120,
+        "function": "NewGasEffectSet"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s03d": [
+      {
+        "class_id": 44795,
+        "function": "NewToBeContinued"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 59774,
+        "function": "NewDemoDoll"
+      },
+      {
+        "class_id": 4492,
+        "function": "NewFindTrap"
+      },
+      {
+        "class_id": 51029,
+        "function": "NewMeryl3"
+      },
+      {
+        "class_id": 31991,
+        "function": "NewS03dZakoCommander"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 57939,
+        "function": "NewElevatorPanel"
+      },
+      {
+        "class_id": 62917,
+        "function": "NewUji"
+      },
+      {
+        "class_id": 60807,
+        "function": "NewS03dZako"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 101,
+        "function": "NewMosaicSet"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 17124,
+        "function": "NewHiyokoGcl"
+      },
+      {
+        "class_id": 20807,
+        "function": "NewPoint"
+      },
+      {
+        "class_id": 56715,
+        "function": "NewIntrudeCamera"
+      },
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 4013,
+        "function": "NewMotionSoundEffect"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 33,
+        "function": "NewFocusView"
+      },
+      {
+        "class_id": 37,
+        "function": "NewBlurSet"
+      },
+      {
+        "class_id": 40,
+        "function": "NewSepia_800C5214"
+      },
+      {
+        "class_id": 68,
+        "function": "NewBlurPure"
+      },
+      {
+        "class_id": 69,
+        "function": "NewFamasLight"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s07a": [
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 50903,
+        "function": "NewCommander"
+      },
+      {
+        "class_id": 28314,
+        "function": "NewSnakeWatcher"
+      },
+      {
+        "class_id": 20600,
+        "function": "NewEnemyMeryl_800D63A4"
+      },
+      {
+        "class_id": 47511,
+        "function": "NewDoor"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 49688,
+        "function": "NewMirror"
+      },
+      {
+        "class_id": 57939,
+        "function": "NewElevatorPanel"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s07b": [
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 42863,
+        "function": "NewPsychoMantis"
+      },
+      {
+        "class_id": 62640,
+        "function": "s07b_800CA8F8"
+      },
+      {
+        "class_id": 44914,
+        "function": "NewMemoryPsycho"
+      },
+      {
+        "class_id": 28941,
+        "function": "NewPsychoObject"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 28959,
+        "function": "NewLifeUp"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 23120,
+        "function": "NewGasEffectSet"
+      },
+      {
+        "class_id": 59774,
+        "function": "NewDemoDoll"
+      },
+      {
+        "class_id": 40957,
+        "function": "GM_SetSecondAvailable"
+      },
+      {
+        "class_id": 11530,
+        "function": "NewSecond"
+      },
+      {
+        "class_id": 4013,
+        "function": "NewMotionSoundEffect"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 5,
+        "function": "NewTelop"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 26,
+        "function": "NewKogaku2"
+      },
+      {
+        "class_id": 27,
+        "function": "NewKogaku3"
+      },
+      {
+        "class_id": 33,
+        "function": "NewFocusView"
+      },
+      {
+        "class_id": 37,
+        "function": "NewBlurSet"
+      },
+      {
+        "class_id": 40,
+        "function": "NewSepia_800C5214"
+      },
+      {
+        "class_id": 55,
+        "function": "NewRedAlert2"
+      },
+      {
+        "class_id": 56,
+        "function": "RedAlert_800C4F48"
+      },
+      {
+        "class_id": 68,
+        "function": "NewBlurPure"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s07br": [
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 42863,
+        "function": "NewPsychoMantis"
+      },
+      {
+        "class_id": 62640,
+        "function": "s07b_800CA8F8"
+      },
+      {
+        "class_id": 44914,
+        "function": "NewMemoryPsycho"
+      },
+      {
+        "class_id": 28941,
+        "function": "NewPsychoObject"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 28959,
+        "function": "NewLifeUp"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 23120,
+        "function": "NewGasEffectSet"
+      },
+      {
+        "class_id": 59774,
+        "function": "NewDemoDoll"
+      },
+      {
+        "class_id": 40957,
+        "function": "GM_SetSecondAvailable"
+      },
+      {
+        "class_id": 11530,
+        "function": "NewSecond"
+      },
+      {
+        "class_id": 4013,
+        "function": "NewMotionSoundEffect"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 5,
+        "function": "NewTelop"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 26,
+        "function": "NewKogaku2"
+      },
+      {
+        "class_id": 27,
+        "function": "NewKogaku3"
+      },
+      {
+        "class_id": 33,
+        "function": "NewFocusView"
+      },
+      {
+        "class_id": 37,
+        "function": "NewBlurSet"
+      },
+      {
+        "class_id": 40,
+        "function": "NewSepia_800C5214"
+      },
+      {
+        "class_id": 55,
+        "function": "NewRedAlert2"
+      },
+      {
+        "class_id": 56,
+        "function": "RedAlert_800C4F48"
+      },
+      {
+        "class_id": 68,
+        "function": "NewBlurPure"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s07c": [
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 47511,
+        "function": "NewDoor"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 49688,
+        "function": "NewMirror"
+      },
+      {
+        "class_id": 57939,
+        "function": "NewElevatorPanel"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 57969,
+        "function": "NewMeryl72_800C7BC4"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 40957,
+        "function": "GM_SetSecondAvailable"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 5,
+        "function": "NewTelop"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 33,
+        "function": "NewFocusView"
+      },
+      {
+        "class_id": 66,
+        "function": "NewGasEffect"
+      },
+      {
+        "class_id": 68,
+        "function": "NewBlurPure"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s08a": [
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 23120,
+        "function": "NewGasEffectSet"
+      },
+      {
+        "class_id": 23908,
+        "function": "NewFewDamageSet"
+      },
+      {
+        "class_id": 43461,
+        "function": "NewGunCamera"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 8434,
+        "function": "NewPanel"
+      },
+      {
+        "class_id": 5788,
+        "function": "NewPilotLamp"
+      },
+      {
+        "class_id": 4220,
+        "function": "NewElectricDamage"
+      },
+      {
+        "class_id": 44786,
+        "function": "NewElectricFloor"
+      },
+      {
+        "class_id": 13052,
+        "function": "NewBreakObject"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 57939,
+        "function": "NewElevatorPanel"
+      },
+      {
+        "class_id": 39874,
+        "function": "NewPlasmaGcl"
+      },
+      {
+        "class_id": 48761,
+        "function": "NewDeathSpark"
+      },
+      {
+        "class_id": 58263,
+        "function": "NewRedAlert"
+      },
+      {
+        "class_id": 59774,
+        "function": "NewDemoDoll"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 65233,
+        "function": "NewPadVibrationGcl"
+      },
+      {
+        "class_id": 36464,
+        "function": "NewGlassSet"
+      },
+      {
+        "class_id": 64523,
+        "function": "NewFloorSpark"
+      },
+      {
+        "class_id": 52216,
+        "function": "NewPadControl"
+      },
+      {
+        "class_id": 31682,
+        "function": "NewCameraShake"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s08b": [
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 36464,
+        "function": "NewGlassSet"
+      },
+      {
+        "class_id": 24322,
+        "function": "NewPaper"
+      },
+      {
+        "class_id": 30861,
+        "function": "NewChair"
+      },
+      {
+        "class_id": 56725,
+        "function": "NewPanel2"
+      },
+      {
+        "class_id": 28024,
+        "function": "NewMonitor1"
+      },
+      {
+        "class_id": 12474,
+        "function": "NewNinjaBoss"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 13395,
+        "function": "NewMovieGCL"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 28959,
+        "function": "NewLifeUp"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 5,
+        "function": "NewTelop"
+      },
+      {
+        "class_id": 14,
+        "function": "AN_Breath"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 17,
+        "function": "s08c_800C4194"
+      },
+      {
+        "class_id": 20,
+        "function": "NewScope"
+      },
+      {
+        "class_id": 23,
+        "function": "NewGoggleIr"
+      },
+      {
+        "class_id": 24,
+        "function": "NewGoggleSight"
+      },
+      {
+        "class_id": 26,
+        "function": "NewKogaku2"
+      },
+      {
+        "class_id": 27,
+        "function": "NewKogaku3"
+      },
+      {
+        "class_id": 33,
+        "function": "NewFocusView"
+      },
+      {
+        "class_id": 35,
+        "function": "NewKetchap_s"
+      },
+      {
+        "class_id": 37,
+        "function": "NewBlurSet"
+      },
+      {
+        "class_id": 45,
+        "function": "NewDemoKatana"
+      },
+      {
+        "class_id": 66,
+        "function": "NewGasEffect"
+      },
+      {
+        "class_id": 76,
+        "function": "NewTelop2"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s08br": [
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 36464,
+        "function": "NewGlassSet"
+      },
+      {
+        "class_id": 24322,
+        "function": "NewPaper"
+      },
+      {
+        "class_id": 30861,
+        "function": "NewChair"
+      },
+      {
+        "class_id": 56725,
+        "function": "NewPanel2"
+      },
+      {
+        "class_id": 28024,
+        "function": "NewMonitor1"
+      },
+      {
+        "class_id": 12474,
+        "function": "NewNinjaBoss"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 13395,
+        "function": "NewMovieGCL"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 28959,
+        "function": "NewLifeUp"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 5,
+        "function": "NewTelop"
+      },
+      {
+        "class_id": 14,
+        "function": "AN_Breath"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 17,
+        "function": "s08c_800C4194"
+      },
+      {
+        "class_id": 20,
+        "function": "NewScope"
+      },
+      {
+        "class_id": 23,
+        "function": "NewGoggleIr"
+      },
+      {
+        "class_id": 24,
+        "function": "NewGoggleSight"
+      },
+      {
+        "class_id": 26,
+        "function": "NewKogaku2"
+      },
+      {
+        "class_id": 27,
+        "function": "NewKogaku3"
+      },
+      {
+        "class_id": 33,
+        "function": "NewFocusView"
+      },
+      {
+        "class_id": 35,
+        "function": "NewKetchap_s"
+      },
+      {
+        "class_id": 37,
+        "function": "NewBlurSet"
+      },
+      {
+        "class_id": 45,
+        "function": "NewDemoKatana"
+      },
+      {
+        "class_id": 66,
+        "function": "NewGasEffect"
+      },
+      {
+        "class_id": 76,
+        "function": "NewTelop2"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s09a": [
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 708,
+        "function": "NewAsiatoKun"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 16752,
+        "function": "NewSnakeBreath"
+      },
+      {
+        "class_id": 57969,
+        "function": "NewMeryl72_800C7BC4"
+      },
+      {
+        "class_id": 27662,
+        "function": "NewDog"
+      },
+      {
+        "class_id": 33258,
+        "function": "NewRippleSurface"
+      },
+      {
+        "class_id": 59774,
+        "function": "NewDemoDoll"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 33157,
+        "function": "NewBlinkTexture"
+      },
+      {
+        "class_id": 23120,
+        "function": "NewGasEffectSet"
+      },
+      {
+        "class_id": 36894,
+        "function": "NewSnowAreaSet"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s10a": [
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 708,
+        "function": "NewAsiatoKun"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 43461,
+        "function": "NewGunCamera"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 36452,
+        "function": "NewZako10Commander"
+      },
+      {
+        "class_id": 12771,
+        "function": "NewZako10"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 15372,
+        "function": "NewScenarioJirai"
+      },
+      {
+        "class_id": 59774,
+        "function": "NewDemoDoll"
+      },
+      {
+        "class_id": 38444,
+        "function": "NewWolf2"
+      },
+      {
+        "class_id": 4440,
+        "function": "NewBloodyMeryl"
+      },
+      {
+        "class_id": 20117,
+        "function": "NewBloodCl"
+      },
+      {
+        "class_id": 54437,
+        "function": "NewMouse"
+      },
+      {
+        "class_id": 16617,
+        "function": "NewStage10Demo"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 28959,
+        "function": "NewLifeUp"
+      },
+      {
+        "class_id": 16752,
+        "function": "NewSnakeBreath"
+      },
+      {
+        "class_id": 33258,
+        "function": "NewRippleSurface"
+      },
+      {
+        "class_id": 16282,
+        "function": "NewEnvironmentSoundSet"
+      },
+      {
+        "class_id": 61027,
+        "function": "NewScnHeadMark"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 5,
+        "function": "NewTelop"
+      },
+      {
+        "class_id": 9,
+        "function": "NewBlood"
+      },
+      {
+        "class_id": 10,
+        "function": "NewSplash_800C8D6C"
+      },
+      {
+        "class_id": 11,
+        "function": "NewBulletEx"
+      },
+      {
+        "class_id": 14,
+        "function": "AN_Breath"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 33,
+        "function": "NewFocusView"
+      },
+      {
+        "class_id": 37,
+        "function": "NewBlurSet"
+      },
+      {
+        "class_id": 40,
+        "function": "NewSepia_800C5214"
+      },
+      {
+        "class_id": 55,
+        "function": "NewRedAlert2"
+      },
+      {
+        "class_id": 56,
+        "function": "RedAlert_800C4F48"
+      },
+      {
+        "class_id": 60,
+        "function": "NewSpark2_800CA714"
+      },
+      {
+        "class_id": 61,
+        "function": "NewSpark"
+      },
+      {
+        "class_id": 66,
+        "function": "NewGasEffect"
+      },
+      {
+        "class_id": 68,
+        "function": "NewBlurPure"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s10ar": [
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 708,
+        "function": "NewAsiatoKun"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 43461,
+        "function": "NewGunCamera"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 36452,
+        "function": "NewZako10Commander"
+      },
+      {
+        "class_id": 12771,
+        "function": "NewZako10"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 15372,
+        "function": "NewScenarioJirai"
+      },
+      {
+        "class_id": 59774,
+        "function": "NewDemoDoll"
+      },
+      {
+        "class_id": 38444,
+        "function": "NewWolf2"
+      },
+      {
+        "class_id": 4440,
+        "function": "NewBloodyMeryl"
+      },
+      {
+        "class_id": 20117,
+        "function": "NewBloodCl"
+      },
+      {
+        "class_id": 54437,
+        "function": "NewMouse"
+      },
+      {
+        "class_id": 16617,
+        "function": "NewStage10Demo"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 28959,
+        "function": "NewLifeUp"
+      },
+      {
+        "class_id": 16752,
+        "function": "NewSnakeBreath"
+      },
+      {
+        "class_id": 33258,
+        "function": "NewRippleSurface"
+      },
+      {
+        "class_id": 16282,
+        "function": "NewEnvironmentSoundSet"
+      },
+      {
+        "class_id": 61027,
+        "function": "NewScnHeadMark"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 5,
+        "function": "NewTelop"
+      },
+      {
+        "class_id": 9,
+        "function": "NewBlood"
+      },
+      {
+        "class_id": 10,
+        "function": "NewSplash_800C8D6C"
+      },
+      {
+        "class_id": 11,
+        "function": "NewBulletEx"
+      },
+      {
+        "class_id": 14,
+        "function": "AN_Breath"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 33,
+        "function": "NewFocusView"
+      },
+      {
+        "class_id": 37,
+        "function": "NewBlurSet"
+      },
+      {
+        "class_id": 40,
+        "function": "NewSepia_800C5214"
+      },
+      {
+        "class_id": 55,
+        "function": "NewRedAlert2"
+      },
+      {
+        "class_id": 56,
+        "function": "RedAlert_800C4F48"
+      },
+      {
+        "class_id": 60,
+        "function": "NewSpark2_800CA714"
+      },
+      {
+        "class_id": 61,
+        "function": "NewSpark"
+      },
+      {
+        "class_id": 66,
+        "function": "NewGasEffect"
+      },
+      {
+        "class_id": 68,
+        "function": "NewBlurPure"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s11c": [
+      {
+        "class_id": 44908,
+        "function": "NewDynamicFloorSet"
+      },
+      {
+        "class_id": 61027,
+        "function": "NewScnHeadMark"
+      },
+      {
+        "class_id": 57939,
+        "function": "NewElevatorPanel"
+      },
+      {
+        "class_id": 65233,
+        "function": "NewPadVibrationGcl"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 55035,
+        "function": "NewFog"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 24537,
+        "function": "NewRasen2"
+      },
+      {
+        "class_id": 43553,
+        "function": "NewRasenElevator"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 31682,
+        "function": "NewCameraShake"
+      },
+      {
+        "class_id": 43461,
+        "function": "NewGunCamera"
+      },
+      {
+        "class_id": 16087,
+        "function": "NewPadDemo"
+      },
+      {
+        "class_id": 23120,
+        "function": "NewGasEffectSet"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s11e": [
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 65233,
+        "function": "NewPadVibrationGcl"
+      },
+      {
+        "class_id": 31682,
+        "function": "NewCameraShake"
+      },
+      {
+        "class_id": 23120,
+        "function": "NewGasEffectSet"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 50903,
+        "function": "NewCommander"
+      },
+      {
+        "class_id": 28314,
+        "function": "NewSnakeWatcher"
+      },
+      {
+        "class_id": 26725,
+        "function": "NewTexScroll"
+      },
+      {
+        "class_id": 24330,
+        "function": "NewZako11ECommander"
+      },
+      {
+        "class_id": 42508,
+        "function": "NewZako11E"
+      },
+      {
+        "class_id": 47511,
+        "function": "NewDoor"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s11i": [
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 16752,
+        "function": "NewSnakeBreath"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 6371,
+        "function": "NewSnow"
+      },
+      {
+        "class_id": 42741,
+        "function": "NewSnowStorm"
+      },
+      {
+        "class_id": 24334,
+        "function": "NewZako11FCommander"
+      },
+      {
+        "class_id": 42509,
+        "function": "NewZako11F"
+      },
+      {
+        "class_id": 29674,
+        "function": "NewSphere"
+      },
+      {
+        "class_id": 47449,
+        "function": "NewHind2"
+      },
+      {
+        "class_id": 22768,
+        "function": "NewDummyWall"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s12a": [
+      {
+        "class_id": 65233,
+        "function": "NewPadVibrationGcl"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 708,
+        "function": "NewAsiatoKun"
+      },
+      {
+        "class_id": 16752,
+        "function": "NewSnakeBreath"
+      },
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 38444,
+        "function": "NewWolf2"
+      },
+      {
+        "class_id": 4492,
+        "function": "NewFindTrap"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 13395,
+        "function": "NewMovieGCL"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 6371,
+        "function": "NewSnow"
+      },
+      {
+        "class_id": 42741,
+        "function": "NewSnowStorm"
+      },
+      {
+        "class_id": 55035,
+        "function": "NewFog"
+      },
+      {
+        "class_id": 43461,
+        "function": "NewGunCamera"
+      },
+      {
+        "class_id": 15372,
+        "function": "NewScenarioJirai"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 28959,
+        "function": "NewLifeUp"
+      },
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 9,
+        "function": "NewBlood"
+      },
+      {
+        "class_id": 10,
+        "function": "NewSplash_800C8D6C"
+      },
+      {
+        "class_id": 14,
+        "function": "AN_Breath"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 26,
+        "function": "NewKogaku2"
+      },
+      {
+        "class_id": 27,
+        "function": "NewKogaku3"
+      },
+      {
+        "class_id": 33,
+        "function": "NewFocusView"
+      },
+      {
+        "class_id": 37,
+        "function": "NewBlurSet"
+      },
+      {
+        "class_id": 53,
+        "function": "NewAnime_8005E574"
+      },
+      {
+        "class_id": 68,
+        "function": "NewBlurPure"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s12b": [
+      {
+        "class_id": 52026,
+        "function": "NewTruckTrap"
+      },
+      {
+        "class_id": 33157,
+        "function": "NewBlinkTexture"
+      },
+      {
+        "class_id": 65233,
+        "function": "NewPadVibrationGcl"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 44908,
+        "function": "NewDynamicFloorSet"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 708,
+        "function": "NewAsiatoKun"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 16752,
+        "function": "NewSnakeBreath"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 28959,
+        "function": "NewLifeUp"
+      },
+      {
+        "class_id": 27662,
+        "function": "NewDog"
+      },
+      {
+        "class_id": 4492,
+        "function": "NewFindTrap"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 6371,
+        "function": "NewSnow"
+      },
+      {
+        "class_id": 55035,
+        "function": "NewFog"
+      },
+      {
+        "class_id": 43461,
+        "function": "NewGunCamera"
+      },
+      {
+        "class_id": 15372,
+        "function": "NewScenarioJirai"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 62659,
+        "function": "NewPutObject"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s12c": [
+      {
+        "class_id": 52026,
+        "function": "NewTruckTrap"
+      },
+      {
+        "class_id": 33157,
+        "function": "NewBlinkTexture"
+      },
+      {
+        "class_id": 65233,
+        "function": "NewPadVibrationGcl"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 708,
+        "function": "NewAsiatoKun"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 62659,
+        "function": "NewPutObject"
+      },
+      {
+        "class_id": 16752,
+        "function": "NewSnakeBreath"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 27662,
+        "function": "NewDog"
+      },
+      {
+        "class_id": 4492,
+        "function": "NewFindTrap"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 6371,
+        "function": "NewSnow"
+      },
+      {
+        "class_id": 55035,
+        "function": "NewFog"
+      },
+      {
+        "class_id": 43461,
+        "function": "NewGunCamera"
+      },
+      {
+        "class_id": 15372,
+        "function": "NewScenarioJirai"
+      },
+      {
+        "class_id": 31682,
+        "function": "NewCameraShake"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s13a": [
+      {
+        "class_id": 47698,
+        "function": "NewShakeModelGCL"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 23120,
+        "function": "NewGasEffectSet"
+      },
+      {
+        "class_id": 65233,
+        "function": "NewPadVibrationGcl"
+      },
+      {
+        "class_id": 31682,
+        "function": "NewCameraShake"
+      },
+      {
+        "class_id": 43461,
+        "function": "NewGunCamera"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 12494,
+        "function": "NewPatrolLamp"
+      },
+      {
+        "class_id": 50903,
+        "function": "NewCommander"
+      },
+      {
+        "class_id": 28314,
+        "function": "NewSnakeWatcher"
+      },
+      {
+        "class_id": 54437,
+        "function": "NewMouse"
+      },
+      {
+        "class_id": 41979,
+        "function": "NewCrane"
+      },
+      {
+        "class_id": 16991,
+        "function": "NewLift"
+      },
+      {
+        "class_id": 29688,
+        "function": "NewDoor2"
+      },
+      {
+        "class_id": 5979,
+        "function": "NewSmokeTarget"
+      },
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 44504,
+        "function": "NewFurnace"
+      },
+      {
+        "class_id": 47698,
+        "function": "NewShakeModelGCL"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s15b": [
+      {
+        "class_id": 65233,
+        "function": "NewPadVibrationGcl"
+      },
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 26725,
+        "function": "NewTexScroll"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 16282,
+        "function": "NewEnvironmentSoundSet"
+      },
+      {
+        "class_id": 43461,
+        "function": "NewGunCamera"
+      },
+      {
+        "class_id": 47698,
+        "function": "NewShakeModelGCL"
+      },
+      {
+        "class_id": 40192,
+        "function": "NewDummyFloor"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 51006,
+        "function": "NewFallSplash"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s15c": [
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 16752,
+        "function": "NewSnakeBreath"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 52293,
+        "function": "s15c_dyncon_800D8C9C"
+      },
+      {
+        "class_id": 23120,
+        "function": "NewGasEffectSet"
+      },
+      {
+        "class_id": 36448,
+        "function": "NewCrow"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 28959,
+        "function": "NewLifeUp"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 44908,
+        "function": "NewDynamicFloorSet"
+      },
+      {
+        "class_id": 50903,
+        "function": "NewCommander"
+      },
+      {
+        "class_id": 28314,
+        "function": "NewSnakeWatcher"
+      },
+      {
+        "class_id": 20117,
+        "function": "NewBloodCl"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s16a": [
+      {
+        "class_id": 65233,
+        "function": "NewPadVibrationGcl"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 50860,
+        "function": "NewKeyItem"
+      },
+      {
+        "class_id": 47511,
+        "function": "NewDoor"
+      },
+      {
+        "class_id": 708,
+        "function": "NewAsiatoKun"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 42112,
+        "function": "NewWaterArea2"
+      },
+      {
+        "class_id": 33258,
+        "function": "NewRippleSurface"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 23908,
+        "function": "NewFewDamageSet"
+      },
+      {
+        "class_id": 43461,
+        "function": "NewGunCamera"
+      },
+      {
+        "class_id": 47698,
+        "function": "NewShakeModelGCL"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 23120,
+        "function": "NewGasEffectSet"
+      },
+      {
+        "class_id": 37243,
+        "function": "NewItemDot"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 40,
+        "function": "NewSepia_800C5214"
+      },
+      {
+        "class_id": 55,
+        "function": "NewRedAlert2"
+      },
+      {
+        "class_id": 56,
+        "function": "RedAlert_800C4F48"
+      },
+      {
+        "class_id": 66,
+        "function": "NewGasEffect"
+      },
+      {
+        "class_id": 68,
+        "function": "NewBlurPure"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s16b": [
+      {
+        "class_id": 47698,
+        "function": "NewShakeModelGCL"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 31,
+        "function": "NewSepia_800C4F9C"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s16c": [
+      {
+        "class_id": 47698,
+        "function": "NewShakeModelGCL"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 50903,
+        "function": "NewCommander"
+      },
+      {
+        "class_id": 28314,
+        "function": "NewSnakeWatcher"
+      },
+      {
+        "class_id": 21183,
+        "function": "NewKikenKun"
+      },
+      {
+        "class_id": 28304,
+        "function": "NewCamera_800D67F8"
+      },
+      {
+        "class_id": 59774,
+        "function": "NewDemoDoll"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 40,
+        "function": "NewSepia_800C5214"
+      },
+      {
+        "class_id": 55,
+        "function": "NewRedAlert2"
+      },
+      {
+        "class_id": 56,
+        "function": "RedAlert_800C4F48"
+      },
+      {
+        "class_id": 66,
+        "function": "NewGasEffect"
+      },
+      {
+        "class_id": 68,
+        "function": "NewBlurPure"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s16d": [
+      {
+        "class_id": 50903,
+        "function": "NewCommander"
+      },
+      {
+        "class_id": 28314,
+        "function": "NewSnakeWatcher"
+      },
+      {
+        "class_id": 28304,
+        "function": "NewCamera_800D67F8"
+      },
+      {
+        "class_id": 21183,
+        "function": "NewKikenKun"
+      },
+      {
+        "class_id": 65233,
+        "function": "NewPadVibrationGcl"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 23120,
+        "function": "NewGasEffectSet"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 62878,
+        "function": "NewBelong"
+      },
+      {
+        "class_id": 23908,
+        "function": "NewFewDamageSet"
+      },
+      {
+        "class_id": 59774,
+        "function": "NewDemoDoll"
+      },
+      {
+        "class_id": 16087,
+        "function": "NewPadDemo"
+      },
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 20,
+        "function": "NewScope"
+      },
+      {
+        "class_id": 21,
+        "function": "NewGoggle"
+      },
+      {
+        "class_id": 22,
+        "function": "NewGoggleSight"
+      },
+      {
+        "class_id": 33,
+        "function": "NewFocusView"
+      },
+      {
+        "class_id": 37,
+        "function": "NewBlurSet"
+      },
+      {
+        "class_id": 40,
+        "function": "NewSepia_800C5214"
+      },
+      {
+        "class_id": 53,
+        "function": "NewAnime_8005E574"
+      },
+      {
+        "class_id": 54,
+        "function": "NewAnime_8005E6A4"
+      },
+      {
+        "class_id": 55,
+        "function": "NewRedAlert2"
+      },
+      {
+        "class_id": 56,
+        "function": "RedAlert_800C4F48"
+      },
+      {
+        "class_id": 60,
+        "function": "NewSpark2_800CA714"
+      },
+      {
+        "class_id": 61,
+        "function": "NewSpark"
+      },
+      {
+        "class_id": 68,
+        "function": "NewBlurPure"
+      },
+      {
+        "class_id": 75,
+        "function": "NewMGRoom"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s20a": [
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 29674,
+        "function": "NewSphere"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 16,
+        "function": "NewDemoAsiato"
+      },
+      {
+        "class_id": 33,
+        "function": "NewFocusView"
+      },
+      {
+        "class_id": 37,
+        "function": "NewBlurSet"
+      },
+      {
+        "class_id": 40,
+        "function": "NewSepia_800C5214"
+      },
+      {
+        "class_id": 49,
+        "function": "NewSmokeLn_800CDFA4"
+      },
+      {
+        "class_id": 55,
+        "function": "NewRedAlert2"
+      },
+      {
+        "class_id": 56,
+        "function": "RedAlert_800C4F48"
+      },
+      {
+        "class_id": 63,
+        "function": "NewInverseLight2"
+      },
+      {
+        "class_id": 68,
+        "function": "NewBlurPure"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s20ar": [
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 29674,
+        "function": "NewSphere"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 16,
+        "function": "NewDemoAsiato"
+      },
+      {
+        "class_id": 33,
+        "function": "NewFocusView"
+      },
+      {
+        "class_id": 37,
+        "function": "NewBlurSet"
+      },
+      {
+        "class_id": 40,
+        "function": "NewSepia_800C5214"
+      },
+      {
+        "class_id": 49,
+        "function": "NewSmokeLn_800CDFA4"
+      },
+      {
+        "class_id": 55,
+        "function": "NewRedAlert2"
+      },
+      {
+        "class_id": 56,
+        "function": "RedAlert_800C4F48"
+      },
+      {
+        "class_id": 63,
+        "function": "NewInverseLight2"
+      },
+      {
+        "class_id": 68,
+        "function": "NewBlurPure"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "change": [
+      {
+        "class_id": 63266,
+        "function": "NewCdChange"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "d03a": [
+      {
+        "class_id": 47511,
+        "function": "NewDoor"
+      },
+      {
+        "class_id": 62917,
+        "function": "NewUji"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 40,
+        "function": "NewSepia_800C5214"
+      },
+      {
+        "class_id": 55,
+        "function": "NewRedAlert2"
+      },
+      {
+        "class_id": 56,
+        "function": "RedAlert_800C4F48"
+      },
+      {
+        "class_id": 66,
+        "function": "NewGasEffect"
+      },
+      {
+        "class_id": 68,
+        "function": "NewBlurPure"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "d11c": [
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 47511,
+        "function": "NewDoor"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 23120,
+        "function": "NewGasEffectSet"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 26,
+        "function": "NewKogaku2"
+      },
+      {
+        "class_id": 27,
+        "function": "NewKogaku3"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "d16e": [
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 59774,
+        "function": "NewDemoDoll"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 28304,
+        "function": "NewCamera_800D67F8"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 33,
+        "function": "NewFocusView"
+      },
+      {
+        "class_id": 37,
+        "function": "NewBlurSet"
+      },
+      {
+        "class_id": 40,
+        "function": "NewSepia_800C5214"
+      },
+      {
+        "class_id": 49,
+        "function": "NewSmokeLn_800CDFA4"
+      },
+      {
+        "class_id": 55,
+        "function": "NewRedAlert2"
+      },
+      {
+        "class_id": 56,
+        "function": "RedAlert_800C4F48"
+      },
+      {
+        "class_id": 60,
+        "function": "NewSpark2_800CA714"
+      },
+      {
+        "class_id": 61,
+        "function": "NewSpark"
+      },
+      {
+        "class_id": 63,
+        "function": "NewInverseLight2"
+      },
+      {
+        "class_id": 68,
+        "function": "NewBlurPure"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "opening": [
+      {
+        "class_id": 12494,
+        "function": "NewPatrolLamp"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 36421,
+        "function": "NewWaterView"
+      },
+      {
+        "class_id": 26725,
+        "function": "NewTexScroll"
+      },
+      {
+        "class_id": 46310,
+        "function": "NewDemoCancel"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 5,
+        "function": "NewTelop"
+      },
+      {
+        "class_id": 18,
+        "function": "NewBubbleT"
+      },
+      {
+        "class_id": 19,
+        "function": "NewBubbleP_800D9D94"
+      },
+      {
+        "class_id": 20,
+        "function": "NewScope"
+      },
+      {
+        "class_id": 21,
+        "function": "NewGoggle"
+      },
+      {
+        "class_id": 22,
+        "function": "NewGoggleSight"
+      },
+      {
+        "class_id": 23,
+        "function": "NewGoggleIr"
+      },
+      {
+        "class_id": 24,
+        "function": "NewGoggleSight"
+      },
+      {
+        "class_id": 33,
+        "function": "NewFocusView"
+      },
+      {
+        "class_id": 37,
+        "function": "NewBlurSet"
+      },
+      {
+        "class_id": 46,
+        "function": "NewSubRoom_800C815C"
+      },
+      {
+        "class_id": 66,
+        "function": "NewGasEffect"
+      },
+      {
+        "class_id": 67,
+        "function": "NewSubEfct_800CCB10"
+      },
+      {
+        "class_id": 68,
+        "function": "NewBlurPure"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "preope": [
+      {
+        "class_id": 27931,
+        "function": "NewPreviousOperation"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "option": [
+      {
+        "class_id": 38764,
+        "function": "NewOption"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "roll": [
+      {
+        "class_id": 46985,
+        "function": "NewEndingRoll"
+      },
+      {
+        "class_id": 13395,
+        "function": "NewMovieGCL"
+      },
+      {
+        "class_id": 59226,
+        "function": "NewEndingTelop"
+      },
+      {
+        "class_id": 46935,
+        "function": "EdTelop_800C4F18"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "ending": [
+      {
+        "class_id": 708,
+        "function": "NewAsiatoKun"
+      },
+      {
+        "class_id": 13395,
+        "function": "NewMovieGCL"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 29674,
+        "function": "NewSphere"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 16,
+        "function": "NewDemoAsiato"
+      },
+      {
+        "class_id": 28,
+        "function": "NewEnvmap3_800CA3A4"
+      },
+      {
+        "class_id": 33,
+        "function": "NewFocusView"
+      },
+      {
+        "class_id": 37,
+        "function": "NewBlurSet"
+      },
+      {
+        "class_id": 47,
+        "function": "AN_Smoke_800CE164"
+      },
+      {
+        "class_id": 51,
+        "function": "demothrd_2_8007DA94"
+      },
+      {
+        "class_id": 68,
+        "function": "NewBlurPure"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "endingr": [
+      {
+        "class_id": 708,
+        "function": "NewAsiatoKun"
+      },
+      {
+        "class_id": 13395,
+        "function": "NewMovieGCL"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 29674,
+        "function": "NewSphere"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 16,
+        "function": "NewDemoAsiato"
+      },
+      {
+        "class_id": 28,
+        "function": "NewEnvmap3_800CA3A4"
+      },
+      {
+        "class_id": 33,
+        "function": "NewFocusView"
+      },
+      {
+        "class_id": 37,
+        "function": "NewBlurSet"
+      },
+      {
+        "class_id": 47,
+        "function": "AN_Smoke_800CE164"
+      },
+      {
+        "class_id": 51,
+        "function": "demothrd_2_8007DA94"
+      },
+      {
+        "class_id": 68,
+        "function": "NewBlurPure"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s15a": [
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 16752,
+        "function": "NewSnakeBreath"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 40949,
+        "function": "NewValcan_800D9864"
+      },
+      {
+        "class_id": 52293,
+        "function": "s15c_dyncon_800D8C9C"
+      },
+      {
+        "class_id": 23120,
+        "function": "NewGasEffectSet"
+      },
+      {
+        "class_id": 36448,
+        "function": "NewCrow"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 28959,
+        "function": "NewLifeUp"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 44908,
+        "function": "NewDynamicFloorSet"
+      },
+      {
+        "class_id": 20117,
+        "function": "NewBloodCl"
+      },
+      {
+        "class_id": 2,
+        "function": "AN_Smoke_800CE08C"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 9,
+        "function": "NewBlood"
+      },
+      {
+        "class_id": 10,
+        "function": "NewSplash_800C8D6C"
+      },
+      {
+        "class_id": 13,
+        "function": "NewKetchap_s"
+      },
+      {
+        "class_id": 14,
+        "function": "AN_Breath"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 33,
+        "function": "NewFocusView"
+      },
+      {
+        "class_id": 37,
+        "function": "NewBlurSet"
+      },
+      {
+        "class_id": 40,
+        "function": "NewSepia_800C5214"
+      },
+      {
+        "class_id": 49,
+        "function": "NewSmokeLn_800CDFA4"
+      },
+      {
+        "class_id": 55,
+        "function": "NewRedAlert2"
+      },
+      {
+        "class_id": 56,
+        "function": "RedAlert_800C4F48"
+      },
+      {
+        "class_id": 68,
+        "function": "NewBlurPure"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s03ar": [
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 59774,
+        "function": "NewDemoDoll"
+      },
+      {
+        "class_id": 4492,
+        "function": "NewFindTrap"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 57939,
+        "function": "NewElevatorPanel"
+      },
+      {
+        "class_id": 62917,
+        "function": "NewUji"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 101,
+        "function": "NewMosaicSet"
+      },
+      {
+        "class_id": 43461,
+        "function": "NewGunCamera"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 23120,
+        "function": "NewGasEffectSet"
+      },
+      {
+        "class_id": 17124,
+        "function": "NewHiyokoGcl"
+      },
+      {
+        "class_id": 20807,
+        "function": "NewPoint"
+      },
+      {
+        "class_id": 52216,
+        "function": "NewPadControl"
+      },
+      {
+        "class_id": 56715,
+        "function": "NewIntrudeCamera"
+      },
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 4013,
+        "function": "NewMotionSoundEffect"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 11,
+        "function": "NewBulletEx"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 33,
+        "function": "NewFocusView"
+      },
+      {
+        "class_id": 37,
+        "function": "NewBlurSet"
+      },
+      {
+        "class_id": 40,
+        "function": "NewSepia_800C5214"
+      },
+      {
+        "class_id": 55,
+        "function": "NewRedAlert2"
+      },
+      {
+        "class_id": 56,
+        "function": "RedAlert_800C4F48"
+      },
+      {
+        "class_id": 66,
+        "function": "NewGasEffect"
+      },
+      {
+        "class_id": 68,
+        "function": "NewBlurPure"
+      },
+      {
+        "class_id": 76,
+        "function": "NewTelop2"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s03er": [
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 57939,
+        "function": "NewElevatorPanel"
+      },
+      {
+        "class_id": 62917,
+        "function": "NewUji"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 43461,
+        "function": "NewGunCamera"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 56715,
+        "function": "NewIntrudeCamera"
+      },
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 4013,
+        "function": "NewMotionSoundEffect"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s04br": [
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 1455,
+        "function": "NewOcelotBoss"
+      },
+      {
+        "class_id": 32458,
+        "function": "NewWire"
+      },
+      {
+        "class_id": 39304,
+        "function": "NewArmsTechPresident"
+      },
+      {
+        "class_id": 47519,
+        "function": "NewCape"
+      },
+      {
+        "class_id": 43461,
+        "function": "NewGunCamera"
+      },
+      {
+        "class_id": 22768,
+        "function": "NewDummyWall"
+      },
+      {
+        "class_id": 3529,
+        "function": "NewVoiceSystem"
+      },
+      {
+        "class_id": 15372,
+        "function": "NewScenarioJirai"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 13395,
+        "function": "NewMovieGCL"
+      },
+      {
+        "class_id": 28959,
+        "function": "NewLifeUp"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 1,
+        "function": "NewBlast"
+      },
+      {
+        "class_id": 2,
+        "function": "AN_Smoke_800CE08C"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 5,
+        "function": "NewTelop"
+      },
+      {
+        "class_id": 9,
+        "function": "NewBlood"
+      },
+      {
+        "class_id": 10,
+        "function": "NewSplash_800C8D6C"
+      },
+      {
+        "class_id": 13,
+        "function": "NewKetchap_s"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 17,
+        "function": "s08c_800C4194"
+      },
+      {
+        "class_id": 26,
+        "function": "NewKogaku2"
+      },
+      {
+        "class_id": 27,
+        "function": "NewKogaku3"
+      },
+      {
+        "class_id": 29,
+        "function": "NewPlasma_800CD1A4"
+      },
+      {
+        "class_id": 33,
+        "function": "NewFocusView"
+      },
+      {
+        "class_id": 37,
+        "function": "NewBlurSet"
+      },
+      {
+        "class_id": 45,
+        "function": "NewDemoKatana"
+      },
+      {
+        "class_id": 54,
+        "function": "NewAnime_8005E6A4"
+      },
+      {
+        "class_id": 60,
+        "function": "NewSpark2_800CA714"
+      },
+      {
+        "class_id": 61,
+        "function": "NewSpark"
+      },
+      {
+        "class_id": 72,
+        "function": "NewBloodDrip"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s07cr": [
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 47511,
+        "function": "NewDoor"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 49688,
+        "function": "NewMirror"
+      },
+      {
+        "class_id": 57939,
+        "function": "NewElevatorPanel"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 57969,
+        "function": "NewMeryl72_800C7BC4"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 40957,
+        "function": "GM_SetSecondAvailable"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 5,
+        "function": "NewTelop"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 33,
+        "function": "NewFocusView"
+      },
+      {
+        "class_id": 66,
+        "function": "NewGasEffect"
+      },
+      {
+        "class_id": 68,
+        "function": "NewBlurPure"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s08c": [
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 59774,
+        "function": "NewDemoDoll"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 11044,
+        "function": "NewWallSpark"
+      },
+      {
+        "class_id": 23120,
+        "function": "NewGasEffectSet"
+      },
+      {
+        "class_id": 23908,
+        "function": "NewFewDamageSet"
+      },
+      {
+        "class_id": 20117,
+        "function": "NewBloodCl"
+      },
+      {
+        "class_id": 27212,
+        "function": "NewBloodBl"
+      },
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 52216,
+        "function": "NewPadControl"
+      },
+      {
+        "class_id": 65233,
+        "function": "NewPadVibrationGcl"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 9,
+        "function": "NewBlood"
+      },
+      {
+        "class_id": 10,
+        "function": "NewSplash_800C8D6C"
+      },
+      {
+        "class_id": 13,
+        "function": "NewKetchap_s"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 17,
+        "function": "s08c_800C4194"
+      },
+      {
+        "class_id": 26,
+        "function": "NewKogaku2"
+      },
+      {
+        "class_id": 27,
+        "function": "NewKogaku3"
+      },
+      {
+        "class_id": 33,
+        "function": "NewFocusView"
+      },
+      {
+        "class_id": 37,
+        "function": "NewBlurSet"
+      },
+      {
+        "class_id": 40,
+        "function": "NewSepia_800C5214"
+      },
+      {
+        "class_id": 45,
+        "function": "NewDemoKatana"
+      },
+      {
+        "class_id": 68,
+        "function": "NewBlurPure"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s08cr": [
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 59774,
+        "function": "NewDemoDoll"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 11044,
+        "function": "NewWallSpark"
+      },
+      {
+        "class_id": 23120,
+        "function": "NewGasEffectSet"
+      },
+      {
+        "class_id": 23908,
+        "function": "NewFewDamageSet"
+      },
+      {
+        "class_id": 20117,
+        "function": "NewBloodCl"
+      },
+      {
+        "class_id": 27212,
+        "function": "NewBloodBl"
+      },
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 52216,
+        "function": "NewPadControl"
+      },
+      {
+        "class_id": 65233,
+        "function": "NewPadVibrationGcl"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 9,
+        "function": "NewBlood"
+      },
+      {
+        "class_id": 10,
+        "function": "NewSplash_800C8D6C"
+      },
+      {
+        "class_id": 13,
+        "function": "NewKetchap_s"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 17,
+        "function": "s08c_800C4194"
+      },
+      {
+        "class_id": 26,
+        "function": "NewKogaku2"
+      },
+      {
+        "class_id": 27,
+        "function": "NewKogaku3"
+      },
+      {
+        "class_id": 33,
+        "function": "NewFocusView"
+      },
+      {
+        "class_id": 37,
+        "function": "NewBlurSet"
+      },
+      {
+        "class_id": 40,
+        "function": "NewSepia_800C5214"
+      },
+      {
+        "class_id": 45,
+        "function": "NewDemoKatana"
+      },
+      {
+        "class_id": 68,
+        "function": "NewBlurPure"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s09ar": [
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 708,
+        "function": "NewAsiatoKun"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 16752,
+        "function": "NewSnakeBreath"
+      },
+      {
+        "class_id": 57969,
+        "function": "NewMeryl72_800C7BC4"
+      },
+      {
+        "class_id": 27662,
+        "function": "NewDog"
+      },
+      {
+        "class_id": 33258,
+        "function": "NewRippleSurface"
+      },
+      {
+        "class_id": 59774,
+        "function": "NewDemoDoll"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 33157,
+        "function": "NewBlinkTexture"
+      },
+      {
+        "class_id": 23120,
+        "function": "NewGasEffectSet"
+      },
+      {
+        "class_id": 36894,
+        "function": "NewSnowAreaSet"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s11g": [
+      {
+        "class_id": 4013,
+        "function": "NewMotionSoundEffect"
+      },
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 11044,
+        "function": "NewWallSpark"
+      },
+      {
+        "class_id": 16752,
+        "function": "NewSnakeBreath"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 6371,
+        "function": "NewSnow"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 6023,
+        "function": "NewHindBoss"
+      },
+      {
+        "class_id": 29674,
+        "function": "NewSphere"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 57448,
+        "function": "NewStage11Objects"
+      },
+      {
+        "class_id": 5438,
+        "function": "NewStage11GDemo"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 30,
+        "function": "NewWindcrcl_800CF6BC"
+      },
+      {
+        "class_id": 33,
+        "function": "NewFocusView"
+      },
+      {
+        "class_id": 37,
+        "function": "NewBlurSet"
+      },
+      {
+        "class_id": 49,
+        "function": "NewSmokeLn_800CDFA4"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s14e": [
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 23120,
+        "function": "NewGasEffectSet"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 55035,
+        "function": "NewFog"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 10940,
+        "function": "NewElevator"
+      },
+      {
+        "class_id": 26725,
+        "function": "NewTexScroll"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 36468,
+        "function": "NewZako14Commander"
+      },
+      {
+        "class_id": 12775,
+        "function": "NewZako14"
+      },
+      {
+        "class_id": 39609,
+        "function": "NewElevatorCrow"
+      },
+      {
+        "class_id": 43461,
+        "function": "NewGunCamera"
+      },
+      {
+        "class_id": 31682,
+        "function": "NewCameraShake"
+      },
+      {
+        "class_id": 65233,
+        "function": "NewPadVibrationGcl"
+      },
+      {
+        "class_id": 16752,
+        "function": "NewSnakeBreath"
+      },
+      {
+        "class_id": 15372,
+        "function": "NewScenarioJirai"
+      },
+      {
+        "class_id": 25713,
+        "function": "NewButtonCheckerSet"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 16282,
+        "function": "NewEnvironmentSoundSet"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 37,
+        "function": "NewBlurSet"
+      },
+      {
+        "class_id": 69,
+        "function": "NewFamasLight"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s11h": [
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 16752,
+        "function": "NewSnakeBreath"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 29674,
+        "function": "NewSphere"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 6371,
+        "function": "NewSnow"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 6023,
+        "function": "NewHindBoss"
+      },
+      {
+        "class_id": 57448,
+        "function": "NewStage11Objects"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 28959,
+        "function": "NewLifeUp"
+      },
+      {
+        "class_id": 37290,
+        "function": "NewPutHzd"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 37,
+        "function": "NewBlurSet"
+      },
+      {
+        "class_id": 40,
+        "function": "NewSepia_800C5214"
+      },
+      {
+        "class_id": 48,
+        "function": "NewBlastLine"
+      },
+      {
+        "class_id": 49,
+        "function": "NewSmokeLn_800CDFA4"
+      },
+      {
+        "class_id": 55,
+        "function": "NewRedAlert2"
+      },
+      {
+        "class_id": 56,
+        "function": "RedAlert_800C4F48"
+      },
+      {
+        "class_id": 59,
+        "function": "NewInverseLight"
+      },
+      {
+        "class_id": 63,
+        "function": "NewInverseLight2"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s11b": [
+      {
+        "class_id": 16752,
+        "function": "NewSnakeBreath"
+      },
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 6371,
+        "function": "NewSnow"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 6023,
+        "function": "NewHindBoss"
+      },
+      {
+        "class_id": 29674,
+        "function": "NewSphere"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 54588,
+        "function": "NewStage11BDemo"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 12,
+        "function": "NewAnime_8005E258"
+      },
+      {
+        "class_id": 14,
+        "function": "AN_Breath"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 30,
+        "function": "NewWindcrcl_800CF6BC"
+      },
+      {
+        "class_id": 37,
+        "function": "NewBlurSet"
+      },
+      {
+        "class_id": 48,
+        "function": "NewBlastLine"
+      },
+      {
+        "class_id": 49,
+        "function": "NewSmokeLn_800CDFA4"
+      },
+      {
+        "class_id": 55,
+        "function": "NewRedAlert2"
+      },
+      {
+        "class_id": 56,
+        "function": "RedAlert_800C4F48"
+      },
+      {
+        "class_id": 57,
+        "function": "NewCrashSmoke"
+      },
+      {
+        "class_id": 59,
+        "function": "NewInverseLight"
+      },
+      {
+        "class_id": 60,
+        "function": "NewSpark2_800CA714"
+      },
+      {
+        "class_id": 61,
+        "function": "NewSpark"
+      },
+      {
+        "class_id": 68,
+        "function": "NewBlurPure"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s18a": [
+      {
+        "class_id": 27500,
+        "function": "NewBlackSmoke"
+      },
+      {
+        "class_id": 37011,
+        "function": "NewBlur"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 31730,
+        "function": "NewLiquid"
+      },
+      {
+        "class_id": 59774,
+        "function": "NewDemoDoll"
+      },
+      {
+        "class_id": 30222,
+        "function": "d18a_snake18_800D4E94"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 5979,
+        "function": "NewSmokeTarget"
+      },
+      {
+        "class_id": 16803,
+        "function": "NewWake"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 37,
+        "function": "NewBlurSet"
+      },
+      {
+        "class_id": 40,
+        "function": "NewSepia_800C5214"
+      },
+      {
+        "class_id": 46310,
+        "function": "NewDemoCancel"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s18ar": [
+      {
+        "class_id": 27500,
+        "function": "NewBlackSmoke"
+      },
+      {
+        "class_id": 37011,
+        "function": "NewBlur"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 31730,
+        "function": "NewLiquid"
+      },
+      {
+        "class_id": 59774,
+        "function": "NewDemoDoll"
+      },
+      {
+        "class_id": 30222,
+        "function": "d18a_snake18_800D4E94"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 5979,
+        "function": "NewSmokeTarget"
+      },
+      {
+        "class_id": 16803,
+        "function": "NewWake"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 37,
+        "function": "NewBlurSet"
+      },
+      {
+        "class_id": 40,
+        "function": "NewSepia_800C5214"
+      },
+      {
+        "class_id": 46310,
+        "function": "NewDemoCancel"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s17a": [
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 18260,
+        "function": "NewRex"
+      },
+      {
+        "class_id": 38219,
+        "function": "RexNewDemo"
+      },
+      {
+        "class_id": 3529,
+        "function": "NewVoiceSystem"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 19432,
+        "function": "RexNewDrum"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 13052,
+        "function": "NewBreakObject"
+      },
+      {
+        "class_id": 37290,
+        "function": "NewPutHzd"
+      },
+      {
+        "class_id": 1,
+        "function": "NewBlast"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 9,
+        "function": "NewBlood"
+      },
+      {
+        "class_id": 10,
+        "function": "NewSplash_800C8D6C"
+      },
+      {
+        "class_id": 11,
+        "function": "NewBulletEx"
+      },
+      {
+        "class_id": 13,
+        "function": "NewKetchap_s"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 29,
+        "function": "NewPlasma_800CD1A4"
+      },
+      {
+        "class_id": 32,
+        "function": "RexNewMeshLaser"
+      },
+      {
+        "class_id": 36,
+        "function": "NewPlasma_800CD268"
+      },
+      {
+        "class_id": 37,
+        "function": "NewBlurSet"
+      },
+      {
+        "class_id": 40,
+        "function": "NewSepia_800C5214"
+      },
+      {
+        "class_id": 42,
+        "function": "AN_Smoke_800CE0F8"
+      },
+      {
+        "class_id": 48,
+        "function": "NewBlastLine"
+      },
+      {
+        "class_id": 49,
+        "function": "NewSmokeLn_800CDFA4"
+      },
+      {
+        "class_id": 55,
+        "function": "NewRedAlert2"
+      },
+      {
+        "class_id": 56,
+        "function": "RedAlert_800C4F48"
+      },
+      {
+        "class_id": 57,
+        "function": "NewCrashSmoke"
+      },
+      {
+        "class_id": 59,
+        "function": "NewInverseLight"
+      },
+      {
+        "class_id": 60,
+        "function": "NewSpark2_800CA714"
+      },
+      {
+        "class_id": 61,
+        "function": "NewSpark"
+      },
+      {
+        "class_id": 62,
+        "function": "AN_Blast_high2"
+      },
+      {
+        "class_id": 63,
+        "function": "NewInverseLight2"
+      },
+      {
+        "class_id": 65,
+        "function": "RexNewNinjaLaser"
+      },
+      {
+        "class_id": 68,
+        "function": "NewBlurPure"
+      },
+      {
+        "class_id": 71,
+        "function": "RexNewBloodHazard"
+      },
+      {
+        "class_id": 72,
+        "function": "NewBloodDrip"
+      },
+      {
+        "class_id": 73,
+        "function": "NewWindcrcl_800CF784"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s17ar": [
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 18260,
+        "function": "NewRex"
+      },
+      {
+        "class_id": 38219,
+        "function": "RexNewDemo"
+      },
+      {
+        "class_id": 3529,
+        "function": "NewVoiceSystem"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 19432,
+        "function": "RexNewDrum"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 13052,
+        "function": "NewBreakObject"
+      },
+      {
+        "class_id": 37290,
+        "function": "NewPutHzd"
+      },
+      {
+        "class_id": 1,
+        "function": "NewBlast"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 9,
+        "function": "NewBlood"
+      },
+      {
+        "class_id": 10,
+        "function": "NewSplash_800C8D6C"
+      },
+      {
+        "class_id": 11,
+        "function": "NewBulletEx"
+      },
+      {
+        "class_id": 13,
+        "function": "NewKetchap_s"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 29,
+        "function": "NewPlasma_800CD1A4"
+      },
+      {
+        "class_id": 32,
+        "function": "RexNewMeshLaser"
+      },
+      {
+        "class_id": 36,
+        "function": "NewPlasma_800CD268"
+      },
+      {
+        "class_id": 37,
+        "function": "NewBlurSet"
+      },
+      {
+        "class_id": 40,
+        "function": "NewSepia_800C5214"
+      },
+      {
+        "class_id": 42,
+        "function": "AN_Smoke_800CE0F8"
+      },
+      {
+        "class_id": 48,
+        "function": "NewBlastLine"
+      },
+      {
+        "class_id": 49,
+        "function": "NewSmokeLn_800CDFA4"
+      },
+      {
+        "class_id": 55,
+        "function": "NewRedAlert2"
+      },
+      {
+        "class_id": 56,
+        "function": "RedAlert_800C4F48"
+      },
+      {
+        "class_id": 57,
+        "function": "NewCrashSmoke"
+      },
+      {
+        "class_id": 59,
+        "function": "NewInverseLight"
+      },
+      {
+        "class_id": 60,
+        "function": "NewSpark2_800CA714"
+      },
+      {
+        "class_id": 61,
+        "function": "NewSpark"
+      },
+      {
+        "class_id": 62,
+        "function": "AN_Blast_high2"
+      },
+      {
+        "class_id": 63,
+        "function": "NewInverseLight2"
+      },
+      {
+        "class_id": 65,
+        "function": "RexNewNinjaLaser"
+      },
+      {
+        "class_id": 68,
+        "function": "NewBlurPure"
+      },
+      {
+        "class_id": 71,
+        "function": "RexNewBloodHazard"
+      },
+      {
+        "class_id": 72,
+        "function": "NewBloodDrip"
+      },
+      {
+        "class_id": 73,
+        "function": "NewWindcrcl_800CF784"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "d18a": [
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 59774,
+        "function": "NewDemoDoll"
+      },
+      {
+        "class_id": 30222,
+        "function": "d18a_snake18_800D4E94"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 5979,
+        "function": "NewSmokeTarget"
+      },
+      {
+        "class_id": 16803,
+        "function": "NewWake"
+      },
+      {
+        "class_id": 13395,
+        "function": "NewMovieGCL"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 26,
+        "function": "NewKogaku2"
+      },
+      {
+        "class_id": 27,
+        "function": "NewKogaku3"
+      },
+      {
+        "class_id": 37,
+        "function": "NewBlurSet"
+      },
+      {
+        "class_id": 47,
+        "function": "AN_Smoke_800CE164"
+      },
+      {
+        "class_id": 49,
+        "function": "NewSmokeLn_800CDFA4"
+      },
+      {
+        "class_id": 74,
+        "function": "NewBombLed"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "d18ar": [
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 59774,
+        "function": "NewDemoDoll"
+      },
+      {
+        "class_id": 30222,
+        "function": "d18a_snake18_800D4E94"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 5979,
+        "function": "NewSmokeTarget"
+      },
+      {
+        "class_id": 16803,
+        "function": "NewWake"
+      },
+      {
+        "class_id": 13395,
+        "function": "NewMovieGCL"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 26,
+        "function": "NewKogaku2"
+      },
+      {
+        "class_id": 27,
+        "function": "NewKogaku3"
+      },
+      {
+        "class_id": 37,
+        "function": "NewBlurSet"
+      },
+      {
+        "class_id": 47,
+        "function": "AN_Smoke_800CE164"
+      },
+      {
+        "class_id": 49,
+        "function": "NewSmokeLn_800CDFA4"
+      },
+      {
+        "class_id": 74,
+        "function": "NewBombLed"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s11d": [
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 6371,
+        "function": "NewSnow"
+      },
+      {
+        "class_id": 29674,
+        "function": "NewSphere"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 48552,
+        "function": "NewRope"
+      },
+      {
+        "class_id": 4585,
+        "function": "NewHind"
+      },
+      {
+        "class_id": 30396,
+        "function": "NewDamageSmoke2"
+      },
+      {
+        "class_id": 35610,
+        "function": "NewLanding"
+      },
+      {
+        "class_id": 50015,
+        "function": "NewPipe"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s19a": [
+      {
+        "class_id": 4013,
+        "function": "NewMotionSoundEffect"
+      },
+      {
+        "class_id": 65233,
+        "function": "NewPadVibrationGcl"
+      },
+      {
+        "class_id": 60653,
+        "function": "NewCountdownGcl"
+      },
+      {
+        "class_id": 31682,
+        "function": "NewCameraShake"
+      },
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 3529,
+        "function": "NewVoiceSystem"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 36488,
+        "function": "s19a_800D7724"
+      },
+      {
+        "class_id": 12780,
+        "function": "s19a_800CDBF4"
+      },
+      {
+        "class_id": 46477,
+        "function": "Garage_800D86E0"
+      },
+      {
+        "class_id": 46202,
+        "function": "Garage_800D9B28"
+      },
+      {
+        "class_id": 40044,
+        "function": "Garage_800DC414"
+      },
+      {
+        "class_id": 59774,
+        "function": "NewDemoDoll"
+      },
+      {
+        "class_id": 3529,
+        "function": "NewVoiceSystem"
+      },
+      {
+        "class_id": 8902,
+        "function": "NewS19Timer"
+      },
+      {
+        "class_id": 22220,
+        "function": "NewCamera2Set"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s19ar": [
+      {
+        "class_id": 4013,
+        "function": "NewMotionSoundEffect"
+      },
+      {
+        "class_id": 65233,
+        "function": "NewPadVibrationGcl"
+      },
+      {
+        "class_id": 60653,
+        "function": "NewCountdownGcl"
+      },
+      {
+        "class_id": 31682,
+        "function": "NewCameraShake"
+      },
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 3529,
+        "function": "NewVoiceSystem"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 36488,
+        "function": "s19a_800D7724"
+      },
+      {
+        "class_id": 12780,
+        "function": "s19a_800CDBF4"
+      },
+      {
+        "class_id": 46477,
+        "function": "Garage_800D86E0"
+      },
+      {
+        "class_id": 46202,
+        "function": "Garage_800D9B28"
+      },
+      {
+        "class_id": 40044,
+        "function": "Garage_800DC414"
+      },
+      {
+        "class_id": 59774,
+        "function": "NewDemoDoll"
+      },
+      {
+        "class_id": 3529,
+        "function": "NewVoiceSystem"
+      },
+      {
+        "class_id": 8902,
+        "function": "NewS19Timer"
+      },
+      {
+        "class_id": 22220,
+        "function": "NewCamera2Set"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s19b": [
+      {
+        "class_id": 60653,
+        "function": "NewCountdownGcl"
+      },
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 27208,
+        "function": "NewJeepScroll"
+      },
+      {
+        "class_id": 41598,
+        "function": "NewJeepDrum"
+      },
+      {
+        "class_id": 9335,
+        "function": "NewJeepEnemy"
+      },
+      {
+        "class_id": 3529,
+        "function": "NewVoiceSystem"
+      },
+      {
+        "class_id": 55035,
+        "function": "NewFog"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s19br": [
+      {
+        "class_id": 60653,
+        "function": "NewCountdownGcl"
+      },
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 27208,
+        "function": "NewJeepScroll"
+      },
+      {
+        "class_id": 41598,
+        "function": "NewJeepDrum"
+      },
+      {
+        "class_id": 9335,
+        "function": "NewJeepEnemy"
+      },
+      {
+        "class_id": 3529,
+        "function": "NewVoiceSystem"
+      },
+      {
+        "class_id": 55035,
+        "function": "NewFog"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "demosel": [
+      {
+        "class_id": 13958,
+        "function": "NewDemoSelect"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "select": [
+      {
+        "class_id": 54006,
+        "function": "NewSelect"
+      },
+      {
+        "class_id": 27750,
+        "function": "NewVibrationEditor"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "select1": [
+      {
+        "class_id": 54006,
+        "function": "NewSelect"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "select2": [
+      {
+        "class_id": 54006,
+        "function": "NewSelect"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "select3": [
+      {
+        "class_id": 54006,
+        "function": "NewSelect"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "select4": [
+      {
+        "class_id": 54006,
+        "function": "NewSelect"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "selectd": [
+      {
+        "class_id": 54006,
+        "function": "NewSelect"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "sound": [
+      {
+        "class_id": 20220,
+        "function": "NewSoundTest"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "s03dr": [
+      {
+        "class_id": 44795,
+        "function": "NewToBeContinued"
+      },
+      {
+        "class_id": 37564,
+        "function": "NewAsiotoKun"
+      },
+      {
+        "class_id": 31237,
+        "function": "NewCinemaScreenSet"
+      },
+      {
+        "class_id": 59774,
+        "function": "NewDemoDoll"
+      },
+      {
+        "class_id": 4492,
+        "function": "NewFindTrap"
+      },
+      {
+        "class_id": 51029,
+        "function": "NewMeryl3"
+      },
+      {
+        "class_id": 31991,
+        "function": "NewS03dZakoCommander"
+      },
+      {
+        "class_id": 60535,
+        "function": "NewWallGcl"
+      },
+      {
+        "class_id": 57939,
+        "function": "NewElevatorPanel"
+      },
+      {
+        "class_id": 62917,
+        "function": "NewUji"
+      },
+      {
+        "class_id": 60807,
+        "function": "NewS03dZako"
+      },
+      {
+        "class_id": 45315,
+        "function": "NewDynamicWallSet"
+      },
+      {
+        "class_id": 6867,
+        "function": "NewTextureLamp"
+      },
+      {
+        "class_id": 101,
+        "function": "NewMosaicSet"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 17124,
+        "function": "NewHiyokoGcl"
+      },
+      {
+        "class_id": 20807,
+        "function": "NewPoint"
+      },
+      {
+        "class_id": 56715,
+        "function": "NewIntrudeCamera"
+      },
+      {
+        "class_id": 20934,
+        "function": "NewCutInCameraSet"
+      },
+      {
+        "class_id": 4013,
+        "function": "NewMotionSoundEffect"
+      },
+      {
+        "class_id": 3,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 4,
+        "function": "NewFadeInOut"
+      },
+      {
+        "class_id": 15,
+        "function": "NewDemoKage"
+      },
+      {
+        "class_id": 33,
+        "function": "NewFocusView"
+      },
+      {
+        "class_id": 37,
+        "function": "NewBlurSet"
+      },
+      {
+        "class_id": 40,
+        "function": "NewSepia_800C5214"
+      },
+      {
+        "class_id": 68,
+        "function": "NewBlurPure"
+      },
+      {
+        "class_id": 69,
+        "function": "NewFamasLight"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "rank": [
+      {
+        "class_id": 1266,
+        "function": "NewRanking"
+      },
+      {
+        "class_id": 54208,
+        "function": "rank_800D4044"
+      },
+      {
+        "class_id": 15058,
+        "function": "rank_800D0DA0"
+      },
+      {
+        "class_id": 41262,
+        "function": "NewFadeInOutSet"
+      },
+      {
+        "class_id": 54350,
+        "function": "NewVrWindow"
+      },
+      {
+        "class_id": 37634,
+        "function": "NewSaveData"
+      },
+      {
+        "class_id": 43539,
+        "function": "StartPocketTask"
+      },
+      {
+        "class_id": 64950,
+        "function": "rank_800CCFC4"
+      },
+      {
+        "class_id": 25620,
+        "function": "rank_800CEDCC"
+      },
+      {
+        "class_id": 52992,
+        "function": "StopPocketTask"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "brf": [
+      {
+        "class_id": 37814,
+        "function": "NewBriefingSelect"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ],
+    "camera": [
+      {
+        "class_id": 33223,
+        "function": "NewCamera_800CF388"
+      },
+      {
+        "class_id": 0,
+        "function": "((void*)0)"
+      }
+    ]
+  },
+  "textual_assembly_files": 14,
+  "textual_assembly_pragmas": 207,
+  "active_assembly_sources": [],
+  "archives": [
+    {
+      "archive_name": "STAGE.DIR",
+      "stage_count": 95,
+      "unregistered": [
+        "init",
+        "init_tux",
+        "init_ve"
+      ],
+      "resource_only": [
+        "init",
+        "init_tux",
+        "init_ve"
+      ],
+      "tables": [
+        {
+          "stage": "brf",
+          "resource": "96a7.b",
+          "original_entries": 1,
+          "native_entries": 1,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "abst",
+          "resource": "1706.b",
+          "original_entries": 5,
+          "native_entries": 5,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "d00a",
+          "resource": "c693.b",
+          "original_entries": 27,
+          "native_entries": 27,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "d01a",
+          "resource": "c6b3.b",
+          "original_entries": 16,
+          "native_entries": 16,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "d03a",
+          "resource": "c6f3.b",
+          "original_entries": 11,
+          "native_entries": 11,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "d11c",
+          "resource": "cab5.b",
+          "original_entries": 10,
+          "native_entries": 10,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "d16e",
+          "resource": "cb57.b",
+          "original_entries": 20,
+          "native_entries": 20,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "d18a",
+          "resource": "cb93.b",
+          "original_entries": 18,
+          "native_entries": 18,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "rank",
+          "resource": "9265.b",
+          "original_entries": 10,
+          "native_entries": 10,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "roll",
+          "resource": "ca26.b",
+          "original_entries": 4,
+          "native_entries": 4,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s00a",
+          "resource": "469b.b",
+          "original_entries": 27,
+          "native_entries": 27,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s01a",
+          "resource": "46bb.b",
+          "original_entries": 27,
+          "native_entries": 27,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s02a",
+          "resource": "46db.b",
+          "original_entries": 28,
+          "native_entries": 28,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s02b",
+          "resource": "46dc.b",
+          "original_entries": 30,
+          "native_entries": 30,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s02c",
+          "resource": "46dd.b",
+          "original_entries": 29,
+          "native_entries": 29,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s02d",
+          "resource": "46de.b",
+          "original_entries": 25,
+          "native_entries": 25,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s02e",
+          "resource": "46df.b",
+          "original_entries": 29,
+          "native_entries": 29,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s03a",
+          "resource": "46fb.b",
+          "original_entries": 31,
+          "native_entries": 31,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s03b",
+          "resource": "46fc.b",
+          "original_entries": 16,
+          "native_entries": 16,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s03c",
+          "resource": "46fd.b",
+          "original_entries": 22,
+          "native_entries": 22,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s03d",
+          "resource": "46fe.b",
+          "original_entries": 28,
+          "native_entries": 28,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s03e",
+          "resource": "46ff.b",
+          "original_entries": 11,
+          "native_entries": 11,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s04a",
+          "resource": "471b.b",
+          "original_entries": 14,
+          "native_entries": 14,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s04b",
+          "resource": "471c.b",
+          "original_entries": 37,
+          "native_entries": 37,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s04c",
+          "resource": "471d.b",
+          "original_entries": 25,
+          "native_entries": 25,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s05a",
+          "resource": "473b.b",
+          "original_entries": 33,
+          "native_entries": 33,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s06a",
+          "resource": "475b.b",
+          "original_entries": 22,
+          "native_entries": 22,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s07a",
+          "resource": "477b.b",
+          "original_entries": 13,
+          "native_entries": 13,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s07b",
+          "resource": "477c.b",
+          "original_entries": 29,
+          "native_entries": 29,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s07c",
+          "resource": "477d.b",
+          "original_entries": 18,
+          "native_entries": 18,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s08a",
+          "resource": "479b.b",
+          "original_entries": 26,
+          "native_entries": 26,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s08b",
+          "resource": "479c.b",
+          "original_entries": 32,
+          "native_entries": 32,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s08c",
+          "resource": "479d.b",
+          "original_entries": 28,
+          "native_entries": 28,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s09a",
+          "resource": "47bb.b",
+          "original_entries": 16,
+          "native_entries": 16,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s10a",
+          "resource": "4a9b.b",
+          "original_entries": 40,
+          "native_entries": 40,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s11a",
+          "resource": "4abb.b",
+          "original_entries": 12,
+          "native_entries": 12,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s11b",
+          "resource": "4abc.b",
+          "original_entries": 28,
+          "native_entries": 28,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s11c",
+          "resource": "4abd.b",
+          "original_entries": 18,
+          "native_entries": 18,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s11d",
+          "resource": "4abe.b",
+          "original_entries": 10,
+          "native_entries": 10,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s11e",
+          "resource": "4abf.b",
+          "original_entries": 14,
+          "native_entries": 14,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s11g",
+          "resource": "4ac1.b",
+          "original_entries": 22,
+          "native_entries": 22,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s11h",
+          "resource": "4ac2.b",
+          "original_entries": 25,
+          "native_entries": 25,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s11i",
+          "resource": "4ac3.b",
+          "original_entries": 15,
+          "native_entries": 15,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s12a",
+          "resource": "4adb.b",
+          "original_entries": 32,
+          "native_entries": 32,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s12b",
+          "resource": "4adc.b",
+          "original_entries": 21,
+          "native_entries": 21,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s12c",
+          "resource": "4add.b",
+          "original_entries": 20,
+          "native_entries": 20,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s13a",
+          "resource": "4afb.b",
+          "original_entries": 21,
+          "native_entries": 21,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s14e",
+          "resource": "4b1f.b",
+          "original_entries": 25,
+          "native_entries": 25,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s15a",
+          "resource": "4b3b.b",
+          "original_entries": 30,
+          "native_entries": 30,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s15b",
+          "resource": "4b3c.b",
+          "original_entries": 13,
+          "native_entries": 13,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s15c",
+          "resource": "4b3d.b",
+          "original_entries": 16,
+          "native_entries": 16,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s16a",
+          "resource": "4b5b.b",
+          "original_entries": 24,
+          "native_entries": 24,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s16b",
+          "resource": "4b5c.b",
+          "original_entries": 8,
+          "native_entries": 8,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s16c",
+          "resource": "4b5d.b",
+          "original_entries": 18,
+          "native_entries": 18,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s16d",
+          "resource": "4b5e.b",
+          "original_entries": 33,
+          "native_entries": 33,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s17a",
+          "resource": "4b7b.b",
+          "original_entries": 40,
+          "native_entries": 40,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s18a",
+          "resource": "4b9b.b",
+          "original_entries": 16,
+          "native_entries": 16,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s19a",
+          "resource": "4bbb.b",
+          "original_entries": 19,
+          "native_entries": 19,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s19b",
+          "resource": "4bbc.b",
+          "original_entries": 9,
+          "native_entries": 9,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s20a",
+          "resource": "4e9b.b",
+          "original_entries": 15,
+          "native_entries": 15,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "option",
+          "resource": "978a.b",
+          "original_entries": 1,
+          "native_entries": 1,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "camera",
+          "resource": "eee9.b",
+          "original_entries": 1,
+          "native_entries": 1,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "preope",
+          "resource": "31ba.b",
+          "original_entries": 1,
+          "native_entries": 1,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s03ar",
+          "resource": "dfda.b",
+          "original_entries": 31,
+          "native_entries": 31,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s03dr",
+          "resource": "e03a.b",
+          "original_entries": 28,
+          "native_entries": 28,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s03er",
+          "resource": "e05a.b",
+          "original_entries": 11,
+          "native_entries": 11,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s04br",
+          "resource": "e3fa.b",
+          "original_entries": 37,
+          "native_entries": 37,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s07br",
+          "resource": "effa.b",
+          "original_entries": 29,
+          "native_entries": 29,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s07cr",
+          "resource": "f01a.b",
+          "original_entries": 18,
+          "native_entries": 18,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s08br",
+          "resource": "f3fa.b",
+          "original_entries": 32,
+          "native_entries": 32,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s08cr",
+          "resource": "f41a.b",
+          "original_entries": 28,
+          "native_entries": 28,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s09ar",
+          "resource": "f7da.b",
+          "original_entries": 16,
+          "native_entries": 16,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s10ar",
+          "resource": "53db.b",
+          "original_entries": 40,
+          "native_entries": 40,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s17ar",
+          "resource": "6fdb.b",
+          "original_entries": 40,
+          "native_entries": 40,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s18ar",
+          "resource": "73db.b",
+          "original_entries": 16,
+          "native_entries": 16,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s19ar",
+          "resource": "77db.b",
+          "original_entries": 19,
+          "native_entries": 19,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s19br",
+          "resource": "77fb.b",
+          "original_entries": 9,
+          "native_entries": 9,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s20ar",
+          "resource": "d3db.b",
+          "original_entries": 15,
+          "native_entries": 15,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "sound",
+          "resource": "698d.b",
+          "original_entries": 1,
+          "native_entries": 1,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "d18ar",
+          "resource": "72eb.b",
+          "original_entries": 18,
+          "native_entries": 18,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "endingr",
+          "resource": "67e2.b",
+          "original_entries": 14,
+          "native_entries": 14,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "title",
+          "resource": "655b.b",
+          "original_entries": 4,
+          "native_entries": 4,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "select",
+          "resource": "8d5c.b",
+          "original_entries": 2,
+          "native_entries": 2,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "opening",
+          "resource": "58cc.b",
+          "original_entries": 21,
+          "native_entries": 21,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "change",
+          "resource": "11f8.b",
+          "original_entries": 1,
+          "native_entries": 1,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "select4",
+          "resource": "abc5.b",
+          "original_entries": 1,
+          "native_entries": 1,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "select2",
+          "resource": "abc3.b",
+          "original_entries": 1,
+          "native_entries": 1,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "select3",
+          "resource": "abc4.b",
+          "original_entries": 1,
+          "native_entries": 1,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "select1",
+          "resource": "abc2.b",
+          "original_entries": 1,
+          "native_entries": 1,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "selectd",
+          "resource": "abf5.b",
+          "original_entries": 1,
+          "native_entries": 1,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "demosel",
+          "resource": "2a2f.b",
+          "original_entries": 1,
+          "native_entries": 1,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "ending",
+          "resource": "833b.b",
+          "original_entries": 14,
+          "native_entries": 14,
+          "identities_and_order_match": true
+        }
+      ]
+    },
+    {
+      "archive_name": "STAGE.DIR",
+      "stage_count": 95,
+      "unregistered": [
+        "init",
+        "init_tux",
+        "init_ve"
+      ],
+      "resource_only": [
+        "init",
+        "init_tux",
+        "init_ve"
+      ],
+      "tables": [
+        {
+          "stage": "brf",
+          "resource": "96a7.b",
+          "original_entries": 1,
+          "native_entries": 1,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "abst",
+          "resource": "1706.b",
+          "original_entries": 5,
+          "native_entries": 5,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "d00a",
+          "resource": "c693.b",
+          "original_entries": 27,
+          "native_entries": 27,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "d01a",
+          "resource": "c6b3.b",
+          "original_entries": 16,
+          "native_entries": 16,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "d03a",
+          "resource": "c6f3.b",
+          "original_entries": 11,
+          "native_entries": 11,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "d11c",
+          "resource": "cab5.b",
+          "original_entries": 10,
+          "native_entries": 10,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "d16e",
+          "resource": "cb57.b",
+          "original_entries": 20,
+          "native_entries": 20,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "d18a",
+          "resource": "cb93.b",
+          "original_entries": 18,
+          "native_entries": 18,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "rank",
+          "resource": "9265.b",
+          "original_entries": 10,
+          "native_entries": 10,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "roll",
+          "resource": "ca26.b",
+          "original_entries": 4,
+          "native_entries": 4,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s00a",
+          "resource": "469b.b",
+          "original_entries": 27,
+          "native_entries": 27,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s01a",
+          "resource": "46bb.b",
+          "original_entries": 27,
+          "native_entries": 27,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s02a",
+          "resource": "46db.b",
+          "original_entries": 28,
+          "native_entries": 28,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s02b",
+          "resource": "46dc.b",
+          "original_entries": 30,
+          "native_entries": 30,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s02c",
+          "resource": "46dd.b",
+          "original_entries": 29,
+          "native_entries": 29,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s02d",
+          "resource": "46de.b",
+          "original_entries": 25,
+          "native_entries": 25,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s02e",
+          "resource": "46df.b",
+          "original_entries": 29,
+          "native_entries": 29,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s03a",
+          "resource": "46fb.b",
+          "original_entries": 31,
+          "native_entries": 31,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s03b",
+          "resource": "46fc.b",
+          "original_entries": 16,
+          "native_entries": 16,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s03c",
+          "resource": "46fd.b",
+          "original_entries": 22,
+          "native_entries": 22,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s03d",
+          "resource": "46fe.b",
+          "original_entries": 28,
+          "native_entries": 28,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s03e",
+          "resource": "46ff.b",
+          "original_entries": 11,
+          "native_entries": 11,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s04a",
+          "resource": "471b.b",
+          "original_entries": 14,
+          "native_entries": 14,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s04b",
+          "resource": "471c.b",
+          "original_entries": 37,
+          "native_entries": 37,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s04c",
+          "resource": "471d.b",
+          "original_entries": 25,
+          "native_entries": 25,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s05a",
+          "resource": "473b.b",
+          "original_entries": 33,
+          "native_entries": 33,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s06a",
+          "resource": "475b.b",
+          "original_entries": 22,
+          "native_entries": 22,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s07a",
+          "resource": "477b.b",
+          "original_entries": 13,
+          "native_entries": 13,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s07b",
+          "resource": "477c.b",
+          "original_entries": 29,
+          "native_entries": 29,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s07c",
+          "resource": "477d.b",
+          "original_entries": 18,
+          "native_entries": 18,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s08a",
+          "resource": "479b.b",
+          "original_entries": 26,
+          "native_entries": 26,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s08b",
+          "resource": "479c.b",
+          "original_entries": 32,
+          "native_entries": 32,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s08c",
+          "resource": "479d.b",
+          "original_entries": 28,
+          "native_entries": 28,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s09a",
+          "resource": "47bb.b",
+          "original_entries": 16,
+          "native_entries": 16,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s10a",
+          "resource": "4a9b.b",
+          "original_entries": 40,
+          "native_entries": 40,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s11a",
+          "resource": "4abb.b",
+          "original_entries": 12,
+          "native_entries": 12,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s11b",
+          "resource": "4abc.b",
+          "original_entries": 28,
+          "native_entries": 28,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s11c",
+          "resource": "4abd.b",
+          "original_entries": 18,
+          "native_entries": 18,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s11d",
+          "resource": "4abe.b",
+          "original_entries": 10,
+          "native_entries": 10,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s11e",
+          "resource": "4abf.b",
+          "original_entries": 14,
+          "native_entries": 14,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s11g",
+          "resource": "4ac1.b",
+          "original_entries": 22,
+          "native_entries": 22,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s11h",
+          "resource": "4ac2.b",
+          "original_entries": 25,
+          "native_entries": 25,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s11i",
+          "resource": "4ac3.b",
+          "original_entries": 15,
+          "native_entries": 15,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s12a",
+          "resource": "4adb.b",
+          "original_entries": 32,
+          "native_entries": 32,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s12b",
+          "resource": "4adc.b",
+          "original_entries": 21,
+          "native_entries": 21,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s12c",
+          "resource": "4add.b",
+          "original_entries": 20,
+          "native_entries": 20,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s13a",
+          "resource": "4afb.b",
+          "original_entries": 21,
+          "native_entries": 21,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s14e",
+          "resource": "4b1f.b",
+          "original_entries": 25,
+          "native_entries": 25,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s15a",
+          "resource": "4b3b.b",
+          "original_entries": 30,
+          "native_entries": 30,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s15b",
+          "resource": "4b3c.b",
+          "original_entries": 13,
+          "native_entries": 13,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s15c",
+          "resource": "4b3d.b",
+          "original_entries": 16,
+          "native_entries": 16,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s16a",
+          "resource": "4b5b.b",
+          "original_entries": 24,
+          "native_entries": 24,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s16b",
+          "resource": "4b5c.b",
+          "original_entries": 8,
+          "native_entries": 8,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s16c",
+          "resource": "4b5d.b",
+          "original_entries": 18,
+          "native_entries": 18,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s16d",
+          "resource": "4b5e.b",
+          "original_entries": 33,
+          "native_entries": 33,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s17a",
+          "resource": "4b7b.b",
+          "original_entries": 40,
+          "native_entries": 40,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s18a",
+          "resource": "4b9b.b",
+          "original_entries": 16,
+          "native_entries": 16,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s19a",
+          "resource": "4bbb.b",
+          "original_entries": 19,
+          "native_entries": 19,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s19b",
+          "resource": "4bbc.b",
+          "original_entries": 9,
+          "native_entries": 9,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s20a",
+          "resource": "4e9b.b",
+          "original_entries": 15,
+          "native_entries": 15,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "option",
+          "resource": "978a.b",
+          "original_entries": 1,
+          "native_entries": 1,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "camera",
+          "resource": "eee9.b",
+          "original_entries": 1,
+          "native_entries": 1,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "preope",
+          "resource": "31ba.b",
+          "original_entries": 1,
+          "native_entries": 1,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s03ar",
+          "resource": "dfda.b",
+          "original_entries": 31,
+          "native_entries": 31,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s03dr",
+          "resource": "e03a.b",
+          "original_entries": 28,
+          "native_entries": 28,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s03er",
+          "resource": "e05a.b",
+          "original_entries": 11,
+          "native_entries": 11,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s04br",
+          "resource": "e3fa.b",
+          "original_entries": 37,
+          "native_entries": 37,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s07br",
+          "resource": "effa.b",
+          "original_entries": 29,
+          "native_entries": 29,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s07cr",
+          "resource": "f01a.b",
+          "original_entries": 18,
+          "native_entries": 18,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s08br",
+          "resource": "f3fa.b",
+          "original_entries": 32,
+          "native_entries": 32,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s08cr",
+          "resource": "f41a.b",
+          "original_entries": 28,
+          "native_entries": 28,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s09ar",
+          "resource": "f7da.b",
+          "original_entries": 16,
+          "native_entries": 16,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s10ar",
+          "resource": "53db.b",
+          "original_entries": 40,
+          "native_entries": 40,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s17ar",
+          "resource": "6fdb.b",
+          "original_entries": 40,
+          "native_entries": 40,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s18ar",
+          "resource": "73db.b",
+          "original_entries": 16,
+          "native_entries": 16,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s19ar",
+          "resource": "77db.b",
+          "original_entries": 19,
+          "native_entries": 19,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s19br",
+          "resource": "77fb.b",
+          "original_entries": 9,
+          "native_entries": 9,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "s20ar",
+          "resource": "d3db.b",
+          "original_entries": 15,
+          "native_entries": 15,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "sound",
+          "resource": "698d.b",
+          "original_entries": 1,
+          "native_entries": 1,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "d18ar",
+          "resource": "72eb.b",
+          "original_entries": 18,
+          "native_entries": 18,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "endingr",
+          "resource": "67e2.b",
+          "original_entries": 14,
+          "native_entries": 14,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "title",
+          "resource": "655b.b",
+          "original_entries": 4,
+          "native_entries": 4,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "select",
+          "resource": "8d5c.b",
+          "original_entries": 2,
+          "native_entries": 2,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "opening",
+          "resource": "58cc.b",
+          "original_entries": 21,
+          "native_entries": 21,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "change",
+          "resource": "11f8.b",
+          "original_entries": 1,
+          "native_entries": 1,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "select4",
+          "resource": "abc5.b",
+          "original_entries": 1,
+          "native_entries": 1,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "select2",
+          "resource": "abc3.b",
+          "original_entries": 1,
+          "native_entries": 1,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "select3",
+          "resource": "abc4.b",
+          "original_entries": 1,
+          "native_entries": 1,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "select1",
+          "resource": "abc2.b",
+          "original_entries": 1,
+          "native_entries": 1,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "selectd",
+          "resource": "abf5.b",
+          "original_entries": 1,
+          "native_entries": 1,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "demosel",
+          "resource": "2a2f.b",
+          "original_entries": 1,
+          "native_entries": 1,
+          "identities_and_order_match": true
+        },
+        {
+          "stage": "ending",
+          "resource": "833b.b",
+          "original_entries": 14,
+          "native_entries": 14,
+          "identities_and_order_match": true
+        }
+      ]
+    }
+  ]
+}

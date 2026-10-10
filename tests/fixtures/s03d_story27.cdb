@@ -1,0 +1,5 @@
+.lines -e
+bu /1 mgs_integral_native!MgsNativeReloadOverlay "ew mgs_integral_native!var_buf+a 1b; .printf \"FIXTURE original story variable $w:00000A=27 before s03d scenario; no player flags changed\\n\"; gc"
+sxe -c "r;kv;q" av
+g
+q

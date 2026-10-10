@@ -1,0 +1,200 @@
+diff --git a/source/game/chara.c b/source/game/chara.c
+index 87fb1bdc1..2d2e10083 100644
+--- a/source/game/chara.c
++++ b/source/game/chara.c
+@@ -13,7 +13,9 @@ void *SECTION(".sbss") StageCharacterEntries;
+ 
+ void GM_InitChara(void)
+ {
+-#ifdef DEV_EXE
++#if defined(MGS_NATIVE)
++    StageCharacterEntries = MgsNativeStageTable();
++#elif defined(DEV_EXE)
+     StageCharacterEntries = &_StageCharacterEntries[0];
+ #else
+     extern void *mts_get_bss_tail(void);
+@@ -23,7 +25,7 @@ void GM_InitChara(void)
+ 
+ void GM_ResetChara(void)
+ {
+-#ifndef DEV_EXE
++#if !defined(DEV_EXE) && !defined(MGS_NATIVE)
+     CHARA *chara;
+ 
+     chara = (CHARA *)StageCharacterEntries;
+diff --git a/source/game/gamed.c b/source/game/gamed.c
+index dc88adcab..5b9d01dd2 100644
+--- a/source/game/gamed.c
++++ b/source/game/gamed.c
+@@ -514,7 +514,11 @@ static void Act(Work *work)
+             // User must hold the combo for 90 frames.
+             if (--reset_timer < 0)
+             {
+-                sprintf(exe_name, "cdrom:\\MGS\\%s;1", MGS_DiskName[FS_DiskNum]);
++#ifdef MGS_NATIVE
++                printf("[native] Soft reset requested; launcher will restart the game.\n");
++                exit(75);
++#else
++                snprintf(exe_name, sizeof(exe_name), "cdrom:\\MGS\\%s;1", MGS_DiskName[FS_DiskNum]);
+                 EnterCriticalSection();
+                 SetDispMask(0);
+                 PadStopCom();
+@@ -535,6 +539,7 @@ static void Act(Work *work)
+                     printf("load %s\n", exe_name);
+                     LoadExec(exe_name, 0x801FFF00, 0);
+                 } while (1);
++#endif
+             }
+         }
+         else
+@@ -710,7 +715,10 @@ void GM_GameOver(void)
+  */
+ static int GM_LoadInitBin(void *buf, int id)
+ {
+-#ifdef DEV_EXE
++#if defined(MGS_NATIVE)
++    MgsNativeReloadOverlay();
++    return 1;
++#elif defined(DEV_EXE)
+     return 1; // the overlay is embedded in the executable in dev variant
+ #endif
+ 
+diff --git a/source/memcard/memcard.c b/source/memcard/memcard.c
+index d7f87d083..6cb3a7de3 100644
+--- a/source/memcard/memcard.c
++++ b/source/memcard/memcard.c
+@@ -33,6 +33,23 @@ static void memcard_swcard_do_op(int op);
+ static int  memcard_dummy(int state);
+ static void memcard_retry(int port);
+ 
++static int memcard_path(char *buffer, size_t capacity, int port, const char *filename)
++{
++    int written;
++    if (port < 0 || port > 1 || !filename)
++    {
++        printf("Invalid memory card path\n");
++        return 0;
++    }
++    written = snprintf(buffer, capacity, "bu%02x:%s", port * 16, filename);
++    if (written < 0 || (size_t)written >= capacity)
++    {
++        printf("Memory card filename is too long\n");
++        return 0;
++    }
++    return 1;
++}
++
+ static inline void memcard_access_wait(void)
+ {
+     printf("[R]");
+@@ -190,7 +207,11 @@ static int memcard_loaddir(int port, int *pUsedBlocksCount)
+ 
+     blocks = 0;
+ 
+-    sprintf(name, "bu%02X:*", port * 16);
++    if (!memcard_path(name, sizeof(name), port, "*"))
++    {
++        *pUsedBlocksCount = 0;
++        return 0;
++    }
+     printf("load_dir %s start\n", name);
+ 
+     if (firstfile(name, &dir))
+@@ -317,13 +338,21 @@ int memcard_check(int port)
+             case 3:
+                 gMemCards[port].last_op = sw_card_op;
+                 memcard_retry(port);
++#ifdef MGS_NATIVE
++                return memcard_dummy(gSwCardLastOp);
++#else
+                 return;
++#endif
+ 
+             case 4:
+                 break;
+ 
+             default:
++#ifdef MGS_NATIVE
++                return memcard_dummy(sw_card_op);
++#else
+                 return; // FIXME: Return without value in function that returns long???
++#endif
+         }
+ 
+     loop_24:
+@@ -352,11 +381,13 @@ int memcard_check(int port)
+             {
+                 gMemCards[port].last_op = 5;
+ 
++#ifndef MGS_NATIVE
+                 {
+                     register int ret asm("v0");
+                     ret = 0x80000000;
+                     asm("" :: "r"(ret));
+                 }
++#endif
+ 
+                 return 0x80000001; // or "return ret | 1;" (with ret variable outside block)
+             }
+@@ -556,11 +587,13 @@ int memcard_delete(int port, const char *filename)
+     char tmp[32];
+ 
+     MEMCARD *pCardBase = gMemCards;
+-    MEMCARD *pCard = &pCardBase[port];
++    MEMCARD *pCard;
++
++    if (!memcard_path(tmp, sizeof(tmp), port, filename)) return 0;
++    pCard = &pCardBase[port];
+ 
+     if (pCard->last_op == 1)
+     {
+-        sprintf(tmp, "bu%02X:%s", 16 * port, filename);
+         if (erase(tmp))
+         {
+             printf("Deleted File %s", filename);
+@@ -616,16 +649,20 @@ void memcard_write(int port, const char *filename, int offset, char *buffer, int
+     int fd;
+     char name[32];
+ 
+-    sprintf(name, "bu%02X:%s", port * 16, filename);
++    if (!memcard_path(name, sizeof(name), port, filename))
++    {
++        gMemCard_io_size = -1;
++        return;
++    }
+ 
+-    fd = open(name, (blocks << 16) | O_CREAT);
++    fd = open(name, (blocks << 16) | FCREAT);
+     if (fd < 0)
+     {
+         printf("Warning : MEMCARD create error ... overwrite\n");
+     }
+     close(fd);
+ 
+-    fd = open(name, O_NOWAIT | O_WRONLY);
++    fd = open(name, FASYNC | FWRITE);
+     if (fd < 0)
+     {
+         printf("MEMCARD WRITE ERROR FD %d\n", fd);
+@@ -650,7 +687,11 @@ void memcard_read(int port, const char *filename, int offset, char *buffer, int
+     char name[32];
+     int fd;
+ 
+-    sprintf(name, "bu%02x:%s", port * 16, filename);
++    if (!memcard_path(name, sizeof(name), port, filename))
++    {
++        gMemCard_io_size = -1;
++        return;
++    }
+     fd = open(name, FREAD | FASYNC);
+     if (fd < 0)
+     {
+@@ -689,7 +730,7 @@ int memcard_format(int port)
+     char cardPath[32];
+ 
+     retries = 4;
+-    sprintf(cardPath, "bu%02x:", port * 16);
++    if (!memcard_path(cardPath, sizeof(cardPath), port, "")) return 0;
+ 
+     if (gMemCards[port].last_op == 5)
+     {

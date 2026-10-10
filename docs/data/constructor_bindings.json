@@ -1,0 +1,1015 @@
+{
+  "schema": 1,
+  "upstream_commit": "f54dbb2a58adfc2755403296c9ebb653fbec277b",
+  "scope": "Constructor identity only; does not establish whole actor equivalence, native compilation, or runtime behavior",
+  "overlay_base_evidence": {
+    "resident_symbol": "mts_get_bss_tail",
+    "address": "0x8008c598",
+    "instructions": [
+      "lui v0, 0x800c",
+      "addiu v0, v0, 0x3208",
+      "jr ra",
+      "nop"
+    ],
+    "result": "0x800c3208"
+  },
+  "stages": [
+    {
+      "provenance": {
+        "stage": "s05a",
+        "disc": "SLPM_862.47",
+        "resource": "473b.b",
+        "offset": 22890496,
+        "size": 132724,
+        "sha256": "fd08923d1e1ad01b8638f7e8f4a101e270a5f399f3d1afed47abca7532a8c081",
+        "load_address": "0x800c3208",
+        "load_address_evidence": "Original resident mts_get_bss_tail at0x8008c598: LUI v0 + ADDIU v0 + JR ra",
+        "resident_sha256": "4b8252b65953a02021486406cfcdca1c7670d1d1a8f3cf6e750ef6e360dc3a2f",
+        "analysis_image": "original resident code plus zero initialized gap and original overlay; entry set to first constructor for analysis only"
+      },
+      "bindings": [
+        {
+          "id": "0x92bc",
+          "address": "0x800c8654",
+          "symbol": "NewAsiotoKun",
+          "source": "source/enemy/asioto.c",
+          "line": 235,
+          "source_sha256": "063999cef39f45c9c4ebae6cced1d3248741fdf3263ff4fcc34fa311dbfbf2ad",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0xa12e",
+          "address": "0x800cfb8c",
+          "symbol": "NewFadeInOutSet",
+          "source": "source/takabe/fadeio.c",
+          "line": 186,
+          "source_sha256": "bc1c7bf0c434bc877d8bdac7a9029d9a5711a258c757e2c7e2f051b5d52c4f5e",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0x18e3",
+          "address": "0x800c5cdc",
+          "symbol": "NewSnow",
+          "source": "source/thing/snow.c",
+          "line": 506,
+          "source_sha256": "95821c5b9737dbbe21b97b32b9ebe97d9b8c96690b87936e77a2dfcdd0047fab",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0xa6f5",
+          "address": "0x800d1b6c",
+          "symbol": "NewSnowStorm",
+          "source": "source/kojo/sstorm.c",
+          "line": 90,
+          "source_sha256": "38646be70e4e4c5d7c4d6b1baf23f57aef9a94df87ae88836a6ed04d6f1e8c8b",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0x9d71",
+          "address": "0x800d26cc",
+          "symbol": "NewM1E1",
+          "source": "source/overlays/s05a/kojo/m1e1.c",
+          "line": 155,
+          "source_sha256": "9b27d44e7064d6143672d8cb2619ee18ad6f582b08666cb7d45cb1687437ad77",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0xd5ec",
+          "address": "0x800e1134",
+          "symbol": "s05a_800E1134",
+          "source": "source/overlays/s05a/kojo/m1e1came.c",
+          "line": 94,
+          "source_sha256": "26afbe341a6ca8dad81e4b49d670bf47f2bcaf6145be6218a0361fb0a750d6fc",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0x03d9",
+          "address": "0x800cf0f0",
+          "symbol": "NewShutter",
+          "source": "source/takabe/shuter.c",
+          "line": 309,
+          "source_sha256": "4c6ddea8088e1451e87ac7a4957a0831198bb65dbc03ac3ca59985fbf2fb81c8",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0x3c0c",
+          "address": "0x8006b76c",
+          "symbol": "NewScenarioJirai",
+          "source": "source/bullet/jirai.c",
+          "line": 659,
+          "source_sha256": "91ba2c14e659c2db26b992fe15e1a20f4e7338d570a376a8498e09e9f4688ab5",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0x7a05",
+          "address": "0x800d0bbc",
+          "symbol": "NewCinemaScreenSet",
+          "source": "source/takabe/cinema.c",
+          "line": 289,
+          "source_sha256": "4dc5631c3f5504ebfb4f9f269e7233776bd166e53777544bbe656ed9e1b95f93",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0xbee1",
+          "address": "0x800c65fc",
+          "symbol": "NewSphere2",
+          "source": "source/thing/sphere2.c",
+          "line": 274,
+          "source_sha256": "a756497fa5687cff84e30d59abb8bab82a817c8579776980df84541a56980af5",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0xec77",
+          "address": "0x800c781c",
+          "symbol": "NewWallGcl",
+          "source": "source/enemy/wall.c",
+          "line": 231,
+          "source_sha256": "f278cda15999e9516d00f9acd8b1ff9266ff1591ee9031fc46e054fa4425bd9e",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0xa9c5",
+          "address": "0x800ca8f8",
+          "symbol": "NewGunCamera",
+          "source": "source/okajima/guncame.c",
+          "line": 1350,
+          "source_sha256": "1a9a6eb3157add2148b0ebb7152c4b2b85bc506d1d59a15d58796ef7cd112166",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0x1ad3",
+          "address": "0x800c43a8",
+          "symbol": "NewTextureLamp",
+          "source": "source/game/lamp.c",
+          "line": 356,
+          "source_sha256": "59d6412a6ae353e5b4dfa87db8a7f92479e63d4f61d79c5c09a78f8b56cd1e9d",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0x7bc2",
+          "address": "0x800d1690",
+          "symbol": "NewCameraShake",
+          "source": "source/takabe/camshake.c",
+          "line": 93,
+          "source_sha256": "032d1844993372202626dbeda0ed1a6cd29417cb9e95b85d2923a01e87a38409",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0x02c4",
+          "address": "0x800c7320",
+          "symbol": "NewAsiatoKun",
+          "source": "source/enemy/asiato.c",
+          "line": 442,
+          "source_sha256": "2a0fb2b9876f251e733963b8680e585e6cda12d7a9f9288a5267bcef5f7aac91",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0x5a50",
+          "address": "0x800cde94",
+          "symbol": "NewGasEffectSet",
+          "source": "source/takabe/gas_efct.c",
+          "line": 223,
+          "source_sha256": "967bbf8ba0ead39d3a081248c98ee078bfb8c05dd58d446e510fe0ee16eef6f3",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0xb103",
+          "address": "0x800d0dec",
+          "symbol": "NewDynamicWallSet",
+          "source": "source/takabe/dymc_seg.c",
+          "line": 84,
+          "source_sha256": "e765fa539dd475a0fcae0a657e1e107e93c189abb0d34b2abf8040bff4235508",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0xaf6c",
+          "address": "0x800d1ad8",
+          "symbol": "NewDynamicFloorSet",
+          "source": "source/takabe/dymc_flr.c",
+          "line": 149,
+          "source_sha256": "ce955b120da5a375d7ada8017fb41f2af4569c6454649c99b53cb4499a0a13a7",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0x4170",
+          "address": "0x800c4ccc",
+          "symbol": "NewSnakeBreath",
+          "source": "source/chara/snake/breath.c",
+          "line": 74,
+          "source_sha256": "3dcb5dd2c78dbc5cd23447b49dab561f015e5132802c8e84c7c6b3773c5b15d1",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0xfed1",
+          "address": "0x8005d508",
+          "symbol": "NewPadVibrationGcl",
+          "source": "source/game/vibrate.c",
+          "line": 96,
+          "source_sha256": "7f3c847416650f8614cb36a832d7e5663c73cb2a307927c3d86821d82ffc7b00",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0xcbf8",
+          "address": "0x800c3a2c",
+          "symbol": "NewPadControl",
+          "source": "source/game/pad.c",
+          "line": 73,
+          "source_sha256": "bf76205683c12f3cc5bd8b4d8dfab89c2a18bc79ee2730acdf4adabef588987f",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0x0003",
+          "address": "0x800cfaf4",
+          "symbol": "NewFadeInOut",
+          "source": "source/takabe/fadeio.c",
+          "line": 167,
+          "source_sha256": "bc1c7bf0c434bc877d8bdac7a9029d9a5711a258c757e2c7e2f051b5d52c4f5e",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0x0004",
+          "address": "0x800cfaf4",
+          "symbol": "NewFadeInOut",
+          "source": "source/takabe/fadeio.c",
+          "line": 167,
+          "source_sha256": "bc1c7bf0c434bc877d8bdac7a9029d9a5711a258c757e2c7e2f051b5d52c4f5e",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0x0005",
+          "address": "0x800d0460",
+          "symbol": "NewTelop",
+          "source": "source/takabe/telop.c",
+          "line": 308,
+          "source_sha256": "49123049d4b985769eb7add78e67b17a886ec245f67355d67b9a2dbdc06e1ae2",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0x000c",
+          "address": "0x8005e258",
+          "symbol": "NewAnime_8005E258",
+          "source": "source/anime/effect/bullet.c",
+          "line": 777,
+          "source_sha256": "72c7f58b268fb18af91d48e2befc1b6f7de7c190ca149dc591baa0db2ce4f3e9",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0x000f",
+          "address": "0x800c7ff8",
+          "symbol": "NewDemoKage",
+          "source": "source/enemy/demokage.c",
+          "line": 221,
+          "source_sha256": "321dc89909931b2195ef6dffd27cdcd76811c7361f3ff7a2606cb56918828c2a",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0x0021",
+          "address": "0x800d1408",
+          "symbol": "NewFocusView",
+          "source": "source/takabe/focus.c",
+          "line": 151,
+          "source_sha256": "49b39f8e780d30bb74cf36a451c7e12285ae17d706e59b2f221dc15c386fedac",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0x0025",
+          "address": "0x800ccc3c",
+          "symbol": "NewBlurSet",
+          "source": "source/okajima/blur.c",
+          "line": 359,
+          "source_sha256": "102b6b924142a8b1b08378ffca6a8f33416b9d6ccdce8d2082a51ede6222c52f",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0x002f",
+          "address": "0x800c4574",
+          "symbol": "AN_Smoke_800CE164",
+          "source": "source/anime/effect/smoke_ln.c",
+          "line": 368,
+          "source_sha256": "d6fe730968be0944931003a3f60a5691e2dd2eff0cc299ae19c6369c4aa82a7d",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0x0030",
+          "address": "0x800cbb28",
+          "symbol": "NewBlastLine",
+          "source": "source/overlays/s11g/okajima/blst_ln.c",
+          "line": 80,
+          "source_sha256": "68c4a568866bea64363aeaf2284865451e7757446b9cf5e29a6ee2a0e1d8365a",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0x0031",
+          "address": "0x800cd244",
+          "symbol": "NewSmokeLn_800CDFA4",
+          "source": "source/okajima/smke_ln.c",
+          "line": 133,
+          "source_sha256": "3477a07298463a71f180c09f43620c3ad4f1e75a0523d3beb2590da5aae5871a",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0x0032",
+          "address": "0x800dbf58",
+          "symbol": "s05a_800DBF58",
+          "source": "source/overlays/s05a/kojo/m1e1smke.c",
+          "line": 26,
+          "source_sha256": "3995fffa232088c3200c253d2893ffccf54d0d26ae8d2a74680e6dc4dccffa94",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0x0044",
+          "address": "0x800cc138",
+          "symbol": "NewBlurPure",
+          "source": "source/okajima/blurpure.c",
+          "line": 170,
+          "source_sha256": "58be17538bc5cc5c56822a4063dd4e32e26e4766b028c597ea5fc0da5ceca301",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        }
+      ]
+    },
+    {
+      "provenance": {
+        "stage": "s11a",
+        "disc": "SLPM_862.47",
+        "resource": "4abb.b",
+        "offset": 32620544,
+        "size": 88528,
+        "sha256": "70be6cf00267ed663e29ce6b9598396e8fb7c60024b76ff86508244c56d39bf6",
+        "load_address": "0x800c3208",
+        "load_address_evidence": "Original resident mts_get_bss_tail at0x8008c598: LUI v0 + ADDIU v0 + JR ra",
+        "resident_sha256": "4b8252b65953a02021486406cfcdca1c7670d1d1a8f3cf6e750ef6e360dc3a2f",
+        "analysis_image": "original resident code plus zero initialized gap and original overlay; entry set to first constructor for analysis only"
+      },
+      "bindings": [
+        {
+          "id": "0xb103",
+          "address": "0x800d7310",
+          "symbol": "NewDynamicWallSet",
+          "source": "source/takabe/dymc_seg.c",
+          "line": 84,
+          "source_sha256": "e765fa539dd475a0fcae0a657e1e107e93c189abb0d34b2abf8040bff4235508",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0x92bc",
+          "address": "0x800c9298",
+          "symbol": "NewAsiotoKun",
+          "source": "source/enemy/asioto.c",
+          "line": 235,
+          "source_sha256": "063999cef39f45c9c4ebae6cced1d3248741fdf3263ff4fcc34fa311dbfbf2ad",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0x56cc",
+          "address": "0x800c5e90",
+          "symbol": "NewCamera2Set",
+          "source": "source/enemy/camera2.c",
+          "line": 804,
+          "source_sha256": "096f3fc56a4a6e8901264553adcdbab14ee30d92db86bc0fccec33f1d597c64a",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0xa12e",
+          "address": "0x800d6904",
+          "symbol": "NewFadeInOutSet",
+          "source": "source/takabe/fadeio.c",
+          "line": 186,
+          "source_sha256": "bc1c7bf0c434bc877d8bdac7a9029d9a5711a258c757e2c7e2f051b5d52c4f5e",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0x1ad3",
+          "address": "0x800c4308",
+          "symbol": "NewTextureLamp",
+          "source": "source/game/lamp.c",
+          "line": 356,
+          "source_sha256": "59d6412a6ae353e5b4dfa87db8a7f92479e63d4f61d79c5c09a78f8b56cd1e9d",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0x5efa",
+          "address": "0x800d3404",
+          "symbol": "NewZako11ACommander",
+          "source": "source/animal/zako11a/zk11acom.c",
+          "line": 798,
+          "source_sha256": "8ed09ea8b6deeeb70a5beaee95b2b7e828e1498e5c9c332d0cbabfe3f5e31e22",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0xa608",
+          "address": "0x800ca194",
+          "symbol": "NewZako11A",
+          "source": "source/animal/zako11a/zako11a.c",
+          "line": 520,
+          "source_sha256": "ab47fa9dc82278e6b099aa510d78f6d10393a757aaeb186d653e7878ce8726e7",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0x5fd9",
+          "address": "0x800d4794",
+          "symbol": "NewRasen2",
+          "source": "source/takabe/rasen.c",
+          "line": 506,
+          "source_sha256": "2df4215e23e4295bbfd9731ab4265887aa9fc46f473fd7726b69abe7dd2a8903",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0xec77",
+          "address": "0x800c489c",
+          "symbol": "NewWallGcl",
+          "source": "source/enemy/wall.c",
+          "line": 231,
+          "source_sha256": "f278cda15999e9516d00f9acd8b1ff9266ff1591ee9031fc46e054fa4425bd9e",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0x51c6",
+          "address": "0x800d76ec",
+          "symbol": "NewCutInCameraSet",
+          "source": "source/takabe/cat_in.c",
+          "line": 149,
+          "source_sha256": "94ddaab11937927048660adb4d4ca7498e025fe9f5ef566d657df5b69466c879",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0x7a05",
+          "address": "0x800d70e0",
+          "symbol": "NewCinemaScreenSet",
+          "source": "source/takabe/cinema.c",
+          "line": 289,
+          "source_sha256": "4dc5631c3f5504ebfb4f9f269e7233776bd166e53777544bbe656ed9e1b95f93",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        },
+        {
+          "id": "0x5a50",
+          "address": "0x800d5724",
+          "symbol": "NewGasEffectSet",
+          "source": "source/takabe/gas_efct.c",
+          "line": 223,
+          "source_sha256": "967bbf8ba0ead39d3a081248c98ee078bfb8c05dd58d446e510fe0ee16eef6f3",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS decompile/disassembly compared with recovered C constructor allocation, callbacks, resource initialization, and argument flow"
+          ],
+          "native_runtime_validated": false
+        }
+      ]
+    },
+    {
+      "provenance": {
+        "stage": "s03d",
+        "disc": "SLPM_862.47",
+        "resource": "46fe.b",
+        "offset": 18118656,
+        "size": 103160,
+        "sha256": "f9fa0f39352d3305b5cb2bd6c292297d4f351387b0038a27ccec29f42150d903",
+        "load_address": "0x800c3208",
+        "resident_sha256": "4b8252b65953a02021486406cfcdca1c7670d1d1a8f3cf6e750ef6e360dc3a2f",
+        "original_table_verified_entries": 28,
+        "analysis_image": "resident code plus original overlay with zero gap; analysis only"
+      },
+      "bindings": [
+        {
+          "id": "0xaefb",
+          "address": "0x800c68e4",
+          "symbol": "NewToBeContinued",
+          "source": "source/game/tobcnt.c",
+          "source_sha256": "e7577b7ebaeba45c61614e11be080d0f156029d563b4165ea324ba9555fba39a",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS constructor allocation, callbacks, filename and argument flow compared with selected recovered C; Zako constructors newly recovered from original instruction blocks"
+          ],
+          "native_runtime_validated": false,
+          "line": 585
+        },
+        {
+          "id": "0x92bc",
+          "address": "0x800c8364",
+          "symbol": "NewAsiotoKun",
+          "source": "source/enemy/asioto.c",
+          "source_sha256": "063999cef39f45c9c4ebae6cced1d3248741fdf3263ff4fcc34fa311dbfbf2ad",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS constructor allocation, callbacks, filename and argument flow compared with selected recovered C; Zako constructors newly recovered from original instruction blocks"
+          ],
+          "native_runtime_validated": false,
+          "line": 235
+        },
+        {
+          "id": "0x7a05",
+          "address": "0x800d9808",
+          "symbol": "NewCinemaScreenSet",
+          "source": "source/takabe/cinema.c",
+          "source_sha256": "4dc5631c3f5504ebfb4f9f269e7233776bd166e53777544bbe656ed9e1b95f93",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS constructor allocation, callbacks, filename and argument flow compared with selected recovered C; Zako constructors newly recovered from original instruction blocks"
+          ],
+          "native_runtime_validated": false,
+          "line": 289
+        },
+        {
+          "id": "0xe97e",
+          "address": "0x800c9344",
+          "symbol": "NewDemoDoll",
+          "source": "source/animal/doll/doll.c",
+          "source_sha256": "defdc51e32c2ffea488e896c4a0477616f1adfba16c15a91533cab8b5da77cbd",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS constructor allocation, callbacks, filename and argument flow compared with selected recovered C; Zako constructors newly recovered from original instruction blocks"
+          ],
+          "native_runtime_validated": false,
+          "line": 742
+        },
+        {
+          "id": "0x118c",
+          "address": "0x800d8df0",
+          "symbol": "NewFindTrap",
+          "source": "source/takabe/findtrap.c",
+          "source_sha256": "61b292b042f5a3a8f5d090b4129806f3363982cf994d2359c0ec871787357491",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS constructor allocation, callbacks, filename and argument flow compared with selected recovered C; Zako constructors newly recovered from original instruction blocks"
+          ],
+          "native_runtime_validated": false,
+          "line": 173
+        },
+        {
+          "id": "0xc755",
+          "address": "0x800cb954",
+          "symbol": "NewMeryl3",
+          "source": "source/overlays/s03d/animal/meryl3/meryl3.c",
+          "source_sha256": "f8d213f8432e46c7f8c912207cfc333f9028857ec215ab58094a5572cf32399f",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS constructor allocation, callbacks, filename and argument flow compared with selected recovered C; Zako constructors newly recovered from original instruction blocks"
+          ],
+          "native_runtime_validated": false,
+          "line": 180
+        },
+        {
+          "id": "0x7cf7",
+          "address": "0x800d580c",
+          "symbol": "NewS03dZakoCommander",
+          "source": "source/overlays/s03d/animal/zako/zakocom.c",
+          "source_sha256": "6bed3b6c0e5f2d80bb151df20b97057d8b7682dca9c0d3bb074dfe10efdcbb2e",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS constructor allocation, callbacks, filename and argument flow compared with selected recovered C; Zako constructors newly recovered from original instruction blocks"
+          ],
+          "native_runtime_validated": false,
+          "line": 905
+        },
+        {
+          "id": "0xec77",
+          "address": "0x800c752c",
+          "symbol": "NewWallGcl",
+          "source": "source/enemy/wall.c",
+          "source_sha256": "f278cda15999e9516d00f9acd8b1ff9266ff1591ee9031fc46e054fa4425bd9e",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS constructor allocation, callbacks, filename and argument flow compared with selected recovered C; Zako constructors newly recovered from original instruction blocks"
+          ],
+          "native_runtime_validated": false,
+          "line": 231
+        },
+        {
+          "id": "0xe253",
+          "address": "0x800c531c",
+          "symbol": "NewElevatorPanel",
+          "source": "source/game/evpanel.c",
+          "source_sha256": "d6410ae7a7b6e8b389675c9b41f40e369106d0ea711029ba2c873f0c0a70990a",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS constructor allocation, callbacks, filename and argument flow compared with selected recovered C; Zako constructors newly recovered from original instruction blocks"
+          ],
+          "native_runtime_validated": false,
+          "line": 1000
+        },
+        {
+          "id": "0xf5c5",
+          "address": "0x800d627c",
+          "symbol": "NewUji",
+          "source": "source/okajima/uji.c",
+          "source_sha256": "b188c2827a3e3b7dcaa867b970794c9ed9a56d3694ed72f6eb4efd90e1e06861",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS constructor allocation, callbacks, filename and argument flow compared with selected recovered C; Zako constructors newly recovered from original instruction blocks"
+          ],
+          "native_runtime_validated": false,
+          "line": 359
+        },
+        {
+          "id": "0xed87",
+          "address": "0x800cd5a0",
+          "symbol": "NewS03dZako",
+          "source": "source/overlays/s03d/animal/zako/zako.c",
+          "source_sha256": "167cf70f1c4bc44d33d8849b4e468d7e79e5435fe52292c4bbd12d4cfd620e9a",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS constructor allocation, callbacks, filename and argument flow compared with selected recovered C; Zako constructors newly recovered from original instruction blocks"
+          ],
+          "native_runtime_validated": false,
+          "line": 467
+        },
+        {
+          "id": "0xb103",
+          "address": "0x800d9a38",
+          "symbol": "NewDynamicWallSet",
+          "source": "source/takabe/dymc_seg.c",
+          "source_sha256": "e765fa539dd475a0fcae0a657e1e107e93c189abb0d34b2abf8040bff4235508",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS constructor allocation, callbacks, filename and argument flow compared with selected recovered C; Zako constructors newly recovered from original instruction blocks"
+          ],
+          "native_runtime_validated": false,
+          "line": 84
+        },
+        {
+          "id": "0x1ad3",
+          "address": "0x800c5c98",
+          "symbol": "NewTextureLamp",
+          "source": "source/game/lamp.c",
+          "source_sha256": "59d6412a6ae353e5b4dfa87db8a7f92479e63d4f61d79c5c09a78f8b56cd1e9d",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS constructor allocation, callbacks, filename and argument flow compared with selected recovered C; Zako constructors newly recovered from original instruction blocks"
+          ],
+          "native_runtime_validated": false,
+          "line": 356
+        },
+        {
+          "id": "0x0065",
+          "address": "0x800d8320",
+          "symbol": "NewMosaicSet",
+          "source": "source/takabe/mosaic.c",
+          "source_sha256": "909f14b5a532643a8d0bac30c7ddf4bac6c54e34981ddbb913de120755e6c44c",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS constructor allocation, callbacks, filename and argument flow compared with selected recovered C; Zako constructors newly recovered from original instruction blocks"
+          ],
+          "native_runtime_validated": false,
+          "line": 110
+        },
+        {
+          "id": "0xa12e",
+          "address": "0x800d8854",
+          "symbol": "NewFadeInOutSet",
+          "source": "source/takabe/fadeio.c",
+          "source_sha256": "bc1c7bf0c434bc877d8bdac7a9029d9a5711a258c757e2c7e2f051b5d52c4f5e",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS constructor allocation, callbacks, filename and argument flow compared with selected recovered C; Zako constructors newly recovered from original instruction blocks"
+          ],
+          "native_runtime_validated": false,
+          "line": 186
+        },
+        {
+          "id": "0x42e4",
+          "address": "0x800d7994",
+          "symbol": "NewHiyokoGcl",
+          "source": "source/okajima/hiyoko.c",
+          "source_sha256": "ffc152e69bc15dfe5ac800602acb5d4f6263762ebfa958e89e452a087451513b",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS constructor allocation, callbacks, filename and argument flow compared with selected recovered C; Zako constructors newly recovered from original instruction blocks"
+          ],
+          "native_runtime_validated": false,
+          "line": 205
+        },
+        {
+          "id": "0x5147",
+          "address": "0x800c6b78",
+          "symbol": "NewPoint",
+          "source": "source/game/point.c",
+          "source_sha256": "8571c91b5671330fec99772f7d76b044648ae692300b8f0a6637f3dcb8ffcf55",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS constructor allocation, callbacks, filename and argument flow compared with selected recovered C; Zako constructors newly recovered from original instruction blocks"
+          ],
+          "native_runtime_validated": false,
+          "line": 89
+        },
+        {
+          "id": "0xdd8b",
+          "address": "0x800c6e0c",
+          "symbol": "NewIntrudeCamera",
+          "source": "source/chara/others/intr_cam.c",
+          "source_sha256": "f79dc72c64a04b23ce98155578c4fa0f7614a187eb839320a6c09a2a83fb90e6",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS constructor allocation, callbacks, filename and argument flow compared with selected recovered C; Zako constructors newly recovered from original instruction blocks"
+          ],
+          "native_runtime_validated": false,
+          "line": 100
+        },
+        {
+          "id": "0x51c6",
+          "address": "0x800daa58",
+          "symbol": "NewCutInCameraSet",
+          "source": "source/takabe/cat_in.c",
+          "source_sha256": "94ddaab11937927048660adb4d4ca7498e025fe9f5ef566d657df5b69466c879",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS constructor allocation, callbacks, filename and argument flow compared with selected recovered C; Zako constructors newly recovered from original instruction blocks"
+          ],
+          "native_runtime_validated": false,
+          "line": 149
+        },
+        {
+          "id": "0x0fad",
+          "address": "0x800c7008",
+          "symbol": "NewMotionSoundEffect",
+          "source": "source/chara/others/motse.c",
+          "source_sha256": "05ca9fdf60a0890e1a926d1927f3ac6ce0afe1a4999c7bfc84087f3e95907e2f",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS constructor allocation, callbacks, filename and argument flow compared with selected recovered C; Zako constructors newly recovered from original instruction blocks"
+          ],
+          "native_runtime_validated": false,
+          "line": 72
+        },
+        {
+          "id": "0x0003",
+          "address": "0x800d87bc",
+          "symbol": "NewFadeInOut",
+          "source": "source/takabe/fadeio.c",
+          "source_sha256": "bc1c7bf0c434bc877d8bdac7a9029d9a5711a258c757e2c7e2f051b5d52c4f5e",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS constructor allocation, callbacks, filename and argument flow compared with selected recovered C; Zako constructors newly recovered from original instruction blocks"
+          ],
+          "native_runtime_validated": false,
+          "line": 167
+        },
+        {
+          "id": "0x0004",
+          "address": "0x800d87bc",
+          "symbol": "NewFadeInOut",
+          "source": "source/takabe/fadeio.c",
+          "source_sha256": "bc1c7bf0c434bc877d8bdac7a9029d9a5711a258c757e2c7e2f051b5d52c4f5e",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS constructor allocation, callbacks, filename and argument flow compared with selected recovered C; Zako constructors newly recovered from original instruction blocks"
+          ],
+          "native_runtime_validated": false,
+          "line": 167
+        },
+        {
+          "id": "0x000f",
+          "address": "0x800c7d08",
+          "symbol": "NewDemoKage",
+          "source": "source/enemy/demokage.c",
+          "source_sha256": "321dc89909931b2195ef6dffd27cdcd76811c7361f3ff7a2606cb56918828c2a",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS constructor allocation, callbacks, filename and argument flow compared with selected recovered C; Zako constructors newly recovered from original instruction blocks"
+          ],
+          "native_runtime_validated": false,
+          "line": 221
+        },
+        {
+          "id": "0x0021",
+          "address": "0x800da054",
+          "symbol": "NewFocusView",
+          "source": "source/takabe/focus.c",
+          "source_sha256": "49b39f8e780d30bb74cf36a451c7e12285ae17d706e59b2f221dc15c386fedac",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS constructor allocation, callbacks, filename and argument flow compared with selected recovered C; Zako constructors newly recovered from original instruction blocks"
+          ],
+          "native_runtime_validated": false,
+          "line": 151
+        },
+        {
+          "id": "0x0025",
+          "address": "0x800d7370",
+          "symbol": "NewBlurSet",
+          "source": "source/okajima/blur.c",
+          "source_sha256": "102b6b924142a8b1b08378ffca6a8f33416b9d6ccdce8d2082a51ede6222c52f",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS constructor allocation, callbacks, filename and argument flow compared with selected recovered C; Zako constructors newly recovered from original instruction blocks"
+          ],
+          "native_runtime_validated": false,
+          "line": 359
+        },
+        {
+          "id": "0x0028",
+          "address": "0x800da69c",
+          "symbol": "NewSepia_800C5214",
+          "source": "source/takabe/sepia.c",
+          "source_sha256": "2d6ed9b84a3a1cc58a2a17ac178df7f01e996d400c786848cf3eab903ab2e7f2",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS constructor allocation, callbacks, filename and argument flow compared with selected recovered C; Zako constructors newly recovered from original instruction blocks"
+          ],
+          "native_runtime_validated": false,
+          "line": 226
+        },
+        {
+          "id": "0x0044",
+          "address": "0x800d686c",
+          "symbol": "NewBlurPure",
+          "source": "source/okajima/blurpure.c",
+          "source_sha256": "58be17538bc5cc5c56822a4063dd4e32e26e4766b028c597ea5fc0da5ceca301",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS constructor allocation, callbacks, filename and argument flow compared with selected recovered C; Zako constructors newly recovered from original instruction blocks"
+          ],
+          "native_runtime_validated": false,
+          "line": 170
+        },
+        {
+          "id": "0x0045",
+          "address": "0x800daaec",
+          "symbol": "NewFamasLight",
+          "source": "source/kojo/famaslit.c",
+          "source_sha256": "1554feb12e78fa1285c36d6e7c67380cd111970d8f8af6ada3743bd3a060c935",
+          "evidence": [
+            "Original overlay table identifier and address match",
+            "MIPS constructor allocation, callbacks, filename and argument flow compared with selected recovered C; Zako constructors newly recovered from original instruction blocks"
+          ],
+          "native_runtime_validated": false,
+          "line": 56
+        }
+      ]
+    }
+  ]
+}

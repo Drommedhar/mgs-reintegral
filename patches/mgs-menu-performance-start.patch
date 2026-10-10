@@ -1,0 +1,26 @@
+diff --git a/source/onoda/open/open.c b/source/onoda/open/open.c
+index 3e5364ab4..899019bd0 100644
+--- a/source/onoda/open/open.c
++++ b/source/onoda/open/open.c
+@@ -15,6 +15,9 @@
+ #include "font/font.h"
+ #include "game/game.h"
+ #include "menu/menuman.h"
++#ifdef MGS_NATIVE
++#include "mgs_cadence.h"
++#endif
+ 
+ typedef struct _Unknown
+ {
+@@ -8434,6 +8437,11 @@ static void Act(Work *work)
+     OT_TYPE   *ot;
+     POLY_FT4 *packs;
+ 
++#ifdef MGS_NATIVE
++    if (work->fA74 == 6 || work->fA74 == 7)
++        MgsCadenceMenuReady();
++#endif
++
+     ot = DG_ChanlOTag(1);
+     packs = work->f18C_polys;
+ 

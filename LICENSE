@@ -1,0 +1,34 @@
+RE:INTEGRAL license scope
+
+The MIT License below applies only to original RE:INTEGRAL software and
+documentation, to the extent that the named copyright holders have the rights
+to license those contributions.
+
+It does not cover recovered or decompiled game or SDK code, original game
+assets or data, third-party material, or patches to upstream code. Those
+materials retain their applicable terms and notices; no permission is granted
+here where an upstream license is absent. Modifications governed by MPL 2.0
+remain subject to that license. More specific file-level notices take
+precedence. See docs/THIRD_PARTY.md for provenance and known license scopes.
+
+MIT License
+
+Copyright (c) 2026 Drommedhar and RE:INTEGRAL contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "patch": "patches/mgs-sight.patch",
+  "host_files": [
+    "src/mgs_sight.c",
+    "include/mgs_sight.h",
+    "tests/mgs_sight_test.c"
+  ],
+  "affected_game_source": "source/thing/sight.c",
+  "observed_failure": {
+    "stage": "s12a",
+    "log": "build/s12a-header.log",
+    "packet_length": "0x28000000",
+    "cause": "Retail .s primitives have a 4-byte header; native P_TAG has an 8-byte header. Native renderer interpreted POLY_F4 color/opcode as length. Hardware watchpoint build/s12a-writer.log identified sight.c GetResources copying the original resource."
+  },
+  "implementation": "Keep retail buffers, offsets, pseudo-text, and original animations unchanged. Read raw code at byte7; convert visible primitives into native double-buffered packets immediately before queueing. Conversion validates source length and destination capacity, preserves every GPU payload word, and initializes separate native address/length fields.",
+  "verification": {
+    "ctest": "mgs_sight_test in RelWithDebInfo; all26 suites passed",
+    "runtime": "s12a initial-story1200VSync and story197 fixture1200VSync pass previous corruption point without unsupported GPU commands or access violation. Fixture movement3112units; original Wolf constructor observed.",
+    "human_playtesting": false
+  },
+  "aislop": {
+    "host_files": 3,
+    "host_score": 100,
+    "errors": 0,
+    "fixable_warnings": 0,
+    "vendor_nonfixable_complexity_warnings": 4,
+    "vendor_existing_todo_info": 1,
+    "unavailable_engines": [
+      "clang-format",
+      "cppcheck"
+    ]
+  }
+}

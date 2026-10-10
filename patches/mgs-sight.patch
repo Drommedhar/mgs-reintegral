@@ -1,0 +1,119 @@
+diff --git a/source/thing/sight.c b/source/thing/sight.c
+index 503a772f2..536f2a240 100644
+--- a/source/thing/sight.c
++++ b/source/thing/sight.c
+@@ -1,5 +1,9 @@
+ #include "sight.h"
+ 
++#ifdef MGS_NATIVE
++#include "mgs_sight.h"
++#endif
++
+ #include <sys/types.h>
+ #include <libgte.h>
+ #include <libgpu.h>
+@@ -81,6 +85,10 @@ typedef struct _Work
+     int                       field_30;
+     SightPrimitiveBufferInfo *primitiveBufferInfo;
+     void                     *primitiveDoubleBuffer[2];
++#ifdef MGS_NATIVE
++    char                     *nativePrimitiveDoubleBuffer[2];
++    int                       nativePrimitiveBufferSize;
++#endif
+     int                       field_40;
+     DR_TPAGE                 *tPageDoubleBuffer[2];
+     short                    *xyOffsetBuffer;
+@@ -167,7 +175,7 @@ static void sight_800711C0(Work *work, int frameCount, void *primitive, int prim
+     primOffsetIndices += primOffsetIndicesIndex - 1;
+     indices = primOffsetIndices->indices;
+ 
+-    code = getcode(primitive);
++    code = ((unsigned char *)primitive)[7];
+     gouraudShaded = (code >> 2) & 4;
+     step = gouraudShaded + 4;
+ 
+@@ -233,7 +241,7 @@ static void sight_act_helper_80071320(Work *work, void *targetPrim, short *xyOff
+         primBuf = work->primitiveBufferInfo->primitiveBuffer;
+         copiedPrim = primBuf + primOffset;
+ 
+-        code = getcode(targetPrim);
++        code = ((unsigned char *)targetPrim)[7];
+         gouraudShaded = (code >> 4) & 1;
+ 
+         tag = *(int *)copiedPrim;
+@@ -384,6 +392,10 @@ static void Act(Work *work)
+     int                       tag;
+     char                      code;
+     short                    *xyOffsetBuffer;
++#ifdef MGS_NATIVE
++    char                     *nativePacket = work->nativePrimitiveDoubleBuffer[GV_Clock];
++    size_t                    nativeAvailable = work->nativePrimitiveBufferSize;
++#endif
+ 
+     if (work->itemId != *work->itemEquippedIndicator)
+     {
+@@ -498,9 +510,23 @@ static void Act(Work *work)
+         {
+             if (!(dword_8009F608 & 1) && !(GM_PlayerStatus & PLAYER_NOT_SIGHT))
+             {
++#ifdef MGS_NATIVE
++                size_t size = MgsSightCopyPacket(nativePacket, nativeAvailable,
++                    offsetPrimBuf, primBufInfo->primitiveBufferSize - primOffset);
++                if (size == 0)
++                {
++                    fprintf(2, "Invalid sight primitive at %d\n", primOffset);
++                    GV_DestroyActor(&work->actor);
++                    return;
++                }
++                addPrim(ot, nativePacket);
++                nativePacket += size;
++                nativeAvailable -= size;
++#else
+                 addPrim(ot, offsetPrimBuf);
++#endif
+             }
+-            code = getcode(offsetPrimBuf);
++            code = ((unsigned char *)offsetPrimBuf)[7];
+             if ((code & 2) != 0) // Checking for semi-transparency.
+             {
+                 SetDrawTPage(tPageBuf, 0, 1, ancField1Shifted << 5);
+@@ -525,6 +551,12 @@ static void Act(Work *work)
+ 
+ static void Die(Work *work)
+ {
++#ifdef MGS_NATIVE
++    if (work->nativePrimitiveDoubleBuffer[0])
++    {
++        GV_DelayedFree(work->nativePrimitiveDoubleBuffer[0]);
++    }
++#endif
+     if (*work->primitiveDoubleBuffer)
+     {
+         GV_DelayedFree(*work->primitiveDoubleBuffer);
+@@ -606,6 +638,17 @@ static int GetResources(Work *work, int hashedFileName, short *itemEquippedIndic
+     }
+     else
+     {
++#ifdef MGS_NATIVE
++        work->nativePrimitiveBufferSize = primitiveBufferSize +
++            primCount * (offsetof(P_TAG, r0) - sizeof(unsigned int));
++        work->nativePrimitiveDoubleBuffer[0] = GV_Malloc(work->nativePrimitiveBufferSize * 2);
++        if (!work->nativePrimitiveDoubleBuffer[0])
++        {
++            return -1;
++        }
++        work->nativePrimitiveDoubleBuffer[1] = work->nativePrimitiveDoubleBuffer[0] +
++            work->nativePrimitiveBufferSize;
++#endif
+         work->primitiveDoubleBuffer[1] = (unsigned int *)(((char *)primitiveBuffer) + primitiveBufferSize);
+         originBuffer = work->primitiveBufferInfo->primitiveBuffer;
+         targetBuffer = primitiveBuffer;
+@@ -640,7 +683,7 @@ static int GetResources(Work *work, int hashedFileName, short *itemEquippedIndic
+                 }
+             }
+ 
+-            code = getcode(currentPrimitive);
++            code = ((unsigned char *)currentPrimitive)[7];
+ 
+             if ((code & 2) != 0)
+             {

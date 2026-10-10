@@ -1,0 +1,305 @@
+diff --git a/psyz/src/platform/sdl3_common.h b/psyz/src/platform/sdl3_common.h
+index de5b28ed7200c1b9c0483167446277f17c1e2164..3144968086e2e7797446ff1a0e00739815d397e3 100644
+--- a/psyz/src/platform/sdl3_common.h
++++ b/psyz/src/platform/sdl3_common.h
+@@ -430,7 +430,12 @@ static bool Sdl3Common_IsInBackground(void) {
+     return SDL_GetAtomicInt(&app_in_background) != 0;
+ }
+ 
+-int Psyz_QuitRequested(void) { return SDL_GetAtomicInt(&quit_requested) != 0; }
++int Psyz_QuitRequested(void) {
++#ifdef PSYZ_GODOT_REMOTE
++    if (MgsGodotQuitRequested()) SDL_SetAtomicInt(&quit_requested, 1);
++#endif
++    return SDL_GetAtomicInt(&quit_requested) != 0;
++}
+ 
+ // Initialize the timing/vsync state. Call once at the end of InitPlatform.
+ static void Sdl3Common_TimingInit(void) {
+@@ -660,6 +665,13 @@ static void RemoveGamepad(SDL_JoystickID id) {
+ }
+ 
+ void MyPadInit(int mode) {
++#ifdef PSYZ_GODOT_REMOTE
++    if (!SDL_SetHintWithPriority(SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS,
++                                 "1", SDL_HINT_OVERRIDE)) {
++        ERRORF("Cannot enable controller input for the Godot window");
++        return;
++    }
++#endif
+     (void)mode;
+     if (!SDL_WasInit(SDL_INIT_GAMEPAD)) {
+         if (!SDL_InitSubSystem(SDL_INIT_GAMEPAD)) {
+@@ -783,6 +795,9 @@ static unsigned int SinglePadRead(int id) {
+         pressed |= Psyz_IosReadTouchControls();
+ #endif
+     }
++#ifdef PSYZ_GODOT_REMOTE
++    if (id == 0) pressed |= MgsGodotButtons();
++#endif
+     return pressed | PadRead_Gamepad(&gamepads[id]);
+ }
+ 
+diff --git a/psyz/src/platform/sdl3_gpu.c b/psyz/src/platform/sdl3_gpu.c
+index 75272f0af76b38601e9dfe0425c5075d4893ecb0..96dca85fc877d2da5c2bf0e97e391b903625282a 100644
+--- a/psyz/src/platform/sdl3_gpu.c
++++ b/psyz/src/platform/sdl3_gpu.c
+@@ -8,6 +8,9 @@
+ #include <string.h>
+ #include "../internal.h"
+ #include <SDL3/SDL.h>
++#ifdef PSYZ_GODOT_REMOTE
++#include "transport.h"
++#endif
+ #define PSYZ_CUSTOM_PRESENTATION
+ #define PSYZ_GPU_DEBUG_TEXT
+ #include "sdl3_common.h"
+@@ -100,6 +103,17 @@ static Posi draw_offset = {0, 0};
+ static Posi draw_area_start = {0, 0};
+ static Posi draw_area_end = {0x10000, 0x10000};
+ static SDL_Rect scissor_rect = {0, 0, VRAM_W, VRAM_H};
++#ifdef PSYZ_GODOT_REMOTE
++void MgsGodotWorldBegin(unsigned near_depth, unsigned far_depth) {
++    Draw_FlushBuffer();
++    const int32_t region[] = {scissor_rect.x, scissor_rect.y,
++                              scissor_rect.w, scissor_rect.h,
++                              force_mask_bit, preserve_masked, near_depth, far_depth,
++                              draw_offset.x - 160, draw_offset.y - 112, 320, 224,
++                              GetCurrentDither()};
++    MgsGodotQueue(MGS_GODOT_WORLD, region, sizeof(region), NULL, 0);
++}
++#endif
+ static float frame_scale_x = 1.0f;
+ static int frame_centre_x;
+ static bool frame_transform_clip, frame_transform_bypass;
+@@ -422,6 +436,17 @@ static bool CreateGpuResources(void) {
+ }
+ 
+ bool InitPlatform() {
++#ifdef PSYZ_GODOT_REMOTE
++    if (is_platform_initialized) return is_platform_init_successful;
++    is_platform_initialized = true;
++    if (!SDL_Init(SDL_INIT_VIDEO)) return false;
++    sdl3_window = SDL_CreateWindow(window_title, 320, 240, SDL_WINDOW_HIDDEN);
++    if (!sdl3_window || !MgsGodotConnect()) return false;
++    cur_tpage = 0;
++    Sdl3Common_TimingInit();
++    is_platform_init_successful = true;
++    return true;
++#endif
+     if (is_platform_initialized) {
+         return is_platform_init_successful;
+     }
+@@ -635,6 +660,9 @@ static void SyncScaledVramToNative(SDL_Rect dirty) {
+ }
+ 
+ static void ResolveNativeVram(void) {
++#ifdef PSYZ_GODOT_REMOTE
++    return;
++#endif
+     if (native_resolve_dirty.w > 0) {
+         SyncScaledVramToNative(native_resolve_dirty);
+         native_resolve_dirty = (SDL_Rect){0};
+@@ -774,6 +802,18 @@ static void ApplyPendingInternalRes(void) {
+ }
+ 
+ static void PlatformBackend_Present(void) {
++#ifdef PSYZ_GODOT_REMOTE
++    if (!InitPlatform()) return;
++    Draw_FlushBuffer();
++    const uint32_t frame[] = {disp_on, display_area.x, display_area.y,
++        display_size.x, presentation_source_height ? presentation_source_height : SDL_min(set_disp_vert, display_size.y),
++        presentation_width ? presentation_width : 4,
++        presentation_height ? presentation_height : 3};
++    MgsGodotExchange(MGS_GODOT_FRAME, frame, sizeof(frame), NULL, 0);
++    if (overlay_frame_cb) overlay_frame_cb();
++    finish_time = SDL_GetPerformanceCounter();
++    return;
++#endif
+     if (!sdl3_window && !InitPlatform()) {
+         return;
+     }
+@@ -874,6 +914,9 @@ static void PlatformBackend_Present(void) {
+ }
+ 
+ static void QuitPlatform(void) {
++#ifdef PSYZ_GODOT_REMOTE
++    MgsGodotClose();
++#endif
+     Sdl3Common_Shutdown();
+     if (overlay_destroy_cb) {
+         overlay_destroy_cb();
+@@ -968,6 +1011,11 @@ void ResetPlatform(void) {
+ }
+ 
+ static bool DownloadVramRegionAsRGBA8888(int x, int y, int w, int h, u8* out) {
++#ifdef PSYZ_GODOT_REMOTE
++    const int32_t remote_region[] = {x, y, w, h};
++    MgsGodotExchange(MGS_GODOT_READ, remote_region, sizeof(remote_region), out, (uint32_t)w * h * 4);
++    return true;
++#endif
+     ResolveNativeVram();
+     SDL_GPUCommandBuffer* cmd = AcquireCmd();
+     if (!cmd) {
+@@ -1001,10 +1049,12 @@ static bool DownloadVramRegionAsRGBA8888(int x, int y, int w, int h, u8* out) {
+ }
+ 
+ static unsigned char* AllocRgb888Region(int x, int y, int w, int h) {
++#ifndef PSYZ_GODOT_REMOTE
+     if (!device || !vram_render) {
+         ERRORF("GPU device not initialized");
+         return NULL;
+     }
++#endif
+ 
+     unsigned char* pixels = malloc((size_t)w * h * 3);
+     u8* rgba = malloc((size_t)w * h * 4);
+@@ -1039,6 +1089,19 @@ unsigned char* Psyz_VideoAllocCapturedFrame(int* w, int* h) {
+ }
+ 
+ static SDL_Surface* ReadPresentationSurface(void) {
++#ifdef PSYZ_GODOT_REMOTE
++    int remote_height = presentation_source_height ? (int)presentation_source_height : SDL_min(set_disp_vert, display_size.y);
++    SDL_Surface *remote_surface = SDL_CreateSurface(display_size.x, remote_height, SDL_PIXELFORMAT_RGBA32);
++    if (!remote_surface) return NULL;
++    Draw_FlushBuffer();
++    if (!DownloadVramRegionAsRGBA8888(display_area.x, display_area.y, display_size.x,
++                                      remote_height, remote_surface->pixels)) {
++        SDL_DestroySurface(remote_surface);
++        return NULL;
++    }
++    return remote_surface;
++#endif
++
+     int source_height = presentation_source_height ? (int)presentation_source_height : display_size.y;
+     if (!device || display_area.x < 0 || display_area.y < 0 ||
+         display_area.x + display_size.x > VRAM_W || display_area.y + source_height > VRAM_H) {
+@@ -1088,9 +1151,11 @@ unsigned char* Psyz_VideoAllocPresentedFrame(int* w, int* h) {
+         return NULL;
+     }
+     *w = *h = 0;
++#ifndef PSYZ_GODOT_REMOTE
+     if (!device) {
+         return NULL;
+     }
++#endif
+     WndSize output = requested_window_size;
+     if (!disp_on) {
+         unsigned char* blank = calloc((size_t)output.w * output.h, 3);
+@@ -1195,6 +1260,13 @@ int Psyz_GpuSetTextureAlignment(int screen_aligned) {
+ unsigned Psyz_VideoGetInternalResolution(void) { return internal_res; }
+ 
+ int Psyz_VideoSetInternalResolution(unsigned multiplier) {
++#ifdef PSYZ_GODOT_REMOTE
++    if (multiplier != 1) {
++        WARNF("Godot compatibility prototype currently requires internal resolution 1");
++        return -1;
++    }
++    return 0;
++#endif
+     if (multiplier < 1) {
+         return -1;
+     }
+@@ -1211,6 +1283,11 @@ int Psyz_VideoSetInternalResolution(unsigned multiplier) {
+ }
+ 
+ static void ApplyDisplayPendingChanges() {
++#ifdef PSYZ_GODOT_REMOTE
++    if (!InitPlatform()) return;
++    cur_display_size = display_size;
++    return;
++#endif
+     if (!sdl3_window && !InitPlatform()) {
+         return;
+     }
+@@ -1777,6 +1854,13 @@ void Draw_SetMask(int bit0, int bit1) {
+ }
+ 
+ void Draw_ClearImage(PS1_RECT* rect, u_char r, u_char g, u_char b) {
++#ifdef PSYZ_GODOT_REMOTE
++    if (!InitPlatform() || rect->w <= 0 || rect->h <= 0) return;
++    Draw_FlushBuffer();
++    const int32_t clear[] = {rect->x, rect->y, rect->w, rect->h, r, g, b};
++    MgsGodotQueue(MGS_GODOT_CLEAR, clear, sizeof(clear), NULL, 0);
++    return;
++#endif
+     Draw_FlushBuffer();
+     ResolveNativeVram();
+     if (rect->w == 0 || rect->h == 0) {
+@@ -1877,6 +1961,19 @@ void Draw_LoadImage(PS1_RECT* rect, u_long* p) {
+     }
+     Draw_FlushBuffer();
+     ResolveNativeVram();
++#ifdef PSYZ_GODOT_REMOTE
++    const size_t bytes = (size_t)rect->w * rect->h * 4;
++    u8 *upload = malloc(bytes);
++    if (!upload) abort();
++    if (!PrepareImageUpload(rect, (const u16 *)p, upload)) {
++        free(upload);
++        abort();
++    }
++    const int32_t region[] = {rect->x, rect->y, rect->w, rect->h};
++    MgsGodotQueue(MGS_GODOT_UPLOAD, region, sizeof(region), upload, (uint32_t)bytes);
++    free(upload);
++    return;
++#endif
+     u8* map = SDL_MapGPUTransferBuffer(device, tex_upload_transfer, true);
+     if (!map) {
+         ERRORF("SDL_MapGPUTransferBuffer: %s", SDL_GetError());
+@@ -1922,9 +2019,11 @@ void Draw_StoreImage(PS1_RECT* rect, u_long* p) {
+               rect->x, rect->y, rect->w, rect->h, VRAM_W, VRAM_H);
+         return;
+     }
++#ifndef PSYZ_GODOT_REMOTE
+     if (!device || !vram_render) {
+         return;
+     }
++#endif
+     Draw_FlushBuffer(); // flush primitives before operating with the VRAM
+ 
+     const size_t pixels = (size_t)rect->w * rect->h;
+@@ -1980,6 +2079,11 @@ void Draw_MoveImage(PS1_RECT* rect, unsigned int x, unsigned int y) {
+         return;
+     }
+ 
++#ifdef PSYZ_GODOT_REMOTE
++    const int32_t move[] = {src_x, src_y, copy_w, copy_h, dst_x, dst_y};
++    MgsGodotQueue(MGS_GODOT_MOVE, move, sizeof(move), NULL, 0);
++    return;
++#endif
+     SDL_GPUCommandBuffer* cmd = AcquireCmd();
+     if (!cmd) {
+         return;
+@@ -2049,6 +2153,32 @@ void Draw_FlushBuffer(void) {
+     if (n_vertices == 0) {
+         return;
+     }
++#ifdef PSYZ_GODOT_REMOTE
++    const float remote_transform = frame_transform_bypass ? 1.0f : frame_scale_x;
++    const float remote_grid = GetDrawGridXScale();
++    struct {
++        uint32_t vertices, indices;
++        int32_t clip[4];
++        float offset[8];
++        uint32_t force, preserve;
++        float scale;
++        uint32_t sampling;
++    } header = {n_vertices, n_indices,
++        {scissor_rect.x, scissor_rect.y, scissor_rect.w, scissor_rect.h},
++        {(float)draw_offset.x, (float)draw_offset.y,
++         0.5f / (remote_grid * remote_transform), 0.5f, remote_grid * remote_transform,
++         draw_offset.x * (1.0f - remote_grid) * remote_transform + frame_centre_x * (1.0f - remote_transform), 0, 0},
++        force_mask_bit, preserve_masked, 1.0f,
++        framebuffer_sampling | (texture_screen_aligned << 1)};
++    _Static_assert(sizeof(Vertex) == 20 && sizeof(header) == 72, "Godot protocol layout");
++    unsigned char payload[MAX_VERTEX_COUNT * sizeof(Vertex) + MAX_INDEX_COUNT * sizeof(u16)];
++    memcpy(payload, vertex_buf, n_vertices * sizeof(Vertex));
++    memcpy(payload + n_vertices * sizeof(Vertex), index_buf, n_indices * sizeof(u16));
++    MgsGodotQueue(MGS_GODOT_DRAW, &header, sizeof(header), payload,
++                  n_vertices * sizeof(Vertex) + n_indices * sizeof(u16));
++    Draw_ResetBuffer();
++    return;
++#endif
+     const bool scaled_snapshot = internal_res > 1 &&
+                                  (framebuffer_sampling || batch_reads_destination);
+     if (scaled_snapshot) EnsureScaledSnapshot();

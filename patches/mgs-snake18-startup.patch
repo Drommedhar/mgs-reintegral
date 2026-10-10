@@ -1,0 +1,15 @@
+diff --git a/source/overlays/d18a/animal/snake18/native_03.c b/source/overlays/d18a/animal/snake18/native_03.c
+--- a/source/overlays/d18a/animal/snake18/native_03.c
++++ b/source/overlays/d18a/animal/snake18/native_03.c
+@@ -255,7 +255,10 @@
+     GM_PlayerStatus &= 0xFFFDF7EF;
+     if (action2 != 0)
+         GM_ConfigObjectOverride(&work->body, 0, 0, 4, 0);
+-    work->f874->type |= 0x100u;
++    if (work->f874 != NULL)
++    {
++        work->f874->type |= DG_PRIM_INVISIBLE;
++    }
+     f834 = work->f834;
+     work->f7E4 &= 0xFFFFFFF9;
+     if (f834 != NULL)

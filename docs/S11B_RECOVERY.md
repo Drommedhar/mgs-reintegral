@@ -1,0 +1,16 @@
+# First tower rooftop cinematic
+
+`s11b` now builds as native C with all 28 original constructor entries bound. Its Hind code reuses the verified `s11g` implementation; its distinct 27,404-byte cinematic actor and 260-byte crash-smoke actor were recovered separately. These two original code ranges contain 1,783 MIPS instruction words. No MIPS code is executed by the native game.
+
+[The cinematic](../vendor/mgs/source/overlays/s11b/okajima/11b_demo.c) preserves the original camera phases, sixteen moving debris objects, 640 ribbon polygons, sounds, flashes, timed destruction and GCL continuation. Its initialization retains an original quirk: the second rotation-array pointer stays fixed, so the first element is overwritten sixteen times. Independent execution of the original initializer caught this detail. Native drawing uses typed packets with complete pointer headers.
+
+[CrashSmoke](../vendor/mgs/source/okajima/crsh_smk.c) preserves its four particles, gravity, lifetime, three smoke styles, optional sparks and color controls. Its animation helpers reuse existing recovered `socom.c` source; all 322 bytes of the three referenced animation scripts match the original overlay. Allocation failures return a failed constructor. The original empty destructor has no owned resources and is represented by a null destruction callback.
+
+`mgs_tower_demo_test` passes 833 independent original-MIPS comparisons: one complete initialization, 96 camera/state cases, all 640 ribbon slots, and 96 smoke-physics/effect cases. The camera fixtures isolate engine allocation and rendering boundaries, and the smoke fixtures cover effects 0/1; these fixtures do not exercise spark creation. Source and test Aislop scans report zero findings.
+
+Two Debug runtime fixtures provide different evidence:
+
+- [Original incoming setup](../tests/fixtures/s11b_story174.cdb): story 174 and the original `s11a` procedure `sub_E1CB` position `(-5000,0,24000)`, heading 0. The authored entry runs, player control returns, and ordinary controller input moves Snake 665 units across 19 movement ticks. The run completes 1,800 VSyncs cleanly; the captured image shows the tower rooftop and Snake.
+- [Isolated trigger setup](../tests/fixtures/s11b_demo_trigger.cdb): starts at the center of the original `ca82.h` `demo1` trigger, with the restart flag set. The authored trap creates the recovered cinematic, debris movement executes, and the original continuation restarts, plays its following demo, and loads `s11g`. Ordinary input then moves Snake 664 units across 24 ticks. After the probe stops moving, enemy attacks reach the normal GAME OVER screen before the 3,600-VSync exit. There is no native exception. This demonstrates the authored cinematic transition; it does not demonstrate survival or completion of the Hind encounter.
+
+The runtime branch did not instantiate CrashSmoke, so its evidence is original-code recovery and differential testing. Continuous campaign arrival and human playability remain unverified. Exact original ranges, constructor bindings, test scope and runtime paths are recorded in [the ledger](data/s11b_recovery.json). [The incremental patch](../patches/mgs-s11b.patch) contains the stage branch, constructor table and both recovered source files; original disc assets remain untracked.

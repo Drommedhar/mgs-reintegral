@@ -1,0 +1,7 @@
+.lines -e
+bu /1 mgs_integral_native!MgsNativeReloadOverlay "ew mgs_integral_native!var_buf+a f2; ew mgs_integral_native!linkvarbuf+10 b7a 464 e997; ew mgs_integral_native!var_buf+2 0 0; .printf \"FIXTURE story242, original sub_13CE saved pose (2938,1124,-5737), heading0; empty serialized container damage\\n\"; gc"
+bu /1 mgs_integral_native!s15c_dyncon_800D6528 ".printf \"OBSERVE native container actor mode=%d\\n\", poi(poi(@esp+4)+4050); gc"
+sxe -c "r;kv;q" av
+sxe -c "r;kv;q" dz
+g
+q

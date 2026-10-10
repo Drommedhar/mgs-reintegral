@@ -1,0 +1,130 @@
+diff --git a/psyz/include/psyz/input.h b/psyz/include/psyz/input.h
+index d0fec85..ee3b31f 100644
+--- a/psyz/include/psyz/input.h
++++ b/psyz/include/psyz/input.h
+@@ -74,6 +74,11 @@ void Psyz_PadsGet(int port, char* dst, int len);
+  */
+ void Psyz_PadsSet(int port, const char* src, int len);
+ 
++int Psyz_PadsRunning(void);
++int Psyz_PadsSupportsRumble(int port);
++int Psyz_PadsRumble(int port, unsigned short low, unsigned short high,
++                    unsigned duration_ms);
++
+ #ifdef __cplusplus
+ }
+ #endif
+diff --git a/psyz/src/platform/sdl3_common.h b/psyz/src/platform/sdl3_common.h
+index b3bbb45..d1c7518 100644
+--- a/psyz/src/platform/sdl3_common.h
++++ b/psyz/src/platform/sdl3_common.h
+@@ -537,6 +537,22 @@ struct Gamepad {
+ static bool is_pads_init = false;
+ static struct Gamepad gamepads[16] = {0};
+ 
++int Psyz_PadsSupportsRumble(int port) {
++    if (port < 0 || port >= 2 || !gamepads[port].dev) {
++        return 0;
++    }
++    return SDL_GetBooleanProperty(SDL_GetGamepadProperties(gamepads[port].dev),
++                                  SDL_PROP_GAMEPAD_CAP_RUMBLE_BOOLEAN, false);
++}
++
++int Psyz_PadsRumble(int port, unsigned short low, unsigned short high,
++                    unsigned duration_ms) {
++    if (!Psyz_PadsSupportsRumble(port)) {
++        return 0;
++    }
++    return SDL_RumbleGamepad(gamepads[port].dev, low, high, duration_ms);
++}
++
+ static void UpdatePlatformTouchControls(void) {
+ #ifdef PLATFORM_IOS
+     Psyz_IosSetTouchControlsVisible(is_pads_init && !gamepads[0].dev);
+diff --git a/psyz/src/psyz/libapi.c b/psyz/src/psyz/libapi.c
+index bf4d015..575f431 100644
+--- a/psyz/src/psyz/libapi.c
++++ b/psyz/src/psyz/libapi.c
+@@ -34,8 +34,12 @@ static ControllerPort ports[2] = {
+ static int pads_sampled = 0; // avoid more than one input polling per frame
+ static char* pad_buffers[2];
+ static int pad_buffer_lens[2];
++static int pads_running;
+ static void ReadPadsOnVsync(void) {
+     pads_sampled = 0;
++    if (!pads_running) {
++        return;
++    }
+     for (int p = 0; p < LEN(ports); p++) {
+         if (pad_buffers[p]) {
+             Psyz_PadsGet(p, pad_buffers[p], pad_buffer_lens[p]);
+@@ -120,6 +124,10 @@ void Psyz_PadsGet(int port, char* dst, int len) {
+ }
+ 
+ int InitPAD(char* bufA, int lenA, char* bufB, int lenB) {
++    pads_running = 0;
++    if (lenA < 0 || lenB < 0) {
++        return 0;
++    }
+     PadInit(0);
+     if (bufA) {
+         memset(bufA, 0, lenA);
+@@ -139,11 +147,21 @@ int InitPAD(char* bufA, int lenA, char* bufB, int lenB) {
+ }
+ 
+ long StartPAD(void) {
+-    NOT_IMPLEMENTED;
+-    return 1;
++    pads_running = (pad_buffers[0] && pad_buffer_lens[0] > 0) ||
++                   (pad_buffers[1] && pad_buffer_lens[1] > 0);
++    return pads_running;
++}
++
++void StopPAD(void) {
++    pads_running = 0;
++    for (int port = 0; port < LEN(ports); ++port) {
++        if (Psyz_PadsSupportsRumble(port) && !Psyz_PadsRumble(port, 0, 0, 0)) {
++            WARNF("failed to stop rumble on controller %d", port);
++        }
++    }
+ }
+ 
+-void StopPAD(void) { NOT_IMPLEMENTED; }
++int Psyz_PadsRunning(void) { return pads_running; }
+ 
+ int PAD_init(int type, void* unused) {
+     PadInit(0);
+diff --git a/psyz/src/psyz/libetc.c b/psyz/src/psyz/libetc.c
+index 198d8de..1f5ce2a 100644
+--- a/psyz/src/psyz/libetc.c
++++ b/psyz/src/psyz/libetc.c
+@@ -71,29 +71,8 @@ void StartTAP(void) {
+     StartPAD();
+ }
+ 
+-int PadGetState(int port) {
+-    // from PSY-Q 4.2
+-    NOT_IMPLEMENTED;
+-    return 0;
+-}
+-
+-void PadSetAct(int port, u_char* data, int len) {
+-    // from PSY-Q 4.2
+-    NOT_IMPLEMENTED;
+-}
+-
+-int PadSetActAlign(int port, char* data) {
+-    // from PSY-Q 4.2
+-    NOT_IMPLEMENTED;
+-    return 0;
+-}
+-
+ void PadInitMtap(u_char* pad1, u_char* pad2) {
+     // from PSY-Q 4.2
+     NOT_IMPLEMENTED;
+ }
+ 
+-void PadStartCom(void) {
+-    // from PSY-Q 4.2
+-    NOT_IMPLEMENTED;
+-}

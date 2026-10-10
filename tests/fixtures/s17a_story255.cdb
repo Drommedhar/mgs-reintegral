@@ -1,0 +1,7 @@
+.lines -e
+bu /1 mgs_integral_native!MgsNativeReloadOverlay "ew mgs_integral_native!var_buf+a ff; ew mgs_integral_native!var_buf+40e 0; ew mgs_integral_native!var_buf+2 800; ew mgs_integral_native!var_buf+4 0; ew mgs_integral_native!linkvarbuf+10 17a 450 117; .printf \"FIXTURE REX first-phase branch: story255, phase0; d16e incoming position(378,1104,279), heading2048, stance0\n\"; gc"
+bu /1 mgs_integral_native!NewRex ".printf \"FIXTURE observed original REX constructor\n\"; gc"
+bu /1 mgs_integral_native!RexNewDrum ".printf \"FIXTURE observed original drum constructor\n\"; gc"
+sxe -c "r;kv;q" av
+g
+q

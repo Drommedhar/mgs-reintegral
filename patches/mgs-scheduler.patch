@@ -1,0 +1,265 @@
+diff --git a/source/mts/mask.c b/source/mts/mask.c
+index 3ecfac49f..1d68de786 100644
+--- a/source/mts/mask.c
++++ b/source/mts/mask.c
+@@ -6,14 +6,24 @@
+ 
+ void SetExMask()
+ {
++#ifdef MGS_NATIVE
++    extern void MgsThreadsFail(const char *message);
++    MgsThreadsFail("PSYQ debug exception requested");
++#else
+     // unknown psyq-specific debug function ?
+     __asm__("break 1030");
++#endif
+ }
+ 
+ void *mts_get_bss_tail(void)
+ {
++#ifdef MGS_NATIVE
++    extern void *MgsNativeStageTable(void);
++    return MgsNativeStageTable();
++#else
+     // linker-defined symbol
+     extern unsigned char _bss_orgend[];
+ 
+     return (void *)_bss_orgend;
++#endif
+ }
+diff --git a/source/mts/mts_new.c b/source/mts/mts_new.c
+index 2926d3f71..978374352 100644
+--- a/source/mts/mts_new.c
++++ b/source/mts/mts_new.c
+@@ -9,9 +9,19 @@
+ #include "mts_new.h"
+ #include "../libsio/isio.h"
+ 
++#ifdef MGS_NATIVE
++#include "mgs_threads.h"
++#undef EnterCriticalSection
++#undef ExitCriticalSection
++#define EnterCriticalSection SwEnterCriticalSection
++#define ExitCriticalSection SwExitCriticalSection
++static int mts_native_interrupt_pending;
++static unsigned long mts_native_task_start(void);
++#else
+ int printf(/* const char *format, ... */);
+ int fprintf(/* int stream, const char *format, ... */);
+ int cprintf(/* const char *format, ... */);
++#endif
+ 
+ /*---------------------------------------------------------------------------*/
+ // extern BSS
+@@ -161,6 +171,12 @@ static inline void mts_TransferExecution( int task )
+ 
+ static inline void mts_TransferExecutionWithinInterrupt( int task )
+ {
++#ifdef MGS_NATIVE
++    if (task != mts_active_task_800C0DB0)
++    {
++        mts_native_interrupt_pending = 1;
++    }
++#else
+     int          change;
+     struct ToT  *t;
+     struct TCBH *h;
+@@ -184,10 +200,14 @@ static inline void mts_TransferExecutionWithinInterrupt( int task )
+ 
+         h->entry = mts_tasks_800C0C30[ mts_active_task_800C0DB0 ].tcb;
+     }
++#endif
+ }
+ 
+ static inline struct TCB *mts_GetTcbEntry( char tcb_id )
+ {
++#ifdef MGS_NATIVE
++    return MgsThreadsGetTcb((unsigned char)tcb_id);
++#else
+     struct ToT *t;
+     struct TCB *tcb_0;
+ 
+@@ -197,6 +217,7 @@ static inline struct TCB *mts_GetTcbEntry( char tcb_id )
+     tcb_0 = (struct TCB *)((t + 2)->head); /* get TCB array from the ToT */
+ 
+     return &tcb_0[tcb_id];
++#endif
+ }
+ 
+ static inline void mts_SetActiveTaskAndTransferExecution( int tasknr )
+@@ -207,7 +228,9 @@ static inline void mts_SetActiveTaskAndTransferExecution( int tasknr )
+ 
+ static inline void mts_SetActiveTaskAndTransferExecutionWithinInterrupt( int tasknr )
+ {
++#ifndef MGS_NATIVE
+     mts_active_task_idx_800C13C0 = tasknr;
++#endif
+     mts_TransferExecutionWithinInterrupt(tasknr);
+ }
+ 
+@@ -387,11 +410,17 @@ static inline void mts_CreateTask( int tasknr, void *stackend, void *entrypoint
+     task->intr = NULL;
+ 
+     // Open a thread for the task and store its ID in the task control block
++#ifdef MGS_NATIVE
++    task->tid = OpenTh(mts_native_task_start, (unsigned long)stackend, GetGp());
++#else
+     task->tid = OpenTh( (long (*)(void))&mts_task_start, (int)stackend, GetGp() );
++#endif
+ 
+     // OpenTh is buggy - does not initialize the SR register, so we have to do it ourselves
+     task->tcb = mts_GetTcbEntry(task->tid);
++#ifndef MGS_NATIVE
+     task->tcb->reg[ R_SR ] = SR_IBIT3; // SR = system status register, interrupt bit (2)
++#endif
+ 
+     task->state = MTS_TASK_READY;
+     mts_ready_tasks_800C0DB4 |= 1 << tasknr;
+@@ -1025,9 +1054,15 @@ void mts_SystemTaskEntrypoint( void )
+                 task->task_queue = -1;
+                 task->u.callback = (int ( * )( void ))start;
+                 task->intr = NULL;
++#ifdef MGS_NATIVE
++                task->tid = OpenTh(mts_native_task_start, (unsigned long)stack_pointer, GetGp());
++#else
+                 task->tid = OpenTh( (long (*)(void))mts_task_start, (int)stack_pointer, GetGp() );
++#endif
+                 task->tcb = mts_GetTcbEntry(task->tid);
++#ifndef MGS_NATIVE
+                 task->tcb->reg[ R_SR ] = SR_IBIT3; // SR = system status register, interrupt bit 3
++#endif
+ 
+                 task->state = MTS_TASK_READY;
+                 mts_ready_tasks_800C0DB4 |= 1 << tasknr;
+@@ -1197,6 +1232,9 @@ void mts_set_stack_check( long task, void *stack_top, long stack_size )
+  */
+ void mts_get_use_stack_size( int *max, int *now, int *limit )
+ {
++#ifdef MGS_NATIVE
++    MgsThreadsStackUsage(mts_tasks_800C0C30[mts_active_task_800C0DB0].tid, max, now, limit);
++#else
+     int       sp;
+     MTS_TASK *task;
+     int       stack_size;
+@@ -1234,6 +1272,7 @@ exit:
+     *max = loc;
+     *now = (int)task->stack_top - sp;
+     *limit = task->stack_size;
++#endif
+ }
+ 
+ // See the corresponding TaskState enum
+@@ -1263,6 +1302,13 @@ void mts_print_process_status( void )
+             continue;
+         }
+ 
++#ifdef MGS_NATIVE
++        {
++            int peak, current, reserved;
++            MgsThreadsStackUsage(mts_tasks_800C0C30[i].tid, &peak, &current, &reserved);
++            cprintf("Task %02d native stack %d; sampled peak %d; reserve %d", i, current, peak, reserved);
++        }
++#else
+         if ( mts_tasks_800C0C30[ i ].stack_top )
+         {
+             cprintf( "%c", mts_tasks_800C0C30[ i ].intr ? 'v' : ' ' );
+@@ -1301,6 +1347,7 @@ void mts_print_process_status( void )
+         {
+             cprintf( " Task %02d SP ---- USE ----/----", i );
+         }
++#endif
+ 
+         cprintf( " %s", ( i != mts_active_task_800C0DB0 ) ?
+                  task_status[ mts_tasks_800C0C30[ i ].state - 1 ] : "Running" );
+@@ -1359,6 +1406,19 @@ void mts_unlock_sio( void )
+ 
+ void mts_SioTaskEntrypoint( void )
+ {
++#ifdef MGS_NATIVE
++    for (;;)
++    {
++        VSync(0);
++        if (mts_native_interrupt_pending)
++        {
++            mts_native_interrupt_pending = 0;
++            SwEnterCriticalSection();
++            mts_SetActiveTaskAndTransferExecution(mts_FindFirstReadyTask());
++            SwExitCriticalSection();
++        }
++    }
++#else
+     int ch;
+     int num;
+ 
+@@ -1400,6 +1460,7 @@ void mts_SioTaskEntrypoint( void )
+             break;
+         }
+     }
++#endif
+ }
+ 
+ int set_stdout_stream( int stream )
+@@ -1422,6 +1483,7 @@ void set_output_stream( int stream )
+ }
+ 
+ // int fprintf(int stream, const char *format, ...);
++#ifndef MGS_NATIVE
+ int fprintf()
+ {
+     /* dummy function */
+@@ -1440,6 +1502,7 @@ int cprintf()
+ {
+     /* dummy function */
+ }
++#endif
+ 
+ /*---------------------------------------------------------------------------*/
+ 
+@@ -1450,10 +1513,23 @@ int mts_get_tick_count( void )
+ 
+ void mts_CpuTrapCallback( void )
+ {
++#ifdef MGS_NATIVE
++    MgsThreadsFail("PS1 CPU trap event received");
++#else
+     while (1);
++#endif
+ }
+ 
+ void mts_task_start( void )
+ {
+     task_start_body();
+ }
++
++#ifdef MGS_NATIVE
++static unsigned long mts_native_task_start(void)
++{
++    mts_task_start();
++    MgsThreadsFail("MTS task trampoline returned");
++    return 0;
++}
++#endif
+diff --git a/source/mts/mts_new.h b/source/mts/mts_new.h
+index 63e2a9322..72d13daf9 100644
+--- a/source/mts/mts_new.h
++++ b/source/mts/mts_new.h
+@@ -69,7 +69,18 @@ extern void *mts_get_bss_tail(void);
+ // "mts_new.c" should really be __FILE__ but we get the full path using the
+ // decomp's build system. mts.lib was originally built using a local Makefile.
+ 
+-#if __STDC_VERSION__ >= 199901L // C99
++#ifdef MGS_NATIVE
++#include "mgs_threads.h"
++#define mts_assert(cond, line, ...) \
++    do { \
++        if (!(cond)) { \
++            printf("MTS assertion at line %d: ", line); \
++            printf(__VA_ARGS__); \
++            printf("\n"); \
++            MgsThreadsFail("MTS assertion failed"); \
++        } \
++    } while (0)
++#elif __STDC_VERSION__ >= 199901L // C99
+ #define mts_assert( cond, line, ... )                               \
+         if ( !( cond ) )                                            \
+         {                                                           \

@@ -1,0 +1,158 @@
+diff --git a/source/libdg/chanl.c b/source/libdg/chanl.c
+index df78e66869d801d14ab40fb2908119e516db0302..475cd10f667263254f2b2b43b32789fbb5ef62bc 100644
+--- a/source/libdg/chanl.c
++++ b/source/libdg/chanl.c
+@@ -1,6 +1,9 @@
+ #define __LIBDG_CHANL_C__
+ 
+ #include "libdg.h"
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_scene.h"
++#endif
+ 
+ #include <sys/types.h>
+ #include <libgte.h>
+@@ -268,6 +271,9 @@ void DG_SortChanlSystem( int which )
+     }
+ #ifdef MGS_NATIVE
+     MgsVisibilityEnd();
++#ifdef MGS_GODOT_SCENE
++    MgsGodotCaptureScene(&DG_Chanls[1], which);
++#endif
+ #endif
+ }
+ 
+@@ -294,6 +300,9 @@ int DG_QueueObjs( DG_OBJS *objs )
+     if ( n >= cp->prim_index ) return -1;
+     cp->queue[ n++ ] = objs;
+     cp->objs_index = n;
++#ifdef MGS_GODOT_SCENE
++    MgsGodotRegisterInstance(objs);
++#endif
+     return 0;
+ }
+ 
+@@ -315,6 +324,9 @@ void DG_DequeueObjs( DG_OBJS *objs )
+     }
+     return;
+ found:
++#ifdef MGS_GODOT_SCENE
++    MgsGodotRemoveInstance(objs);
++#endif
+     for ( --i; i > 0; i-- )
+     {
+         oque[ 0 ] = oque[ 1 ];
+diff --git a/source/libdg/divide.c b/source/libdg/divide.c
+index 7dc12ef0943646138e84daa93da73f2297cf2601..80815372316ef72d57595e7a5effe90880c39996 100644
+--- a/source/libdg/divide.c
++++ b/source/libdg/divide.c
+@@ -1,4 +1,7 @@
+ #include "libdg.h"
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_scene.h"
++#endif
+ #include "mgstype.h"
+ #ifdef MGS_NATIVE
+ #include "mgs_video.h"
+@@ -601,6 +604,12 @@ void DG_DivideChanl( DG_CHANL *chanl, int idx )
+         {
+             for ( j = objs->n_models ; j > 0 ; --j )
+             {
++#ifdef MGS_GODOT_SCENE
++                if (MgsGodotSceneEnabled() && MgsGodotOwnsPart(objs, objs->n_models - j, idx)) {
++                    ++obj;
++                    continue;
++                }
++#endif
+                 if (obj->bound_mode)
+                 {
+                     gte_SetRotMatrix( &obj->screen );
+@@ -627,6 +636,12 @@ void DG_DivideChanl( DG_CHANL *chanl, int idx )
+         {
+             for ( j = objs->n_models ; j > 0 ; --j )
+             {
++#ifdef MGS_GODOT_SCENE
++                if (MgsGodotSceneEnabled() && MgsGodotOwnsPart(objs, objs->n_models - j, idx)) {
++                    ++obj;
++                    continue;
++                }
++#endif
+                 if (obj->bound_mode)
+                 {
+                     DG_AddSubdividedPrim( obj, idx );
+diff --git a/source/libdg/loader.c b/source/libdg/loader.c
+index b532977d3733b338705212fa5447f3d19c55cfcb..c0f38665fc020032d9514309ee9e973a98ebeb94 100644
+--- a/source/libdg/loader.c
++++ b/source/libdg/loader.c
+@@ -4,6 +4,9 @@
+ #include <stddef.h>
+ 
+ #include "libdg.h"
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_scene.h"
++#endif
+ #include "mgstype.h"
+ #include "libgv/libgv.h"
+ #include "fmt_sgt.h"
+@@ -93,6 +96,9 @@ int DG_LoadInitKmd( void *buf, int id )
+         if ( mdl->parent >= 0 ) LinkModelToParent( mdl, &def->models[ mdl->parent ] );
+         mdl++;
+     }
++#ifdef MGS_GODOT_SCENE
++    MgsGodotRegisterModel(def, id);
++#endif
+     return 1;
+ }
+ 
+@@ -352,6 +358,9 @@ int DG_LoadInitKmdar( void *buf, int id )
+             mdl++;
+         }
+ 
++#ifdef MGS_GODOT_SCENE
++        MgsGodotRegisterModel(def, kmd->id);
++#endif
+         GV_SetCache( GV_CacheID( kmd->id, 'k' ), def );
+         kmd = (DG_KMDPACK *)mdl;
+     }
+diff --git a/source/libdg/sort.c b/source/libdg/sort.c
+index 0b866e910df8404909e1b8c5acfcd1d77f4c9546..6ac0cc902572a79ffb8ef75bc1b7b8cdbf012611 100644
+--- a/source/libdg/sort.c
++++ b/source/libdg/sort.c
+@@ -1,4 +1,7 @@
+ #include "libdg.h"
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_scene.h"
++#endif
+ 
+ typedef struct _SCRATCHPAD_UNK {
+     OT_TYPE *buf;
+@@ -117,4 +120,7 @@ void DG_SortChanl( DG_CHANL *chanl, int idx )
+             prim += prim_size;
+         }
+     }
++#ifdef MGS_GODOT_SCENE
++    MgsGodotSortWorld(chanl, idx);
++#endif
+ }
+diff --git a/source/takabe/lit_mdl.c b/source/takabe/lit_mdl.c
+index 40fd52479dc747807abfd2b8de3f72e909979413..53f24b3955cf0b857f91a58b618c107fa82e152b 100644
+--- a/source/takabe/lit_mdl.c
++++ b/source/takabe/lit_mdl.c
+@@ -1,4 +1,7 @@
+ #include "lit_mdl.h"
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_scene.h"
++#endif
+ 
+ #include <stddef.h>
+ 
+@@ -226,6 +229,9 @@ int s01a_lit_mdl_800E2ADC(Work *work, MATRIX *arg2, int arg3, int arg4, int rais
+     obj->flag = 0x15D;
+     obj->light = &work->field_48_light;
+     obj->map_name = GM_CurrentMap;
++#ifdef MGS_GODOT_SCENE
++    MgsGodotRegisterGeneratedModel(&work->field_C8, MGS_GODOT_GENERATED_LIGHT);
++#endif
+     obj->objs = DG_MakeObjs(&work->field_C8, obj->flag, 0);
+     DG_QueueObjs(obj->objs);
+ 

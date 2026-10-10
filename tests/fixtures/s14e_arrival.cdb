@@ -1,0 +1,6 @@
+.lines -e
+bu /1 mgs_integral_native!MgsNativeReloadOverlay "ew mgs_integral_native!var_buf+8 2190 cd; .echo FIXTURE original cargo-elevator arrival branch 2190 and story205, original GCL supplies map and player pose; gc"
+bu /1 mgs_integral_native!NewElevator ".echo OBSERVED original script created cargo elevator; gc"
+sxe -c "r;kv;q" av
+g
+q

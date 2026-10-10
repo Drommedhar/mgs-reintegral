@@ -1,0 +1,572 @@
+diff --git a/source/animal/zako11e/zako11e.c b/source/animal/zako11e/zako11e.c
+index 998c51baf..bd10255f7 100644
+--- a/source/animal/zako11e/zako11e.c
++++ b/source/animal/zako11e/zako11e.c
+@@ -336,7 +336,7 @@ int ReadNodes_800D3CA4( ZakoWork* work )
+ int s11e_zako11e_800D3D40( char *opt, short* s )
+ {
+     int i;
+-    unsigned char *res;
++    char *res;
+ 
+     for ( i = 0 ; ( res = GCL_NextStr() ) ; i++ )
+     {
+@@ -350,7 +350,7 @@ int s11e_zako11e_800D3D40( char *opt, short* s )
+ int s11e_zako11e_800D3D98( char *opt, int* l )
+ {
+     int i;
+-    unsigned char *res;
++    char *res;
+ 
+     for ( i = 0 ; ( res = GCL_NextStr() ) ; i++ )
+     {
+diff --git a/source/animal/zako11e/zk11eaction.c b/source/animal/zako11e/zk11eaction.c
+index 98d05cd8a..839318855 100644
+--- a/source/animal/zako11e/zk11eaction.c
++++ b/source/animal/zako11e/zk11eaction.c
+@@ -1720,7 +1720,7 @@ void ZAKO11E_PutSound_800D7CAC( ZakoWork* work )
+ extern void  NewLSight( SVECTOR *from, SVECTOR *to, int color ) ;
+ extern void  AN_Breath( MATRIX * );
+ 
+-void ZAKO11E_PutBreath_800D7D44( ZakoWork *work, int arg1 )
++void ZAKO11E_PutBreath_800D7D44( ZakoWork *work )
+ {
+     int frame;
+     if ( ZakoCommand_800DF280.mode == TOP_COMM_ALERT )
+diff --git a/source/animal/zako11e/zk11ecom.c b/source/animal/zako11e/zk11ecom.c
+index 1c1edcf10..c012b64a0 100644
+--- a/source/animal/zako11e/zk11ecom.c
++++ b/source/animal/zako11e/zk11ecom.c
+@@ -102,7 +102,7 @@ int s11e_zk11ecom_800D9BD4( char *ops, A4_STRUCT *unk )
+ int s11e_zk11ecom_800D9C34( char *ops, short* s )
+ {
+     int i;
+-    unsigned char *res;
++    char *res;
+ 
+     for ( i = 0 ; ( res = GCL_NextStr() ) ; i++ )
+     {
+@@ -399,7 +399,7 @@ void s11e_zk11ecom_800DA2BC( ZAKO_COMMAND* command )
+     if ( sound )
+     {
+         s11e_dword_800C3928 = 0x1E;
+-        GM_SeSet2(NULL, 0x30, s11e_zk11ecom_800DA0A8( sound ) );
++        GM_SeSet2(0, 0x30, s11e_zk11ecom_800DA0A8( sound ) );
+     }
+ }
+ 
+@@ -584,7 +584,7 @@ void s11e_zk11ecom_800DA784( void )
+ int s11e_zk11ecom_800DA7F8( char *arg0 )
+ {
+     int i;
+-    unsigned char* res;
++    char* res;
+     int proc_id;
+ 
+     res = arg0;
+@@ -905,7 +905,7 @@ static void GetResources( ZakoCommanderWork *work, int name, int where )
+     ops = GCL_GetOption( 'b' );
+     if ( ops )
+     {
+-        int res = GCL_StrToInt( (unsigned char*)ops );
++        int res = GCL_StrToInt( ops );
+         ZakoCommand_800DF280.field_0x114 = res;
+         printf( "ENEMY VOICE [0x%x]\n", res );
+     }
+diff --git a/source/animal/zako11f/action.c b/source/animal/zako11f/action.c
+index 84f991aa7..d6457d5da 100644
+--- a/source/animal/zako11f/action.c
++++ b/source/animal/zako11f/action.c
+@@ -13,8 +13,8 @@ short ActTable_800C3330[54] =
+ };
+ 
+ // vibration data
+-char s11i_800C339C[] = {1, 4, 0, 0};
+-char s11i_800C33A0[] = {255, 4, 0, 0};
++unsigned char s11i_800C339C[] = {1, 4, 0, 0};
++unsigned char s11i_800C33A0[] = {255, 4, 0, 0};
+ 
+ SVECTOR s11i_800C33A4 = {-150, 0, 300, 0};
+ SVECTOR s11i_800C33AC = {0, -700, 900, 0};
+@@ -24,11 +24,20 @@ SVECTOR s11i_800C33C4 = {0, 0, 100, 0};
+ SVECTOR s11i_800C33CC = {-1024, 0, 0, 0};
+ 
+ 
++#ifdef MGS_NATIVE
++extern const char s11i_dword_800D5260[];
++extern const char s11i_aSocombullet_800D524C[];
++extern const char s11i_aFamasbullet_800D5238[];
++const char *s11i_dword_800C33D4[3] = {
++    s11i_dword_800D5260, s11i_aSocombullet_800D524C, s11i_aFamasbullet_800D5238
++};
++#else
+ const char *s11i_dword_800C33D4[3] = {
+     (const char *)0x800D5260,
+     (const char *)0x800D524C,
+     (const char *)0x800D5238
+ };
++#endif
+ 
+ void ZAKO11F_PutSound_800CD2C0( Zako11FWork *work );
+ void ZAKO11F_PutBreath_800CD358( Zako11FWork *work );
+diff --git a/source/animal/zako11f/zako11f.c b/source/animal/zako11f/zako11f.c
+index 2c1938c45..49681b3f7 100644
+--- a/source/animal/zako11f/zako11f.c
++++ b/source/animal/zako11f/zako11f.c
+@@ -303,7 +303,7 @@ int ReadNodes_800C8E4C( Zako11FWork* work )
+ int s11i_zako11f_800C8EE8( char *opt, short* s )
+ {
+     int i;
+-    unsigned char *res;
++    char *res;
+ 
+     for ( i = 0 ; ( res = GCL_NextStr() ) ; i++ )
+     {
+@@ -317,7 +317,7 @@ int s11i_zako11f_800C8EE8( char *opt, short* s )
+ int s11i_zako11f_800C8F40( char *opt, int* l )
+ {
+     int i;
+-    unsigned char *res;
++    char *res;
+ 
+     for ( i = 0 ; ( res = GCL_NextStr() ) ; i++ )
+     {
+diff --git a/source/okajima/wolf/action.c b/source/okajima/wolf/action.c
+index 154a90862..9fba51313 100644
+--- a/source/okajima/wolf/action.c
++++ b/source/okajima/wolf/action.c
+@@ -79,7 +79,7 @@ void wolf2_800D3704(Wolf2Work *work, int action, int arg2)
+ void s12a_wolf2_800D375C(Wolf2Work *work)
+ {
+     GCL_ARGS args;
+-    u_long   data[1];
++    long     data[1];
+     int      proc_id;
+ 
+     proc_id = work->f784;
+diff --git a/source/okajima/wolf/unknown.c b/source/okajima/wolf/unknown.c
+index fc0cd5c10..79b115877 100644
+--- a/source/okajima/wolf/unknown.c
++++ b/source/okajima/wolf/unknown.c
+@@ -262,8 +262,13 @@ void s12a_wolf2_800CF2C4(Wolf2Work *work)
+     MATRIX    sp58;
+     MATRIX    sp78;
+     short     sp98[2];
++#ifdef MGS_NATIVE
++    int       p;
++    int       flag;
++#else
+     long      p;
+     long      flag;
++#endif
+     int       height;
+     int       count;
+     MAP      *map;
+@@ -425,7 +430,11 @@ void s12a_wolf2_800CF2C4(Wolf2Work *work)
+             DG_Clip(&chanl->clip_rect, chanl->screen);
+             gte_SetRotMatrix(&chanl->eye_inv);
+             gte_SetTransMatrix(&chanl->eye_inv);
++#ifdef MGS_NATIVE
++            RotTransPers(&sp20, (int *)sp98, &p, &flag);
++#else
+             RotTransPers(&sp20, (long *)sp98, &p, &flag);
++#endif
+ 
+             dist = (ABS(160 - sp98[0]) + ABS(102 - sp98[1])) & 0xFFF;
+             if (dist < 90)
+@@ -1555,7 +1564,7 @@ void s12a_wolf2_800D1EBC(Wolf2Work *work)
+             }
+             else
+             {
+-                work->fA18.vx = 55000;
++                work->fA18.vx = -10536;
+                 work->fA18.vy = 8000;
+                 work->fA18.vz = -14000;
+             }
+diff --git a/source/okajima/wolf/wolf2.c b/source/okajima/wolf/wolf2.c
+index b120c0dbe..e213603bb 100644
+--- a/source/okajima/wolf/wolf2.c
++++ b/source/okajima/wolf/wolf2.c
+@@ -35,7 +35,7 @@ void s12a_wolf2_800D2E0C(Wolf2Work *work);
+ void wolf2_ExecProcC(Wolf2Work *work)
+ {
+     GCL_ARGS args;
+-    u_long   data[3];
++    long     data[3];
+ 
+     if (work->f9C0 >= 0)
+     {
+@@ -53,7 +53,7 @@ void wolf2_ExecProcC(Wolf2Work *work)
+ void wolf2_ExecProcJ(Wolf2Work *work)
+ {
+     GCL_ARGS args;
+-    u_long   data[5];
++    long     data[5];
+ 
+     data[0] = work->control.mov.vx;
+     data[1] = work->control.mov.vy;
+@@ -187,7 +187,7 @@ void wolf2_SetLifebar(Wolf2Work *work)
+ 
+     work->fA44 = (work->fA40 / 8) * 8;
+ 
+-    strcpy(wolf2_name, "WOLF");
++    memcpy(wolf2_name, "WOLF", sizeof("WOLF"));
+     lifebar = &work->lifebar;
+     lifebar->name = wolf2_name;
+     lifebar->left[0] = 16;
+diff --git a/source/overlays/s11e/overlay2.c b/source/overlays/s11e/overlay2.c
+index 80f183605..2f7e7966b 100644
+--- a/source/overlays/s11e/overlay2.c
++++ b/source/overlays/s11e/overlay2.c
+@@ -1,3 +1,57 @@
++#ifdef MGS_NATIVE
++#include "enemy/enemy.h"
++
++extern const char s11e_dword_800DEC0C[];
++extern const char s11e_aSocombullet_800DEBF8[];
++extern const char s11e_aFamasbullet_800DEBE4[];
++void ZAKO11E_PutSound_800D7CAC(ZakoWork *work);
++void ZAKO11E_PutBreath_800D7D44(ZakoWork *work);
++void s11e_zk11ecom_800D7E8C(ZakoWork *work);
++void ZAKO11E_PutBulletEx_800D7EC8(ZakoWork *work);
++
++int s11e_dword_800C35BC[8] = {3000, 4000, 7000, 8000, 8000, 8000, 8000, 8000};
++unsigned short s11e_dword_800C35DC[8] = {300, 15, 30, 60, 90, 0, 32001, 30000};
++short ActTable_800C35EC[54] = {19, 20, 10, 22, 9, 34, 35, 36, 45, 13, 12, 26, 15, 14, 16, 27, 8, 46, 19, 21, 30, 31, 32, 33, 37, 19, 19, 25, 5, 2, 42, 4, 39, 40, 6, 7, 38, 3, 41, 17, 18, 43, 23, 24, 28, 29, 0, 1, 51, 17, 18, 43, 22, 0};
++unsigned char s11e_dword_800C3658[4] = {1, 4, 0, 0};
++unsigned char s11e_dword_800C365C[4] = {255, 4, 0, 0};
++SVECTOR s11e_dword_800C3660 = {-150, 0, 300, 0};
++SVECTOR s11e_dword_800C3668 = {0, -700, 900, 0};
++SVECTOR s11e_dword_800C3670 = {0, 0, 100, 0};
++SVECTOR s11e_dword_800C3678 = {-1024, 0, 0, 0};
++SVECTOR s11e_dword_800C3680 = {0, 0, 100, 0};
++SVECTOR s11e_dword_800C3688 = {-1024, 0, 0, 0};
++const char *s11e_dword_800C3690[3] = {s11e_dword_800DEC0C, s11e_aSocombullet_800DEBF8, s11e_aFamasbullet_800DEBE4};
++void *s11e_dword_800C369C[4] = {ZAKO11E_PutSound_800D7CAC, ZAKO11E_PutBreath_800D7D44, s11e_zk11ecom_800D7E8C, ZAKO11E_PutBulletEx_800D7EC8};
++SVECTOR s11e_dword_800C36AC = {5, -500, 80, 0};
++SVECTOR s11e_dword_800C36B4[3] = {
++    {5750, 0, -1000, 0},
++    {6250, 0, 500, 0},
++    {5750, 0, 2000, 0},
++};
++typedef struct { int set; } Zako11EActionPattern;
++Zako11EActionPattern s11e_dword_800C36CC[4][16] = {
++    {{1}, {1}, {0}, {1}, {1}, {1}, {0}, {1}, {1}, {1}, {2}, {1}, {1}, {1}, {1}, {0}},
++    {{1}, {1}, {0}, {1}, {1}, {1}, {0}, {1}, {1}, {1}, {2}, {1}, {1}, {1}, {1}, {0}},
++    {{1}, {1}, {1}, {1}, {0}, {1}, {1}, {1}, {0}, {1}, {2}, {1}, {1}, {1}, {1}, {0}},
++    {{1}, {1}, {1}, {1}, {0}, {1}, {1}, {1}, {0}, {1}, {2}, {1}, {1}, {1}, {1}, {0}},
++};
++Zako11EActionPattern s11e_dword_800C37CC[4][16] = {
++    {{2}, {10}, {10}, {2}, {2}, {10}, {10}, {2}, {2}, {5}, {5}, {5}, {2}, {0}, {11}, {0}},
++    {{0}, {9}, {9}, {0}, {0}, {8}, {8}, {11}, {11}, {0}, {0}, {2}, {0}, {11}, {9}, {0}},
++    {{11}, {3}, {3}, {1}, {1}, {9}, {9}, {1}, {1}, {6}, {6}, {0}, {11}, {9}, {2}, {0}},
++    {{9}, {2}, {2}, {5}, {5}, {0}, {0}, {3}, {3}, {11}, {11}, {11}, {9}, {2}, {0}, {0}},
++};
++SVECTOR ZAKO_TARGET_SIZE_800C38CC = {300, 1500, 300, 0};
++SVECTOR ZAKO_TARGET_FORCE_800C38D4 = {0, 0, 0, 0};
++SVECTOR ZAKO_ATTACK_SIZE_800C38DC = {800, 500, 800, 0};
++SVECTOR ZAKO_ATTACK_FORCE_800C38E4 = {100, 0, 0, 0};
++SVECTOR ZAKO_TOUCH_SIZE_800C38EC = {300, 800, 300, 0};
++SVECTOR ZAKO_TOUCH_FORCE_800C38F4 = {0, 0, 0, 0};
++SVECTOR ZAKO11E_NO_POINT_800C38FC = {30000, 30000, 30000, 0};
++int ZAKO11E_EYE_LENGTH_800C3904 = 4000;
++int s11e_dword_800C3908[8] = {3000, 4000, 7000, 8000, 8000, 8000, 8000, 8000};
++int s11e_dword_800C3928 = 0;
++#else
+ // #include "mgstype.h"
+ 
+ int s11e_dword_800C35BC = 0x00000BB8;
+@@ -236,3 +290,4 @@ int s11e_dword_800C391C = 0x00001F40;
+ int s11e_dword_800C3920 = 0x00001F40;
+ int s11e_dword_800C3924 = 0x00001F40;
+ int s11e_dword_800C3928 = 0x00000000;
++#endif
+diff --git a/source/overlays/s11e/overlay4.c b/source/overlays/s11e/overlay4.c
+index c7c87d44e..7edfdefb7 100644
+--- a/source/overlays/s11e/overlay4.c
++++ b/source/overlays/s11e/overlay4.c
+@@ -1,3 +1,6 @@
++#ifdef MGS_NATIVE
++#include "enemy/enemy.h"
++#endif
+ #include "mgstype.h"
+ 
+ #include <sys/types.h>
+@@ -5,6 +8,10 @@
+ 
+ SVECTOR SECTION(".bss") ZAKOCOM_PlayerPosition_800DF278;
+ 
++#ifdef MGS_NATIVE
++_Static_assert(sizeof(ZAKO_COMMAND) == 0x124, "Original commander layout");
++ZAKO_COMMAND SECTION(".bss") ZakoCommand_800DF280;
++#else
+ //zakocommand start
+ int SECTION(".bss") ZakoCommand_800DF280;
+ int SECTION(".bss") s11e_dword_800DF284;
+@@ -80,10 +87,15 @@ int SECTION(".bss") s11e_dword_800DF398;
+ int SECTION(".bss") s11e_dword_800DF39C;
+ int SECTION(".bss") s11e_dword_800DF3A0;
+ //zakocommand end
++#endif
+ int SECTION(".bss") s11e_dword_800DF3A4;
+ 
++#ifdef MGS_NATIVE
++TOPCOMMAND_STRUCT SECTION(".bss") TOPCOMMAND_800DF3A8;
++#else
+ int SECTION(".bss") TOPCOMMAND_800DF3A8;
+ int SECTION(".bss") s11e_dword_800DF3AC;
++#endif
+ 
+ int SECTION(".bss") s11e_dword_800DF3B0;
+ int SECTION(".bss") s11e_dword_800DF3B4;
+diff --git a/source/overlays/s11i/overlay4.c b/source/overlays/s11i/overlay4.c
+index d051e5c9f..bd3e142ff 100644
+--- a/source/overlays/s11i/overlay4.c
++++ b/source/overlays/s11i/overlay4.c
+@@ -1,3 +1,6 @@
++#ifdef MGS_NATIVE
++#include "enemy/enemy.h"
++#endif
+ #include "mgstype.h"
+ 
+ #include <sys/types.h>
+@@ -123,6 +126,10 @@ int s11i_dword_800C3698 = 0;
+ 
+ SVECTOR SECTION(".bss") ZAKOCOM_PlayerPosition_800D5AF0;
+ 
++#ifdef MGS_NATIVE
++_Static_assert(sizeof(ZAKO11F_COMMAND) == 0x144, "Original commander layout");
++ZAKO11F_COMMAND SECTION(".bss") Zako11FCommand_800D5AF8;
++#else
+ int SECTION(".bss") Zako11FCommand_800D5AF8;
+ int SECTION(".bss") s11i_dword_800D5AFC;
+ int SECTION(".bss") s11i_dword_800D5B00;
+@@ -205,9 +212,14 @@ int SECTION(".bss") s11i_dword_800D5C30;
+ int SECTION(".bss") s11i_dword_800D5C34;
+ int SECTION(".bss") s11i_dword_800D5C38;
+ int SECTION(".bss") s11i_dword_800D5C3C;
++#endif
+ 
++#ifdef MGS_NATIVE
++TOPCOMMAND_STRUCT SECTION(".bss") TOPCOMMAND_800D5C40;
++#else
+ int SECTION(".bss") TOPCOMMAND_800D5C40;
+ int SECTION(".bss") s11i_dword_800D5C44;
++#endif
+ int SECTION(".bss") s11i_dword_800D5C48;
+ int SECTION(".bss") ZAKO11F_GameFlag_800D5C4C;
+ int SECTION(".bss") ZAKOCOM_PlayerAddress_800D5C50;
+diff --git a/source/takabe/libdg2.c b/source/takabe/libdg2.c
+index bf0a45ba0..e9e8abe0b 100644
+--- a/source/takabe/libdg2.c
++++ b/source/takabe/libdg2.c
+@@ -82,8 +82,8 @@ void s12c_800D4AB4(int scale)
+ 
+ typedef struct _SCRATCHPAD_UNK
+ {
+-    u_int **buf;
+-    u_long *ot;
++    OT_TYPE *buf;
++    OT_TYPE *ot;
+     int     len;
+     int     unkC;
+     int     unk10;
+@@ -92,6 +92,9 @@ typedef struct _SCRATCHPAD_UNK
+     short  *unk1C;
+ } SCRATCHPAD_UNK;
+ 
++#ifdef MGS_NATIVE
++#include "mgs_fog_gte.h"
++#else
+ // TODO: fix this
+ // clang-format off
+ #define gte_ldrgb_s0( r0 ) __asm__ volatile (                   \
+@@ -204,6 +207,7 @@ typedef struct _SCRATCHPAD_UNK
+         : "r"( r0 )                                             \
+         : "memory" )
+ // clang-format on
++#endif
+ 
+ void s12c_800D4B2C(SCRATCHPAD_UNK *scratch, P_TAG *buffer, int p)
+ {
+@@ -334,14 +338,14 @@ static inline SCRATCHPAD_UNK *get_scratch(void)
+     return (SCRATCHPAD_UNK *)SCRPAD_ADDR;
+ }
+ 
+-void s12c_800D4CF4(u_long *ot)
++void s12c_800D4CF4(OT_TYPE *ot)
+ {
+     SCRATCHPAD_UNK *scratch;
+-    unsigned int  **buf;
++    OT_TYPE        *buf;
+     int             i;
+-    unsigned int   *tag;
+-    unsigned int    val;
+-    u_long         *next;
++    void           *tag;
++    void           *next_tag;
++    OT_TYPE        *next;
+ 
+     scratch = get_scratch();
+     scratch->unkC = s12c_800DA428;
+@@ -351,30 +355,30 @@ void s12c_800D4CF4(u_long *ot)
+     buf = scratch->buf;
+     for (i = 256; i > 0; i--)
+     {
+-        tag = *buf++;
++        tag = (void *)getaddr(buf++);
+ 
+         while (tag != NULL)
+         {
+-            val = *tag;
+-            next = &ot[val >> 24];
+-            *tag = *next | 0x0C000000;
+-            *next = (unsigned int)tag;
+-            tag = (unsigned int *)(val & 0xFFFFFF);
++            next_tag = (void *)getaddr(tag);
++            next = &ot[getlen(tag)];
++            addPrim(next, tag);
++            setlen(tag, 12);
++            tag = next_tag;
+         }
+     }
+ }
+ 
+ void *s12c_800D4D8C(u_short *buffer, int n_prims, int size, void (*callback)(void *, void *, int))
+ {
+-    u_long *ot;
+-    u_long *currentOt;
++    OT_TYPE *ot;
++    OT_TYPE *currentOt;
+     int     len;
+     int     idx, idx2;
+ 
+     int *scratch;
+     scratch = (int *)SCRPAD_ADDR;
+ 
+-    ot = (u_long *)scratch[1];
++    ot = (OT_TYPE *)scratch[1];
+     len = scratch[2];
+ 
+     while (--n_prims >= 0)
+@@ -400,9 +404,7 @@ void *s12c_800D4D8C(u_short *buffer, int n_prims, int size, void (*callback)(voi
+ 
+                 currentOt = &ot[idx];
+ 
+-                // Not quite addPrim()
+-                *(int *)buffer = (*(int *)buffer & 0xFF000000) | *currentOt;
+-                *currentOt = (int)(buffer)&0xFFFFFF;
++                addPrim(currentOt, buffer);
+             }
+         }
+ 
+@@ -423,7 +425,7 @@ void FogSortChanl_800D4E98(DG_CHANL *chanl, int idx)
+     int             type;
+ 
+     scratch = get_scratch();
+-    scratch->buf = (unsigned int **)DG_DivideBuffer;
++    scratch->buf = DG_DivideBuffer;
+     scratch->ot = chanl->ot[idx] + 1;
+ 
+     s12c_800D4CF4(scratch->ot);
+@@ -941,7 +943,7 @@ void s12c_800D5A34(DG_OBJ *obj, int idx)
+     unsigned short id;
+     POLY_GT4      *pack;
+     int            n_packs;
+-    short         *tex_ids;
++    unsigned short *tex_ids;
+     DG_TEX        *texture;
+     unsigned short current_id;
+ 
+@@ -1020,19 +1022,25 @@ void s12c_800D5B00(DG_CHANL *chanl, int idx)
+     }
+ }
+ 
++#ifndef MGS_NATIVE
+ // clang-format off
+ #define gte_ldVZ2_2( r0 ) __asm__ volatile (                    \
+         "lwc2   $5, 20( %0 )"                                   \
+         :                                                       \
+         : "r"( r0 ) )
+ // clang-format on
++#endif
+ 
+ // DG_Trans_Chanl_helper_simple_8001DF48
+ void s12c_800D5C48(PVECTOR *a0, int count)
+ {
+     VECTOREX     *scrpd_nidx;
+     VECTOREX     *scrpd_nidx2;
++#ifdef MGS_NATIVE
++    long          v1;
++#else
+     register long v1 asm("t2"); // FIXME
++#endif
+     long          v2, v3, v4, v5;
+ 
+     scrpd_nidx = (VECTOREX *)getScratchAddr(0);
+@@ -1276,7 +1284,7 @@ static inline void DG_TransVerticesBound(PVECTOR *verts, int n_verts)
+ 
+     int xy0;
+ 
+-    gte_ldv3c(verts);
++    gte_ldv3c((SVECTOR *)verts);
+ 
+     verts += 3;
+     vert_count = n_verts - 3;
+@@ -1437,6 +1445,7 @@ void FogTransChanl_800D63B0(DG_CHANL *chanl, int idx)
+     }
+ }
+ 
++#ifndef MGS_NATIVE
+ // clang-format off
+ #define gte_ldRGB( r0 ) __asm__ volatile (                      \
+         "swc2   $22, 4( %0 )"                                   \
+@@ -1461,6 +1470,7 @@ void FogTransChanl_800D63B0(DG_CHANL *chanl, int idx)
+         :                                                       \
+         : "r"( r0 ) )
+ // clang-format on
++#endif
+ 
+ void s12c_800D6588(DG_OBJ *pDGObj, int idx)
+ {
+@@ -1537,6 +1547,7 @@ void s12c_800D6588(DG_OBJ *pDGObj, int idx)
+     gte_strgb_s4(last);
+ }
+ 
++#ifndef MGS_NATIVE
+ // clang-format off
+ #define gte_strgb3_2( vec ) __asm__ volatile (                  \
+         "swc2   $20, 0( %0 );"                                  \
+@@ -1546,6 +1557,7 @@ void s12c_800D6588(DG_OBJ *pDGObj, int idx)
+         : "r"( vec )                                            \
+         : "memory" )
+ // clang-format on
++#endif
+ 
+ void s12c_800D6698(DG_MDL *mdl)
+ {
+@@ -1850,7 +1862,11 @@ void FogShadeChanl_800D6A04(DG_CHANL *chanl, int index)
+                 {
+                     if (obj->bound_mode != 0)
+                     {
++#ifdef MGS_NATIVE
++                        DG_MulRotMatrix0(&obj->world, (MATRIX *)SCRPAD_ADDR);
++#else
+                         MulRotMatrix0(&obj->world, (MATRIX *)SCRPAD_ADDR);
++#endif
+                         SetLightMatrix((MATRIX *)SCRPAD_ADDR);
+                         s12c_800D6958(obj, index);
+                     }
+diff --git a/source/takabe/rasen_el.c b/source/takabe/rasen_el.c
+index a2e7d1e09..faa594018 100644
+--- a/source/takabe/rasen_el.c
++++ b/source/takabe/rasen_el.c
+@@ -601,7 +601,7 @@ void s11c_800CD17C(OBJECT *object, int model, int flag)
+ void RasenElExecProc_800CD1E4(int proc, int value)
+ {
+     GCL_ARGS args;
+-    u_long   data;
++    long     data;
+ 
+     data = value;
+     if (proc != 0)

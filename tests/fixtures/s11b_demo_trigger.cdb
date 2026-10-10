@@ -1,0 +1,9 @@
+.lines -e
+bu /1 mgs_integral_native!MgsNativeReloadOverlay "ew mgs_integral_native!var_buf+a ae; ew mgs_integral_native!linkvarbuf+10 ee6c 898 3a98; ew mgs_integral_native!var_buf+2 0 0; eb mgs_integral_native!var_buf+1 1; .printf \"FIXTURE: story174, isolated original demo1 trigger center(-4500,2200,15000), restart flag, heading0.\\n\"; gc"
+bu /1 mgs_integral_native!NewStage11BDemo ".printf \"OBSERVE: original script constructs recovered 11b cinematic.\\n\"; gc"
+bu /1 mgs_integral_native!Stage11BMoveDebris ".printf \"OBSERVE: recovered cinematic debris moves.\\n\"; gc"
+bu /1 mgs_integral_native!NewCrashSmoke ".printf \"OBSERVE: recovered crash smoke constructed.\\n\"; gc"
+sxe -c "r;kv;q" av
+sxe -c "r;kv;q" dz
+g
+q

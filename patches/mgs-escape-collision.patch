@@ -1,0 +1,38 @@
+diff --git a/source/overlays/s19b/takabe/jeep_liq/jeep_collision_native.h b/source/overlays/s19b/takabe/jeep_liq/jeep_collision_native.h
+index 270b7ec2e..01c4a5f07 100644
+--- a/source/overlays/s19b/takabe/jeep_liq/jeep_collision_native.h
++++ b/source/overlays/s19b/takabe/jeep_liq/jeep_collision_native.h
+@@ -7,17 +7,17 @@ void *NewSpark2M(MATRIX *world);
+ 
+ int s19b_spark2_m_800D9C90(CONTROL *control, VECTOR *position, int *speed, SVECTOR *delta)
+ {
+-    SVECTOR near, hit, from = control->mov;
++    SVECTOR near[2], hit, from = control->mov;
+     MATRIX world;
+     int distance;
+     (void)speed;
+     from.vy += 250;
+     if (HZD_NearHazardCheck(control->map->hzd, &from, 475, 12, 0) <= 0)
+         return 0;
+-    HZD_GetNearVector(&near);
+-    hit = near;
+-    distance = GV_VecLen3(&near);
+-    GV_AddVec3(&near, &from, &hit);
++    HZD_GetNearVector(near);
++    hit = near[0];
++    distance = GV_VecLen3(&near[0]);
++    GV_AddVec3(&near[0], &from, &hit);
+     if (distance < 485)
+     {
+         world = DG_ZeroMatrix;
+@@ -34,8 +34,8 @@ int s19b_spark2_m_800D9C90(CONTROL *control, VECTOR *position, int *speed, SVECT
+     }
+     if (distance >= 475)
+         return 0;
+-    GV_LenVec3(&near, &near, distance, -475);
+-    GV_AddVec3(&near, &hit, &hit);
++    GV_LenVec3(&near[0], &near[0], distance, -475);
++    GV_AddVec3(&near[0], &hit, &hit);
+     GV_SubVec3(&from, &hit, delta);
+     control->mov = hit;
+     /* Retail subtracts the X correction three times from the same world component. */

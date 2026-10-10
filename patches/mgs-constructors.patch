@@ -1,0 +1,124 @@
+diff --git a/source/stage/s05a.c b/source/stage/s05a.c
+index 4559c77cd..3d452f468 100644
+--- a/source/stage/s05a.c
++++ b/source/stage/s05a.c
+@@ -1,41 +1,47 @@
+ #define DECLARE_NEWCHARA_PROTOS
+ #include "charalst.h"
+ 
++extern NEWCHARA NewM1E1;
++extern NEWCHARA s05a_800E1134;
++extern NEWCHARA NewAnime_8005E258;
++extern NEWCHARA NewBlastLine;
++extern NEWCHARA s05a_800DBF58;
++
+ CHARA _StageCharacterEntries[] = {
+-    { 0x92bc, (NEWCHARA *)0x800c8654 }, //  CHARA_ASIOTOKUN,    /* chara 足音君 */
+-    { 0xa12e, (NEWCHARA *)0x800cfb8c }, //  CHARA_FADEIO,       /* chara フェードイン・アウト */
+-    { 0x18e3, (NEWCHARA *)0x800c5cdc }, //  CHARA_SNOW,         /* chara 雪 */
+-    { 0xa6f5, (NEWCHARA *)0x800d1b6c }, //  CHARA_SNOWSTORM,    /* chara 雪嵐 */
+-    { 0x9d71, (NEWCHARA *)0x800d26cc }, //  CHARA_M1E1,
+-    { 0xd5ec, (NEWCHARA *)0x800e1134 }, //  CHARA_M1E1CAME,
+-    { 0x03d9, (NEWCHARA *)0x800cf0f0 }, //  CHARA_SHUTTER,      /* chara シャッター */
+-    { 0x3c0c, (NEWCHARA *)0x8006b76c }, //  CHARA_CLAYMORE,     /* chara クレイモア地雷 */
+-    { 0x7a05, (NEWCHARA *)0x800d0bbc }, //  CHARA_CINEMA,       /* chara シネマスクリーン */
+-    { 0xbee1, (NEWCHARA *)0x800c65fc }, //  CHARA_SPHERE2,      /* chara 天球２ */
+-    { 0xec77, (NEWCHARA *)0x800c781c }, //  CHARA_WALL,         /* chara 障害物 */
+-    { 0xa9c5, (NEWCHARA *)0x800ca8f8 }, //  CHARA_CAMERAGUN,    /* chara カメラ付随ガン */
+-    { 0x1ad3, (NEWCHARA *)0x800c43a8 }, //  CHARA_TEXTURE,      /* chara テクスチャ */
+-    { 0x7bc2, (NEWCHARA *)0x800d1690 }, //  CHARA_CAMERASHAKE,  /* chara カメラ揺らし */
+-    { 0x02c4, (NEWCHARA *)0x800c7320 }, //  CHARA_ASIATOKUN,    /* chara 足跡君 */
+-    { 0x5a50, (NEWCHARA *)0x800cde94 }, //  CHARA_GASEFFECT,    /* chara ガス効果 */
+-    { 0xb103, (NEWCHARA *)0x800d0dec }, //  CHARA_DYNWALL,      /* chara 透明壁 */
+-    { 0xaf6c, (NEWCHARA *)0x800d1ad8 }, //  CHARA_DYNFLOOR,     /* chara 透明床 */
+-    { 0x4170, (NEWCHARA *)0x800c4ccc }, //  CHARA_SNEBREATH,    /* chara スネーク息 */
+-    { 0xfed1, (NEWCHARA *)0x8005d508 }, //  CHARA_PADVIBRATE,   /* chara パッド振動 */
+-    { 0xcbf8, (NEWCHARA *)0x800c3a2c }, //  CHARA_PADCONTROL,   /* chara パッドコントロール */
++    { 0x92bc, NewAsiotoKun }, //  CHARA_ASIOTOKUN,    /* chara 足音君 */
++    { 0xa12e, NewFadeInOutSet }, //  CHARA_FADEIO,       /* chara フェードイン・アウト */
++    { 0x18e3, NewSnow }, //  CHARA_SNOW,         /* chara 雪 */
++    { 0xa6f5, NewSnowStorm }, //  CHARA_SNOWSTORM,    /* chara 雪嵐 */
++    { 0x9d71, NewM1E1 }, //  CHARA_M1E1,
++    { 0xd5ec, s05a_800E1134 }, //  CHARA_M1E1CAME,
++    { 0x03d9, NewShutter }, //  CHARA_SHUTTER,      /* chara シャッター */
++    { 0x3c0c, NewScenarioJirai }, //  CHARA_CLAYMORE,     /* chara クレイモア地雷 */
++    { 0x7a05, NewCinemaScreenSet }, //  CHARA_CINEMA,       /* chara シネマスクリーン */
++    { 0xbee1, NewSphere2 }, //  CHARA_SPHERE2,      /* chara 天球２ */
++    { 0xec77, NewWallGcl }, //  CHARA_WALL,         /* chara 障害物 */
++    { 0xa9c5, NewGunCamera }, //  CHARA_CAMERAGUN,    /* chara カメラ付随ガン */
++    { 0x1ad3, NewTextureLamp }, //  CHARA_TEXTURE,      /* chara テクスチャ */
++    { 0x7bc2, NewCameraShake }, //  CHARA_CAMERASHAKE,  /* chara カメラ揺らし */
++    { 0x02c4, NewAsiatoKun }, //  CHARA_ASIATOKUN,    /* chara 足跡君 */
++    { 0x5a50, NewGasEffectSet }, //  CHARA_GASEFFECT,    /* chara ガス効果 */
++    { 0xb103, NewDynamicWallSet }, //  CHARA_DYNWALL,      /* chara 透明壁 */
++    { 0xaf6c, NewDynamicFloorSet }, //  CHARA_DYNFLOOR,     /* chara 透明床 */
++    { 0x4170, NewSnakeBreath }, //  CHARA_SNEBREATH,    /* chara スネーク息 */
++    { 0xfed1, NewPadVibrationGcl }, //  CHARA_PADVIBRATE,   /* chara パッド振動 */
++    { 0xcbf8, NewPadControl }, //  CHARA_PADCONTROL,   /* chara パッドコントロール */
+ 
+-    { 0x0003, (NEWCHARA *)0x800cfaf4 }, //  DEMO_FADEIN,
+-    { 0x0004, (NEWCHARA *)0x800cfaf4 }, //  DEMO_FADEOUT,
+-    { 0x0005, (NEWCHARA *)0x800d0460 }, //  DEMO_TEXT,
+-    { 0x000c, (NEWCHARA *)0x8005e258 }, //  DEMO_MISSILESMOKE,
+-    { 0x000f, (NEWCHARA *)0x800c7ff8 }, //  DEMO_SHADOW,
+-    { 0x0021, (NEWCHARA *)0x800d1408 }, //  DEMO_UNSHAPEVIEW,
+-    { 0x0025, (NEWCHARA *)0x800ccc3c }, //  DEMO_BLUR,
+-    { 0x002f, (NEWCHARA *)0x800c4574 }, //  DEMO_BLACKSMOKE2,
+-    { 0x0030, (NEWCHARA *)0x800cbb28 }, //  DEMO_BLASTLINE,
+-    { 0x0031, (NEWCHARA *)0x800cd244 }, //  DEMO_SMOKELINE,
+-    { 0x0032, (NEWCHARA *)0x800dbf58 }, //  DEMO_SHELLSMOKE,
+-    { 0x0044, (NEWCHARA *)0x800cc138 }, //  DEMO_GHOST,
++    { 0x0003, NewFadeInOut }, //  DEMO_FADEIN,
++    { 0x0004, NewFadeInOut }, //  DEMO_FADEOUT,
++    { 0x0005, NewTelop }, //  DEMO_TEXT,
++    { 0x000c, NewAnime_8005E258 }, //  DEMO_MISSILESMOKE,
++    { 0x000f, NewDemoKage }, //  DEMO_SHADOW,
++    { 0x0021, NewFocusView }, //  DEMO_UNSHAPEVIEW,
++    { 0x0025, NewBlurSet }, //  DEMO_BLUR,
++    { 0x002f, AN_Smoke_800CE164 }, //  DEMO_BLACKSMOKE2,
++    { 0x0030, NewBlastLine }, //  DEMO_BLASTLINE,
++    { 0x0031, NewSmokeLn_800CDFA4 }, //  DEMO_SMOKELINE,
++    { 0x0032, s05a_800DBF58 }, //  DEMO_SHELLSMOKE,
++    { 0x0044, NewBlurPure }, //  DEMO_GHOST,
+ 
+     CHARA_END
+ };
+diff --git a/source/stage/s11a.c b/source/stage/s11a.c
+index 49ba2b86b..13ff0e70e 100644
+--- a/source/stage/s11a.c
++++ b/source/stage/s11a.c
+@@ -1,19 +1,22 @@
+ #define DECLARE_NEWCHARA_PROTOS
+ #include "charalst.h"
+ 
++extern NEWCHARA NewZako11ACommander;
++extern NEWCHARA NewZako11A;
++
+ CHARA _StageCharacterEntries[] = {
+-    { 0xb103, (NEWCHARA *)0x800d7310 }, //  CHARA_DYNWALL,      /* chara 透明壁 */
+-    { 0x92bc, (NEWCHARA *)0x800c9298 }, //  CHARA_ASIOTOKUN,    /* chara 足音君 */
+-    { 0x56cc, (NEWCHARA *)0x800c5e90 }, //  CHARA_CAMERA2,      /* chara カメラ２ */
+-    { 0xa12e, (NEWCHARA *)0x800d6904 }, //  CHARA_FADEIO,       /* chara フェードイン・アウト */
+-    { 0x1ad3, (NEWCHARA *)0x800c4308 }, //  CHARA_TEXTURE,      /* chara テクスチャ */
+-    { 0x5efa, (NEWCHARA *)0x800d3404 }, //  CHARA_ZAKO11ACOM,   /* chara ざこ１１ａコマンダー */
+-    { 0xa608, (NEWCHARA *)0x800ca194 }, //  CHARA_ZAKO11A,      /* chara ざこ１１ａ */
+-    { 0x5fd9, (NEWCHARA *)0x800d4794 }, //  CHARA_RASEN,        /* chara 螺旋階段 */
+-    { 0xec77, (NEWCHARA *)0x800c489c }, //  CHARA_WALL,         /* chara 障害物 */
+-    { 0x51c6, (NEWCHARA *)0x800d76ec }, //  CHARA_CAT_IN,       /* chara カットインカメラ */
+-    { 0x7a05, (NEWCHARA *)0x800d70e0 }, //  CHARA_CINEMA,       /* chara シネマスクリーン */
+-    { 0x5a50, (NEWCHARA *)0x800d5724 }, //  CHARA_GASEFFECT,    /* chara ガス効果 */
++    { 0xb103, NewDynamicWallSet }, //  CHARA_DYNWALL,      /* chara 透明壁 */
++    { 0x92bc, NewAsiotoKun }, //  CHARA_ASIOTOKUN,    /* chara 足音君 */
++    { 0x56cc, NewCamera2Set }, //  CHARA_CAMERA2,      /* chara カメラ２ */
++    { 0xa12e, NewFadeInOutSet }, //  CHARA_FADEIO,       /* chara フェードイン・アウト */
++    { 0x1ad3, NewTextureLamp }, //  CHARA_TEXTURE,      /* chara テクスチャ */
++    { 0x5efa, NewZako11ACommander }, //  CHARA_ZAKO11ACOM,   /* chara ざこ１１ａコマンダー */
++    { 0xa608, NewZako11A }, //  CHARA_ZAKO11A,      /* chara ざこ１１ａ */
++    { 0x5fd9, NewRasen2 }, //  CHARA_RASEN,        /* chara 螺旋階段 */
++    { 0xec77, NewWallGcl }, //  CHARA_WALL,         /* chara 障害物 */
++    { 0x51c6, NewCutInCameraSet }, //  CHARA_CAT_IN,       /* chara カットインカメラ */
++    { 0x7a05, NewCinemaScreenSet }, //  CHARA_CINEMA,       /* chara シネマスクリーン */
++    { 0x5a50, NewGasEffectSet }, //  CHARA_GASEFFECT,    /* chara ガス効果 */
+ 
+     CHARA_END
+ };

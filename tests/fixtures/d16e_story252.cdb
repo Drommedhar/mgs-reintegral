@@ -1,0 +1,6 @@
+.lines -e
+bu /1 mgs_integral_native!MgsNativeReloadOverlay "ew mgs_integral_native!var_buf+a fc; .printf \"FIXTURE story252 selects original underground-base cinematic\\n\"; gc"
+sxe -c "r;kv;q" av
+sxe -c "r;kv;q" dz
+g
+q

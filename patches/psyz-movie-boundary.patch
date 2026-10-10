@@ -1,0 +1,34 @@
+diff --git a/psyz/src/psyz/libpress.c b/psyz/src/psyz/libpress.c
+index 7cc0e0d..47c9502 100644
+--- a/psyz/src/psyz/libpress.c
++++ b/psyz/src/psyz/libpress.c
+@@ -1,9 +1,15 @@
+ #include <psyz.h>
++#include <stdlib.h>
+ #include <libpress.h>
+ #include <psyz/log.h>
+ #include "../../../decomp/src/libpress/libpress_private.h"
+ 
+-void MDEC_reset(int mode) { NOT_IMPLEMENTED; }
++static void UnsupportedMovieDecoder(void) {
++    ERRORF("Native FMV/MDEC decoding is not implemented; movie playback cannot continue.");
++    exit(EXIT_FAILURE);
++}
++
++void MDEC_reset(int mode) { UnsupportedMovieDecoder(); }
+ void MDEC_in(u_long* buf, int size) { NOT_IMPLEMENTED; }
+ void MDEC_out(u_long* buf, int size) { NOT_IMPLEMENTED; }
+ int MDEC_in_sync(void) {
+@@ -23,3 +29,12 @@ int DecDCTvlc(u_long* bs, u_long* buf) {
+     NOT_IMPLEMENTED;
+     return 0;
+ }
++
++int DecDCTvlc2(u_long* bs, u_long* buf, DECDCTTAB table) {
++    UnsupportedMovieDecoder();
++    return -1;
++}
++
++void DecDCTvlcBuild(u_short* table) {
++    UnsupportedMovieDecoder();
++}

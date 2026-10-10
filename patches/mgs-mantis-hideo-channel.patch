@@ -1,0 +1,13 @@
+diff --git a/source/overlays/s07b/chara/psyco/psyco.c b/source/overlays/s07b/chara/psyco/psyco.c
+index ba8b202d5..5c50fcb27 100644
+--- a/source/overlays/s07b/chara/psyco/psyco.c
++++ b/source/overlays/s07b/chara/psyco/psyco.c
+@@ -867,7 +867,7 @@ void s07b_800CC174(PsychoWork *work, int time)
+     int bank = GV_Time & 1;
+     int japanese = GM_Configuration & 0x100;
+     int last = work->field_a58 ? 127 : 255;
+-    OT_TYPE *ot = DG_Chanl(0)->ot[bank];
++    OT_TYPE *ot = DG_Chanl(1)->ot[bank];
+ 
+     if (!japanese && (time == 0 || time == 64))
+     {

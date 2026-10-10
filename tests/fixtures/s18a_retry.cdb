@@ -1,0 +1,10 @@
+.lines -e
+bu /1 mgs_integral_native!MgsNativeReloadOverlay "ew mgs_integral_native!var_buf+a 115; eb mgs_integral_native!var_buf+3ad 1; .echo FIXTURE original s18a story277 with one prior attempt - original GCL selects retry introduction; gc"
+bu /1 mgs_integral_native!NewLiquid ".echo OBSERVED original script created native Liquid; gc"
+bu /1 mgs_integral_native!d18a_snake18_800D4E94 ".echo OBSERVED original script created native Snake18 controller; gc"
+bu /1 mgs_integral_native!NewCountdown ".echo OBSERVED original Liquid sequence starts countdown; gc"
+bu /1 mgs_integral_native!liquid_800C7A68 ".echo OBSERVED Liquid attack target update; gc"
+sxe -c "r;kv;q" av
+sxe -c "r;kv;q" dz
+g
+q

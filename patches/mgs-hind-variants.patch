@@ -1,0 +1,481 @@
+diff --git a/build/linker_command_file.txt b/build/linker_command_file.txt
+index fd0c26927..42fc75238 100644
+--- a/build/linker_command_file.txt
++++ b/build/linker_command_file.txt
+@@ -1765,6 +1765,50 @@ overlay_bss group   file("{{OBJ_DIR}}\{{OVERLAY}}_{{OVERLAY_SUFFIX}}_bss.bin")
+     include "{{PSYQ_SDK}}\psyq_4.4\lib\libgpu\P22.OBJ", overlay
+     include "{{PSYQ_SDK}}\psyq_4.4\lib\libgpu\P26.OBJ", overlay
+ ;------------------------------------------------------------------------------
++{% elif OVERLAY == "s11h" %}
++    include "{{OBJ_DIR}}\stage\s11h.obj", overlay
++    include "{{OBJ_DIR}}\game\lamp.obj", overlay
++    include "{{OBJ_DIR}}\chara\snake\breath.obj", overlay
++    include "{{OBJ_DIR}}\anime\effect\breath.obj", overlay
++    include "{{OBJ_DIR}}\chara\others\motse.obj", overlay
++    include "{{OBJ_DIR}}\thing\snow.obj", overlay
++    include "{{OBJ_DIR}}\thing\sphere.obj", overlay
++    include "{{OBJ_DIR}}\enemy\wall.obj", overlay
++    include "{{OBJ_DIR}}\enemy\demokage.obj", overlay
++    include "{{OBJ_DIR}}\enemy\asioto.obj", overlay
++    include "{{OBJ_DIR}}\okajima\blur.obj", overlay
++    include "{{OBJ_DIR}}\okajima\smke_ln.obj", overlay
++    include "{{OBJ_DIR}}\anime\effect\smoke_ln.obj", overlay
++    include "{{OBJ_DIR}}\okajima\wall_spa.obj", overlay
++    include "{{OBJ_DIR}}\okajima\plasma.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s11g\okajima\s11_objs.obj", overlay
++    include "{{OBJ_DIR}}\okajima\red_alrt.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s11g\okajima\blst_ln.obj", overlay
++    include "{{OBJ_DIR}}\okajima\blurpure.obj", overlay
++    include "{{OBJ_DIR}}\takabe\spark2.obj", overlay
++    include "{{OBJ_DIR}}\takabe\object.obj", overlay
++    include "{{OBJ_DIR}}\takabe\fadeio.obj", overlay
++    include "{{OBJ_DIR}}\takabe\thing.obj", overlay
++    include "{{OBJ_DIR}}\takabe\cinema.obj", overlay
++    include "{{OBJ_DIR}}\takabe\dymc_seg.obj", overlay
++    include "{{OBJ_DIR}}\takabe\focus.obj", overlay
++    include "{{OBJ_DIR}}\takabe\windcrcl.obj", overlay
++    include "{{OBJ_DIR}}\takabe\cat_in.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s11g\kojo\hind.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s11g\kojo\hindact.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s11g\kojo\hindbody.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s11g\kojo\hindbody2.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s11g\okajima\blastoff.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s11g\okajima\unknown.obj", overlay
++
++    include "{{OBJ_DIR}}\takabe\puthzd.obj", overlay
++    include "{{OBJ_DIR}}\kojo\inverlt.obj", overlay
++    include "{{OBJ_DIR}}\kojo\inverlt2.obj", overlay
++    include "{{OBJ_DIR}}\takabe\life_up.obj", overlay
++    include "{{OBJ_DIR}}\takabe\sepia.obj", overlay
++    include "{{PSYQ_SDK}}\psyq_4.4\lib\libgpu\P22.OBJ", overlay
++    include "{{PSYQ_SDK}}\psyq_4.4\lib\libgpu\P26.OBJ", overlay
++;------------------------------------------------------------------------------
+ {% elif OVERLAY == "s11c" %}
+     include "{{OBJ_DIR}}\stage\s11c.obj", overlay
+     include "{{OBJ_DIR}}\game\evpanel.obj", overlay
+diff --git a/source/kojo/inverlt.c b/source/kojo/inverlt.c
+new file mode 100644
+index 000000000..f93c468fb
+--- /dev/null
++++ b/source/kojo/inverlt.c
+@@ -0,0 +1,150 @@
++#include "inverlt.h"
++#include "libgv/libgv.h"
++#include "libdg/libdg.h"
++#include "game/game.h"
++#include "okajima/stngrnd.h"
++#include "okajima/stgfd_io.h"
++
++typedef struct
++{
++    GV_ACT actor;
++    int map;
++    DG_PRIM *prims[8];
++    RECT rects[8];
++    SVECTOR vertices[8];
++    int scales[8];
++    int timer;
++    SVECTOR position;
++} InverseLightWork;
++
++_Static_assert(sizeof(InverseLightWork) == 0xf0, "InverseLight actor layout");
++
++/* Integral s11h 800CD638. Integer division truncates toward zero. */
++static void InverseLightVertex(InverseLightWork *work, int index, const SVECTOR *screen)
++{
++    work->vertices[index].vx = screen->vx - screen->vx * work->scales[index] / 16;
++    work->vertices[index].vy = screen->vy - screen->vy * work->scales[index] / 16;
++    work->vertices[index].vz = 320;
++}
++
++static void InverseLightProject(InverseLightWork *work, SVECTOR *screen)
++{
++    int packed, p, flag;
++
++    SetRotMatrix(&DG_Chanl(0)->eye_inv);
++    SetTransMatrix(&DG_Chanl(0)->eye_inv);
++    RotTransPers(&work->position, &packed, &p, &flag);
++    screen->vx = (short)packed;
++    screen->vy = (short)((unsigned int)packed >> 16);
++}
++
++static void InverseLightAct(InverseLightWork *work)
++{
++    SVECTOR screen;
++    int i;
++
++    if (work->timer <= 0)
++    {
++        GV_DestroyActor(&work->actor);
++        return;
++    }
++    GM_CurrentMap = work->map;
++    if (work->timer == 15)
++    {
++        AN_Stn_G_Sonic(&work->position);
++        AN_Stn_G_Center(&work->position);
++        NewStnFade();
++        sub_800790E8();
++    }
++    if (work->timer == 14)
++    {
++        sub_8007913C();
++    }
++    InverseLightProject(work, &screen);
++    for (i = 0; i < 8; ++i)
++    {
++        InverseLightVertex(work, i, &screen);
++    }
++    --work->timer;
++}
++
++static void InverseLightDie(InverseLightWork *work)
++{
++    int i;
++
++    for (i = 0; i < 8; ++i)
++    {
++        if (work->prims[i])
++        {
++            DG_DequeuePrim(work->prims[i]);
++            DG_FreePrim(work->prims[i]);
++        }
++    }
++}
++
++static int InverseLightPrim(InverseLightWork *work, int index, DG_TEX *texture)
++{
++    DG_PRIM *prim;
++    POLY_FT4 *packet;
++    int buffer;
++
++    prim = GM_MakePrim(DG_PRIM_RECTANGLE | DG_PRIM_ON_CAMERA | DG_PRIM_POLY_FT4,
++                       1, &work->vertices[index], &work->rects[index]);
++    if (!prim)
++    {
++        return -1;
++    }
++    work->prims[index] = prim;
++    prim->raise = 320;
++    for (buffer = 0; buffer < 2; ++buffer)
++    {
++        packet = (POLY_FT4 *)prim->packs[buffer];
++        setPolyFT4(packet);
++        setRGB0(packet, 30 - 5 * buffer, 30 - 5 * buffer, 30 - 5 * buffer);
++        DG_SetPacketTexture4(packet, texture);
++        setSemiTrans(packet, 1);
++    }
++    return 0;
++}
++
++void *NewInverseLight(SVECTOR *position)
++{
++    static const short dimensions[8][2] = {
++        {8, 8}, {34, 11}, {6, 20}, {25, 33},
++        {12, 37}, {70, 50}, {11, -7}, {50, -9}
++    };
++    InverseLightWork *work;
++    DG_TEX *texture;
++    SVECTOR screen;
++    int i;
++
++    work = GV_NewActor(GV_ACTOR_USER, sizeof(InverseLightWork));
++    if (!work)
++    {
++        return NULL;
++    }
++    GV_SetNamedActor(&work->actor, InverseLightAct, InverseLightDie, "inverlt.c");
++    work->timer = 15;
++    work->map = GM_CurrentMap;
++    work->position = *position;
++    InverseLightProject(work, &screen);
++    texture = DG_GetTexture(GV_StrCode("refrection6"));
++    if (!texture)
++    {
++        GV_DestroyActor(&work->actor);
++        return NULL;
++    }
++    for (i = 0; i < 8; ++i)
++    {
++        work->rects[i].x = work->rects[i].y = dimensions[i][0] / 2;
++        work->rects[i].w = work->rects[i].h = dimensions[i][0];
++        work->scales[i] = dimensions[i][1];
++        InverseLightVertex(work, i, &screen);
++        if (InverseLightPrim(work, i, texture) < 0)
++        {
++            GV_DestroyActor(&work->actor);
++            return NULL;
++        }
++    }
++    return work;
++}
+diff --git a/source/kojo/inverlt.h b/source/kojo/inverlt.h
+new file mode 100644
+index 000000000..8880776a5
+--- /dev/null
++++ b/source/kojo/inverlt.h
+@@ -0,0 +1,9 @@
++#ifndef __MGS_KOJO_INVERLT_H__
++#define __MGS_KOJO_INVERLT_H__
++
++#include <sys/types.h>
++#include <libgte.h>
++
++void *NewInverseLight(SVECTOR *position);
++
++#endif
+diff --git a/source/stage/s11h.c b/source/stage/s11h.c
+index 2488d4ead..e8fb8c180 100644
+--- a/source/stage/s11h.c
++++ b/source/stage/s11h.c
+@@ -1,33 +1,37 @@
+ #define DECLARE_NEWCHARA_PROTOS
+ #include "charalst.h"
+ 
++extern NEWCHARA NewPutHzd;
++extern NEWCHARA NewInverseLight;
++extern NEWCHARA NewBlastLine;
++
+ CHARA _StageCharacterEntries[] = {
+-    { 0x51c6, (NEWCHARA *)0x800cc970 }, //  CHARA_CAT_IN,       /* chara カットインカメラ */
+-    { 0x4170, (NEWCHARA *)0x800c410c }, //  CHARA_SNEBREATH,    /* chara スネーク息 */
+-    { 0x92bc, (NEWCHARA *)0x800c6de4 }, //  CHARA_ASIOTOKUN,    /* chara 足音君 */
+-    { 0x73ea, (NEWCHARA *)0x800c5a84 }, //  CHARA_SPHERE,       /* chara 天球 */
+-    { 0x1ad3, (NEWCHARA *)0x800c3e9c }, //  CHARA_TEXTURE,      /* chara テクスチャ */
+-    { 0x18e3, (NEWCHARA *)0x800c511c }, //  CHARA_SNOW,         /* chara 雪 */
+-    { 0x7a05, (NEWCHARA *)0x800cbd3c }, //  CHARA_CINEMA,       /* chara シネマスクリーン */
+-    { 0xa12e, (NEWCHARA *)0x800cab6c }, //  CHARA_FADEIO,       /* chara フェードイン・アウト */
+-    { 0x1787, (NEWCHARA *)0x800ce5b0 }, //  CHARA_MI24HIND,
+-    { 0xe068, (NEWCHARA *)0x800ca494 }, //  CHARA_S11_OBJS,     /* chara コントロールＳ１１物 */
+-    { 0xec77, (NEWCHARA *)0x800c5fac }, //  CHARA_WALL,         /* chara 障害物 */
+-    { 0xb103, (NEWCHARA *)0x800cbf6c }, //  CHARA_DYNWALL,      /* chara 透明壁 */
+-    { 0x711f, (NEWCHARA *)0x800cb574 }, //  CHARA_LIFEUP,       /* chara ライフ増加 */
+-    { 0x91aa, (NEWCHARA *)0x800ccbf0 }, //  CHARA_PUTHZD,
++    { 0x51c6, NewCutInCameraSet }, //  CHARA_CAT_IN,       /* chara カットインカメラ */
++    { 0x4170, NewSnakeBreath }, //  CHARA_SNEBREATH,    /* chara スネーク息 */
++    { 0x92bc, NewAsiotoKun }, //  CHARA_ASIOTOKUN,    /* chara 足音君 */
++    { 0x73ea, NewSphere }, //  CHARA_SPHERE,       /* chara 天球 */
++    { 0x1ad3, NewTextureLamp }, //  CHARA_TEXTURE,      /* chara テクスチャ */
++    { 0x18e3, NewSnow }, //  CHARA_SNOW,         /* chara 雪 */
++    { 0x7a05, NewCinemaScreenSet }, //  CHARA_CINEMA,       /* chara シネマスクリーン */
++    { 0xa12e, NewFadeInOutSet }, //  CHARA_FADEIO,       /* chara フェードイン・アウト */
++    { 0x1787, NewHindBoss }, //  CHARA_MI24HIND,
++    { 0xe068, NewStage11Objects }, //  CHARA_S11_OBJS,     /* chara コントロールＳ１１物 */
++    { 0xec77, NewWallGcl }, //  CHARA_WALL,         /* chara 障害物 */
++    { 0xb103, NewDynamicWallSet }, //  CHARA_DYNWALL,      /* chara 透明壁 */
++    { 0x711f, NewLifeUp }, //  CHARA_LIFEUP,       /* chara ライフ増加 */
++    { 0x91aa, NewPutHzd }, //  CHARA_PUTHZD,
+ 
+-    { 0x0003, (NEWCHARA *)0x800caad4 }, //  DEMO_FADEIN,
+-    { 0x0004, (NEWCHARA *)0x800caad4 }, //  DEMO_FADEOUT,
+-    { 0x000f, (NEWCHARA *)0x800c6788 }, //  DEMO_SHADOW,
+-    { 0x0025, (NEWCHARA *)0x800c87c8 }, //  DEMO_BLUR,
+-    { 0x0028, (NEWCHARA *)0x800cc5b4 }, //  DEMO_MONOTONE,
+-    { 0x0030, (NEWCHARA *)0x800c7d1c }, //  DEMO_BLASTLINE,
+-    { 0x0031, (NEWCHARA *)0x800c8dd0 }, //  DEMO_SMOKELINE,
+-    { 0x0037, (NEWCHARA *)0x800c7960 }, //  DEMO_ENVIRONMENTLIGHT,
+-    { 0x0038, (NEWCHARA *)0x800c7a24 }, //  DEMO_ENVIRONMENTLIGHT2,
+-    { 0x003b, (NEWCHARA *)0x800ccfa4 }, //  DEMO_INVERSLIGHT,
+-    { 0x003f, (NEWCHARA *)0x800cd6b0 }, //  DEMO_INVERSLIGHT2,
++    { 0x0003, NewFadeInOut }, //  DEMO_FADEIN,
++    { 0x0004, NewFadeInOut }, //  DEMO_FADEOUT,
++    { 0x000f, NewDemoKage }, //  DEMO_SHADOW,
++    { 0x0025, NewBlurSet }, //  DEMO_BLUR,
++    { 0x0028, NewSepia_800C5214 }, //  DEMO_MONOTONE,
++    { 0x0030, NewBlastLine }, //  DEMO_BLASTLINE,
++    { 0x0031, NewSmokeLn_800CDFA4 }, //  DEMO_SMOKELINE,
++    { 0x0037, NewRedAlert2 }, //  DEMO_ENVIRONMENTLIGHT,
++    { 0x0038, RedAlert_800C4F48 }, //  DEMO_ENVIRONMENTLIGHT2,
++    { 0x003b, NewInverseLight }, //  DEMO_INVERSLIGHT,
++    { 0x003f, NewInverseLight2 }, //  DEMO_INVERSLIGHT2,
+ 
+     CHARA_END
+ };
+diff --git a/source/takabe/puthzd.c b/source/takabe/puthzd.c
+new file mode 100644
+index 000000000..0e0dab54a
+--- /dev/null
++++ b/source/takabe/puthzd.c
+@@ -0,0 +1,170 @@
++#include "puthzd.h"
++#include "thing.h"
++#include "libgv/libgv.h"
++#include "libgcl/libgcl.h"
++#include "game/game.h"
++
++typedef struct
++{
++    GV_ACT actor;
++    int map;
++    int name;
++    int translated;
++    SVECTOR offset;
++    HZD_DEF *definition;
++    HZD_GRP *group;
++    HZD_HDL *handler;
++    int n_floors;
++    int n_walls;
++    HZD_SEG *walls;
++    HZD_FLR *floors;
++} PutHzdWork;
++
++_Static_assert(sizeof(PutHzdWork) == 0x50, "PutHzd actor layout");
++
++static unsigned short PutHzdMessages[] = {0xd182, 0x006b};
++
++static void PutHzdTranslatePoint(HZD_VEC *point, const SVECTOR *offset)
++{
++    point->x += offset->vx;
++    point->y += offset->vy;
++    point->z += offset->vz;
++}
++
++/* Integral s11h 800CCDC8: HZD vectors store x,z,y,h, including floor bounds. */
++static void PutHzdTranslate(PutHzdWork *work, HZD_GRP *group)
++{
++    int i;
++    HZD_FLR *floor;
++
++    for (i = 0; i < work->n_walls; ++i)
++    {
++        work->walls[i] = group->walls[i];
++        PutHzdTranslatePoint(&work->walls[i].p1, &work->offset);
++        PutHzdTranslatePoint(&work->walls[i].p2, &work->offset);
++    }
++    for (i = 0; i < work->n_floors; ++i)
++    {
++        floor = &work->floors[i];
++        *floor = group->floors[i];
++        PutHzdTranslatePoint(&floor->b1, &work->offset);
++        PutHzdTranslatePoint(&floor->b2, &work->offset);
++        PutHzdTranslatePoint(&floor->p1, &work->offset);
++        PutHzdTranslatePoint(&floor->p2, &work->offset);
++        PutHzdTranslatePoint(&floor->p3, &work->offset);
++        PutHzdTranslatePoint(&floor->p4, &work->offset);
++    }
++}
++
++static void PutHzdQueue(PutHzdWork *work, HZD_GRP *group)
++{
++    unsigned char *flags = (unsigned char *)group->wallsFlags;
++    int i;
++
++    for (i = 0; i < work->n_walls; ++i)
++    {
++        HZD_QueueDynamicSegment2(work->handler, &work->walls[i],
++                                flags[i] | (flags[group->n_walls + i] << 8));
++    }
++    for (i = 0; i < work->n_floors; ++i)
++    {
++        HZD_QueueDynamicFloor(work->handler, &work->floors[i]);
++    }
++}
++
++static void PutHzdAct(PutHzdWork *work)
++{
++    GM_CurrentMap = work->map;
++    if (THING_Msg_CheckMessage(work->name, 2, PutHzdMessages) == 1)
++    {
++        THING_Hzd_800C4874(work->n_walls, work->walls, work->n_floors, work->floors);
++        GV_DestroyActor(&work->actor);
++    }
++}
++
++static void PutHzdDie(PutHzdWork *work)
++{
++    int i;
++
++    for (i = 0; i < work->n_walls; ++i)
++    {
++        HZD_DequeueDynamicSegment(work->handler, &work->walls[i]);
++    }
++    for (i = 0; i < work->n_floors; ++i)
++    {
++        HZD_DequeueDynamicFloor(work->handler, &work->floors[i]);
++    }
++    if (work->translated)
++    {
++        GV_Free(work->walls);
++    }
++}
++
++static int PutHzdGetResources(PutHzdWork *work, int name, int where)
++{
++    HZD_GRP *group;
++    int size;
++
++    work->map = GM_CurrentMap = where;
++    work->name = name;
++    work->handler = GM_GetMap(where)->hzd;
++    if (GCL_GetOption('p'))
++    {
++        work->translated = 1;
++        GCL_StrToSV(GCL_NextStr(), &work->offset.vx);
++    }
++    if (!GCL_GetOption('h'))
++    {
++        return 0;
++    }
++    work->definition = GV_GetCache(GV_CacheID(GCL_StrToInt(GCL_NextStr()), 'h'));
++    if (!work->definition)
++    {
++        return -1;
++    }
++    work->group = group = work->definition->groups;
++    if (group->n_walls < 0 || group->n_floors < 0)
++    {
++        return -1;
++    }
++    if (work->translated)
++    {
++        size = sizeof(HZD_SEG) * group->n_walls + sizeof(HZD_FLR) * group->n_floors;
++        work->walls = GV_Malloc(size);
++        if (!work->walls)
++        {
++            return -1;
++        }
++        work->floors = (HZD_FLR *)(work->walls + group->n_walls);
++    }
++    else
++    {
++        work->walls = group->walls;
++        work->floors = group->floors;
++    }
++    work->n_walls = group->n_walls;
++    work->n_floors = group->n_floors;
++    if (work->translated)
++    {
++        PutHzdTranslate(work, group);
++    }
++    PutHzdQueue(work, group);
++    return 0;
++}
++
++void *NewPutHzd(int name, int where, int argc, char **argv)
++{
++    PutHzdWork *work = GV_NewActor(GV_ACTOR_USER, sizeof(PutHzdWork));
++
++    if (!work)
++    {
++        return NULL;
++    }
++    GV_SetNamedActor(&work->actor, PutHzdAct, PutHzdDie, "puthzd.c");
++    if (PutHzdGetResources(work, name, where) < 0)
++    {
++        GV_DestroyActor(&work->actor);
++        return NULL;
++    }
++    return work;
++}
+diff --git a/source/takabe/puthzd.h b/source/takabe/puthzd.h
+new file mode 100644
+index 000000000..3724c8ee9
+--- /dev/null
++++ b/source/takabe/puthzd.h
+@@ -0,0 +1,6 @@
++#ifndef __MGS_TAKABE_PUTHZD_H__
++#define __MGS_TAKABE_PUTHZD_H__
++
++void *NewPutHzd(int name, int where, int argc, char **argv);
++
++#endif

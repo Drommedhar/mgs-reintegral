@@ -1,0 +1,26 @@
+{
+  "stage_variants": [
+    "s19a",
+    "s19ar"
+  ],
+  "bindings": {
+    "0x800c429c": "NewMotionSoundEffect",
+    "0x8005d508": "NewPadVibrationGcl",
+    "0x800c40ac": "NewCountdownGcl",
+    "0x800ddd2c": "NewCameraShake",
+    "0x800de108": "NewCutInCameraSet",
+    "0x800dcb54": "NewFadeInOutSet",
+    "0x800dd330": "NewCinemaScreenSet",
+    "0x800c9c0c": "NewAsiotoKun",
+    "0x800ddaa4": "NewVoiceSystem",
+    "0x800d7724": "s19a_800D7724",
+    "0x800cdbf4": "s19a_800CDBF4",
+    "0x800d86e0": "Garage_800D86E0",
+    "0x800d9b28": "Garage_800D9B28",
+    "0x800dc414": "Garage_800DC414",
+    "0x800cabec": "NewDemoDoll",
+    "0x800c5330": "NewS19Timer",
+    "0x800c6804": "NewCamera2Set"
+  },
+  "status": "Original constructor entry points and supplied vendor declarations checked; this is not full campaign completion."
+}

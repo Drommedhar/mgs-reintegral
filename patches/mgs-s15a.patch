@@ -1,0 +1,123 @@
+diff --git a/build/linker_command_file.txt b/build/linker_command_file.txt
+index c2b7b8bce..388b94cd4 100644
+--- a/build/linker_command_file.txt
++++ b/build/linker_command_file.txt
+@@ -1518,6 +1518,43 @@ overlay_bss group   file("{{OBJ_DIR}}\{{OVERLAY}}_{{OVERLAY_SUFFIX}}_bss.bin")
+     include "{{OBJ_DIR}}\takabe\cat_in.obj", overlay
+     include "{{OBJ_DIR}}\kojo\sstorm.obj", overlay
+ ;------------------------------------------------------------------------------
++{% elif OVERLAY == "s15a" %}
++    include "{{OBJ_DIR}}\stage\s15a.obj", overlay
++    include "{{OBJ_DIR}}\game\lamp.obj", overlay
++    include "{{OBJ_DIR}}\chara\snake\breath.obj", overlay
++    include "{{OBJ_DIR}}\anime\effect\breath.obj", overlay
++    include "{{OBJ_DIR}}\anime\effect\smoke.obj", overlay
++    include "{{OBJ_DIR}}\anime\effect\mark.obj", overlay
++    include "{{OBJ_DIR}}\enemy\wall.obj", overlay
++    include "{{OBJ_DIR}}\enemy\asioto.obj", overlay
++    include "{{OBJ_DIR}}\enemy\demokage.obj", overlay
++    include "{{OBJ_DIR}}\okajima\blood_cl.obj", overlay
++    include "{{OBJ_DIR}}\okajima\splash.obj", overlay
++    include "{{OBJ_DIR}}\okajima\d_bloods.obj", overlay
++    include "{{OBJ_DIR}}\okajima\red_alrt.obj", overlay
++    include "{{OBJ_DIR}}\okajima\blur.obj", overlay
++    include "{{OBJ_DIR}}\okajima\blurpure.obj", overlay
++    include "{{OBJ_DIR}}\anime\effect\smoke_ln.obj", overlay
++    include "{{OBJ_DIR}}\takabe\focus.obj", overlay
++    include "{{OBJ_DIR}}\takabe\sepia.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s15c\overlay2.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s15c\okajima\valcan\dyncon.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s15c\okajima\valcan\dyncon_geo.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s15c\okajima\valcan\dyncon_setup.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s15c\okajima\valcan\dyncon_act.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s15c\okajima\valcan\valcan.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s15c\okajima\valcan\crow.obj", overlay
++    include "{{OBJ_DIR}}\takabe\gas_efct.obj", overlay
++    include "{{OBJ_DIR}}\takabe\thing.obj", overlay
++    include "{{OBJ_DIR}}\takabe\object.obj", overlay
++    include "{{OBJ_DIR}}\takabe\mosaic.obj", overlay
++    include "{{OBJ_DIR}}\takabe\fadeio.obj", overlay
++    include "{{OBJ_DIR}}\takabe\life_up.obj", overlay
++    include "{{OBJ_DIR}}\takabe\cinema.obj", overlay
++    include "{{OBJ_DIR}}\takabe\dymc_seg.obj", overlay
++    include "{{OBJ_DIR}}\takabe\cat_in.obj", overlay
++    include "{{OBJ_DIR}}\takabe\dymc_flr.obj", overlay
++;------------------------------------------------------------------------------
+ {% elif OVERLAY == "s15c" %}
+     include "{{OBJ_DIR}}\stage\s15c.obj", overlay
+     include "{{OBJ_DIR}}\game\lamp.obj", overlay
+diff --git a/source/stage/s15a.c b/source/stage/s15a.c
+index b319e2a25..fac3254ba 100644
+--- a/source/stage/s15a.c
++++ b/source/stage/s15a.c
+@@ -1,38 +1,40 @@
+ #define DECLARE_NEWCHARA_PROTOS
+ #include "charalst.h"
+ 
++extern NEWCHARA NewValcan_800D9864;
++
+ CHARA _StageCharacterEntries[] = {
+-    { 0x51c6, (NEWCHARA *)0x800d7ddc }, //  CHARA_CAT_IN,       /* chara カットインカメラ */
+-    { 0xec77, (NEWCHARA *)0x800c4e24 }, //  CHARA_WALL,         /* chara 障害物 */
+-    { 0x92bc, (NEWCHARA *)0x800c5c5c }, //  CHARA_ASIOTOKUN,    /* chara 足音君 */
+-    { 0x4170, (NEWCHARA *)0x800c48f8 }, //  CHARA_SNEBREATH,    /* chara スネーク息 */
+-    { 0xa12e, (NEWCHARA *)0x800d609c }, //  CHARA_FADEIO,       /* chara フェードイン・アウト */
+-    { 0x9ff5, (NEWCHARA *)0x800ca1cc }, //  CHARA_VALCAN,       /* chara バルカン */
+-    { 0xcc45, (NEWCHARA *)0x800d334c }, //  CHARA_CONTAINER,    /* chara コンテナ */
+-    { 0x5a50, (NEWCHARA *)0x800d4ebc }, //  CHARA_GASEFFECT,    /* chara ガス効果 */
+-    { 0x8e60, (NEWCHARA *)0x800d4900 }, //  CHARA_CROW,         /* chara カラス */
+-    { 0x7a05, (NEWCHARA *)0x800d6b8c }, //  CHARA_CINEMA,       /* chara シネマスクリーン */
+-    { 0x1ad3, (NEWCHARA *)0x800c3e74 }, //  CHARA_TEXTURE,      /* chara テクスチャ */
+-    { 0x711f, (NEWCHARA *)0x800d63c4 }, //  CHARA_LIFEUP,       /* chara ライフ増加 */
+-    { 0xb103, (NEWCHARA *)0x800d6dbc }, //  CHARA_DYNWALL,      /* chara 透明壁 */
+-    { 0xaf6c, (NEWCHARA *)0x800d8224 }, //  CHARA_DYNFLOOR,     /* chara 透明床 */
+-    { 0x4e95, (NEWCHARA *)0x800c72b8 }, //  CHARA_BLOOD_POOL,   /* chara 血溜り */
++    { 0x51c6, NewCutInCameraSet }, // CHARA_CAT_IN,       /* chara カットインカメラ */
++    { 0xec77, NewWallGcl }, // CHARA_WALL,         /* chara 障害物 */
++    { 0x92bc, NewAsiotoKun }, // CHARA_ASIOTOKUN,    /* chara 足音君 */
++    { 0x4170, NewSnakeBreath }, // CHARA_SNEBREATH,    /* chara スネーク息 */
++    { 0xa12e, NewFadeInOutSet }, // CHARA_FADEIO,       /* chara フェードイン・アウト */
++    { 0x9ff5, NewValcan_800D9864 }, // CHARA_VALCAN,       /* chara バルカン */
++    { 0xcc45, s15c_dyncon_800D8C9C }, // CHARA_CONTAINER,    /* chara コンテナ */
++    { 0x5a50, NewGasEffectSet }, // CHARA_GASEFFECT,    /* chara ガス効果 */
++    { 0x8e60, NewCrow }, // CHARA_CROW,         /* chara カラス */
++    { 0x7a05, NewCinemaScreenSet }, // CHARA_CINEMA,       /* chara シネマスクリーン */
++    { 0x1ad3, NewTextureLamp }, // CHARA_TEXTURE,      /* chara テクスチャ */
++    { 0x711f, NewLifeUp }, // CHARA_LIFEUP,       /* chara ライフ増加 */
++    { 0xb103, NewDynamicWallSet }, // CHARA_DYNWALL,      /* chara 透明壁 */
++    { 0xaf6c, NewDynamicFloorSet }, // CHARA_DYNFLOOR,     /* chara 透明床 */
++    { 0x4e95, NewBloodCl }, // CHARA_BLOOD_POOL,   /* chara 血溜り */
+ 
+-    { 0x0002, (NEWCHARA *)0x800c40c8 }, //  DEMO_SMOKE,
+-    { 0x0003, (NEWCHARA *)0x800d6004 }, //  DEMO_FADEIN,
+-    { 0x0004, (NEWCHARA *)0x800d6004 }, //  DEMO_FADEOUT,
+-    { 0x0009, (NEWCHARA *)0x80072728 }, //  DEMO_BLOOD,
+-    { 0x000a, (NEWCHARA *)0x800c6234 }, //  DEMO_BLOOD2,
+-    { 0x000d, (NEWCHARA *)0x800c6dc0 }, //  DEMO_BLOODCIRCLE,
+-    { 0x000e, (NEWCHARA *)0x800c3f68 }, //  DEMO_BREATH,
+-    { 0x000f, (NEWCHARA *)0x800c5600 }, //  DEMO_SHADOW,
+-    { 0x0021, (NEWCHARA *)0x800d73d8 }, //  DEMO_UNSHAPEVIEW,
+-    { 0x0025, (NEWCHARA *)0x800c8f98 }, //  DEMO_BLUR,
+-    { 0x0028, (NEWCHARA *)0x800d7a20 }, //  DEMO_MONOTONE,
+-    { 0x0031, (NEWCHARA *)0x800c95a0 }, //  DEMO_SMOKELINE,
+-    { 0x0037, (NEWCHARA *)0x800c7e44 }, //  DEMO_ENVIRONMENTLIGHT,
+-    { 0x0038, (NEWCHARA *)0x800c7f08 }, //  DEMO_ENVIRONMENTLIGHT2,
+-    { 0x0044, (NEWCHARA *)0x800c8494 }, //  DEMO_GHOST,
++    { 0x0002, AN_Smoke_800CE08C }, // DEMO_SMOKE,
++    { 0x0003, NewFadeInOut }, // DEMO_FADEIN,
++    { 0x0004, NewFadeInOut }, // DEMO_FADEOUT,
++    { 0x0009, NewBlood }, // DEMO_BLOOD,
++    { 0x000a, NewSplash_800C8D6C }, // DEMO_BLOOD2,
++    { 0x000d, NewKetchap_s }, // DEMO_BLOODCIRCLE,
++    { 0x000e, AN_Breath }, // DEMO_BREATH,
++    { 0x000f, NewDemoKage }, // DEMO_SHADOW,
++    { 0x0021, NewFocusView }, // DEMO_UNSHAPEVIEW,
++    { 0x0025, NewBlurSet }, // DEMO_BLUR,
++    { 0x0028, NewSepia_800C5214 }, // DEMO_MONOTONE,
++    { 0x0031, NewSmokeLn_800CDFA4 }, // DEMO_SMOKELINE,
++    { 0x0037, NewRedAlert2 }, // DEMO_ENVIRONMENTLIGHT,
++    { 0x0038, RedAlert_800C4F48 }, // DEMO_ENVIRONMENTLIGHT2,
++    { 0x0044, NewBlurPure }, // DEMO_GHOST,
+ 
+     CHARA_END
+ };

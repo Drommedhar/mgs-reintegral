@@ -1,0 +1,99 @@
+name: Build alpha release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version without v (for example 0.1.0-alpha.1)'
+        required: true
+        default: '0.1.0-alpha.1'
+        type: string
+      publish:
+        description: Publish the tested files as a prerelease
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alpha-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: windows-2022
+    timeout-minutes: 40
+    permissions:
+      contents: write
+    env:
+      RELEASE_VERSION: ${{ inputs.version }}
+      GH_TOKEN: ${{ github.token }}
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Validate release request
+        run: |
+          if ($env:RELEASE_VERSION -notmatch '^\d+\.\d+\.\d+-alpha\.\d+$') { throw 'Use a version such as 0.1.0-alpha.1.' }
+          $release = gh api "repos/$env:GITHUB_REPOSITORY/releases" --jq '.[].tag_name'
+          if ($LASTEXITCODE -ne 0) { throw 'Cannot inspect existing releases.' }
+          if (@($release) -contains "v$env:RELEASE_VERSION") { throw 'That release already exists. Choose a new alpha version.' }
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            .tools/cmake-3.31.8
+            .tools/ninja-1.13.1
+            vendor
+          key: windows-x86-dependencies-${{ hashFiles('sources.lock.json', 'patches/**', 'tools/toolchain.ps1') }}
+      - name: Bootstrap and verify pinned sources
+        run: |
+          ./tools/bootstrap.ps1
+          ./tools/bootstrap.ps1 -Check
+      - name: Build optimized game, symbols, launcher and tests
+        run: ./tools/build.ps1 -Configuration RelWithDebInfo -BuildDirectory build/alpha -Version $env:RELEASE_VERSION -Parallel 4
+      - name: Test without retail discs or a physical GPU
+        env:
+          SDL_AUDIODRIVER: dummy
+        run: |
+          & ./.tools/cmake-3.31.8/cmake-3.31.8-windows-x86_64/bin/ctest.exe --test-dir build/alpha --output-on-failure --timeout 60 -j 4 -E '^mgs_(gpu_|widescreen_gpu_)'
+          if ($LASTEXITCODE -ne 0) { throw 'CTest failed.' }
+      - name: Package and test the unpacked download
+        run: |
+          ./tools/package.ps1 -BuildDirectory build/alpha -Version $env:RELEASE_VERSION
+          & ./.venv/Scripts/python.exe -m tests.test_release "build/packages/reintegral-$env:RELEASE_VERSION-windows-x86.zip" --ui
+          if ($LASTEXITCODE -ne 0) { throw 'Unpacked package checks failed.' }
+      - name: Publish prerelease after validation
+        if: inputs.publish
+        run: |
+          $assets = @(Get-ChildItem -LiteralPath build/packages -File | Select-Object -ExpandProperty FullName)
+          gh release create "v$env:RELEASE_VERSION" @assets --repo $env:GITHUB_REPOSITORY --target $env:GITHUB_SHA --prerelease --draft --title "RE:INTEGRAL $env:RELEASE_VERSION" --notes-file docs/ALPHA.md
+          if ($LASTEXITCODE -ne 0) { throw 'Release upload failed; any partial release remains a draft.' }
+          gh release edit "v$env:RELEASE_VERSION" --repo $env:GITHUB_REPOSITORY --draft=false
+          if ($LASTEXITCODE -ne 0) { throw 'Could not publish the completed draft.' }
+      - name: Keep test-build downloads briefly
+        if: success() && !inputs.publish
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: alpha-test-downloads
+          path: |
+            build/packages/*.zip
+            build/packages/*SHA256SUMS.txt
+          retention-days: 3
+      - name: Keep failure diagnostics briefly
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: alpha-test-diagnostics
+          path: |
+            build/alpha/Testing/Temporary/*.log
+            build/alpha/CMakeFiles/CMakeConfigureLog.yaml
+          retention-days: 3

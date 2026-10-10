@@ -1,0 +1,9 @@
+.lines -e
+bu /1 mgs_integral_native!MgsNativeReloadOverlay "ew mgs_integral_native!var_buf+a 115; .echo FIXTURE original s18a story277 fight branch - original GCL supplies player pose, health and combat actors; gc"
+bu /1 mgs_integral_native!NewLiquid ".echo OBSERVED original script created native Liquid; gc"
+bu /1 mgs_integral_native!liquid_800C736C ".echo OBSERVED native Liquid action dispatcher; gc"
+bu /1 mgs_integral_native!d18a_snake18_800D4E94 ".echo OBSERVED original script created native Snake18 controller; gc"
+sxe -c "r;kv;q" av
+sxe -c "r;kv;q" dz
+g
+q

@@ -1,0 +1,59 @@
+diff --git a/source/game/alert.c b/source/game/alert.c
+index 8c00e61da..244900043 100644
+--- a/source/game/alert.c
++++ b/source/game/alert.c
+@@ -77,6 +77,9 @@ void GM_AlertSound(void)
+     int x_code;
+     int vox_code;
+     int proc;
++    int pan;
++    int volume;
++    int sound;
+ 
+     if (GCL_GetOption('b'))
+     {
+@@ -122,9 +125,10 @@ void GM_AlertSound(void)
+ 
+     if (GCL_GetOption('e')) // emit
+     {
+-        GM_SeSet2(GCL_GetNextInt(),  // pan
+-                  GCL_GetNextInt(),  // vol
+-                  GCL_GetNextInt()); // se_id
++        pan = GCL_GetNextInt();
++        volume = GCL_GetNextInt();
++        sound = GCL_GetNextInt();
++        GM_SeSet2(pan, volume, sound);
+     }
+ 
+     if (GCL_GetOption('v')) // vox
+diff --git a/source/game/strctrl.c b/source/game/strctrl.c
+index b39062349..714c12b58 100644
+--- a/source/game/strctrl.c
++++ b/source/game/strctrl.c
+@@ -177,7 +177,12 @@ void *NewStreamControl( int stream_code, int gcl_proc, int flags )
+         return (void *)&StrctrlWork;
+     }
+ 
++#ifdef MGS_NATIVE
++    _Static_assert(0x7800 + FS_CDLOAD_BUF_SIZE <= MGS_TOP_RAM_SIZE, "Stream buffer exceeds native top RAM");
++    FS_StreamInit( (unsigned char *)MEM_BOTTOM + 0x7800, FS_CDLOAD_BUF_SIZE );
++#else
+     FS_StreamInit( ( void * )0x801E7800, FS_CDLOAD_BUF_SIZE );
++#endif
+     GV_InitActor( GV_ACTOR_MANAGER, ( GV_ACT * )&StrctrlWork, NULL );
+     GV_SetNamedActor( ( GV_ACT * )&StrctrlWork, &Act, &Die, "strctrl.c" );
+ 
+diff --git a/source/menu/item.c b/source/menu/item.c
+index 414ef96c1..7875ed908 100644
+--- a/source/menu/item.c
++++ b/source/menu/item.c
+@@ -1216,8 +1216,8 @@ void menu_item_init_8003CBF0(MenuWork *work)
+     prev_current = 0;
+     menu_set_panel_config_8003D6A8(&work->field_1DC_menu_item, 0, draw_item);
+     load_item_texture();
+-    sub_8003CB98(work);
+     menu_init_nouse();
++    sub_8003CB98(work);
+ }
+ 
+ void menu_item_kill_8003CC74(MenuWork *work)

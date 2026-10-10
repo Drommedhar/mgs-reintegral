@@ -1,0 +1,118 @@
+diff --git a/source/onoda/change/safety.c b/source/onoda/change/safety.c
+index 58929fbb6..708b2652f 100644
+--- a/source/onoda/change/safety.c
++++ b/source/onoda/change/safety.c
+@@ -1,6 +1,10 @@
+ #include "safety.h"
+ 
+ #include <stdio.h>
++#ifdef MGS_NATIVE
++#include <stdlib.h>
++#include "mgs_safety.h"
++#endif
+ #include <sys/types.h>
+ #include <libcd.h>
+ #include <libetc.h>
+@@ -22,6 +26,13 @@ int Safety_800C45F8( int lba, int timeout )
+     printf( "SafeCheckStart\n" );
+     CdIntToPos( lba, &loc );
+ 
++#ifdef MGS_NATIVE
++    if (SafetyCheck(loc.minute, loc.second, loc.sector) < 0)
++    {
++        fprintf(2, "[native] Cannot continue with invalid Integral disc content.\n");
++        exit(EXIT_FAILURE);
++    }
++#else
+     while ( 1 )
+     {
+         printf( "TRY\n" );
+@@ -53,6 +64,7 @@ int Safety_800C45F8( int lba, int timeout )
+ 
+         printf( "OPEN\n" );
+     }
++#endif
+ 
+     printf( "SafeCheckEND\n" );
+     return 1;
+diff --git a/source/onoda/open/open.c b/source/onoda/open/open.c
+index 53678602b..3e5364ab4 100644
+--- a/source/onoda/open/open.c
++++ b/source/onoda/open/open.c
+@@ -281,7 +281,7 @@ static void Open_800C4674(Work *work, int index)
+     work->unk[index].num = 1;
+ }
+ 
+-static inline void AddTpage(Work *work, u_long *ot, int found, int i)
++static inline void AddTpage(Work *work, OT_TYPE *ot, int found, int i)
+ {
+     int       tp;
+     DR_TPAGE *tpage;
+@@ -295,7 +295,7 @@ static inline void AddTpage(Work *work, u_long *ot, int found, int i)
+     }
+ }
+ 
+-static void title_open_800C47B8(Work *work, u_long *ot)
++static void title_open_800C47B8(Work *work, OT_TYPE *ot)
+ {
+     int   count;
+     int   found;
+@@ -340,8 +340,10 @@ static void title_open_800C47B8(Work *work, u_long *ot)
+         AddTpage(work, ot, found, i);
+     }
+ 
++#ifndef MGS_NATIVE
+     asm("" : "=r"(found)); // TODO: fix
+     AddTpage(work, ot, found, i);
++#endif
+ }
+ 
+ static void title_open_800C4AD0(Work *work, int index, int color)
+@@ -7801,7 +7803,11 @@ void title_open_800D1CB4(Work *work)
+ void title_open_800D2374(Work *work)
+ {
+     int i;
++#ifdef MGS_NATIVE
++    int v;
++#else
+     register int v asm("$4");
++#endif
+ 
+     for (i = 0; i < 24; i++)
+     {
+@@ -8223,7 +8229,7 @@ void title_open_800D2AFC(Work *work)
+     }
+ }
+ 
+-void title_open_800D2CA8(Work *work, u_long *ot)
++void title_open_800D2CA8(Work *work, OT_TYPE *ot)
+ {
+     int i;
+ 
+@@ -8265,7 +8271,7 @@ void title_open_800D2CA8(Work *work, u_long *ot)
+     title_open_800C47B8(work, ot);
+ }
+ 
+-void title_open_800D2E44(Work *work, u_long *ot)
++void title_open_800D2E44(Work *work, OT_TYPE *ot)
+ {
+     if (has_clear_data)
+     {
+@@ -8339,7 +8345,7 @@ void title_open_800D2E44(Work *work, u_long *ot)
+     title_open_800C47B8(work, ot);
+ }
+ 
+-void title_open_800D3500(Work *work, u_long *ot)
++void title_open_800D3500(Work *work, OT_TYPE *ot)
+ {
+     int i;
+ 
+@@ -8425,7 +8431,7 @@ void title_open_800D3500(Work *work, u_long *ot)
+ 
+ static void Act(Work *work)
+ {
+-    u_long   *ot;
++    OT_TYPE   *ot;
+     POLY_FT4 *packs;
+ 
+     ot = DG_ChanlOTag(1);

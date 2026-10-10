@@ -1,0 +1,142 @@
+diff --git a/source/overlays/s10a/okajima/10a_demo.c b/source/overlays/s10a/okajima/10a_demo.c
+new file mode 100644
+index 000000000..4cd058b44
+--- /dev/null
++++ b/source/overlays/s10a/okajima/10a_demo.c
+@@ -0,0 +1,136 @@
++#include "libgv/libgv.h"
++#include "libdg/libdg.h"
++#include "libgcl/libgcl.h"
++#include "game/game.h"
++#include "game/camera.h"
++#include "weapon/weapon.h"
++
++typedef struct
++{
++    GV_ACT  actor;
++    int     name;
++    int     map;
++    SVECTOR eye;
++    SVECTOR target;
++    SVECTOR smoothed;
++    char    unused[16];
++    int     time;
++    int     saved_item;
++    int     saved_weapon;
++    int     proc;
++} Work;
++
++static void Smooth(SVECTOR *position, const SVECTOR *target, int divisor)
++{
++    position->vx = (position->vx * (divisor - 1) + target->vx) / divisor;
++    position->vy = (position->vy * (divisor - 1) + target->vy) / divisor;
++    position->vz = (position->vz * (divisor - 1) + target->vz) / divisor;
++}
++
++static void UpdateCamera(Work *work)
++{
++    SVECTOR target;
++    SVECTOR eye = work->eye;
++    SVECTOR center;
++
++    GV_PadData[0].status &= ~PAD_UP;
++    GV_PadData[0].press = GV_PadData[0].status;
++    GV_PadData[1].status &= ~PAD_UP;
++    GV_PadData[1].press = GV_PadData[1].status;
++
++    target.vy = work->smoothed.vy + (rsin(GV_Time * 64) - rsin(GV_Time * 31) / 2 - rsin(GV_Time * 180) / 2) / 32;
++    target.vx = work->smoothed.vx + (rsin(GV_Time * 23) - rsin(GV_Time * 45) / 2 - rsin(GV_Time * 139) / 2) / 32;
++    target.vz = work->smoothed.vz;
++    center.vx = eye.vx + (target.vx - eye.vx) / 8;
++    center.vy = eye.vy + (target.vy - eye.vy) / 8;
++    center.vz = eye.vz + (target.vz - eye.vz) / 8;
++    center.pad = 0;
++
++    DG_MakeCameraMatrix(DG_Chanl(0), &eye, &center, 5000);
++    GM_Camera.interp_mode = 0;
++    GM_Camera.zoom = 5000;
++    gUnkCameraStruct2_800B7868.position = eye;
++    gUnkCameraStruct2_800B7868.target = center;
++}
++
++static int UsesItemView(int item)
++{
++    return item == 1 || item == 12 || item == 5 || item == 6;
++}
++
++static int UsesWeaponView(int weapon)
++{
++    return weapon == 9 || weapon == 4;
++}
++
++static void Act(Work *work)
++{
++    GM_CurrentMap = work->map;
++    if (GV_Time % 60 == 0)
++        GM_SeSet2(0, 63, 135);
++
++    if (work->time == 0)
++    {
++        work->saved_item = GM_Item;
++        work->saved_weapon = GM_Weapon;
++        if (UsesItemView(GM_Item))
++            GM_Item = -1;
++        if (UsesWeaponView(GM_Weapon))
++            GM_Weapon = -1;
++        work->smoothed = GM_PlayerPosition;
++        work->smoothed.vy += 10000;
++        work->target = work->smoothed;
++    }
++    else if (work->time >= 190)
++    {
++        GV_DestroyActor(work);
++    }
++    else
++    {
++        if (work->time >= 100)
++        {
++            work->target.vx = 1000;
++            work->target.vy = -29000;
++            work->target.vz = 20500;
++        }
++        else
++        {
++            work->target = GM_PlayerPosition;
++        }
++        Smooth(&work->smoothed, &work->target, work->time < 20 ? 16 : 8);
++    }
++    UpdateCamera(work);
++    work->time++;
++}
++
++static void Die(Work *work)
++{
++    GM_GameStatus &= ~STATE_PADRELEASE;
++    if (UsesWeaponView(work->saved_weapon))
++        GM_Weapon = work->saved_weapon;
++    if (UsesItemView(work->saved_item))
++        GM_Item = work->saved_item;
++    GCL_ForceExecProc(work->proc, NULL);
++}
++
++void *NewStage10Demo(int name, int where)
++{
++    Work *work = GV_NewActor(GV_ACTOR_PREV, sizeof(Work));
++    if (!work)
++        return NULL;
++
++    GV_SetNamedActor(&work->actor, Act, Die, "10a_demo.c");
++    work->name = name;
++    work->map = where;
++    GM_CurrentMap = where;
++    char *option = GCL_GetOption('p');
++    if (option)
++        work->proc = GCL_StrToInt(option);
++    work->eye.vx = 0;
++    work->eye.vy = -28000;
++    work->eye.vz = -23000;
++    work->time = 0;
++    NewRifleSightFast();
++    GM_GameStatus |= 0x104A0000;
++    return work;
++}

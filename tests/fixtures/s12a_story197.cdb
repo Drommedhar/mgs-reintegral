@@ -1,0 +1,6 @@
+.lines -e
+bu /1 mgs_integral_native!MgsNativeReloadOverlay "ew mgs_integral_native!var_buf+a c5; ew mgs_integral_native!var_buf+2 800; ew mgs_integral_native!var_buf+4 0; ew mgs_integral_native!linkvarbuf+10 fc94 3fe 5910; .printf \"FIXTURE original story variable $w:00000A=197 and original s11c sub_5DDC entry pose(-876,1022,22800), heading2048, stance0\n\"; gc"
+bu /1 mgs_integral_native!NewWolf2 ".printf \"FIXTURE observed original Wolf2 constructor\n\"; gc"
+sxe -c "r;kv;q" av
+g
+q

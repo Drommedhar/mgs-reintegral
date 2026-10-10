@@ -1,0 +1,752 @@
+diff --git a/build/linker_command_file.txt b/build/linker_command_file.txt
+index 42fc75238..6cfebec0c 100644
+--- a/build/linker_command_file.txt
++++ b/build/linker_command_file.txt
+@@ -1765,6 +1765,48 @@ overlay_bss group   file("{{OBJ_DIR}}\{{OVERLAY}}_{{OVERLAY_SUFFIX}}_bss.bin")
+     include "{{PSYQ_SDK}}\psyq_4.4\lib\libgpu\P22.OBJ", overlay
+     include "{{PSYQ_SDK}}\psyq_4.4\lib\libgpu\P26.OBJ", overlay
+ ;------------------------------------------------------------------------------
++{% elif OVERLAY == "s11b" %}
++    include "{{OBJ_DIR}}\stage\s11b.obj", overlay
++    include "{{OBJ_DIR}}\game\lamp.obj", overlay
++    include "{{OBJ_DIR}}\chara\snake\breath.obj", overlay
++    include "{{OBJ_DIR}}\anime\effect\breath.obj", overlay
++    include "{{OBJ_DIR}}\chara\others\motse.obj", overlay
++    include "{{OBJ_DIR}}\thing\snow.obj", overlay
++    include "{{OBJ_DIR}}\thing\sphere.obj", overlay
++    include "{{OBJ_DIR}}\enemy\wall.obj", overlay
++    include "{{OBJ_DIR}}\enemy\demokage.obj", overlay
++    include "{{OBJ_DIR}}\enemy\asioto.obj", overlay
++    include "{{OBJ_DIR}}\okajima\blur.obj", overlay
++    include "{{OBJ_DIR}}\okajima\smke_ln.obj", overlay
++    include "{{OBJ_DIR}}\anime\effect\smoke_ln.obj", overlay
++    include "{{OBJ_DIR}}\okajima\wall_spa.obj", overlay
++    include "{{OBJ_DIR}}\okajima\plasma.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s11b\okajima\11b_demo.obj", overlay
++    include "{{OBJ_DIR}}\okajima\red_alrt.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s11g\okajima\blst_ln.obj", overlay
++    include "{{OBJ_DIR}}\okajima\blurpure.obj", overlay
++    include "{{OBJ_DIR}}\takabe\spark2.obj", overlay
++    include "{{OBJ_DIR}}\takabe\object.obj", overlay
++    include "{{OBJ_DIR}}\takabe\fadeio.obj", overlay
++    include "{{OBJ_DIR}}\takabe\thing.obj", overlay
++    include "{{OBJ_DIR}}\takabe\cinema.obj", overlay
++    include "{{OBJ_DIR}}\takabe\dymc_seg.obj", overlay
++    include "{{OBJ_DIR}}\takabe\focus.obj", overlay
++    include "{{OBJ_DIR}}\takabe\windcrcl.obj", overlay
++    include "{{OBJ_DIR}}\takabe\cat_in.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s11g\kojo\hind.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s11g\kojo\hindact.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s11g\kojo\hindbody.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s11g\kojo\hindbody2.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s11g\okajima\blastoff.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s11g\okajima\unknown.obj", overlay
++
++    include "{{OBJ_DIR}}\kojo\inverlt.obj", overlay
++    include "{{OBJ_DIR}}\okajima\crsh_smk.obj", overlay
++    include "{{OBJ_DIR}}\anime\effect\socom.obj", overlay
++    include "{{PSYQ_SDK}}\psyq_4.4\lib\libgpu\P22.OBJ", overlay
++    include "{{PSYQ_SDK}}\psyq_4.4\lib\libgpu\P26.OBJ", overlay
++;------------------------------------------------------------------------------
+ {% elif OVERLAY == "s11h" %}
+     include "{{OBJ_DIR}}\stage\s11h.obj", overlay
+     include "{{OBJ_DIR}}\game\lamp.obj", overlay
+diff --git a/source/okajima/crsh_smk.c b/source/okajima/crsh_smk.c
+new file mode 100644
+index 000000000..27e222e83
+--- /dev/null
++++ b/source/okajima/crsh_smk.c
+@@ -0,0 +1,113 @@
++#include "game/game.h"
++#include "takabe/spark2.h"
++
++typedef struct
++{
++    GV_ACT actor;
++    int map;
++    SVECTOR origin;
++    int script;
++    int smoke_type;
++    int effect;
++    int timer;
++    int counter;
++    SVECTOR velocities[4];
++    SVECTOR positions[4];
++    char unused[128];
++    unsigned char r, g, b, pad;
++} CrashSmokeWork;
++
++_Static_assert(sizeof(CrashSmokeWork) == 0x104, "CrashSmoke actor layout");
++
++void AN_Unknown_800D6F6C(SVECTOR *position);
++void AN_Unknown_800D7028(SVECTOR *position, int script);
++void AN_Unknown_800D70E4(SVECTOR *position, char r, char g, char b);
++
++static void CrashSmokeAct(CrashSmokeWork *work)
++{
++    MATRIX world;
++    SVECTOR rotation;
++    int i;
++
++    GM_CurrentMap = work->map;
++    for (i = 0; i < 4; ++i)
++    {
++        work->positions[i].vx += work->velocities[i].vx;
++        work->velocities[i].vy -= 15;
++        work->positions[i].vy += work->velocities[i].vy;
++        work->positions[i].vz += work->velocities[i].vz;
++        switch (work->smoke_type)
++        {
++        case 0:
++            AN_Unknown_800D6F6C(&work->positions[i]);
++            break;
++        case 1:
++            AN_Unknown_800D7028(&work->positions[i], work->script);
++            break;
++        case 2:
++            AN_Unknown_800D70E4(&work->positions[i], work->r, work->g, work->b);
++            break;
++        }
++        if (work->effect >= 2 && work->effect < 4 && (GV_RandU(16) == 0 || work->timer == 0))
++        {
++            rotation.vx = GV_RandU(2048);
++            rotation.vy = GV_RandU(4096);
++            rotation.vz = 0;
++            DG_SetPos2(&work->positions[i], &rotation);
++            ReadRotMatrix(&world);
++            NewSpark2_800CA714(&world);
++        }
++    }
++    if (--work->timer < 0)
++    {
++        GV_DestroyActor(&work->actor);
++    }
++    if ((work->timer & 1) == 0)
++    {
++        ++work->counter;
++    }
++}
++
++static void CrashSmokeInitialize(CrashSmokeWork *work, SVECTOR *rotation, int size)
++{
++    SVECTOR speed;
++    SVECTOR turn = DG_ZeroVector;
++    int duration = (work->effect == 1 || work->effect == 3) ? 30 : 15;
++    int i;
++
++    for (i = 0; i < 4; ++i)
++    {
++        speed.vx = 0;
++        speed.vy = GV_RandU(256) + 128;
++        speed.vz = size * (GV_RandU(2048) + 2048) / duration / 4096;
++        turn.vy = GV_RandU(4096);
++        DG_SetPos2(&DG_ZeroVector, &turn);
++        DG_PutVector(&speed, &speed, 1);
++        DG_SetPos2(&DG_ZeroVector, rotation);
++        DG_PutVector(&speed, &work->velocities[i], 1);
++        work->positions[i] = work->origin;
++    }
++    work->timer = duration;
++    work->counter = 0;
++}
++
++void *NewCrashSmoke(SVECTOR *origin, SVECTOR *rotation, int size, int script,
++                    int smoke_type, int effect, char r, char g, char b)
++{
++    CrashSmokeWork *work = GV_NewActor(GV_ACTOR_PREV, sizeof(CrashSmokeWork));
++
++    if (work)
++    {
++        GV_SetNamedActor(&work->actor, CrashSmokeAct, NULL, "crsh_smk.c");
++        work->map = GM_CurrentMap;
++        work->effect = effect;
++        work->origin = *origin;
++        work->script = script;
++        work->smoke_type = smoke_type;
++        work->r = r;
++        work->g = g;
++        work->b = b;
++        CrashSmokeInitialize(work, rotation, size);
++    }
++    return work;
++}
+diff --git a/source/overlays/s11b/okajima/11b_demo.c b/source/overlays/s11b/okajima/11b_demo.c
+new file mode 100644
+index 000000000..123f059d7
+--- /dev/null
++++ b/source/overlays/s11b/okajima/11b_demo.c
+@@ -0,0 +1,498 @@
++#include "bullet/blast.h"
++#include "libgcl/libgcl.h"
++#include "game/game.h"
++#include "okajima/red_alrt.h"
++#include "takabe/fadeio.h"
++
++typedef struct
++{
++    GV_ACT actor;
++    int name;
++    int map;
++    DG_PRIM *prim;
++    SVECTOR vertices[2560];
++    int ribbon_index[16];
++    OBJECT objects[16];
++    MATRIX light[2];
++    int debris_state[16];
++    SVECTOR positions[16];
++    SVECTOR velocities[16];
++    int angles1[16];
++    int angles2[16];
++    int ribbon_life[640];
++    SVECTOR origin;
++    SVECTOR destination;
++    SVECTOR camera_goal;
++    SVECTOR target_goal;
++    SVECTOR camera;
++    SVECTOR target;
++    char pad6ADC[8];
++    int state;
++    int timer;
++    int field_6AEC;
++    int field_6AF0;
++    char pad6AF4[8];
++    int elapsed;
++    int proc_id;
++    int flash;
++    int sound_cycle;
++} Stage11BWork;
++
++_Static_assert(sizeof(Stage11BWork) == 0x6b0c, "Stage11B demo actor layout");
++static VECTOR stage11b_scale = {4096, 4096, 4096, 0};
++void NewAnime_8005E774(SVECTOR *position);
++void *NewBlastLine(int count, int time, int size, SVECTOR *from, SVECTOR *to);
++
++static void Stage11BInitPackets(Stage11BWork *work, POLY_FT4 *packs, int n_packs, DG_TEX *tex)
++{
++    int *ribbon_life;
++
++    ribbon_life = work->ribbon_life;
++    while (--n_packs >= 0)
++    {
++        *ribbon_life++ = 0;
++
++        setPolyFT4(packs);
++        setSemiTrans(packs, 1);
++        setRGB0(packs, 0, 0, 0);
++        DG_SetPacketTexture4(packs, tex);
++        packs->tpage |= (1 << 5);
++        packs++;
++    }
++}
++
++static void Stage11BUpdatePackets(Stage11BWork *work)
++{
++    POLY_FT4 *packs;
++    int       i;
++    int       shade;
++
++    packs = work->prim->packs[GV_Clock];
++    for (i = 0; i < 640; i++)
++    {
++        if (work->ribbon_life[i] <= 0)
++        {
++            work->ribbon_life[i] = 0;
++            shade = 0;
++        }
++        else
++        {
++            shade = (work->ribbon_life[i] * 255) / 40;
++            work->ribbon_life[i]--;
++        }
++
++        setRGB0(packs, shade, shade, shade);
++        packs++;
++    }
++}
++
++static int Stage11BInitPrim(Stage11BWork *work)
++{
++    DG_TEX  *tex;
++    DG_PRIM *prim;
++
++    tex = DG_GetTexture(GV_StrCode("plasma"));
++    if (!tex)
++    {
++        return -1;
++    }
++
++    work->prim = prim = GM_MakePrim(DG_PRIM_POLY_FT4, 640, work->vertices, NULL);
++    if (!prim)
++    {
++        return -1;
++    }
++
++    prim->raise = 200;
++
++    Stage11BInitPackets(work, prim->packs[0], 640, tex);
++    Stage11BInitPackets(work, prim->packs[1], 640, tex);
++    return 0;
++}
++
++static void Stage11BAngles(SVECTOR *a, SVECTOR *b, SVECTOR *out)
++{
++    SVECTOR diff;
++    int     dy;
++
++    GV_SubVec3(b, a, &diff);
++    out->vy = ratan2(diff.vx, diff.vz) & 0xFFF;
++
++    dy = diff.vy;
++    diff.vy = 0;
++
++    out->vx = ratan2(GV_VecLen3(&diff), dy) & 0xFFF;
++    out->vz = 0;
++}
++
++static void Stage11BInterpolate(SVECTOR *vec, SVECTOR *pos, int len)
++{
++    vec->vx = (vec->vx * (len - 1) + pos->vx) / len;
++    vec->vy = (vec->vy * (len - 1) + pos->vy) / len;
++    vec->vz = (vec->vz * (len - 1) + pos->vz) / len;
++}
++
++static void Stage11BCamera(Stage11BWork *work)
++{    
++    DG_MakeCameraMatrix(DG_Chanl(0), &work->camera, &work->target, 320);
++    GM_Camera.interp_mode = 0;
++    GM_Camera.zoom = 320;
++    gUnkCameraStruct2_800B7868.position = work->camera;
++    gUnkCameraStruct2_800B7868.target = work->target;
++}
++
++static void Stage11BFlash(void)
++{
++    SVECTOR col0;
++    SVECTOR col1;
++
++    setVector(&col0, 32, 32, 32);
++    setVector(&col1, 8, 8, 8);
++
++    NewRedAlert2(0, 1, &col0, &col1, 1, 15);
++}
++
++static void Stage11BSound(SVECTOR *pos, int se_id)
++{
++    GM_SeSetMode(pos, se_id, GM_SEMODE_BOMB);
++}
++
++static void Stage11BRibbon(Stage11BWork *work, SVECTOR *position, int index)
++{
++    int current = work->ribbon_index[index];
++    int slot = index * 40 + current;
++    int previous = index * 40 + (current != 0 ? current - 1 : 39);
++    SVECTOR *vertices = &work->vertices[slot * 4];
++    SVECTOR *old_vertices = &work->vertices[previous * 4];
++
++    work->ribbon_life[slot] = 40;
++    work->ribbon_index[index] = current + 1;
++    if (work->ribbon_index[index] >= 40)
++    {
++        work->ribbon_index[index] = 0;
++    }
++    vertices[0] = *position;
++    vertices[1] = old_vertices[0];
++    vertices[2] = *position;
++    vertices[2].vy -= 100;
++    vertices[3] = old_vertices[2];
++}
++
++static void Stage11BAdvanceCamera(Stage11BWork *work)
++{
++    switch (work->state)
++    {
++    case 0:
++        GM_SeSet2(0, 63, 42);
++        work->timer = 40;
++        setVector(&work->camera_goal, 4045, 1117, 26881);
++        setVector(&work->target_goal, -6287, 8057, 15429);
++        work->state = 1;
++        work->camera = gUnkCameraStruct2_800B7868.position;
++        work->target = gUnkCameraStruct2_800B7868.target;
++        Stage11BSound(&work->target_goal, 190);
++        /* fallthrough */
++    case 1:
++        if (work->timer >= 21)
++        {
++            GM_PadVibration = GV_RandU(2);
++            GM_PadVibration2 = 12 * (work->timer - 20);
++        }
++        if (GV_RandU(128) == 0)
++        {
++            Stage11BSound(&work->target_goal, 189);
++        }
++        Stage11BInterpolate(&work->camera, &work->camera_goal, 8);
++        Stage11BInterpolate(&work->target, &work->target_goal, 8);
++        if (work->timer < 0)
++        {
++            Stage11BSound(&work->target_goal, 190);
++            work->state = 2;
++            work->timer = 90;
++            setVector(&work->target_goal, -10418, 13712, 15869);
++            setVector(&work->camera_goal, -11662, 15703, 29801);
++        }
++        break;
++    case 2:
++        if (GV_RandU(128) == 0)
++        {
++            Stage11BSound(&work->target_goal, 189);
++        }
++        Stage11BInterpolate(&work->camera, &work->camera_goal, 16);
++        Stage11BInterpolate(&work->target, &work->target_goal, 16);
++        work->camera_goal.vx -= 30;
++        work->camera_goal.vy -= 35;
++        work->camera_goal.vz -= 100;
++        work->target_goal.vx += 50;
++        work->target_goal.vy -= 40;
++        work->target_goal.vz -= 100;
++        if (work->timer < 0)
++        {
++            Stage11BSound(&work->target_goal, 190);
++            work->state = 3;
++            work->timer = 41;
++            work->target_goal = GM_PlayerPosition;
++            setVector(&work->camera_goal, 9200, 4000, 29000);
++            NewFadeInOut(2, 40);
++        }
++        break;
++    case 3:
++        Stage11BInterpolate(&work->camera, &work->camera_goal, 16);
++        Stage11BInterpolate(&work->target, &work->target_goal, 8);
++        if (work->timer < 0)
++        {
++            GV_DestroyActor(&work->actor);
++        }
++        break;
++    }
++}
++
++static void Stage11BLaunch(Stage11BWork *work, int index)
++{
++    if (GV_RandU(32) == 0 || work->state >= 3)
++    {
++        work->debris_state[index] = 1;
++        Stage11BSound(&work->positions[index], 180);
++        work->ribbon_index[index] = 0;
++        switch (work->sound_cycle)
++        {
++        case 0:
++            Stage11BSound(&work->target_goal, 188);
++            ++work->sound_cycle;
++            break;
++        case 1:
++            Stage11BSound(&work->target_goal, 193);
++            ++work->sound_cycle;
++            break;
++        case 2:
++            Stage11BSound(&work->target_goal, 194);
++            work->sound_cycle = 0;
++            break;
++        }
++    }
++}
++
++static void Stage11BImpact(Stage11BWork *work, int index, SVECTOR *rotation, SVECTOR *direction)
++{
++    SVECTOR from;
++    SVECTOR *position = &work->positions[index];
++
++    work->debris_state[index] = 2;
++    Stage11BFlash();
++    DG_InvisibleObjs(work->objects[index].objs);
++    if (position->vx < 3000 && position->vx >= -4999)
++    {
++        setVector(&from, (1348 * index) % 2048 + 4000, (1933 * index) % 2048 + 4000, 0);
++        rotation->vy = (1633 * index) % 4096;
++        DG_SetPos2(&DG_ZeroVector, rotation);
++        DG_PutVector(&from, &from, 1);
++        DG_SetPos2(position, direction);
++        DG_PutVector(&from, &from, 1);
++        from.vy -= 3000;
++        NewBlastLine(4, 16, 3000, position, &from);
++        work->flash = GV_RandU(16) + 20;
++        Stage11BSound(position, 192);
++        Stage11BSound(position, 41);
++    }
++    else
++    {
++        setVector(&from, (1433 * index) % 1024 - 512, (1133 * index) % 1024 - 512, 0);
++        rotation->vy = (1933 * index) % 4096;
++        DG_SetPos2(position, rotation);
++        DG_PutVector(&from, &from, 1);
++        AN_Blast_Single(&from);
++    }
++}
++
++static void Stage11BMoveDebris(Stage11BWork *work, int index, SVECTOR *rotation)
++{
++    SVECTOR from, next, direction;
++    SVECTOR *position = &work->positions[index];
++    SVECTOR *velocity = &work->velocities[index];
++    OBJECT *object = &work->objects[index];
++    int shade;
++
++    DG_VisibleObjs(object->objs);
++    rotation->vz = work->angles1[index] + work->angles2[index];
++    work->angles1[index] += index / 2 + 10;
++    work->angles2[index] += index + 25;
++    position->vx += velocity->vx;
++    position->vy += velocity->vy;
++    position->vz += velocity->vz;
++    next = *position;
++    next.vx += velocity->vx;
++    next.vy += velocity->vy;
++    next.vz += velocity->vz;
++    setVector(&from, index * 10 + 60, 0, 0);
++    DG_SetPos2(position, rotation);
++    DG_PutVector(&from, position, 1);
++    NewAnime_8005E774(position);
++    rotation->vz = work->angles1[index] + work->angles2[index];
++    DG_SetPos2(&next, rotation);
++    DG_PutVector(&from, &next, 1);
++    next.vy -= 50;
++    Stage11BAngles(&next, position, &direction);
++    DG_SetPos2(&next, &direction);
++    GM_ActObject2(object);
++    shade = GV_RandU(2) ? 255 : 128;
++    object->objs->light->t[0] = shade;
++    object->objs->light->t[1] = shade;
++    object->objs->light->t[2] = shade;
++    ScaleMatrix(&object->objs->world, &stage11b_scale);
++    Stage11BRibbon(work, position, index);
++    if (position->vz < 6800)
++    {
++        Stage11BImpact(work, index, rotation, &direction);
++    }
++}
++
++static void Stage11BDebris(Stage11BWork *work)
++{
++    SVECTOR rotation = DG_ZeroVector;
++    int i;
++
++    for (i = 0; i < 16; ++i)
++    {
++        switch (work->debris_state[i])
++        {
++        case 0:
++            DG_InvisibleObjs(work->objects[i].objs);
++            Stage11BLaunch(work, i);
++            break;
++        case 1:
++            Stage11BMoveDebris(work, i, &rotation);
++            break;
++        case 2:
++            DG_InvisibleObjs(work->objects[i].objs);
++            if (GV_RandU(64) == 0)
++                GM_SeSet2(0, 255, 187);
++            if (GV_RandU(128) == 0)
++                GM_SeSet2(0, 255, 39);
++            if (GV_RandU(256) == 0)
++                GM_SeSet2(0, 255, 40);
++            break;
++        }
++    }
++}
++
++static void Stage11BAct(Stage11BWork *work)
++{
++    GM_CurrentMap = work->map;
++    Stage11BAdvanceCamera(work);
++    Stage11BDebris(work);
++    Stage11BUpdatePackets(work);
++    if (work->flash > 0)
++    {
++        --work->flash;
++        GM_PadVibration = GV_RandU(2);
++        GM_PadVibration2 = 255 * work->flash / 42;
++    }
++    Stage11BCamera(work);
++    ++work->elapsed;
++    --work->timer;
++}
++
++static void Stage11BDie(Stage11BWork *work)
++{
++    int i;
++
++    if (work->prim)
++    {
++        DG_DequeuePrim(work->prim);
++        DG_FreePrim(work->prim);
++    }
++    for (i = 0; i < 16; ++i)
++    {
++        GM_FreeObject(&work->objects[i]);
++    }
++    GM_GameStatus &= ~0x10000000;
++    GCL_ForceExecProc(work->proc_id, NULL);
++}
++
++static void Stage11BInitDebris(Stage11BWork *work)
++{
++    SVECTOR target, below;
++    int i, j;
++
++    setVector(&work->origin, -18000, 0, 26000);
++    setVector(&work->destination, -3000, 4000, 5000);
++    for (i = 0; i < 16; ++i)
++    {
++        GM_InitObject(&work->objects[i], GV_StrCode("stn_fr"), 101, 0);
++        GM_ConfigObjectJoint(&work->objects[i]);
++        GM_ConfigObjectLight(&work->objects[i], work->light);
++        work->debris_state[i] = 0;
++        work->angles1[i] = (633 * i) % 4096;
++        /* Original CCBD0 keeps this pointer fixed for all sixteen objects. */
++        work->angles2[0] = (733 * i) % 4096;
++        work->ribbon_life[i] = 0;
++        work->origin.vx += 50 * i;
++        work->origin.vy = (1433 * i) % 4096 + 17000;
++        work->positions[i] = work->origin;
++        target = work->destination;
++        target.vx += (1223 * i) % 4096 - 2048;
++        target.vy += i * 512;
++        target.vz += (1493 * i) % 4096 - 2048;
++        work->velocities[i].vx = (target.vx - work->positions[i].vx) / (i + 50);
++        work->velocities[i].vy = (target.vy - work->positions[i].vy) / (i + 50);
++        work->velocities[i].vz = (target.vz - work->positions[i].vz) / (i + 50);
++        below = work->origin;
++        below.vy -= 100;
++        for (j = 0; j < 40; ++j)
++        {
++            work->vertices[(i * 40 + j) * 4] = work->origin;
++            work->vertices[(i * 40 + j) * 4 + 1] = work->origin;
++            work->vertices[(i * 40 + j) * 4 + 2] = below;
++            work->vertices[(i * 40 + j) * 4 + 3] = below;
++        }
++    }
++    work->destination.vz = -30000;
++}
++
++static int Stage11BGetResources(Stage11BWork *work, int name, int where)
++{
++    char *option;
++
++    work->name = name;
++    work->map = GM_CurrentMap = where;
++    Stage11BInitDebris(work);
++    option = GCL_GetOption('p');
++    if (option)
++    {
++        work->proc_id = GCL_StrToInt(option);
++    }
++    work->elapsed = work->state = work->timer = work->field_6AEC = work->field_6AF0 = work->flash = 0;
++    GM_GameStatus |= 0x104a0000;
++    if (Stage11BInitPrim(work) < 0)
++    {
++        return -1;
++    }
++    if (GM_Item == IT_Scope || GM_Item == IT_Camera || GM_Item == IT_NVG || GM_Item == IT_ThermG)
++    {
++        GM_Item = IT_None;
++    }
++    if (GM_Weapon == WP_Rifle || GM_Weapon == WP_Stinger)
++    {
++        GM_Weapon = WP_None;
++    }
++    work->sound_cycle = 0;
++    return 0;
++}
++
++void *NewStage11BDemo(int name, int where)
++{
++    Stage11BWork *work = GV_NewActor(GV_ACTOR_PREV, sizeof(Stage11BWork));
++
++    if (!work)
++    {
++        return NULL;
++    }
++    GV_SetNamedActor(&work->actor, Stage11BAct, Stage11BDie, "11b_demo.c");
++    if (Stage11BGetResources(work, name, where) < 0)
++    {
++        GV_DestroyActor(&work->actor);
++        return NULL;
++    }
++    return work;
++}
++
+diff --git a/source/stage/s11b.c b/source/stage/s11b.c
+index a82bd2f6b..11fdf0e41 100644
+--- a/source/stage/s11b.c
++++ b/source/stage/s11b.c
+@@ -1,36 +1,43 @@
+ #define DECLARE_NEWCHARA_PROTOS
+ #include "charalst.h"
+ 
++extern NEWCHARA NewStage11BDemo;
++extern NEWCHARA NewBlastLine;
++extern NEWCHARA NewInverseLight;
++extern NEWCHARA NewAnime_8005E258;
++extern NEWCHARA NewCrashSmoke;
++
++
+ CHARA _StageCharacterEntries[] = {
+-    { 0x4170, (NEWCHARA *)0x800c420c }, //  CHARA_SNEBREATH,    /* chara スネーク息 */
+-    { 0x51c6, (NEWCHARA *)0x800ce958 }, //  CHARA_CAT_IN,       /* chara カットインカメラ */
+-    { 0x92bc, (NEWCHARA *)0x800c6d84 }, //  CHARA_ASIOTOKUN,    /* chara 足音君 */
+-    { 0xb103, (NEWCHARA *)0x800cddb4 }, //  CHARA_DYNWALL,      /* chara 透明壁 */
+-    { 0x1ad3, (NEWCHARA *)0x800c3e3c }, //  CHARA_TEXTURE,      /* chara テクスチャ */
+-    { 0x18e3, (NEWCHARA *)0x800c50bc }, //  CHARA_SNOW,         /* chara 雪 */
+-    { 0x7a05, (NEWCHARA *)0x800cdb84 }, //  CHARA_CINEMA,       /* chara シネマスクリーン */
+-    { 0xa12e, (NEWCHARA *)0x800cccc8 }, //  CHARA_FADEIO,       /* chara フェードイン・アウト */
+-    { 0x1787, (NEWCHARA *)0x800cf13c }, //  CHARA_MI24HIND,
+-    { 0x73ea, (NEWCHARA *)0x800c5a24 }, //  CHARA_SPHERE,       /* chara 天球 */
+-    { 0xec77, (NEWCHARA *)0x800c5f4c }, //  CHARA_WALL,         /* chara 障害物 */
+-    { 0xd53c, (NEWCHARA *)0x800cc144 }, //  CHARA_11B_DEMO,
++    { 0x4170, NewSnakeBreath }, //  CHARA_SNEBREATH,    /* chara スネーク息 */
++    { 0x51c6, NewCutInCameraSet }, //  CHARA_CAT_IN,       /* chara カットインカメラ */
++    { 0x92bc, NewAsiotoKun }, //  CHARA_ASIOTOKUN,    /* chara 足音君 */
++    { 0xb103, NewDynamicWallSet }, //  CHARA_DYNWALL,      /* chara 透明壁 */
++    { 0x1ad3, NewTextureLamp }, //  CHARA_TEXTURE,      /* chara テクスチャ */
++    { 0x18e3, NewSnow }, //  CHARA_SNOW,         /* chara 雪 */
++    { 0x7a05, NewCinemaScreenSet }, //  CHARA_CINEMA,       /* chara シネマスクリーン */
++    { 0xa12e, NewFadeInOutSet }, //  CHARA_FADEIO,       /* chara フェードイン・アウト */
++    { 0x1787, NewHindBoss }, //  CHARA_MI24HIND,
++    { 0x73ea, NewSphere }, //  CHARA_SPHERE,       /* chara 天球 */
++    { 0xec77, NewWallGcl }, //  CHARA_WALL,         /* chara 障害物 */
++    { 0xd53c, NewStage11BDemo }, //  CHARA_11B_DEMO,
+ 
+-    { 0x0003, (NEWCHARA *)0x800ccc30 }, //  DEMO_FADEIN,
+-    { 0x0004, (NEWCHARA *)0x800ccc30 }, //  DEMO_FADEOUT,
+-    { 0x000c, (NEWCHARA *)0x8005e258 }, //  DEMO_MISSILESMOKE,
+-    { 0x000e, (NEWCHARA *)0x800c3f30 }, //  DEMO_BREATH,
+-    { 0x000f, (NEWCHARA *)0x800c6728 }, //  DEMO_SHADOW,
+-    { 0x001e, (NEWCHARA *)0x800ce478 }, //  DEMO_WINDCIRCLE,
+-    { 0x0025, (NEWCHARA *)0x800c9d48 }, //  DEMO_BLUR,
+-    { 0x0030, (NEWCHARA *)0x800c7cbc }, //  DEMO_BLASTLINE,
+-    { 0x0031, (NEWCHARA *)0x800ca350 }, //  DEMO_SMOKELINE,
+-    { 0x0037, (NEWCHARA *)0x800c7900 }, //  DEMO_ENVIRONMENTLIGHT,
+-    { 0x0038, (NEWCHARA *)0x800c79c4 }, //  DEMO_ENVIRONMENTLIGHT2,
+-    { 0x0039, (NEWCHARA *)0x800c8168 }, //  DEMO_CRASHSMOKE,
+-    { 0x003b, (NEWCHARA *)0x800ce9ec }, //  DEMO_INVERSLIGHT,
+-    { 0x003c, (NEWCHARA *)0x800cc804 }, //  DEMO_SPACK,
+-    { 0x003d, (NEWCHARA *)0x80074564 }, //  DEMO_SPACK2,
+-    { 0x0044, (NEWCHARA *)0x800c9244 }, //  DEMO_GHOST,
++    { 0x0003, NewFadeInOut }, //  DEMO_FADEIN,
++    { 0x0004, NewFadeInOut }, //  DEMO_FADEOUT,
++    { 0x000c, NewAnime_8005E258 }, //  DEMO_MISSILESMOKE,
++    { 0x000e, AN_Breath }, //  DEMO_BREATH,
++    { 0x000f, NewDemoKage }, //  DEMO_SHADOW,
++    { 0x001e, NewWindcrcl_800CF6BC }, //  DEMO_WINDCIRCLE,
++    { 0x0025, NewBlurSet }, //  DEMO_BLUR,
++    { 0x0030, NewBlastLine }, //  DEMO_BLASTLINE,
++    { 0x0031, NewSmokeLn_800CDFA4 }, //  DEMO_SMOKELINE,
++    { 0x0037, NewRedAlert2 }, //  DEMO_ENVIRONMENTLIGHT,
++    { 0x0038, RedAlert_800C4F48 }, //  DEMO_ENVIRONMENTLIGHT2,
++    { 0x0039, NewCrashSmoke }, //  DEMO_CRASHSMOKE,
++    { 0x003b, NewInverseLight }, //  DEMO_INVERSLIGHT,
++    { 0x003c, NewSpark2_800CA714 }, //  DEMO_SPACK,
++    { 0x003d, NewSpark }, //  DEMO_SPACK2,
++    { 0x0044, NewBlurPure }, //  DEMO_GHOST,
+ 
+     CHARA_END
+ };

@@ -1,0 +1,457 @@
+diff --git a/psyz/CMakeLists.txt b/psyz/CMakeLists.txt
+index c5111e5..38132d3 100644
+--- a/psyz/CMakeLists.txt
++++ b/psyz/CMakeLists.txt
+@@ -27,6 +27,7 @@ option(GTE_USE_HW_SQRT "Use hardware-accelerated sqrt (C math library)" OFF)
+ set(PSYZ_SOURCES
+     src/platform/psyz.c
+     src/psyz/dma.c
++    src/psyz/clock.c
+     src/psyz/libapi.c
+     src/psyz/kernel.c
+     src/psyz/libetc.c
+diff --git a/psyz/include/psyz.h b/psyz/include/psyz.h
+index 8a06b7e..21867fc 100644
+--- a/psyz/include/psyz.h
++++ b/psyz/include/psyz.h
+@@ -41,6 +41,7 @@
+ 
+ #include <psyz/audio.h>
+ #include <psyz/cd.h>
++#include <psyz/clock.h>
+ #include <psyz/dbgserver.h>
+ #include <psyz/dma.h>
+ #include <psyz/gpu.h>
+diff --git a/psyz/include/psyz/clock.h b/psyz/include/psyz/clock.h
+new file mode 100644
+index 0000000..0d3a477
+--- /dev/null
++++ b/psyz/include/psyz/clock.h
+@@ -0,0 +1,22 @@
++#ifndef PSYZ_CLOCK_H
++#define PSYZ_CLOCK_H
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++/**
++ * Select a deterministic emulated clock before starting the game kernel.
++ * Nonzero enables NTSC 60000/1001 Hz or PAL 50 Hz VBlanks with 44100 Hz audio.
++ * Host rendering remains paced normally; device consumption cannot advance
++ * emulated time. Requires the polled-IRQ backend. Returns 0, or -1 if unsupported
++ * or called during an active frame. Reconfiguration resets the clock epoch.
++ */
++int Psyz_ClockSetDeterministic(int enabled);
++int Psyz_ClockDeterministic(void);
++
++#ifdef __cplusplus
++}
++#endif
++
++#endif
+diff --git a/psyz/include/psyz/input.h b/psyz/include/psyz/input.h
+index ee3b31f..0850552 100644
+--- a/psyz/include/psyz/input.h
++++ b/psyz/include/psyz/input.h
+@@ -49,6 +49,25 @@ PsyzControllerKind Psyz_PadsSetKind(
+  */
+ #define PSYZ_PAD_BUF_LEN 34
+ 
++/**
++ * @brief Observe or replace both controller packets after a backend poll.
++ *
++ * The callback receives writable copies of both complete packets and channel-0
++ * controller kinds. Its results are published before the requesting pad read
++ * returns. Cached reads do not invoke it again. Do not poll or read pads from
++ * inside the callback. Packet pointers are valid only for this call.
++ */
++typedef void (*PsyzPadPollHook)(char frames[2][PSYZ_PAD_BUF_LEN],
++                               PsyzControllerKind kinds[2], void* userdata);
++
++/**
++ * @brief Set the hook for subsequent backend input samples, or NULL to remove.
++ *
++ * Registration and callbacks run on the thread that reads pads. Changing the
++ * hook does not invalidate the current sample or skip platform event polling.
++ */
++void Psyz_PadsSetPollHook(PsyzPadPollHook hook, void* userdata);
++
+ /**
+  * @brief Retrieve the internal 34-byte controller frame for a port
+  *
+diff --git a/psyz/src/platform/sdl3_audio.c b/psyz/src/platform/sdl3_audio.c
+index 073eff2..aa40784 100644
+--- a/psyz/src/platform/sdl3_audio.c
++++ b/psyz/src/platform/sdl3_audio.c
+@@ -4,6 +4,7 @@
+ #include <stdbool.h>
+ #include <stdio.h>
+ #include <stdlib.h>
++#include "../psyz/clock_internal.h"
+ 
+ #define N_CHANNELS 2
+ #define SAMPLE_SIZE sizeof(short)
+@@ -44,8 +45,59 @@ void Psyz_AudioSetServiceCallback(void (*service)(void)) {
+     service_tasks = service;
+ }
+ 
++static void QueueTimelineAudio(const short* buffer, int frames) {
++    if (!sdl_stream) {
++        return;
++    }
++    if (SDL_AudioStreamDevicePaused(sdl_stream)) {
++        if (!SDL_ClearAudioStream(sdl_stream)) {
++            ERRORF("cannot clear paused audio: %s", SDL_GetError());
++            abort();
++        }
++        return;
++    }
++    int queued = SDL_GetAudioStreamQueued(sdl_stream);
++    if (queued < 0) {
++        ERRORF("cannot query queued audio: %s", SDL_GetError());
++        abort();
++    }
++    if (queued > BUFFER_FRAMES * N_CHANNELS * SAMPLE_SIZE * 4) {
++        WARNF("movie audio output backlog cleared; emulated samples preserved");
++        if (!SDL_ClearAudioStream(sdl_stream)) {
++            ERRORF("cannot clear backlogged audio: %s", SDL_GetError());
++            abort();
++        }
++    }
++    if (!SDL_PutAudioStreamData(sdl_stream, buffer,
++                               frames * N_CHANNELS * SAMPLE_SIZE)) {
++        ERRORF("cannot queue generated audio: %s", SDL_GetError());
++        abort();
++    }
++}
++
++static void PumpTimelineAudio(void) {
++    short buffer[BUFFER_FRAMES * N_CHANNELS];
++    unsigned due = Psyz_ClockAudioFramesDue();
++    while (due) {
++        unsigned frames = due > BUFFER_FRAMES ? BUFFER_FRAMES : due;
++        Psyz_AudioLock();
++        Psyz_SpuPullSamplesServiced(buffer, (int)frames, service_tasks);
++        Psyz_AudioUnlock();
++        QueueTimelineAudio(buffer, (int)frames);
++        due = Psyz_ClockAudioFramesDue();
++    }
++}
++
+ void Psyz_AudioPump(void) {
+ #ifdef PSYZ_POLL_IRQ_ONLY
++    if (Psyz_ClockDeterministic()) {
++        if (!pumping) {
++            pumping = true;
++            PumpTimelineAudio();
++            pumping = false;
++        }
++        return;
++    }
+     if (!sdl_stream || pumping || SDL_AudioStreamDevicePaused(sdl_stream)) {
+         return;
+     }
+diff --git a/psyz/src/psyz/clock.c b/psyz/src/psyz/clock.c
+new file mode 100644
+index 0000000..496400b
+--- /dev/null
++++ b/psyz/src/psyz/clock.c
+@@ -0,0 +1,80 @@
++#include <psyz/clock.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include "clock_internal.h"
++#include "os.h"
++
++/* 8820000 Hz represents both video periods and each SPU sample exactly. */
++enum { NTSC_FRAME_TICKS = 147147, PAL_FRAME_TICKS = 176400, SAMPLE_TICKS = 200 };
++static int deterministic;
++static int frame_active;
++static uint64_t now_ticks, target_ticks, last_blank_ticks, audio_samples;
++static uint32_t vblanks;
++
++static void RequireFrame(int condition) {
++    if (!condition) {
++        fputs("PsyZ deterministic clock: invalid frame/sample order.\n", stderr);
++        abort();
++    }
++}
++
++int Psyz_ClockSetDeterministic(int enabled) {
++#ifndef PSYZ_POLL_IRQ_ONLY
++    if (enabled) {
++        return -1;
++    }
++#endif
++    if (frame_active) {
++        return -1;
++    }
++    deterministic = enabled != 0;
++    now_ticks = target_ticks = last_blank_ticks = audio_samples = 0;
++    vblanks = 0;
++    return 0;
++}
++
++int Psyz_ClockDeterministic(void) { return deterministic; }
++
++uint32_t Psyz_ClockNowUs(void) {
++    return deterministic ? (uint32_t)(now_ticks * 50 / 441) : Psyz_OsNowUs();
++}
++
++uint32_t Psyz_ClockVBlanks(void) { return vblanks; }
++
++unsigned Psyz_ClockScanlines(void) {
++    return (unsigned)((now_ticks - last_blank_ticks) * 50 / (441 * 64));
++}
++
++void Psyz_ClockBeginFrame(int pal) {
++    if (!deterministic) {
++        return;
++    }
++    RequireFrame(!frame_active);
++    target_ticks += pal ? PAL_FRAME_TICKS : NTSC_FRAME_TICKS;
++    frame_active = 1;
++}
++
++unsigned Psyz_ClockAudioFramesDue(void) {
++    return deterministic && frame_active ?
++        (unsigned)(target_ticks / SAMPLE_TICKS - audio_samples) : 0;
++}
++
++int Psyz_ClockAdvanceAudioSample(void) {
++    if (!deterministic || !frame_active) {
++        return 0;
++    }
++    RequireFrame(Psyz_ClockAudioFramesDue() != 0);
++    now_ticks = ++audio_samples * SAMPLE_TICKS;
++    return 1;
++}
++
++void Psyz_ClockEndFrame(void) {
++    if (!deterministic) {
++        return;
++    }
++    RequireFrame(frame_active && Psyz_ClockAudioFramesDue() == 0);
++    now_ticks = target_ticks;
++    last_blank_ticks = now_ticks;
++    ++vblanks;
++    frame_active = 0;
++}
+diff --git a/psyz/src/psyz/clock_internal.h b/psyz/src/psyz/clock_internal.h
+new file mode 100644
+index 0000000..ecfb1c2
+--- /dev/null
++++ b/psyz/src/psyz/clock_internal.h
+@@ -0,0 +1,14 @@
++#ifndef PSYZ_CLOCK_INTERNAL_H
++#define PSYZ_CLOCK_INTERNAL_H
++
++#include <stdint.h>
++
++uint32_t Psyz_ClockNowUs(void);
++uint32_t Psyz_ClockVBlanks(void);
++unsigned Psyz_ClockScanlines(void);
++void Psyz_ClockBeginFrame(int pal);
++unsigned Psyz_ClockAudioFramesDue(void);
++int Psyz_ClockAdvanceAudioSample(void);
++void Psyz_ClockEndFrame(void);
++
++#endif
+diff --git a/psyz/src/psyz/kernel.c b/psyz/src/psyz/kernel.c
+index 3acf222..4f6439f 100644
+--- a/psyz/src/psyz/kernel.c
++++ b/psyz/src/psyz/kernel.c
+@@ -7,6 +7,7 @@
+ #include <libetc.h>
+ #include <string.h>
+ #include "os.h"
++#include "clock_internal.h"
+ #include "../internal.h"
+ 
+ #if defined(_MSC_VER) && !defined(__clang__)
+@@ -320,7 +321,7 @@ void Psyz_KernelPost(void (*fn)(void)) {
+     }
+     Psyz_OsUnlock(post_lock);
+     StartIrqThread();
+-    AtomicStore(&poll_deadline_us, (long)Psyz_OsNowUs());
++    AtomicStore(&poll_deadline_us, (long)Psyz_ClockNowUs());
+     Psyz_OsBellRing(bell_irq);
+ }
+ 
+@@ -511,7 +512,7 @@ static void CounterRestart(RootCounter* c, uint32_t now_us) {
+ static int ServiceTimers(uint32_t* deadline_us) {
+     int triggered = 0;
+     KernelLock();
+-    uint32_t now = Psyz_OsNowUs();
++    uint32_t now = Psyz_ClockNowUs();
+     in_interrupt = 1;
+     for (int i = 0; i < LEN(counters); i++) {
+         RootCounter* c = &counters[i];
+@@ -550,7 +551,7 @@ static void IrqThread(void) {
+             Psyz_OsBellWait(bell_irq, PSYZ_OS_FOREVER);
+             continue;
+         }
+-        int32_t left = (int32_t)(deadline - Psyz_OsNowUs());
++        int32_t left = (int32_t)(deadline - Psyz_ClockNowUs());
+         if (left > 0) {
+             Psyz_OsBellWait(bell_irq, (uint32_t)left);
+         }
+@@ -572,7 +573,7 @@ static void StartIrqThread(void) {
+ void Psyz_KernelPoll(void) {
+     uint32_t deadline;
+     if (!irq_thread_state || OwnsKernel() ||
+-        !IsDue((uint32_t)AtomicLoad(&poll_deadline_us), Psyz_OsNowUs())) {
++        !IsDue((uint32_t)AtomicLoad(&poll_deadline_us), Psyz_ClockNowUs())) {
+         return;
+     }
+     ServiceTimers(&deadline);
+@@ -600,7 +601,7 @@ long SetRCnt(long spec, unsigned short target, long mode) {
+     }
+     c->ticks_per_us_q15 = clock / 15625 * 512 + clock % 15625 * 512 / 15625;
+     c->irq = (mode & RCntMdINTR) != 0;
+-    CounterRestart(c, Psyz_OsNowUs());
++    CounterRestart(c, Psyz_ClockNowUs());
+     AtomicStore(&poll_deadline_us, (long)c->last_us);
+     KernelUnlock();
+     Psyz_OsBellRing(bell_irq);
+@@ -616,7 +617,7 @@ long GetRCnt(long spec) {
+     RootCounter* c = &counters[i];
+     long value = 0;
+     if (c->period_us) {
+-        uint32_t phase = (Psyz_OsNowUs() - c->last_us) % c->period_us;
++        uint32_t phase = (Psyz_ClockNowUs() - c->last_us) % c->period_us;
+         uint32_t ticks = phase * c->ticks_per_us_q15 >> 15;
+         value = (long)(ticks < c->target ? ticks : c->target - 1);
+     }
+@@ -630,7 +631,7 @@ long ResetRCnt(long spec) {
+         return 0;
+     }
+     KernelLock();
+-    CounterRestart(&counters[i], Psyz_OsNowUs());
++    CounterRestart(&counters[i], Psyz_ClockNowUs());
+     AtomicStore(&poll_deadline_us, (long)counters[i].last_us);
+     KernelUnlock();
+     Psyz_OsBellRing(bell_irq);
+diff --git a/psyz/src/psyz/libapi.c b/psyz/src/psyz/libapi.c
+index 8b50fa3..ec86a4c 100644
+--- a/psyz/src/psyz/libapi.c
++++ b/psyz/src/psyz/libapi.c
+@@ -5,6 +5,7 @@
+ #include "libgpu.h"
+ #include "../draw.h"
+ #include "../internal.h"
++#include "clock_internal.h"
+ 
+ #undef _get_errno // Windows: avoid conflicts
+ #undef undelete   // macOS: avoid conflicts
+@@ -35,6 +36,31 @@ static int pads_sampled = 0; // avoid more than one input polling per frame
+ static char* pad_buffers[2];
+ static int pad_buffer_lens[2];
+ static int pads_running;
++static PsyzPadPollHook pad_poll_hook;
++static void* pad_poll_userdata;
++
++void Psyz_PadsSetPollHook(PsyzPadPollHook hook, void* userdata) {
++    pad_poll_hook = hook;
++    pad_poll_userdata = userdata;
++}
++
++static void ApplyPadPollHook(void) {
++    char frames[2][PSYZ_PAD_BUF_LEN];
++    PsyzControllerKind kinds[2];
++    if (!pad_poll_hook) {
++        return;
++    }
++    for (int p = 0; p < LEN(ports); p++) {
++        memcpy(frames[p], ports[p].frame, sizeof(frames[p]));
++        kinds[p] = ports[p].channels[0];
++    }
++    pad_poll_hook(frames, kinds, pad_poll_userdata);
++    for (int p = 0; p < LEN(ports); p++) {
++        memcpy(ports[p].frame, frames[p], sizeof(frames[p]));
++        ports[p].channels[0] = kinds[p];
++    }
++}
++
+ static void ReadPadsOnVsync(void) {
+     pads_sampled = 0;
+     if (!pads_running) {
+@@ -59,8 +85,14 @@ int VSync(int mode) {
+     int elapsed, n;
+     Psyz_KernelPoll();
+     if (mode < 0) {
++        if (Psyz_ClockDeterministic()) {
++            return (int)Psyz_ClockVBlanks();
++        }
+         return Psyz_VideoVSync(-1);
+     } else if (mode == 1) {
++        if (Psyz_ClockDeterministic()) {
++            return (int)Psyz_ClockScanlines();
++        }
+         return Psyz_VideoVSync(1);
+     } else if (mode > 1) {
+         static int logged_once = 0;
+@@ -70,10 +102,16 @@ int VSync(int mode) {
+         }
+     }
+     n = mode > 0 ? mode : 1;
++    Psyz_ClockBeginFrame(GetVideoMode() == MODE_PAL);
+ #ifdef PSYZ_POLL_IRQ_ONLY
+     Psyz_AudioPump();
+ #endif
++    int simulated_elapsed = (int)Psyz_ClockScanlines();
++    Psyz_ClockEndFrame();
+     elapsed = Psyz_VideoVSync(0);
++    if (Psyz_ClockDeterministic()) {
++        elapsed = simulated_elapsed;
++    }
+     ReadPadsOnVsync(); // this is done on vsync by the BIOS
+     if (g_PsyzVsyncCb) {
+         g_PsyzVsyncCb();
+@@ -120,6 +158,7 @@ void Psyz_PadsGet(int port, char* dst, int len) {
+     if (!pads_sampled) {
+         pads_sampled = 1;
+         Psyz_PadsPoll();
++        ApplyPadPollHook();
+     }
+     if (len > PSYZ_PAD_BUF_LEN) {
+         len = PSYZ_PAD_BUF_LEN;
+diff --git a/psyz/src/psyz/psyz_spu.c b/psyz/src/psyz/psyz_spu.c
+index c6a0951..e3f2bcf 100644
+--- a/psyz/src/psyz/psyz_spu.c
++++ b/psyz/src/psyz/psyz_spu.c
+@@ -5,6 +5,7 @@
+ #include <stdatomic.h>
+ #include "spu_voice.h"
+ #include "../internal.h"
++#include "clock_internal.h"
+ 
+ #if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L
+ _Static_assert(sizeof(SPU_RXX) == 0x200, "SPU_RXX must be 0x200 bytes");
+@@ -534,13 +535,23 @@ static void service_spu_irq(void (*service)(void)) {
+ 
+ void Psyz_SpuPullSamplesServiced(short* out, int num_frames,
+                                void (*service)(void)) {
+-    if (!spu.initialized) {
++    if (!spu.initialized && !Psyz_ClockDeterministic()) {
+         memset(out, 0, num_frames * 2 * sizeof(short));
+         return;
+     }
+     service_spu_irq(service);
+     for (int i = 0; i < num_frames; i++) {
+-        spu_tick(&out[i * 2]);
++        if (Psyz_ClockAdvanceAudioSample()) {
++            Psyz_KernelPoll();
++            if (service) {
++                service();
++            }
++        }
++        if (spu.initialized) {
++            spu_tick(&out[i * 2]);
++        } else {
++            out[i * 2] = out[i * 2 + 1] = 0;
++        }
+         service_spu_irq(service);
+     }
+ }

@@ -1,0 +1,131 @@
+{
+  "stages": [
+    "s08b",
+    "s08br"
+  ],
+  "upstream_commit": "f54dbb2a58adfc2755403296c9ebb653fbec277b",
+  "original_overlays": [
+    {
+      "stage": "s08b",
+      "disc": "SLPM_862.47",
+      "resource": "479c.b",
+      "offset": 28917760,
+      "size": 135696,
+      "sha256": "21c5534dd17e5579404b2b0b2f3c47fb324b27a363a108669e3818a3dee15ded",
+      "load_address": "0x800c3208",
+      "resident_sha256": "4b8252b65953a02021486406cfcdca1c7670d1d1a8f3cf6e750ef6e360dc3a2f"
+    },
+    {
+      "stage": "s08br",
+      "disc": "SLPM_862.47",
+      "resource": "f3fa.b",
+      "offset": 61927424,
+      "size": 135696,
+      "sha256": "064e8dbb2af7589a7122f02a51e202d43fd3e9bf05aa18258c5cd88621a2d69c",
+      "load_address": "0x800c3208",
+      "resident_sha256": "4b8252b65953a02021486406cfcdca1c7670d1d1a8f3cf6e750ef6e360dc3a2f"
+    }
+  ],
+  "recovery": {
+    "published_assembly_blocks": 122,
+    "verified_instruction_words": 10445,
+    "ninja_actual_functions": 129,
+    "effect_actual_functions": 3,
+    "original_actor_size": 6964,
+    "original_action_slot": "0x1994",
+    "native_pointer_width": 32
+  },
+  "constructor_bindings": [
+    {
+      "class": "0x8e70",
+      "address": "0x800DB50C",
+      "symbol": "NewGlassSet",
+      "evidence": "Actor priority5, size224, glass.c, GetResources(name,where), final state3 and mapwhere"
+    },
+    {
+      "class": "0x0023",
+      "address": "0x800D6AF4",
+      "symbol": "NewKetchap_s",
+      "evidence": "Actor priority7, size152, d_bloods.c, callbacks and resource initializer match existing blood-circle actor"
+    },
+    {
+      "class": "0x0025",
+      "address": "0x800D8D84",
+      "symbol": "NewBlurSet",
+      "evidence": "Actor priority7, size128, blur.c, GetResources(name,where,argc), final name=-1"
+    }
+  ],
+  "variant": {
+    "canonical_source": "overlays/s08b/overlay2.c",
+    "alias_source": "overlays/s08br/overlay2.c",
+    "identical_prefix_end_inclusive": "0x800E35AA",
+    "differing_bytes": 119,
+    "first_difference_context": "padding after lamp.c string",
+    "source_initializer_difference": "Equivalent Punch Damage string representation: one string vs four-byte chunks"
+  },
+  "patch": {
+    "path": "patches/mgs-ninja.patch",
+    "files": 17,
+    "bytes": 290733,
+    "sha256": "d8a078ffe6ce206b3ce6106ca8b00b1a7e65870d7b17a7e2b270d2ced3f5371b",
+    "applies_after_locked_prefix_patches": 28,
+    "fresh_index_apply_check": true,
+    "working_blob_match": true
+  },
+  "validation": {
+    "available_c": true,
+    "native_compiled": true,
+    "native_linked": true,
+    "native_runtime_validated": true,
+    "human_playtest": false,
+    "game_translation_units": 498,
+    "ctest_passed": 36,
+    "mips_boundary_cases": 143,
+    "mips_route_cases": 240,
+    "build_log": "build/compile-ninja-runtime.log",
+    "test_log": "build/test-ninja-runtime.log",
+    "test_name": "mgs_ninja_helpers_test",
+    "runtime_stage": "s08b",
+    "runtime_frames": 1800,
+    "runtime_log": "build/s08b-encounter-fixed-console.log",
+    "capture": "build/s08b-encounter-fixed.bmp",
+    "capture_visually_inspected": true,
+    "movement_horizontal_delta": 1049,
+    "movement_ticks": 26,
+    "input_frames": 57,
+    "intro_released_control_frame": 1090,
+    "boss_completion": false,
+    "s08br_runtime_validated": false
+  },
+  "runtime_fixture": {
+    "path": "tests/fixtures/s08b_story77.cdb",
+    "original_procedure": "s08b scenario ea54.g sub_CE82",
+    "story": 77,
+    "position": [
+      -6378,
+      2304,
+      55
+    ],
+    "heading": 2371,
+    "stance": 0,
+    "map": "0x7df9",
+    "purpose": "Original post-demo encounter state; automated integration only"
+  },
+  "aislop": {
+    "vendor_score": 84,
+    "vendor_errors": 0,
+    "vendor_fixable": 0,
+    "vendor_nonfixable_complexity": 12,
+    "integration_score": 100,
+    "integration_findings": 0,
+    "llvm_tools_ran": true,
+    "cppcheck_available": false
+  },
+  "native_compatibility": {
+    "actor": "Bunsin2",
+    "original_read": "0x800D5814 loads NULL position at Work+0x108",
+    "original_initialization": "0x800D5850 never writes Work+0x108; three-argument constructor confirmed",
+    "native_behavior": "Sample light at actual clone world translation",
+    "console_low_memory_values_verified": false
+  }
+}

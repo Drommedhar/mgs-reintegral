@@ -1,0 +1,53 @@
+diff --git a/source/game/gamed.c b/source/game/gamed.c
+index 95a3fd78a..53871f608 100644
+--- a/source/game/gamed.c
++++ b/source/game/gamed.c
+@@ -23,6 +23,7 @@
+ #include "menu/menuman.h"
+ #ifdef MGS_NATIVE
+ #include "mgs_bonus_items.h"
++#include "mgs_checkpoint.h"
+ #endif
+ 
+ /*---------------------------------------------------------------------------*/
+@@ -207,6 +208,12 @@ static void GM_CreateLoader(void)
+     {
+         stage = GM_GetArea(GM_SaveArea);
+     }
++#ifdef MGS_NATIVE
++    else
++    {
++        stage = (char *)MgsCheckpointInitialStage(stage);
++    }
++#endif
+     NewLoader(stage);
+ }
+ 
+diff --git a/source/game/script.c b/source/game/script.c
+index 7d955f743..628d3b04f 100644
+--- a/source/game/script.c
++++ b/source/game/script.c
+@@ -14,6 +14,7 @@
+ #include "strcode.h"
+ #ifdef MGS_NATIVE
+ #include "mgs_player.h"
++#include "mgs_checkpoint.h"
+ #endif
+ 
+ static HZD_BND gBindsArray_800b58e0[ 128 ];
+@@ -535,6 +536,15 @@ static int LoadCmd(char *top)
+ 
+     stage = GCL_GetString(GCL_NextStr());
+ #ifdef MGS_NATIVE
++    int checkpoint_boot = MgsCheckpointBoot(stage);
++    if (checkpoint_boot < 0)
++    {
++        exit(EXIT_FAILURE);
++    }
++    if (checkpoint_boot)
++    {
++        return GCL_OK;
++    }
+     stage = (char *)MgsNativeBootStage(stage);
+ #endif
+     if (*stage == '\0')

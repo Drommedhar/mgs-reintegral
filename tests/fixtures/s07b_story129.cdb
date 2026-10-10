@@ -1,0 +1,12 @@
+sxe av
+bu /1 mgs_integral_native!MgsNativeReloadOverlay "ew mgs_integral_native!var_buf+a 81; ew mgs_integral_native!var_buf+2 800; eb mgs_integral_native!var_buf+46 3; ew mgs_integral_native!var_buf+120 400; ew mgs_integral_native!var_buf+5a 1c0; ew mgs_integral_native!linkvarbuf+10 fd62 0 36b; .printf \"FIXTURE: s07b fight checkpoint129; pose from sub_6716, heading from sub_9AE1, starting healths1024/448.\\n\"; gc"
+bu /1 mgs_integral_native!NewPsychoMantis ".printf \"OBSERVED: original script created native Mantis.\\n\"; gc"
+bu /1 mgs_integral_native!s07b_800CA8F8 ".printf \"OBSERVED: original script created native Meryl.\\n\"; gc"
+bu /1 mgs_integral_native!s07b_800CED04 ".printf \"OBSERVED: Mantis main attack action.\\n\"; gc"
+bu /1 mgs_integral_native!NewPsychoChair ".printf \"OBSERVED: chair attack.\\n\"; gc"
+bu /1 mgs_integral_native!NewPsychoPot ".printf \"OBSERVED: pot attack.\\n\"; gc"
+bu /1 mgs_integral_native!NewPsychoSonic ".printf \"OBSERVED: psychic projectile.\\n\"; gc"
+bu /1 mgs_integral_native!s07b_800CC174 ".printf \"OBSERVED: HIDEO screen.\\n\"; gc"
+g
+k
+q

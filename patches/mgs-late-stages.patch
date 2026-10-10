@@ -1,0 +1,83 @@
+diff --git a/source/kojo/inverlt2.c b/source/kojo/inverlt2.c
+index 72da6025f..383bb88f0 100644
+--- a/source/kojo/inverlt2.c
++++ b/source/kojo/inverlt2.c
+@@ -287,14 +287,24 @@ static void InitRects(LPINVERSLIGHT2 lpAct, int scale)
+ {
+     SVECTOR sxy;
+     SVECTOR sp18;
++#ifdef MGS_NATIVE
++    int     packed, p, flag;
++#else
+     long    p;
+     long    flag;
++#endif
+     short   screen;
+ 
+ 
+     SetRotMatrix(&DG_Chanl(0)->eye_inv);
+     SetTransMatrix(&DG_Chanl(0)->eye_inv);
++#ifdef MGS_NATIVE
++    RotTransPers(&lpAct->fE0, &packed, &p, &flag);
++    sxy.vx = (short)packed;
++    sxy.vy = (short)((unsigned int)packed >> 16);
++#else
+     RotTransPers(&lpAct->fE0, (long *)&sxy, &p, &flag);
++#endif
+ 
+     if (sxy.vy == 0)
+     {
+diff --git a/source/okajima/crane.c b/source/okajima/crane.c
+index a8901e82c..fb8a03935 100644
+--- a/source/okajima/crane.c
++++ b/source/okajima/crane.c
+@@ -55,10 +55,10 @@ typedef struct _Work
+     int     f390;
+ } Work;
+ 
+-char crane_800C35F4[] = {0x00, 0x00, 0x00, 0x00};
+-char crane_800C35F8[] = {0xAF, 0x04, 0x28, 0x03, 0x23, 0x03, 0x1E, 0x0C, 0x00, 0x00, 0x00, 0x00};
+-char crane_800C3604[] = {0x7F, 0x01, 0x00, 0x00};
+-char crane_800C3608[] = {0xAF, 0x04, 0x28, 0x03, 0x23, 0x03, 0x1E, 0x0C, 0x00, 0x00, 0x00, 0x00};
++unsigned char crane_800C35F4[] = {0x00, 0x00, 0x00, 0x00};
++unsigned char crane_800C35F8[] = {0xAF, 0x04, 0x28, 0x03, 0x23, 0x03, 0x1E, 0x0C, 0x00, 0x00, 0x00, 0x00};
++unsigned char crane_800C3604[] = {0x7F, 0x01, 0x00, 0x00};
++unsigned char crane_800C3608[] = {0xAF, 0x04, 0x28, 0x03, 0x23, 0x03, 0x1E, 0x0C, 0x00, 0x00, 0x00, 0x00};
+ 
+ SVECTOR crane_800C3614 = {500, 500, 300, 0};
+ 
+diff --git a/source/okajima/fall_spl.c b/source/okajima/fall_spl.c
+index 168bfc67c..663225af3 100644
+--- a/source/okajima/fall_spl.c
++++ b/source/okajima/fall_spl.c
+@@ -19,7 +19,7 @@ void *NewSplash3_800C83D0(int dir, SVECTOR *pos);
+ int s15b_fall_spl_800C7B0C(char *opt, SVECTOR *out)
+ {
+     int            count;
+-    unsigned char *param;
++    char          *param;
+ 
+     count = 0;
+     while ((param = GCL_NextStr()))
+@@ -47,7 +47,7 @@ void s15b_fall_spl_800C7B60(Work *work)
+ int s15b_fall_spl_800C7C3C(Work *work, int where)
+ {
+     char *opt1;
+-    unsigned char *opt2;
++    char *opt2;
+ 
+     work->map = where;
+     opt1 = GCL_GetOption('l');
+diff --git a/source/takabe/furnace.c b/source/takabe/furnace.c
+index b47bd5fe2..4879346e8 100644
+--- a/source/takabe/furnace.c
++++ b/source/takabe/furnace.c
+@@ -47,7 +47,7 @@ static int BoundInCheck( SVECTOR *bound, SVECTOR *check )
+ static void ExecProc(int proc, int value)
+ {
+     GCL_ARGS    args;
+-    u_long      data = value;
++    long        data = value;
+ 
+     if (proc == 0) return;
+ 

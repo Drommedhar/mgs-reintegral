@@ -1,0 +1,180 @@
+{
+  "stage": "camera",
+  "disc": 2,
+  "overlay_base": "0x800C3208",
+  "overlay_size": 54668,
+  "overlay_sha256": "7e1738af3c3987b5461773cf865da803bac48820000e0e916307f29fa836f388",
+  "constructor": {
+    "hash": "0x81c7",
+    "address": "0x800CF388",
+    "native": "NewCamera_800CF388"
+  },
+  "missing_blocks": 16,
+  "instruction_words": 7590,
+  "assembly_mismatches": 0,
+  "functions": [
+    {
+      "name": "camera_800C4394",
+      "address": "0x800c4394",
+      "instruction_words": 255
+    },
+    {
+      "name": "camera_800C4790",
+      "address": "0x800c4790",
+      "instruction_words": 263
+    },
+    {
+      "name": "camera_800C4D70",
+      "address": "0x800c4d70",
+      "instruction_words": 358
+    },
+    {
+      "name": "camera_800C6110",
+      "address": "0x800c6110",
+      "instruction_words": 491
+    },
+    {
+      "name": "camera_800C73E4",
+      "address": "0x800c73e4",
+      "instruction_words": 772
+    },
+    {
+      "name": "camera_800C8AD4",
+      "address": "0x800c8ad4",
+      "instruction_words": 1937
+    },
+    {
+      "name": "camera_800CA918",
+      "address": "0x800ca918",
+      "instruction_words": 451
+    },
+    {
+      "name": "camera_800CB024",
+      "address": "0x800cb024",
+      "instruction_words": 546
+    },
+    {
+      "name": "camera_800CB8AC",
+      "address": "0x800cb8ac",
+      "instruction_words": 263
+    },
+    {
+      "name": "camera_800CBDE4",
+      "address": "0x800cbde4",
+      "instruction_words": 377
+    },
+    {
+      "name": "camera_800CC3C8",
+      "address": "0x800cc3c8",
+      "instruction_words": 506
+    },
+    {
+      "name": "camera_800CCBB0",
+      "address": "0x800ccbb0",
+      "instruction_words": 316
+    },
+    {
+      "name": "camera_800CD198",
+      "address": "0x800cd198",
+      "instruction_words": 382
+    },
+    {
+      "name": "camera_800CD790",
+      "address": "0x800cd790",
+      "instruction_words": 201
+    },
+    {
+      "name": "camera_800CDCA4",
+      "address": "0x800cdca4",
+      "instruction_words": 157
+    },
+    {
+      "name": "camera_800CDF18",
+      "address": "0x800cdf18",
+      "instruction_words": 315
+    }
+  ],
+  "original_actor_size": 18920,
+  "native_actor_size": 19100,
+  "stable_state_tail_size": 180,
+  "tests": {
+    "controls": 3800,
+    "animation": 1364,
+    "photo": 1536,
+    "files": 1024,
+    "state": 1080,
+    "card": 2600
+  },
+  "original_mips_cases": 11404,
+  "card_proof": {
+    "image": {
+      "path": ".local/recovery/camera/camera.b",
+      "sha256": "7e1738af3c3987b5461773cf865da803bac48820000e0e916307f29fa836f388",
+      "base": "0x800C3208"
+    },
+    "functions": [
+      {
+        "name": "camera_800C4D70",
+        "words": 358,
+        "cases": 1832,
+        "boundaries": 20572
+      },
+      {
+        "name": "camera_800C4790",
+        "words": 263,
+        "cases": 768
+      }
+    ],
+    "boundary_counts": {
+      "vsync_task": 1832,
+      "request": 8580,
+      "check": 6576,
+      "files": 1900,
+      "delete": 392,
+      "format": 40,
+      "read": 768,
+      "write": 484
+    },
+    "state": "13 globals normalized only for native card pointers; FNV-1a state hash before every boundary and final return",
+    "writer": "Full 8192/16384/24576-byte body, 24-byte filename storage and ordered SDK/callback call hashes; synthetic icon/title/game-data inputs; 0-15 duplicate filenames; initial attempt plus 3 retries",
+    "native_only": {
+      "cooperative_waits": 384,
+      "allocation_failure": 1,
+      "notes": "Cooperative wait checks count=1 and shared response=-2. Original allocation failure dereferences NULL; native early failure is checked separately."
+    },
+    "tests": {
+      "private_compiler_flags": "-Wall -Wextra -Werror",
+      "passed": 2600,
+      "production_changes": false,
+      "aislop_score": 100,
+      "aislop_diagnostics": 0
+    },
+    "sha256": {
+      "tests/prepare_camera_card_test.py": "01bbe93c012a861b1b775eace683a7477df01b31d8881a274dd5ba0f948cb0cd",
+      "tests/mgs_camera_card_test.c": "023829a5e6d07213d526d03f68e01ee78df054b535ff047e30fc32a7c9b90d73",
+      "tests/fixtures/mgs_camera_card_fixtures.h": "e4062a1ea938082d9f64191dfb847384da86e183d6f85de4aa654cb206bf8802",
+      "tests/fixtures/mgs_camera_writer_fixtures.h": "3e952253490b33c4f4b360aff6c5c4f8daf643ac47571f74308766433f4dfd93"
+    }
+  },
+  "runtime": {
+    "no_fault_vsyncs": 1800,
+    "fixed_labels_capture_vsyncs": 360,
+    "before": ".local/recovery/camera/render-before.bmp",
+    "after": ".local/recovery/camera/render-after.bmp",
+    "scope": "Initial card-selection UI; full edit/save/reload session not yet exercised"
+  },
+  "native_adaptations": [
+    "Fat GPU packet and MenuWork layouts",
+    "Typed contiguous upstream data and strings",
+    "Bounded photo runlevel and decoded-cell buffers",
+    "Zeroed save-title padding instead of uninitialized stack bytes",
+    "Bounded formatting",
+    "Cooperative card-response wait",
+    "Explicit font texture page before album sprite submission"
+  ],
+  "scan": {
+    "errors": 0,
+    "fixable_warnings": 0,
+    "nonfixable_source_complexity_warnings": 8
+  }
+}

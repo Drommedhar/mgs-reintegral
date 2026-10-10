@@ -1,0 +1,70 @@
+diff --git a/psyz/src/platform/sdl3_gpu.c b/psyz/src/platform/sdl3_gpu.c
+index bfbaf78..557537d 100644
+--- a/psyz/src/platform/sdl3_gpu.c
++++ b/psyz/src/platform/sdl3_gpu.c
+@@ -1077,6 +1077,44 @@ int Draw_ExequeSync() { return 0; }
+ 
+ // optimization to avoid sampling the VRAM on an untextured batch draw
+ static bool batch_has_texture = false;
++
++static bool VramRegionReadsDrawArea(SDL_Rect region) {
++    if (SDL_HasRectIntersection(&region, &scissor_rect)) {
++        return true;
++    }
++    if (region.x + region.w > VRAM_W) {
++        region.w -= VRAM_W - region.x;
++        region.x = 0;
++        return SDL_HasRectIntersection(&region, &scissor_rect);
++    }
++    return false;
++}
++
++static void FlushTextureFeedback(const u_long* packets, int len, int code) {
++    if (n_vertices == 0 || !(code & TEXTURED) ||
++        ((code & 0x40) && !(code & 0x20))) {
++        return;
++    }
++    bool polygon = !(code & 0x40);
++    int page_word = (code & GOURAUD) ? 5 : 4;
++    if (len <= 2 || (polygon && len <= page_word)) {
++        return;
++    }
++    u16 page = polygon ? (u16)(packets[page_word] >> 16) : cur_tpage;
++    u16 palette = (u16)(packets[2] >> 16);
++    int depth = (page >> 7) & 3;
++    SDL_Rect texture = {(page & 15) * 64, (page & 16) * 16,
++                        64 << (depth > 2 ? 2 : depth), 256};
++    SDL_Rect colors = {(palette & 63) * 16, (palette >> 6) & 511,
++                       depth == 0 ? 16 : 256, 1};
++    if (VramRegionReadsDrawArea(texture) ||
++        (depth < 2 && VramRegionReadsDrawArea(colors))) {
++        // A textured draw must sample writes from earlier commands, including
++        // palette writes. The next batch snapshots VRAM after this flush.
++        Draw_FlushBuffer();
++    }
++}
++
+ int Draw_PushPrim(u_long* packets, int max_len) {
+     int len = max_len;
+     int code = (int)(*packets >> 24) & 0xFF;
+@@ -1089,6 +1127,7 @@ int Draw_PushPrim(u_long* packets, int max_len) {
+     u16 tpage = -1, clut = -1, pad2, pad3;
+     Vertex* v;
+ 
++    FlushTextureFeedback(packets, max_len, code);
+     // to ensure we always have space, we pretend we want to allocate a quad
+     // Gouraud read-ahead can write a colour into a fifth vertex slot.
+     Draw_EnsureBufferWillNotOverflow(5, 6);
+@@ -1346,10 +1385,12 @@ int Draw_PushPrim(u_long* packets, int max_len) {
+ }
+ 
+ void Draw_SetAreaStart(int x, int y) {
++    Draw_FlushBuffer();
+     draw_area_start.x = x;
+     draw_area_start.y = y;
+ }
+ void Draw_SetAreaEnd(int x, int y) {
++    Draw_FlushBuffer();
+     draw_area_end.x = x;
+     draw_area_end.y = y;
+     UpdateScissor();

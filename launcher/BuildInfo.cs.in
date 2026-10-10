@@ -1,0 +1,8 @@
+namespace ReIntegral
+{
+    public static class BuildInfo
+    {
+        public const string Version = "@MGS_RELEASE_VERSION@";
+        public const string Commit = "@MGS_BUILD_COMMIT@";
+    }
+}

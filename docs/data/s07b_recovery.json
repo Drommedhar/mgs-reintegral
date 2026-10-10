@@ -1,0 +1,2014 @@
+{
+  "schema_version": 1,
+  "stages": [
+    "s07b",
+    "s07br"
+  ],
+  "upstream_commit": "f54dbb2a58adfc2755403296c9ebb653fbec277b",
+  "original_overlays": {
+    "s07b": {
+      "sha256": "bbe527b3883ad7c41e4999a8b1d49e64265100b7d8ff6a7724e3fce5d6fb7328",
+      "size": 143856,
+      "stage_dir_offset": 25980928,
+      "load_address": "0x800c3208"
+    },
+    "s07br": {
+      "sha256": "04007a426525216049196b550e22fc0e922c75f78c6fcfc4b469f9d5defbbc47",
+      "size": 143856,
+      "stage_dir_offset": 59959296,
+      "load_address": "0x800c3208"
+    }
+  },
+  "missing_assembly_blocks": 157,
+  "verified_instruction_words": 13193,
+  "assembly_matches_both_original_overlays": true,
+  "actor_groups": [
+    {
+      "source": "source/overlays/s07b/chara/meryl07b/meryl07b.c",
+      "assembly_blocks": 78,
+      "actual_ida_functions": 80,
+      "recovery_status": "80 original routines recovered to C; native x86 stage compilation and reference helper tests pass",
+      "native_layout": {
+        "sizeof": "0x97c",
+        "target": "0x7dc",
+        "action": "0x854",
+        "pad": "0x8dc"
+      }
+    },
+    {
+      "source": "source/overlays/s07b/chara/psyco/psyco.c",
+      "assembly_blocks": 79,
+      "recovery_status": "79 assembly blocks recovered to C with existing C retained; native x86 stage compilation and reference helper tests pass"
+    }
+  ],
+  "stage_constructors": {
+    "bound_raw_entries": 57,
+    "records_per_original_table": 29,
+    "bindings": [
+      {
+        "stage": "s07b",
+        "hash": "92bc",
+        "original": "800da890",
+        "native": "NewAsiotoKun"
+      },
+      {
+        "stage": "s07b",
+        "hash": "a12e",
+        "original": "800e2440",
+        "native": "NewFadeInOutSet"
+      },
+      {
+        "stage": "s07b",
+        "hash": "a76f",
+        "original": "800d2060",
+        "native": "NewPsychoMantis"
+      },
+      {
+        "stage": "s07b",
+        "hash": "f4b0",
+        "original": "800ca8f8",
+        "native": "s07b_800CA8F8"
+      },
+      {
+        "stage": "s07b",
+        "hash": "af72",
+        "original": "800d9330",
+        "native": "NewMemoryPsycho"
+      },
+      {
+        "stage": "s07b",
+        "hash": "1ad3",
+        "original": "800c44f0",
+        "native": "NewTextureLamp"
+      },
+      {
+        "stage": "s07b",
+        "hash": "7a05",
+        "original": "800e3784",
+        "native": "NewCinemaScreenSet"
+      },
+      {
+        "stage": "s07b",
+        "hash": "b103",
+        "original": "800e39b4",
+        "native": "NewDynamicWallSet"
+      },
+      {
+        "stage": "s07b",
+        "hash": "711f",
+        "original": "800e2768",
+        "native": "NewLifeUp"
+      },
+      {
+        "stage": "s07b",
+        "hash": "ec77",
+        "original": "800d9a58",
+        "native": "NewWallGcl"
+      },
+      {
+        "stage": "s07b",
+        "hash": "51c6",
+        "original": "800e49d4",
+        "native": "NewCutInCameraSet"
+      },
+      {
+        "stage": "s07b",
+        "hash": "5a50",
+        "original": "800e1464",
+        "native": "NewGasEffectSet"
+      },
+      {
+        "stage": "s07b",
+        "hash": "e97e",
+        "original": "800db870",
+        "native": "NewDemoDoll"
+      },
+      {
+        "stage": "s07b",
+        "hash": "9ffd",
+        "original": "800c46d4",
+        "native": "GM_SetSecondAvailable"
+      },
+      {
+        "stage": "s07b",
+        "hash": "2d0a",
+        "original": "800c466c",
+        "native": "NewSecond"
+      },
+      {
+        "stage": "s07b",
+        "hash": "0fad",
+        "original": "800d9534",
+        "native": "NewMotionSoundEffect"
+      },
+      {
+        "stage": "s07b",
+        "hash": "0003",
+        "original": "800e23a8",
+        "native": "NewFadeInOut"
+      },
+      {
+        "stage": "s07b",
+        "hash": "0004",
+        "original": "800e23a8",
+        "native": "NewFadeInOut"
+      },
+      {
+        "stage": "s07b",
+        "hash": "0005",
+        "original": "800e3028",
+        "native": "NewTelop"
+      },
+      {
+        "stage": "s07b",
+        "hash": "000f",
+        "original": "800da234",
+        "native": "NewDemoKage"
+      },
+      {
+        "stage": "s07b",
+        "hash": "001a",
+        "original": "800615fc",
+        "native": "NewKogaku2"
+      },
+      {
+        "stage": "s07b",
+        "hash": "001b",
+        "original": "80061708",
+        "native": "NewKogaku3"
+      },
+      {
+        "stage": "s07b",
+        "hash": "0021",
+        "original": "800e3fd0",
+        "native": "NewFocusView"
+      },
+      {
+        "stage": "s07b",
+        "hash": "0025",
+        "original": "800e0e10",
+        "native": "NewBlurSet"
+      },
+      {
+        "stage": "s07b",
+        "hash": "0028",
+        "original": "800e4618",
+        "native": "NewSepia_800C5214"
+      },
+      {
+        "stage": "s07b",
+        "hash": "0037",
+        "original": "800dfcbc",
+        "native": "NewRedAlert2"
+      },
+      {
+        "stage": "s07b",
+        "hash": "0038",
+        "original": "800dfd80",
+        "native": "RedAlert_800C4F48"
+      },
+      {
+        "stage": "s07b",
+        "hash": "0044",
+        "original": "800e030c",
+        "native": "NewBlurPure"
+      },
+      {
+        "stage": "s07br",
+        "hash": "92bc",
+        "original": "800da890",
+        "native": "NewAsiotoKun"
+      },
+      {
+        "stage": "s07br",
+        "hash": "a12e",
+        "original": "800e2440",
+        "native": "NewFadeInOutSet"
+      },
+      {
+        "stage": "s07br",
+        "hash": "a76f",
+        "original": "800d2060",
+        "native": "NewPsychoMantis"
+      },
+      {
+        "stage": "s07br",
+        "hash": "f4b0",
+        "original": "800ca8f8",
+        "native": "s07b_800CA8F8"
+      },
+      {
+        "stage": "s07br",
+        "hash": "af72",
+        "original": "800d9330",
+        "native": "NewMemoryPsycho"
+      },
+      {
+        "stage": "s07br",
+        "hash": "710d",
+        "original": "800d4004",
+        "native": "NewPsychoObject"
+      },
+      {
+        "stage": "s07br",
+        "hash": "1ad3",
+        "original": "800c44f0",
+        "native": "NewTextureLamp"
+      },
+      {
+        "stage": "s07br",
+        "hash": "7a05",
+        "original": "800e3784",
+        "native": "NewCinemaScreenSet"
+      },
+      {
+        "stage": "s07br",
+        "hash": "b103",
+        "original": "800e39b4",
+        "native": "NewDynamicWallSet"
+      },
+      {
+        "stage": "s07br",
+        "hash": "711f",
+        "original": "800e2768",
+        "native": "NewLifeUp"
+      },
+      {
+        "stage": "s07br",
+        "hash": "ec77",
+        "original": "800d9a58",
+        "native": "NewWallGcl"
+      },
+      {
+        "stage": "s07br",
+        "hash": "51c6",
+        "original": "800e49d4",
+        "native": "NewCutInCameraSet"
+      },
+      {
+        "stage": "s07br",
+        "hash": "5a50",
+        "original": "800e1464",
+        "native": "NewGasEffectSet"
+      },
+      {
+        "stage": "s07br",
+        "hash": "e97e",
+        "original": "800db870",
+        "native": "NewDemoDoll"
+      },
+      {
+        "stage": "s07br",
+        "hash": "9ffd",
+        "original": "800c46d4",
+        "native": "GM_SetSecondAvailable"
+      },
+      {
+        "stage": "s07br",
+        "hash": "2d0a",
+        "original": "800c466c",
+        "native": "NewSecond"
+      },
+      {
+        "stage": "s07br",
+        "hash": "0fad",
+        "original": "800d9534",
+        "native": "NewMotionSoundEffect"
+      },
+      {
+        "stage": "s07br",
+        "hash": "0003",
+        "original": "800e23a8",
+        "native": "NewFadeInOut"
+      },
+      {
+        "stage": "s07br",
+        "hash": "0004",
+        "original": "800e23a8",
+        "native": "NewFadeInOut"
+      },
+      {
+        "stage": "s07br",
+        "hash": "0005",
+        "original": "800e3028",
+        "native": "NewTelop"
+      },
+      {
+        "stage": "s07br",
+        "hash": "000f",
+        "original": "800da234",
+        "native": "NewDemoKage"
+      },
+      {
+        "stage": "s07br",
+        "hash": "001a",
+        "original": "800615fc",
+        "native": "NewKogaku2"
+      },
+      {
+        "stage": "s07br",
+        "hash": "001b",
+        "original": "80061708",
+        "native": "NewKogaku3"
+      },
+      {
+        "stage": "s07br",
+        "hash": "0021",
+        "original": "800e3fd0",
+        "native": "NewFocusView"
+      },
+      {
+        "stage": "s07br",
+        "hash": "0025",
+        "original": "800e0e10",
+        "native": "NewBlurSet"
+      },
+      {
+        "stage": "s07br",
+        "hash": "0028",
+        "original": "800e4618",
+        "native": "NewSepia_800C5214"
+      },
+      {
+        "stage": "s07br",
+        "hash": "0037",
+        "original": "800dfcbc",
+        "native": "NewRedAlert2"
+      },
+      {
+        "stage": "s07br",
+        "hash": "0038",
+        "original": "800dfd80",
+        "native": "RedAlert_800C4F48"
+      },
+      {
+        "stage": "s07br",
+        "hash": "0044",
+        "original": "800e030c",
+        "native": "NewBlurPure"
+      }
+    ]
+  },
+  "native_stage_compilation": "s07b and s07br linked in Debug executable; 14 additional translation units",
+  "runtime": {
+    "fixture": "tests/fixtures/s07b_story129.cdb",
+    "s07b": {
+      "vsyncs": 3600,
+      "movement_units": 3033,
+      "observed": [
+        "both native actor constructors",
+        "main attack action",
+        "HIDEO blackout and return",
+        "psychic projectile",
+        "chair attack",
+        "pot attack"
+      ],
+      "log": "build/movie-audit/mantis129.log",
+      "capture": "build/movie-audit/mantis129.bmp"
+    },
+    "s07br": {
+      "vsyncs": 1800,
+      "movement_units": 3141,
+      "observed": [
+        "both native actor constructors",
+        "main attack action",
+        "HIDEO blackout and return",
+        "psychic projectile"
+      ],
+      "log": "build/movie-audit/mantis-repeat129.log"
+    },
+    "completed_boss_fight": false,
+    "human_playability": false
+  },
+  "local_evidence": ".local/recovery/s07b: provenance.json,assembly-proof.json,constructors.json,meryl-typed.json,psyco-typed.json,reference_helpers.py; build/movie-audit/mantis-*",
+  "blocks": [
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C46F0.s",
+      "start": "0x800c46f0",
+      "end": "0x800c473c",
+      "words": 19,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C473C.s",
+      "start": "0x800c473c",
+      "end": "0x800c47d4",
+      "words": 38,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C47D4.s",
+      "start": "0x800c47d4",
+      "end": "0x800c4854",
+      "words": 32,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C4854.s",
+      "start": "0x800c4854",
+      "end": "0x800c4974",
+      "words": 72,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C4974.s",
+      "start": "0x800c4974",
+      "end": "0x800c49cc",
+      "words": 22,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C49CC.s",
+      "start": "0x800c49cc",
+      "end": "0x800c4a18",
+      "words": 19,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C4A18.s",
+      "start": "0x800c4a18",
+      "end": "0x800c4a94",
+      "words": 31,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C4A94.s",
+      "start": "0x800c4a94",
+      "end": "0x800c4b58",
+      "words": 49,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C4B58.s",
+      "start": "0x800c4b58",
+      "end": "0x800c4e90",
+      "words": 206,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C4E90.s",
+      "start": "0x800c4e90",
+      "end": "0x800c4f50",
+      "words": 48,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C4F50.s",
+      "start": "0x800c4f50",
+      "end": "0x800c4fb8",
+      "words": 26,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C4FB8.s",
+      "start": "0x800c4fb8",
+      "end": "0x800c500c",
+      "words": 21,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C500C.s",
+      "start": "0x800c500c",
+      "end": "0x800c50d8",
+      "words": 51,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C50D8.s",
+      "start": "0x800c50d8",
+      "end": "0x800c5160",
+      "words": 34,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C5160.s",
+      "start": "0x800c5160",
+      "end": "0x800c51dc",
+      "words": 31,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C51DC.s",
+      "start": "0x800c51dc",
+      "end": "0x800c52b8",
+      "words": 55,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C52B8.s",
+      "start": "0x800c52b8",
+      "end": "0x800c53a0",
+      "words": 58,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C53A0.s",
+      "start": "0x800c53a0",
+      "end": "0x800c5490",
+      "words": 60,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C5490.s",
+      "start": "0x800c5490",
+      "end": "0x800c54c0",
+      "words": 12,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C54C0.s",
+      "start": "0x800c54c0",
+      "end": "0x800c54e8",
+      "words": 10,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C54E8.s",
+      "start": "0x800c54e8",
+      "end": "0x800c5514",
+      "words": 11,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C5514.s",
+      "start": "0x800c5514",
+      "end": "0x800c5554",
+      "words": 16,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C5554.s",
+      "start": "0x800c5554",
+      "end": "0x800c5598",
+      "words": 17,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C5598.s",
+      "start": "0x800c5598",
+      "end": "0x800c5b14",
+      "words": 351,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C5B14.s",
+      "start": "0x800c5b14",
+      "end": "0x800c5cfc",
+      "words": 122,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C5CFC.s",
+      "start": "0x800c5cfc",
+      "end": "0x800c5dc4",
+      "words": 50,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C5DC4.s",
+      "start": "0x800c5dc4",
+      "end": "0x800c6000",
+      "words": 143,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C6000.s",
+      "start": "0x800c6000",
+      "end": "0x800c60f0",
+      "words": 60,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C60F0.s",
+      "start": "0x800c60f0",
+      "end": "0x800c61d8",
+      "words": 58,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C61D8.s",
+      "start": "0x800c61d8",
+      "end": "0x800c627c",
+      "words": 41,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C627C.s",
+      "start": "0x800c627c",
+      "end": "0x800c63f4",
+      "words": 94,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C63F4.s",
+      "start": "0x800c63f4",
+      "end": "0x800c6538",
+      "words": 81,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C6538.s",
+      "start": "0x800c6538",
+      "end": "0x800c6634",
+      "words": 63,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C6634.s",
+      "start": "0x800c6634",
+      "end": "0x800c6964",
+      "words": 204,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C6964.s",
+      "start": "0x800c6964",
+      "end": "0x800c6aa4",
+      "words": 80,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C6AA4.s",
+      "start": "0x800c6aa4",
+      "end": "0x800c6b8c",
+      "words": 58,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C6B8C.s",
+      "start": "0x800c6b8c",
+      "end": "0x800c6c5c",
+      "words": 52,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C6C5C.s",
+      "start": "0x800c6c5c",
+      "end": "0x800c6d80",
+      "words": 73,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C6D80.s",
+      "start": "0x800c6d80",
+      "end": "0x800c6e54",
+      "words": 53,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C6E54.s",
+      "start": "0x800c6e54",
+      "end": "0x800c7040",
+      "words": 123,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C7040.s",
+      "start": "0x800c7040",
+      "end": "0x800c714c",
+      "words": 67,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C714C.s",
+      "start": "0x800c714c",
+      "end": "0x800c73f0",
+      "words": 169,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C73F0.s",
+      "start": "0x800c73f0",
+      "end": "0x800c7604",
+      "words": 133,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C7604.s",
+      "start": "0x800c7604",
+      "end": "0x800c76c8",
+      "words": 49,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C76C8.s",
+      "start": "0x800c76c8",
+      "end": "0x800c77a8",
+      "words": 56,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C77A8.s",
+      "start": "0x800c77a8",
+      "end": "0x800c796c",
+      "words": 113,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C796C.s",
+      "start": "0x800c796c",
+      "end": "0x800c7aa8",
+      "words": 79,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C7AA8.s",
+      "start": "0x800c7aa8",
+      "end": "0x800c7c64",
+      "words": 111,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C7C64.s",
+      "start": "0x800c7c64",
+      "end": "0x800c7d88",
+      "words": 73,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C7D88.s",
+      "start": "0x800c7d88",
+      "end": "0x800c7e98",
+      "words": 68,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C7E98.s",
+      "start": "0x800c7e98",
+      "end": "0x800c7f48",
+      "words": 44,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C7F48.s",
+      "start": "0x800c7f48",
+      "end": "0x800c8010",
+      "words": 50,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C8010.s",
+      "start": "0x800c8010",
+      "end": "0x800c84fc",
+      "words": 315,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C84FC.s",
+      "start": "0x800c84fc",
+      "end": "0x800c8510",
+      "words": 5,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C8510.s",
+      "start": "0x800c8510",
+      "end": "0x800c89e0",
+      "words": 308,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C89E0.s",
+      "start": "0x800c89e0",
+      "end": "0x800c8bb4",
+      "words": 117,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C8BB4.s",
+      "start": "0x800c8bb4",
+      "end": "0x800c8f9c",
+      "words": 250,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C8F9C.s",
+      "start": "0x800c8f9c",
+      "end": "0x800c9044",
+      "words": 42,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C9044.s",
+      "start": "0x800c9044",
+      "end": "0x800c9304",
+      "words": 176,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C9304.s",
+      "start": "0x800c9304",
+      "end": "0x800c9454",
+      "words": 84,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C9454.s",
+      "start": "0x800c9454",
+      "end": "0x800c96b8",
+      "words": 153,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C96B8.s",
+      "start": "0x800c96b8",
+      "end": "0x800c9738",
+      "words": 32,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C9738.s",
+      "start": "0x800c9738",
+      "end": "0x800c9954",
+      "words": 135,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C9954.s",
+      "start": "0x800c9954",
+      "end": "0x800c9994",
+      "words": 16,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C9994.s",
+      "start": "0x800c9994",
+      "end": "0x800c9a58",
+      "words": 49,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C9A58.s",
+      "start": "0x800c9a58",
+      "end": "0x800c9b24",
+      "words": 51,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C9B24.s",
+      "start": "0x800c9b24",
+      "end": "0x800c9b94",
+      "words": 28,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C9B94.s",
+      "start": "0x800c9b94",
+      "end": "0x800c9c74",
+      "words": 56,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C9C74.s",
+      "start": "0x800c9c74",
+      "end": "0x800c9d44",
+      "words": 52,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800C9D44.s",
+      "start": "0x800c9d44",
+      "end": "0x800ca1fc",
+      "words": 302,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CA1FC.s",
+      "start": "0x800ca1fc",
+      "end": "0x800ca2ec",
+      "words": 60,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CA2EC.s",
+      "start": "0x800ca2ec",
+      "end": "0x800ca4fc",
+      "words": 132,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CA4FC.s",
+      "start": "0x800ca4fc",
+      "end": "0x800ca584",
+      "words": 34,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CA584.s",
+      "start": "0x800ca584",
+      "end": "0x800ca5fc",
+      "words": 30,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CA5FC.s",
+      "start": "0x800ca5fc",
+      "end": "0x800ca674",
+      "words": 30,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CA674.s",
+      "start": "0x800ca674",
+      "end": "0x800ca6ec",
+      "words": 30,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CA6EC.s",
+      "start": "0x800ca6ec",
+      "end": "0x800ca8f8",
+      "words": 131,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CA8F8.s",
+      "start": "0x800ca8f8",
+      "end": "0x800ca984",
+      "words": 35,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CAF54.s",
+      "start": "0x800caf54",
+      "end": "0x800cafc8",
+      "words": 29,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CAFC8.s",
+      "start": "0x800cafc8",
+      "end": "0x800cb068",
+      "words": 40,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CB068.s",
+      "start": "0x800cb068",
+      "end": "0x800cb0b4",
+      "words": 19,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CB0B4.s",
+      "start": "0x800cb0b4",
+      "end": "0x800cb130",
+      "words": 31,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CB130.s",
+      "start": "0x800cb130",
+      "end": "0x800cb224",
+      "words": 61,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CB224.s",
+      "start": "0x800cb224",
+      "end": "0x800cb264",
+      "words": 16,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CB264.s",
+      "start": "0x800cb264",
+      "end": "0x800cb2a4",
+      "words": 16,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CB2A4.s",
+      "start": "0x800cb2a4",
+      "end": "0x800cb6b0",
+      "words": 259,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CB6B0.s",
+      "start": "0x800cb6b0",
+      "end": "0x800cb770",
+      "words": 48,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CB770.s",
+      "start": "0x800cb770",
+      "end": "0x800cb8cc",
+      "words": 87,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CB8CC.s",
+      "start": "0x800cb8cc",
+      "end": "0x800cb9e8",
+      "words": 71,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CB9E8.s",
+      "start": "0x800cb9e8",
+      "end": "0x800cbaa4",
+      "words": 47,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CBAA4.s",
+      "start": "0x800cbaa4",
+      "end": "0x800cbb38",
+      "words": 37,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CBB38.s",
+      "start": "0x800cbb38",
+      "end": "0x800cbc20",
+      "words": 58,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CBC20.s",
+      "start": "0x800cbc20",
+      "end": "0x800cbce8",
+      "words": 50,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CBCE8.s",
+      "start": "0x800cbce8",
+      "end": "0x800cbd4c",
+      "words": 25,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CBD4C.s",
+      "start": "0x800cbd4c",
+      "end": "0x800cbda0",
+      "words": 21,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CBDA0.s",
+      "start": "0x800cbda0",
+      "end": "0x800cbdcc",
+      "words": 11,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CBDCC.s",
+      "start": "0x800cbdcc",
+      "end": "0x800cbe34",
+      "words": 26,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CBE34.s",
+      "start": "0x800cbe34",
+      "end": "0x800cbf00",
+      "words": 51,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CBF00.s",
+      "start": "0x800cbf00",
+      "end": "0x800cbfb0",
+      "words": 44,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CBFB0.s",
+      "start": "0x800cbfb0",
+      "end": "0x800cc138",
+      "words": 98,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CC138.s",
+      "start": "0x800cc138",
+      "end": "0x800cc174",
+      "words": 15,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CC174.s",
+      "start": "0x800cc174",
+      "end": "0x800cc468",
+      "words": 189,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CC468.s",
+      "start": "0x800cc468",
+      "end": "0x800cc50c",
+      "words": 41,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CC514.s",
+      "start": "0x800cc514",
+      "end": "0x800cc578",
+      "words": 25,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CC578.s",
+      "start": "0x800cc578",
+      "end": "0x800cc67c",
+      "words": 65,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CC67C.s",
+      "start": "0x800cc67c",
+      "end": "0x800cc6cc",
+      "words": 20,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CC6CC.s",
+      "start": "0x800cc6cc",
+      "end": "0x800cc704",
+      "words": 14,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CC704.s",
+      "start": "0x800cc704",
+      "end": "0x800cc790",
+      "words": 35,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CC790.s",
+      "start": "0x800cc790",
+      "end": "0x800cc89c",
+      "words": 67,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CC89C.s",
+      "start": "0x800cc89c",
+      "end": "0x800cc8d4",
+      "words": 14,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CC8D4.s",
+      "start": "0x800cc8d4",
+      "end": "0x800cc930",
+      "words": 23,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CC930.s",
+      "start": "0x800cc930",
+      "end": "0x800cc970",
+      "words": 16,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CC970.s",
+      "start": "0x800cc970",
+      "end": "0x800cc9e8",
+      "words": 30,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CC9E8.s",
+      "start": "0x800cc9e8",
+      "end": "0x800cca10",
+      "words": 10,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CCA10.s",
+      "start": "0x800cca10",
+      "end": "0x800cca80",
+      "words": 28,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CCA80.s",
+      "start": "0x800cca80",
+      "end": "0x800ccbb0",
+      "words": 76,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CCBB0.s",
+      "start": "0x800ccbb0",
+      "end": "0x800ccbfc",
+      "words": 19,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CCBFC.s",
+      "start": "0x800ccbfc",
+      "end": "0x800ccfe4",
+      "words": 250,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CCFE4.s",
+      "start": "0x800ccfe4",
+      "end": "0x800cd86c",
+      "words": 546,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CD86C.s",
+      "start": "0x800cd86c",
+      "end": "0x800cda04",
+      "words": 102,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CDA04.s",
+      "start": "0x800cda04",
+      "end": "0x800cda90",
+      "words": 35,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CDA90.s",
+      "start": "0x800cda90",
+      "end": "0x800cdafc",
+      "words": 27,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CDAFC.s",
+      "start": "0x800cdafc",
+      "end": "0x800cdba4",
+      "words": 42,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CDBA4.s",
+      "start": "0x800cdba4",
+      "end": "0x800cdcac",
+      "words": 66,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CDCAC.s",
+      "start": "0x800cdcac",
+      "end": "0x800cdf40",
+      "words": 165,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CDF40.s",
+      "start": "0x800cdf40",
+      "end": "0x800ce134",
+      "words": 125,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CE134.s",
+      "start": "0x800ce134",
+      "end": "0x800ce2a8",
+      "words": 93,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CE2A8.s",
+      "start": "0x800ce2a8",
+      "end": "0x800ce43c",
+      "words": 101,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CE43C.s",
+      "start": "0x800ce43c",
+      "end": "0x800ce660",
+      "words": 137,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CE660.s",
+      "start": "0x800ce660",
+      "end": "0x800ce85c",
+      "words": 127,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CE85C.s",
+      "start": "0x800ce85c",
+      "end": "0x800cea18",
+      "words": 111,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CEA18.s",
+      "start": "0x800cea18",
+      "end": "0x800cebac",
+      "words": 101,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CEBAC.s",
+      "start": "0x800cebac",
+      "end": "0x800ced04",
+      "words": 86,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CED04.s",
+      "start": "0x800ced04",
+      "end": "0x800ceff0",
+      "words": 187,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CEFF0.s",
+      "start": "0x800ceff0",
+      "end": "0x800cf130",
+      "words": 80,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CF130.s",
+      "start": "0x800cf130",
+      "end": "0x800cf200",
+      "words": 52,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CF200.s",
+      "start": "0x800cf200",
+      "end": "0x800cf304",
+      "words": 65,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CF304.s",
+      "start": "0x800cf304",
+      "end": "0x800cf684",
+      "words": 224,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CF684.s",
+      "start": "0x800cf684",
+      "end": "0x800cf6f0",
+      "words": 27,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CF6F0.s",
+      "start": "0x800cf6f0",
+      "end": "0x800cf768",
+      "words": 30,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CF768.s",
+      "start": "0x800cf768",
+      "end": "0x800cf9a0",
+      "words": 142,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800CF9A0.s",
+      "start": "0x800cf9a0",
+      "end": "0x800d075c",
+      "words": 879,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800D075C.s",
+      "start": "0x800d075c",
+      "end": "0x800d0774",
+      "words": 6,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800D0774.s",
+      "start": "0x800d0774",
+      "end": "0x800d098c",
+      "words": 134,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800D098C.s",
+      "start": "0x800d098c",
+      "end": "0x800d0a4c",
+      "words": 48,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800D0A4C.s",
+      "start": "0x800d0a4c",
+      "end": "0x800d0a6c",
+      "words": 8,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800D0A6C.s",
+      "start": "0x800d0a6c",
+      "end": "0x800d0b40",
+      "words": 53,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800D0B48.s",
+      "start": "0x800d0b48",
+      "end": "0x800d0c8c",
+      "words": 81,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800D0C94.s",
+      "start": "0x800d0c94",
+      "end": "0x800d0dcc",
+      "words": 78,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800D0DD4.s",
+      "start": "0x800d0dd4",
+      "end": "0x800d0f94",
+      "words": 112,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800D0F94.s",
+      "start": "0x800d0f94",
+      "end": "0x800d0fc0",
+      "words": 11,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800D105C.s",
+      "start": "0x800d105c",
+      "end": "0x800d1254",
+      "words": 126,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800D1254.s",
+      "start": "0x800d1254",
+      "end": "0x800d13c4",
+      "words": 92,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800D13C4.s",
+      "start": "0x800d13c4",
+      "end": "0x800d1484",
+      "words": 48,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800D1484.s",
+      "start": "0x800d1484",
+      "end": "0x800d1638",
+      "words": 109,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800D1638.s",
+      "start": "0x800d1638",
+      "end": "0x800d187c",
+      "words": 145,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    },
+    {
+      "assembly": "asm/overlays/s07b/s07b_800D195C.s",
+      "start": "0x800d195c",
+      "end": "0x800d1c80",
+      "words": 201,
+      "matches": {
+        "s07b": true,
+        "s07br": true
+      }
+    }
+  ],
+  "reference_tests": {
+    "test": "mgs_mantis_helpers_test",
+    "cases": 58,
+    "reference": "Original MIPS executed by Unicorn 2.1.4 with no function hooks; 11 selected recovered helpers and resident GV_DiffDirS",
+    "covers": [
+      "turn wrapping/clamping",
+      "trap membership",
+      "target damage reset",
+      "immunity masks and timers",
+      "dodge/blink timers",
+      "gravity and signed wrapping"
+    ],
+    "excludes": [
+      "complete combat state machine",
+      "all damage/HP branches",
+      "completed boss fight"
+    ]
+  }
+}

@@ -1,0 +1,162 @@
+{
+  "schema": 1,
+  "stages": [
+    "s07c",
+    "s08a",
+    "s09a"
+  ],
+  "upstream_commit": "f54dbb2a58adfc2755403296c9ebb653fbec277b",
+  "constructor_tables": "Already named in recovered upstream C; unchanged.",
+  "additional_translation_units": 27,
+  "changes": [
+    {
+      "path": "source/animal/meryl72/meryl72.c",
+      "change": "Route parser matches the explicitly signed-char destination array."
+    },
+    {
+      "path": "source/anime/effect/smoke4.c",
+      "change": "Use integer zero for the integer map argument."
+    },
+    {
+      "path": "source/takabe/glass.c",
+      "change": "Native ApplyMatrixSV executes the same load/rotate/store GTE operations as the original macro."
+    },
+    {
+      "path": "source/takabe/elc_flr.c",
+      "change": "Use the native MATRIX translation element type and sequence the original same-element unsigned light decay before advancing to the next component."
+    },
+    {
+      "path": "source/takabe/elc_damg.c",
+      "change": "GCL argument storage matches the declared long pointer type."
+    },
+    {
+      "path": "source/okajima/dog/dog.c",
+      "change": "Express the original signed 16-bit -1024 vector component without narrowing 64512."
+    },
+    {
+      "path": "source/animal/meryl72/action.c",
+      "change": "Give the Meryl72-only light helper internal linkage and a distinct name; the upstream name collides with a different s07a function."
+    }
+  ],
+  "binary_evidence": {
+    "provenance": {
+      "stage": "s08a",
+      "disc": "SLPM_862.47",
+      "resource": "479b.b",
+      "offset": 27981824,
+      "size": 88016,
+      "sha256": "56a0d3aa551dd6eefda902497c3f0a90c458b4ab0a54b9a63b7fe3298606d4c9",
+      "load_address": "0x800c3208",
+      "resident_sha256": "4b8252b65953a02021486406cfcdca1c7670d1d1a8f3cf6e750ef6e360dc3a2f",
+      "analysis_image": "Original resident and stage code plus zero gap; entry reset to first constructor; analysis only."
+    },
+    "function": "ElcFlrAct_800D47CC",
+    "instruction_range": [
+      "0x800d48ec",
+      "0x800d4908"
+    ],
+    "operations": [
+      "lw current component",
+      "multiply low 32 bits by 3",
+      "srl by 2",
+      "sw to the same component",
+      "advance pointer by 4 in branch delay slot"
+    ],
+    "conclusion": "The C postincrement expression has undefined sequencing; explicit indexed stores preserve the observed MIPS order for all three components."
+  },
+  "patch": {
+    "path": "patches/mgs-middle-stages.patch",
+    "size": 4235,
+    "sha256": "686c1721f6abf9c90292abb4a303c55200badd2bf2dd446c1b27c07048a6c644",
+    "files": [
+      "source/animal/meryl72/meryl72.c",
+      "source/anime/effect/smoke4.c",
+      "source/takabe/glass.c",
+      "source/takabe/elc_flr.c",
+      "source/takabe/elc_damg.c",
+      "source/okajima/dog/dog.c",
+      "source/animal/meryl72/action.c"
+    ]
+  },
+  "validation": {
+    "standalone_syntax": "All 27 additional translation units pass Windows x86 C17 syntax compilation with unknown pragmas as errors.",
+    "native_link": true,
+    "native_runtime_validated": true,
+    "human_playtesting": false,
+    "aislop": {
+      "score": null,
+      "errors": 0,
+      "fixable_warnings": 0,
+      "nonfixable_complexity_warnings": 24,
+      "unavailable_engines": [
+        "clang-format",
+        "cppcheck"
+      ],
+      "scope": "Seven patch files scanned in two runs; 6-file run scored66, added action.c included in tower scan."
+    },
+    "configuration": "RelWithDebInfo; all26 CTest suites pass in validated snapshot.",
+    "runs": [
+      {
+        "stage": "s07c",
+        "log": "build/s07c-entry.log",
+        "capture": "build/s07c-room.bmp",
+        "vsyncs": 900,
+        "setup": "Explicit development entry with default initial story state.",
+        "movement_delta": 2996,
+        "pad_frames": 57,
+        "movement_ticks": 24,
+        "result": "Automated movement passed; frame-limit exit0; agent inspected capture.",
+        "scope": "Does not establish encounter completion or campaign continuity."
+      },
+      {
+        "stage": "s08a",
+        "log": "build/s08a-entry.log",
+        "capture": "build/s08a-room.bmp",
+        "vsyncs": 900,
+        "setup": "Explicit development entry with default initial story state.",
+        "movement_delta": 1422,
+        "pad_frames": 58,
+        "movement_ticks": 20,
+        "result": "Automated movement passed; frame-limit exit0; agent inspected capture.",
+        "scope": "Does not establish encounter completion or campaign continuity."
+      },
+      {
+        "stage": "s09a",
+        "log": "build/s09a-entry.log",
+        "capture": "build/s09a-room.bmp",
+        "vsyncs": 900,
+        "setup": "Explicit development entry with default initial story state.",
+        "result": "Original Meryl dialogue cutscene rendered; no access violation, but control not granted before frame limit and probe incomplete."
+      },
+      {
+        "stage": "s07c",
+        "fixture": "tests/fixtures/s07c_story117.cdb",
+        "setup": "Original sub_7658 scenario preconditions: story117, incoming map9987, X6750/Z-12430, heading1024, var_buf byte4F=1, linkvarbuf words6A=1/6C=5. Remaining variables retain initialization. Original script advances story119, creates Meryl72 and releases control after voice ends.",
+        "log": "build/s07c-meryl.log",
+        "capture": "build/s07c-meryl.bmp",
+        "vsyncs": 1800,
+        "movement_delta": 2818,
+        "pad_frames": 57,
+        "movement_ticks": 25,
+        "collision_ticks": 0,
+        "result": "Automated debugger fixture observes original actor constructor, movement passes and frame limit reached without access violation; agent inspected capture.",
+        "scope": "Bounded stage/actor integration, not human playtesting, encounter completion or campaign progression."
+      },
+      {
+        "stage": "s09a",
+        "fixture": "tests/fixtures/s09a_story142.cdb",
+        "setup": "Only story variable $w:00000A=142. Original 142 <= story < 145 branch creates dog; original story>=142 normal Snake entry is retained.",
+        "log": "build/s09a-dog.log",
+        "capture": "build/s09a-dog.bmp",
+        "vsyncs": 1200,
+        "movement_delta": 2996,
+        "pad_frames": 58,
+        "movement_ticks": 24,
+        "collision_ticks": 0,
+        "result": "Automated debugger fixture observes original actor constructor, movement passes and frame limit reached without access violation; agent inspected capture.",
+        "scope": "Bounded stage/actor integration, not human playtesting, encounter completion or campaign progression."
+      }
+    ],
+    "runtime_scope": "All three stages have a controller movement pass; Meryl72 and dog constructors exercised by explicit original-script fixtures. Initial incomplete cutscene run retained as separate evidence."
+  }
+}

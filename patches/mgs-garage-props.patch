@@ -1,0 +1,2773 @@
+diff --git a/build/linker_command_file.txt b/build/linker_command_file.txt
+index 20700ad8e..fd7660812 100644
+--- a/build/linker_command_file.txt
++++ b/build/linker_command_file.txt
+@@ -2905,6 +2905,53 @@ overlay_bss group   file("{{OBJ_DIR}}\{{OVERLAY}}_{{OVERLAY_SUFFIX}}_bss.bin")
+     include "{{OBJ_DIR}}\takabe\cinema.obj", overlay
+     include "{{OBJ_DIR}}\takabe\sepia.obj", overlay
+ ;------------------------------------------------------------------------------
++{% elif OVERLAY in ["s19a", "s19ar"] %}
++    include "{{OBJ_DIR}}\stage\s19a.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s19b\menu\countdwn.obj", overlay
++    include "{{OBJ_DIR}}\chara\others\motse.obj", overlay
++    include "{{OBJ_DIR}}\game\lamp.obj", overlay
++    include "{{OBJ_DIR}}\enemy\camera2.obj", overlay
++    include "{{OBJ_DIR}}\chara\snake\breath.obj", overlay
++    include "{{OBJ_DIR}}\enemy\wall.obj", overlay
++    include "{{OBJ_DIR}}\enemy\demokage.obj", overlay
++    include "{{OBJ_DIR}}\enemy\asioto.obj", overlay
++    include "{{OBJ_DIR}}\enemy\glight.obj", overlay
++    include "{{OBJ_DIR}}\enemy\asiato.obj", overlay
++    include "{{OBJ_DIR}}\enemy\l_sight.obj", overlay
++    include "{{OBJ_DIR}}\enemy\grnad_e.obj", overlay
++    include "{{OBJ_DIR}}\anime\effect\breath.obj", overlay
++    include "{{OBJ_DIR}}\anime\effect\fog.obj", overlay
++    include "{{OBJ_DIR}}\anime\effect\sleep.obj", overlay
++    include "{{OBJ_DIR}}\anime\effect\mark.obj", overlay
++    include "{{OBJ_DIR}}\animal\doll\doll.obj", overlay
++    include "{{OBJ_DIR}}\takabe\thing.obj", overlay
++    include "{{OBJ_DIR}}\takabe\object.obj", overlay
++    include "{{OBJ_DIR}}\takabe\fadeio.obj", overlay
++    include "{{OBJ_DIR}}\takabe\cinema.obj", overlay
++    include "{{OBJ_DIR}}\takabe\voicesys.obj", overlay
++    include "{{OBJ_DIR}}\takabe\camshake.obj", overlay
++    include "{{OBJ_DIR}}\takabe\cat_in.obj", overlay
++    include "{{OBJ_DIR}}\kojo\rex_particles.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s19a\guard\action.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s19a\guard\reaction.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s19a\guard\core.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s19a\guard\damage.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s19a\guard\effects.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s19a\guard\override.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s19a\guard\sensing.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s19a\guard\navigation.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s19a\guard\think.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s19a\guard\strategy.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s19a\guard\commander.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s19a\guard\data.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s19a\timer.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s19a\props_companion.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s19a\props_data.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s19a\props_drum.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s19a\props_gate.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s19a\props_jeep.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s19a\props_snake.obj", overlay
++;------------------------------------------------------------------------------
+ {% elif OVERLAY == "s14e" %}
+     include "{{OBJ_DIR}}\stage\s14e.obj", overlay
+     include "{{OBJ_DIR}}\game\lamp.obj", overlay
+diff --git a/source/overlays/s19a/props_companion.c b/source/overlays/s19a/props_companion.c
+new file mode 100644
+index 000000000..6a62b5fa5
+--- /dev/null
++++ b/source/overlays/s19a/props_companion.c
+@@ -0,0 +1,459 @@
++#include "props_native.h"
++
++void Garage_800DB53C(GarageCompanion *work)
++{
++    CONTROL *p_control;
++    DG_OBJS *objs;
++
++    p_control = &work->control;
++    Garage_800DC0A0(work);
++    GM_ActMotion(&work->body);
++    sna_act_helper2_helper2_80033054(work->motion_id, &work->adjustments[6]);
++    work->adjustments[6].vy = GV_NearSpeed(work->adjustments[6].vy, work->field_7E4, 200);
++    work->control.turn = DG_ZeroVector;
++    work->control.rot = work->control.turn;
++    work->control.mov = GarageCompanionOffset;
++    GM_ActControl(p_control);
++    GM_ActObject(&work->body);
++    objs = work->body.objs;
++    CompMatrix(work->root_matrix, &objs->world, &objs->world);
++    work->control.mov.vx = objs->world.t[0];
++    p_control->mov.vy = objs->world.t[1];
++    p_control->mov.vz = objs->world.t[2];
++    DG_GetLightMatrix(&p_control->mov, work->light);
++    GM_MoveTarget(work->target, &p_control->mov);
++}
++
++int Garage_800DB668(GarageCompanion *work, int name, int otacon)
++{
++    CONTROL *control;
++    CONTROL *root_control;
++    CONTROL *v9;
++    int      v11;
++    int      v12;
++    int      v13;
++    short    v14;
++    short    v15;
++    int      v16;
++    int      v17;
++    int      v18;
++    int      v19;
++
++    control = &work->control;
++    if (GM_InitControl(&work->control, name, GM_CurrentMap) < 0)
++        return -1;
++    root_control = work->root_control;
++    work->control.mov = root_control->mov;
++    v9 = work->root_control;
++    work->control.rot = v9->rot;
++    GM_ConfigControlInterp(control, 4);
++    if (otacon != 0)
++    {
++        v17 = GV_StrCode("otacom");
++        v16 = GV_StrCode("mel_19a");
++        GM_InitObject(&work->body, v17, 45, v16);
++        v18 = GV_StrCode("\xa5\xe1\xa5\xea\xa5\xeb");
++        v14 = 133;
++        work->motion_id = v18;
++        work->motions[1] = 134;
++        v15 = 135;
++    }
++    else
++    {
++        v12 = GV_StrCode("meryl");
++        v11 = GV_StrCode("mel_19a");
++        GM_InitObject(&work->body, v12, 45, v11);
++        v13 = GV_StrCode("\xa5\xe1\xa5\xea\xa5\xeb");
++        v14 = 130;
++        work->motion_id = v13;
++        work->motions[1] = 131;
++        v15 = 132;
++    }
++    work->motions[0] = v14;
++    work->motions[2] = v15;
++    work->motions[3] = v14;
++    GM_ConfigObjectJoint(&work->body);
++    v19 = GV_StrCode("mel_19a");
++    GM_ConfigMotionControl(&work->body, &work->motion, v19, work->segments1, work->segments2, control, work->rotations);
++    GM_ConfigObjectLight(&work->body, work->light);
++    GM_ConfigObjectAction(&work->body, 14, 28, 0);
++    GM_ActMotion(&work->body);
++    GM_ConfigMotionAdjust(&work->body, work->adjustments);
++    work->target = GM_AllocTarget();
++    control->r_sphere = -2;
++    return 0;
++}
++
++void Garage_800DB860(GarageCompanion *work)
++{
++    GM_FreeTarget(work->target);
++    GM_FreeControl(&work->control);
++    GM_FreeObject(&work->body);
++}
++
++GarageCompanion *Garage_800DB89C(CONTROL *root_control, MATRIX *root_matrix, int otacon)
++{
++    GarageCompanion *v6;
++    int              v7;
++    bool             v8;
++    GarageCompanion *result;
++
++    v6 = (GarageCompanion *)GV_NewActor(6, sizeof(GarageCompanion));
++    if (v6 == NULL)
++        return NULL;
++    GV_SetNamedActor(v6, Garage_800DB53C, Garage_800DB860, "pkjp_mrl.c");
++    v6->root_control = root_control;
++    v6->root_matrix = root_matrix;
++    v7 = GV_StrCode("meryl");
++    v8 = Garage_800DB668(v6, v7, otacon) >= 0;
++    result = v6;
++    if (!v8)
++    {
++        GV_DestroyActor(v6);
++        return NULL;
++    }
++    return result;
++}
++
++int Garage_800DB950(GarageCompanion *work)
++{
++    int flags;
++    void (*v2)(GarageCompanion *, int);
++
++    flags = work->flags;
++    if ((flags & 2) != 0)
++    {
++        v2 = Garage_800DBFB8;
++    LABEL_3:
++        work->action = v2;
++        work->tick = 0;
++        work->control.turn.vz = 0;
++        work->control.turn.vx = 0;
++        return 1;
++    }
++    if ((flags & 1) != 0)
++    {
++        v2 = Garage_800DBA10;
++        goto LABEL_3;
++    }
++    if ((flags & 0x20) != 0)
++    {
++        v2 = Garage_800DBCF8;
++        goto LABEL_3;
++    }
++    if ((flags & 0x200) != 0)
++    {
++        v2 = Garage_800DBE58;
++        goto LABEL_3;
++    }
++    if ((flags & 0x1000) != 0)
++    {
++        v2 = Garage_800DBA54;
++        goto LABEL_3;
++    }
++    if ((flags & 0x2000) != 0)
++    {
++        work->action = Garage_800DBC28;
++        work->tick = 0;
++        work->control.turn.vz = 0;
++        work->control.turn.vx = 0;
++        return 1;
++    }
++    return 0;
++}
++
++void Garage_800DBA10(GarageCompanion *work, int tick)
++{
++    if (tick == 0)
++    {
++        work->action_id = 0;
++        GM_ConfigObjectAction(&work->body, 0, 0, 4);
++    }
++    Garage_800DB950(work);
++}
++
++void Garage_800DBA54(GarageCompanion *work, int tick)
++{
++    int     v4;
++    SVECTOR pos;
++
++    if (tick == 0)
++    {
++        work->action_id = 14;
++        GM_ConfigObjectAction(&work->body, 14, 0, 4);
++    }
++    v4 = tick & 3;
++    if (tick == 1)
++    {
++        pos.vx = work->body.objs->objs[4].world.t[0];
++        pos.vy = work->body.objs->objs[4].world.t[1];
++        pos.vz = work->body.objs->objs[4].world.t[2];
++        GM_SeSet(&pos, 178);
++        v4 = 1;
++    }
++    if (v4 == 2)
++        GarageHeadlightIntensity = 255;
++    if (work->body.is_end != 0)
++    {
++        if ((work->flags & 0x10000) != 0)
++        {
++            work->action = Garage_800DBB44;
++            work->tick = 0;
++            work->control.turn.vz = 0;
++            work->control.turn.vx = 0;
++        }
++        else
++        {
++            work->tick = 0;
++        }
++    }
++}
++
++void Garage_800DBB44(GarageCompanion *work, int tick)
++{
++    int     v4;
++    SVECTOR pos;
++
++    if (tick == 0)
++    {
++        work->action_id = 14;
++        GM_ConfigObjectAction(&work->body, 14, 0, 4);
++    }
++    v4 = tick & 3;
++    if (tick == 1)
++    {
++        pos.vx = work->body.objs->objs[4].world.t[0];
++        pos.vy = work->body.objs->objs[4].world.t[1];
++        pos.vz = work->body.objs->objs[4].world.t[2];
++        GM_SeSet(&pos, 177);
++        v4 = 1;
++    }
++    if (v4 == 2)
++        GarageHeadlightIntensity = 255;
++    if (work->body.is_end != 0)
++    {
++        GarageIgnition = 1;
++        work->action = Garage_800DBA10;
++        work->tick = 0;
++        work->control.turn.vz = 0;
++        work->control.turn.vx = 0;
++    }
++}
++
++void Garage_800DBC28(GarageCompanion *work, int tick)
++{
++    short   v3;
++    int     v4;
++    bool    v5;
++    int     v6;
++    int     v7;
++    int     v8;
++    SVECTOR vec3;
++
++    if (tick == 0)
++    {
++        work->action_id = 0;
++        GM_ConfigObjectAction(&work->body, 0, 0, 4);
++    }
++    GV_SubVec3(&GM_PlayerPosition, &work->control.mov, &vec3);
++    v3 = ratan2(vec3.vz, vec3.vx);
++    v4 = (-v3 - work->control.rot.vy) & 0xFFF;
++    v5 = ((-v3 - work->control.rot.vy) & 0x800) == 0;
++    v6 = false;
++    if (!v5)
++    {
++        v4 -= 4096;
++        v6 = v4 < -1024;
++    }
++    v5 = !v6;
++    v7 = v4 < 1025;
++    if (!v5)
++    {
++        v4 = -1024;
++        v7 = true;
++    }
++    if (!v7)
++        v4 = 1024;
++    v8 = work->flags & 0x2000;
++    work->field_7E4 = v4;
++    if (v8 == 0)
++    {
++        work->action = Garage_800DBA10;
++        work->tick = 0;
++        work->control.turn.vz = 0;
++        work->control.turn.vx = 0;
++        work->field_7E4 = 0;
++    }
++}
++
++void Garage_800DBCF8(GarageCompanion *work, int tick)
++{
++    int v3;
++
++    if (tick == 0)
++    {
++        work->action_id = 7;
++        GM_ConfigObjectAction(&work->body, 7, 0, 4);
++    }
++    v3 = Garage_800DB950(work);
++    if (v3 == 0 && work->body.is_end != 0)
++    {
++        work->action = Garage_800DBD6C;
++        work->tick = 0;
++        work->control.turn.vz = 0;
++        work->control.turn.vx = 0;
++    }
++}
++
++void Garage_800DBD6C(GarageCompanion *work, int tick)
++{
++    int v3;
++
++    if (tick == 0)
++    {
++        work->action_id = 8;
++        GM_ConfigObjectAction(&work->body, 8, 0, 0);
++    }
++    v3 = Garage_800DB950(work);
++    if (v3 == 0 && (work->flags & 0x20000) == 0)
++    {
++        work->action = Garage_800DBDE4;
++        work->tick = 0;
++        work->control.turn.vz = 0;
++        work->control.turn.vx = 0;
++    }
++}
++
++void Garage_800DBDE4(GarageCompanion *work, int tick)
++{
++    int v3;
++
++    if (tick == 0)
++    {
++        work->action_id = 9;
++        GM_ConfigObjectAction(&work->body, 9, 0, 4);
++    }
++    v3 = Garage_800DB950(work);
++    if (v3 == 0 && work->body.is_end != 0)
++    {
++        work->action = Garage_800DBA10;
++        work->tick = 0;
++        work->control.turn.vz = 0;
++        work->control.turn.vx = 0;
++    }
++}
++
++void Garage_800DBE58(GarageCompanion *work, int tick)
++{
++    int v3;
++
++    if (tick == 0)
++    {
++        work->action_id = 1;
++        GM_ConfigObjectAction(&work->body, 1, 0, 4);
++    }
++    v3 = Garage_800DB950(work);
++    if (v3 == 0 && work->body.is_end != 0)
++    {
++        work->action = Garage_800DBECC;
++        work->tick = 0;
++        work->control.turn.vz = 0;
++        work->control.turn.vx = 0;
++    }
++}
++
++void Garage_800DBECC(GarageCompanion *work, int tick)
++{
++    int v3;
++
++    if (tick == 0)
++    {
++        work->action_id = 2;
++        GM_ConfigObjectAction(&work->body, 2, 0, 0);
++    }
++    v3 = Garage_800DB950(work);
++    if (v3 == 0 && (work->flags & 0x20000) == 0)
++    {
++        work->action = Garage_800DBF44;
++        work->tick = 0;
++        work->control.turn.vz = 0;
++        work->control.turn.vx = 0;
++    }
++}
++
++void Garage_800DBF44(GarageCompanion *work, int tick)
++{
++    int v3;
++
++    if (tick == 0)
++    {
++        work->action_id = 3;
++        GM_ConfigObjectAction(&work->body, 3, 0, 4);
++    }
++    v3 = Garage_800DB950(work);
++    if (v3 == 0 && work->body.is_end != 0)
++    {
++        work->action = Garage_800DBA10;
++        work->tick = 0;
++        work->control.turn.vz = 0;
++        work->control.turn.vx = 0;
++    }
++}
++
++void Garage_800DBFB8(GarageCompanion *work, int tick)
++{
++    if (tick == 0)
++    {
++        work->action_id = 13;
++        GM_ConfigObjectAction(&work->body, 13, 0, 4);
++        GM_SeSet(&work->control.mov, work->motions[0]);
++    }
++    if (work->body.is_end != 0)
++    {
++        work->action = Garage_800DBA10;
++        work->tick = 0;
++        work->control.turn.vz = 0;
++        work->control.turn.vx = 0;
++    }
++}
++
++void Garage_800DC028(GarageCompanion *work)
++{
++    int                   tick;
++    GarageCompanionAction action;
++
++    tick = work->tick;
++    action = work->action;
++    work->tick = tick + 1;
++    if (action == NULL)
++    {
++        action = Garage_800DBA54;
++        work->action = Garage_800DBA54;
++        work->action_id = 14;
++        GM_ConfigObjectAction(&work->body, 14, 0, 0);
++    }
++    action(work, tick);
++}
++
++void Garage_800DC0A0(GarageCompanion *work)
++{
++    int v1;
++
++    v1 = GarageCompanionFlags;
++    work->flags = GarageCompanionFlags;
++    GarageCompanionFlags = v1 & 0xFFFF0000;
++    Garage_800DC028(work);
++}
++
++void Garage_800DC0D4(MATRIX *matrix)
++{
++    PRESCRIPT script = {{0}, {0}, 0, 0};
++    int       choice;
++    script.pos.vx = matrix->t[0];
++    script.pos.vy = matrix->t[1];
++    script.pos.vz = matrix->t[2];
++    choice = GV_RandU(16);
++    script.s_anim = choice < 5 ? (choice > 0) : 2;
++    GarageCasingAnimation.pre_script = &script;
++    NewAnime(NULL, 0, &GarageCasingAnimation);
++}
+diff --git a/source/overlays/s19a/props_data.c b/source/overlays/s19a/props_data.c
+new file mode 100644
+index 000000000..85d236e5e
+--- /dev/null
++++ b/source/overlays/s19a/props_data.c
+@@ -0,0 +1,87 @@
++#include "props_native.h"
++
++SVECTOR GarageDrumCorners[8] = {{-500, 0, -250, 0}, {-250, 1000, -500, 0}, {250, 0, -500, 0}, {500, 1000, -250, 0},
++                                {500, 0, 250, 0},   {250, 1000, 500, 0},   {-250, 0, 500, 0}, {-500, 1000, 250, 0}};
++
++SVECTOR GarageFallenDrumCorners[4] = {
++    {-250, -500, -250, 0}, {250, 500, -250, 0}, {-250, -500, 250, 0}, {250, 500, 250, 0}};
++
++unsigned short GarageJeepMessages[4] = {59924, 56882, 46252, 35278};
++
++unsigned char GarageVibrationCollision[8] = {222, 2, 73, 5, 37, 7, 0, 0};
++
++unsigned char GarageVibrationDriving[16] = {255, 1, 183, 6, 144, 11, 92, 9, 69, 4, 34, 4, 0, 0, 0, 0};
++
++SVECTOR GarageWheelOffset = {0, 1435, -925, 0};
++
++SVECTOR GarageHeadlightPositions[2] = {{330, 890, 1436, 0}, {-330, 890, 1436, 0}};
++
++SVECTOR GarageJeepTargetSize = {730, 880, 730, 0};
++
++SVECTOR GarageJeepCorners[4] = {{750, 0, 1500, 0}, {-750, 0, 1500, 0}, {-750, 0, -1500, 0}, {750, 0, -1500, 0}};
++
++SVECTOR GarageJeepAttackPositions[2] = {{0, 900, 600, 0}, {0, 900, -600, 0}};
++
++SVECTOR GarageJeepAttackForce = {0, 0, 0, 0};
++
++VECTOR GarageSnakeScale = {2048, 2048, 2048, 0};
++
++int GarageSnakeAddress = -1;
++
++SVECTOR GarageSnakeTargetSize = {150, 750, 150, 0};
++
++short GarageSnakeActions[6] = {0, 1, 2, 3, 4, 5};
++
++unsigned char GarageVibrationDamage1[4] = {127, 4, 0, 0};
++
++unsigned char GarageVibrationDamage2[8] = {225, 1, 255, 2, 0, 0, 0, 0};
++
++unsigned char GarageVibrationFire1[4] = {127, 1, 0, 0};
++
++unsigned char GarageVibrationFire2[4] = {155, 3, 0, 0};
++
++SVECTOR GarageBloodOffset = {0, 0, 100, 0};
++
++SVECTOR GarageBloodRotation = {-1024, 0, 0, 0};
++
++SVECTOR GarageBulletOffset = {0, 286, 574, 0};
++
++SVECTOR GarageBulletRotation = {3072, 0, 0, 0};
++
++SVECTOR GarageGunOffset = {0, 1435, -925, 0};
++
++SVECTOR GarageSnakeOffset = {180, -932, -340, 0};
++
++int GarageFirstPersonTime = 0;
++
++SVECTOR GarageCompanionOffset = {345, 915, -440, 0};
++
++static char GarageCasingScript[] = {0, 7, 1, 0, 5, 9, 1, 244, 2, 0, 1, 15};
++
++ANIMATION GarageCasingAnimation = {50716, 2, 2, 3, 1, 300, 1, 800, 800, 128, NULL, GarageCasingScript};
++
++SVECTOR GarageGateTargetSize = {2500, 2000, 500, 0};
++
++SVECTOR GarageGateTargetPosition = {-500, 2000, -5000, 0};
++
++SVECTOR GarageGateWallStart = {-3500, 0, -5000, 0};
++
++SVECTOR GarageGateWallEnd = {1500, 4000, -5000, 0};
++
++SVECTOR GarageSteeringOffset = {0, 0, 2250, 0};
++
++MATRIX *GarageGunWorld = NULL;
++
++int GarageIgnition = 0;
++
++int GarageHeadlightIntensity = 0;
++
++int GarageCompanionFlags = 0;
++
++void Garage_800D8E54(int procedure, int value)
++{
++    long     argument = value;
++    GCL_ARGS args = {1, &argument};
++    if (procedure != 0)
++        GCL_ExecProc(procedure, &args);
++}
+diff --git a/source/overlays/s19a/props_drum.c b/source/overlays/s19a/props_drum.c
+new file mode 100644
+index 000000000..9d7b67f4b
+--- /dev/null
++++ b/source/overlays/s19a/props_drum.c
+@@ -0,0 +1,311 @@
++#include "props_native.h"
++
++void Garage_800D7E50(GarageDrum *work)
++{
++    CONTROL       *p_control;
++    int            v3;
++    TARGET        *target;
++    u_short        damaged;
++    int            phase;
++    short          ly;
++    int            wall_count;
++    HZD_SEG       *walls;
++    HZD_SEG       *v10;
++    int            procedure;
++    int            vy;
++    unsigned short vx;
++    int            v15;
++    unsigned short vz;
++    bool           v17;
++    short          v18;
++    HZD_SEG       *v20;
++    int            v21;
++    HZD_SEG       *v22;
++    SVECTOR       *v23;
++    HZD_SEG       *v24;
++    MATRIX         matrix;
++
++    p_control = &work->control;
++    GM_CurrentMap = work->map;
++    DG_GetLightMatrix(&work->control.mov, work->light);
++    v3 = 0;
++    GM_ConfigControlAttribute(p_control, work->phase == 0);
++    target = work->target;
++    damaged = target->damaged;
++    if ((damaged & 4) == 0)
++        goto LABEL_6;
++    target->damaged = damaged & 0xFFFB;
++    if (work->phase == 0)
++    {
++        if (target->vital < 0 || target->a_mode == 2)
++        {
++            work->exploded = 1;
++            work->phase = 1;
++            target->vital = 255;
++            work->homing->flag = 0;
++            target->class = 1;
++        }
++    LABEL_6:
++        if (work->phase == 0)
++            goto LABEL_30;
++    }
++    phase = work->phase;
++    if (phase >= 7)
++    {
++        if (phase == 7)
++        {
++            work->phase = 8;
++            GM_FreeObject(&work->body);
++            GM_InitObject(&work->body, 64239, 93, 0);
++            GM_ConfigObjectJoint(&work->body);
++            GM_ConfigObjectLight(&work->body, work->light);
++            GM_ConfigObjectStep(&work->body, &p_control->step);
++            p_control->mov.vy = (short)(work->original_height) - (short)(work->body.objs->def->models[0].ly);
++            ly = work->body.objs->def->models[0].ly;
++            p_control->grounded = 0;
++            p_control->height = -ly;
++            wall_count = work->wall_count;
++            walls = work->walls;
++            if (wall_count > 0)
++            {
++                v10 = work->walls;
++                do
++                {
++                    ++walls;
++                    --wall_count;
++                    HZD_DequeueDynamicSegment(work->hzd, v10);
++                    v10 = walls;
++                } while (wall_count > 0);
++            }
++            procedure = work->procedure;
++            v3 = 1;
++            if (procedure != 0)
++                GCL_ExecProc(procedure, NULL);
++            GM_ConfigControlHazard(p_control, p_control->height, 400, 400);
++            if (work->forced_velocity != 0)
++            {
++                p_control->step = work->velocity;
++            }
++            else
++            {
++                p_control->step.vy = GV_RandU(128) + 150;
++                p_control->step.vx = GV_RandS(128);
++                p_control->step.vz = GV_RandS(128);
++            }
++            p_control->seg_flag = 4;
++            work->spin.vx = 0;
++            work->spin.vy = GV_RandS(128);
++            work->spin.vz = GV_RandS(128);
++            work->airborne = 1;
++            work->bounce_count = 0;
++        }
++        else if (work->airborne != 0)
++        {
++            GV_AddVec3(&work->spin, &p_control->turn, &p_control->turn);
++            if (p_control->grounded != 0)
++            {
++                ++work->bounce_count;
++                vy = p_control->step.vy;
++                p_control->grounded = 0;
++                vx = p_control->step.vx;
++                p_control->step.vy = -vy / 2;
++                v15 = (short)vx + (vx >> 15);
++                vz = p_control->step.vz;
++                p_control->step.vx = v15 >> 1;
++                v17 = p_control->step.vy >= 20;
++                p_control->step.vz = ((short)vz + (vz >> 15)) >> 1;
++                if (!v17)
++                {
++                    GM_ConfigControlHazard(p_control, -1, 0, -1);
++                    work->airborne = 0;
++                }
++            }
++            p_control->step.vy -= 20;
++            if (work->bounce_count >= 3)
++            {
++                v18 = 1024;
++                if (p_control->rot.vz >= 2048)
++                    v18 = 3072;
++                p_control->turn.vz = v18;
++            }
++            p_control->rot = p_control->turn;
++            matrix = DG_ZeroMatrix;
++            RotMatrixY(p_control->rot.vy, &matrix);
++            v20 = work->walls;
++            v21 = 0;
++            v22 = work->walls;
++            do
++            {
++                v23 = &GarageFallenDrumCorners[v21++];
++                matrix.t[0] = p_control->mov.vx;
++                matrix.t[1] = p_control->mov.vy;
++                matrix.t[2] = p_control->mov.vz;
++                THING_Hzd_800C45C4(v22, &matrix, v23, &GarageFallenDrumCorners[v21 & 3]);
++                v24 = v20++;
++                HZD_QueueDynamicSegment2(work->hzd, v24, 324);
++                v22 = v20;
++            } while (v21 < 4);
++            work->wall_count = 4;
++        }
++    }
++    else
++    {
++        work->phase = phase + 1;
++    }
++LABEL_30:
++    GM_ActControl(p_control);
++    GM_ActObject2(&work->body);
++    if (v3 != 0)
++    {
++        NewBlast(&work->body.objs->world, blast_data_8009F4B8);
++        RexNewDrumSmoke(&work->body.objs->world, 0, 100);
++        RexNewDrumFire(&work->body.objs->world, 0, 55);
++        RexNewDrumSmoke(&work->body.objs->world, 1, 200);
++    }
++    GM_MoveTarget(target, &work->control.mov);
++}
++
++void Garage_800D833C(GarageDrum *work)
++{
++    int      wall_count;
++    HZD_SEG *walls;
++    HZD_SEG *v4;
++
++    wall_count = work->wall_count;
++    walls = work->walls;
++    if (wall_count > 0)
++    {
++        v4 = work->walls;
++        do
++        {
++            ++walls;
++            --wall_count;
++            HZD_DequeueDynamicSegment(work->hzd, v4);
++            v4 = walls;
++        } while (wall_count > 0);
++    }
++    GM_ResetHomingTarget(work->homing);
++    GM_FreeControl(&work->control);
++    GM_FreeObject(&work->body);
++    GM_FreeTarget(work->target);
++    GM_FreeTarget(work->push_target);
++}
++
++void Garage_800D83CC(GarageDrum *work)
++{
++    TARGET  *v2;
++    TARGET  *v3;
++    DG_OBJS *objs;
++    DG_MDL  *def;
++    int      uy;
++    int      ly;
++
++    v2 = GM_AllocTarget();
++    work->target = v2;
++    v3 = GM_AllocTarget();
++    objs = work->body.objs;
++    work->push_target = v3;
++    def = objs->def->models;
++    work->size.vx = 550;
++    uy = def->uy;
++    ly = def->ly;
++    work->size.vz = 550;
++    work->size.vy = (uy - ly) / 2 + 10;
++    GM_SetTarget(v2, 20, 2, &work->size);
++    GM_SetTarget(v3, 20, 1, &work->size);
++    GM_SetPowerTarget(v2, 1, -1, 150, 0, &DG_ZeroVector);
++    GM_SetPowerTarget(v3, 1, -1, 150, 0, &DG_ZeroVector);
++    work->original_height = work->control.mov.vy;
++    work->control.mov.vy -= (short)(def->ly);
++    GM_MoveTarget(v2, &work->control.mov);
++    GM_MoveTarget(v3, &work->control.mov);
++    v3->class = 1;
++}
++
++int Garage_800D8504(GarageDrum *work, int name, int map)
++{
++    CONTROL *p_control;
++    char    *v7;
++    char    *Option;
++    char    *Str;
++    HOMING  *v10;
++    HZD_SEG *walls;
++    int      v12;
++    DG_MDL  *def;
++    int      ly;
++    int      uy;
++    HZD_SEG *v16;
++    SVECTOR *v17;
++    SVECTOR *v18;
++    HZD_SEG *v19;
++    MATRIX   matrix;
++
++    p_control = &work->control;
++    if (GM_InitControl(&work->control, name, map) < 0)
++        return -1;
++    GM_ConfigControlHazard(p_control, -1, -2, -1);
++    GM_ConfigControlInterp(p_control, 0);
++    Option = GCL_GetOption(112);
++    v7 = GCL_GetOption(100);
++    GM_ConfigControlString(p_control, Option, v7);
++    work->procedure = THING_Gcl_GetInt(101);
++    if (GCL_GetOption(102) != NULL)
++    {
++        Str = GCL_NextStr();
++        GCL_StrToSV(Str, &work->velocity.vx);
++        work->forced_velocity = 1;
++    }
++    GM_InitObject(&work->body, 64238, 93, 0);
++    GM_ConfigObjectLight(&work->body, work->light);
++    Garage_800D83CC(work);
++    v10 = GM_SetHomingTarget(&work->body.objs->world, p_control);
++    work->homing = v10;
++    if (v10 != NULL)
++        v10->flag = 1;
++    walls = work->walls;
++    work->hzd = GM_GetMap(map)->hzd;
++    DG_SetPos2(&p_control->mov, &work->control.rot);
++    ReadRotMatrix(&matrix);
++    v12 = 0;
++    def = work->body.objs->def->models;
++    ly = def->ly;
++    uy = def->uy;
++    v16 = work->walls;
++    do
++    {
++        v17 = &GarageDrumCorners[v12++];
++        v18 = &GarageDrumCorners[v12 & 7];
++        v17->vy = ly;
++        v18->vy = uy;
++        THING_Hzd_800C45C4(v16, &matrix, v17, v18);
++        v19 = walls++;
++        HZD_QueueDynamicSegment2(work->hzd, v19, 256);
++        v16 = walls;
++    } while (v12 < 8);
++    work->wall_count = 8;
++    work->map = map;
++    work->phase = 0;
++    work->exploded = 0;
++    work->airborne = 0;
++    return 0;
++}
++
++GarageDrum *Garage_800D86E0(int name, int map)
++{
++    GarageDrum *v4;
++    bool        v5;
++    GarageDrum *result;
++
++    v4 = (GarageDrum *)GV_NewActor(5, sizeof(GarageDrum));
++    if (v4 == NULL)
++        return NULL;
++    GV_SetNamedActor(v4, Garage_800D7E50, Garage_800D833C, "drum.c");
++    v5 = Garage_800D8504(v4, name, map) >= 0;
++    result = v4;
++    if (!v5)
++    {
++        GV_DestroyActor(v4);
++        return NULL;
++    }
++    return result;
++}
+diff --git a/source/overlays/s19a/props_gate.c b/source/overlays/s19a/props_gate.c
+new file mode 100644
+index 000000000..aaac05843
+--- /dev/null
++++ b/source/overlays/s19a/props_gate.c
+@@ -0,0 +1,116 @@
++#include "props_native.h"
++
++void Garage_800DC18C(GarageGate *work)
++{
++    int      map;
++    int      lit_ready;
++    MAP     *v4;
++    TARGET  *target;
++    u_short  damaged;
++    DG_OBJS *objs;
++    int      v8;
++    MAP     *v9;
++
++    map = work->map;
++    lit_ready = work->lit_ready;
++    GM_CurrentMap = map;
++    if (lit_ready == 0)
++    {
++        v4 = GM_GetMap(map);
++        Takabe_ReshadeModel(work->body.objs, v4->lit);
++        work->lit_ready = 1;
++    }
++    target = work->target;
++    damaged = target->damaged;
++    if ((damaged & 4) != 0)
++    {
++        target->damaged = damaged & 0xFFFB;
++        if (target->a_mode == 2 && work->broken == 0)
++        {
++            objs = work->body.objs;
++            work->broken = 1;
++            Takabe_FreeObjs(objs);
++            v8 = GV_StrCode("19a_o1b");
++            Garage_800DC4A8(&work->body, v8, 87);
++            v9 = GM_GetMap(GM_CurrentMap);
++            Takabe_ReshadeModel(work->body.objs, v9->lit);
++            work->target->side = 3;
++            work->wall.p1.x = 500;
++        }
++    }
++    DG_SetPos(&DG_ZeroMatrix);
++    GM_ActObject2(&work->body);
++}
++
++void Garage_800DC2A0(GarageGate *work)
++{
++    HZD_DequeueDynamicSegment(work->hzd, &work->wall);
++    Takabe_FreeObjs(work->body.objs);
++    GM_FreeTarget(work->target);
++}
++
++void Garage_800DC2E4(GarageGate *work)
++{
++    TARGET *v2;
++
++    v2 = GM_AllocTarget();
++    work->target = v2;
++    GM_SetTarget(v2, 20, 2, &GarageGateTargetSize);
++    GM_SetPowerTarget(v2, 1, -1, 3, 0, &DG_ZeroVector);
++    GM_MoveTarget(v2, &GarageGateTargetPosition);
++}
++
++int Garage_800DC364(GarageGate *work, int name, int map)
++{
++    (void)name;
++    int      v5;
++    HZD_HDL *hzd;
++
++    GM_CurrentMap = map;
++    work->map = map;
++    v5 = GV_StrCode("19a_o1a");
++    Garage_800DC4A8(&work->body, v5, 87);
++    THING_Hzd_800C45C4(&work->wall, NULL, &GarageGateWallStart, &GarageGateWallEnd);
++    hzd = GM_GetMap(map)->hzd;
++    work->hzd = hzd;
++    HZD_QueueDynamicSegment2(hzd, &work->wall, 512);
++    Garage_800DC2E4(work);
++    work->lit_ready = 0;
++    work->broken = 0;
++    return 0;
++}
++
++GarageGate *Garage_800DC414(int name, int map)
++{
++    GarageGate *v4;
++    bool        v5;
++    GarageGate *result;
++
++    v4 = (GarageGate *)GV_NewActor(5, sizeof(GarageGate));
++    if (v4 == NULL)
++        return NULL;
++    GV_SetNamedActor(v4, Garage_800DC18C, Garage_800DC2A0, "pk_gate.c");
++    v5 = Garage_800DC364(v4, name, map) >= 0;
++    result = v4;
++    if (!v5)
++    {
++        GV_DestroyActor(v4);
++        return NULL;
++    }
++    return result;
++}
++
++void Garage_800DC4A8(OBJECT *object, int model, int flags)
++{
++    int     v6;
++    u_short v7;
++    MAP    *Map;
++
++    GV_ZeroMemory(object, sizeof(*object));
++    v6 = GM_CurrentMap;
++    v7 = GM_CurrentMap;
++    object->flag = flags;
++    object->map_name = v7;
++    Map = GM_GetMap(v6);
++    object->objs = Takabe_MakeElevatorPreshade(model, Map->lit);
++}
+diff --git a/source/overlays/s19a/props_jeep.c b/source/overlays/s19a/props_jeep.c
+new file mode 100644
+index 000000000..55921c0dc
+--- /dev/null
++++ b/source/overlays/s19a/props_jeep.c
+@@ -0,0 +1,639 @@
++#include "props_native.h"
++
++void Garage_800D8E8C(GarageJeep *work)
++{
++    int      map;
++    int      v5;
++    DG_OBJS *objs;
++    int      v7;
++    DG_OBJS *v8;
++    int      procedure;
++    int      v10;
++    int      v11;
++    int      v12;
++    int      v13;
++    int      v14;
++    int      timer;
++    int      v16;
++    int      v17;
++    int      v18;
++    int      v19;
++    int      v20;
++    int      v21;
++    int      v22;
++    int      v23;
++    int      direction;
++    int      v25;
++    int      v26;
++    int      v27;
++    int      v28;
++    int      v29;
++    int      v30;
++    int      v31;
++    int      v32;
++    int      v33;
++    int      v34;
++    int      v35;
++    int      v36;
++    int      v37;
++    int      v38;
++    int      v39;
++    int      v40;
++    int      v41;
++    int      v42;
++    int      v43;
++    int      v44;
++    int      v45;
++    int      v46;
++    int      v47;
++    int      v48;
++    int      v49;
++    int      v50;
++    int      v51;
++    int      v52;
++    int      v53;
++    int      v54;
++    int      v55;
++    int      v56;
++    int      v57;
++    int      v58;
++    int      v59;
++    short    vy;
++    short    v62;
++    short    vx;
++    short    v64;
++    short    v65;
++    SVECTOR  vec;
++    SVECTOR  rot;
++    SVECTOR  headlights[2];
++
++    map = work->map;
++    vec = work->control.mov;
++    GM_CurrentMap = map;
++    vec.vy += 500;
++    DG_GetLightMatrix(&vec, work->light);
++    if (work->phase < 3 && GM_GameOverTimer != 0 && GM_Vitality <= 0)
++        Voicesys_800CE734();
++    v5 = THING_Msg_CheckMessage(work->name, 4, GarageJeepMessages);
++    ++work->timer;
++    switch (work->phase)
++    {
++    case 0:
++        if (Garage_800D9FA8() == 0)
++        {
++            objs = work->body.objs;
++            v7 = work->field_58C;
++            work->phase = 1;
++            work->timer = 0;
++            GarageCompanionFlags = 4096;
++            work->snake = (GV_ACT *)Garage_800DB89C(&work->control, &objs->world, v7);
++        }
++        goto LABEL_70;
++    case 1:
++        if (v5 == 1)
++            GarageCompanionFlags |= 0x10000u;
++        if (GarageIgnition == 1)
++        {
++            work->phase = 2;
++            work->timer = 0;
++            Voicesys_800CE2D0();
++            v8 = work->lamp2.objs;
++            GarageHeadlightIntensity = 255;
++            v8->flag &= ~0x80u;
++            procedure = work->procedure;
++            work->lamp_light.t[0] = 128;
++            work->lamp_light.t[1] = 128;
++            work->lamp_light.t[2] = 128;
++            Garage_800D8E54(procedure, 7310);
++        }
++        else
++        {
++            v10 = GarageHeadlightIntensity / 2;
++            work->lamp_light.t[0] = GarageHeadlightIntensity / 2;
++            work->lamp_light.t[1] = v10;
++            work->lamp_light.t[2] = v10;
++            GarageHeadlightIntensity = v10;
++        }
++        goto LABEL_70;
++    case 2:
++        GarageCompanionFlags |= 0x2000u;
++        if (v5 == 2)
++        {
++            v11 = 3;
++            goto LABEL_68;
++        }
++        v12 = work->field_590 + 1;
++        work->field_590 = v12;
++        if (v12 < 451)
++            goto LABEL_70;
++        v13 = work->field_598;
++        work->field_590 = 0;
++        work->field_598 = v13 + 1;
++        if (v13 == 1)
++        {
++            v14 = 8;
++            goto LABEL_23;
++        }
++        if (v13 < 2)
++        {
++            v14 = 7;
++            if (v13 != 0)
++                goto LABEL_70;
++        LABEL_23:
++            Voicesys_800CE5F8(v14, 1);
++            goto LABEL_70;
++        }
++        if (v13 == 2)
++        {
++            Voicesys_800CE5F8(9, 1);
++            work->field_598 = 0;
++        }
++        goto LABEL_70;
++    case 3:
++        if ((GM_PlayerStatus & 4) != 0)
++            goto LABEL_69;
++        if (v5 == 3)
++            work->field_588 = 1;
++        timer = work->timer;
++        if (timer == 1)
++        {
++            work->field_578 = 0;
++            THING_Msg_SendMessage(0x21CAu, 0x3223u);
++            work->companion = (GV_ACT *)Garage_800DA684(&work->control, &work->body.objs->world);
++        }
++        else if (timer >= 15)
++        {
++            if (timer >= 20)
++            {
++                if (timer >= 90)
++                {
++                    if (work->field_588 != 0)
++                    {
++                        work->phase = 4;
++                        work->timer = 0;
++                    }
++                }
++                else
++                {
++                    v23 = GV_NearExp4(work->field_578, 0);
++                    direction = work->direction;
++                    work->field_578 = v23;
++                    v25 = GV_NearExp4(direction, 1536);
++                    v26 = work->field_578;
++                    work->direction = v25;
++                    Garage_800D9BBC(&work->control.mov, &work->control.rot.vy, v25, v26);
++                    Garage_800D9E98(work, work->field_578);
++                    if (work->timer == 89)
++                        Voicesys_800CE5F8(11, 1);
++                }
++            }
++            else
++            {
++                v21 = GV_NearExp4(work->direction, 1536);
++                v22 = work->field_578;
++                work->direction = v21;
++                Garage_800D9BBC(&work->control.mov, &work->control.rot.vy, v21, v22);
++                Garage_800D9E98(work, work->field_578);
++            }
++        }
++        else
++        {
++            v16 = GV_NearSpeed(work->field_578, 400, 30);
++            v17 = work->direction;
++            work->field_578 = v16;
++            v18 = GV_NearSpeed(v17, 1536, 60);
++            v19 = work->field_578;
++            work->direction = v18;
++            Garage_800D9BBC(&work->control.mov, &work->control.rot.vy, v18, v19);
++            v20 = work->field_578;
++            GarageCompanionFlags |= 0x20u;
++            Garage_800D9E98(work, v20);
++            if (work->timer == 2)
++            {
++                GM_SeSet(&work->control.mov, 188);
++                NewPadVibration(GarageVibrationDriving, 2);
++            }
++        }
++        GM_PlayerStatus &= ~0x800000u;
++        goto LABEL_70;
++    case 4:
++        v27 = work->timer;
++        v28 = v27 < 30;
++        if (v27 == 4)
++        {
++            Voicesys_800CE6AC(1);
++            Voicesys_800CE2D0();
++            v27 = work->timer;
++            v28 = v27 < 30;
++        }
++        if (v28)
++        {
++            work->field_57C = 0;
++            if (v27 == 20)
++                GarageCompanionFlags = 131584;
++            goto LABEL_70;
++        }
++        if (v27 < 40)
++        {
++            v29 = GV_NearExp4(work->direction, work->control.rot.vy);
++            v30 = work->field_578;
++            v31 = work->field_57C;
++            work->direction = v29;
++            v32 = GV_NearSpeed(v30, -300, v31);
++            v33 = work->field_57C;
++            work->field_578 = v32;
++            v34 = GV_NearSpeed(v33, 30, 4);
++            v35 = work->direction;
++            v36 = work->field_578;
++            work->field_57C = v34;
++            Garage_800D9BBC(&work->control.mov, &work->control.rot.vy, v35, v36);
++            Garage_800D9E98(work, work->field_578);
++            if (work->timer == 30)
++            {
++                GM_SeSet(&work->control.mov, 183);
++                NewPadVibration(GarageVibrationDriving, 2);
++            }
++            goto LABEL_70;
++        }
++        if (v27 < 50)
++        {
++            v37 = GV_NearExp4(work->direction, work->control.rot.vy - 200);
++            v38 = work->field_578;
++            v39 = work->field_57C;
++            work->direction = v37;
++            v40 = GV_NearSpeed(v38, -300, v39);
++            v41 = work->field_57C;
++            work->field_578 = v40;
++            v42 = GV_NearSpeed(v41, 30, 4);
++            v43 = work->direction;
++            v44 = work->field_578;
++            work->field_57C = v42;
++            Garage_800D9BBC(&work->control.mov, &work->control.rot.vy, v43, v44);
++            if (work->timer == 49)
++                work->field_57C = 0;
++            Garage_800D9E98(work, work->field_578);
++        LABEL_66:
++            GarageCompanionFlags &= 0xFFFDFDFF;
++            goto LABEL_70;
++        }
++        if (v27 >= 60)
++        {
++            if (v27 >= 80)
++            {
++                if (v27 >= 210)
++                {
++                    v11 = 5;
++                LABEL_68:
++                    work->phase = v11;
++                LABEL_69:
++                    work->timer = 0;
++                }
++                else
++                {
++                    v51 = GV_NearSpeed(work->direction, 2048, 40);
++                    v52 = work->field_578;
++                    v53 = work->field_57C;
++                    work->direction = v51;
++                    v54 = GV_NearSpeed(v52, 700, v53);
++                    v55 = work->field_57C;
++                    work->field_578 = v54;
++                    v56 = GV_NearSpeed(v55, 30, 4);
++                    v57 = work->direction;
++                    v58 = work->field_578;
++                    work->field_57C = v56;
++                    Garage_800D9BBC(&work->control.mov, &work->control.rot.vy, v57, v58);
++                    Garage_800D9E98(work, work->field_578);
++                    v59 = work->timer;
++                    if (v59 == 80)
++                    {
++                        GM_SeSet(&work->control.mov, 180);
++                        NewPadVibration(GarageVibrationDriving, 2);
++                        v59 = work->timer;
++                    }
++                    if (v59 == 120)
++                        goto LABEL_66;
++                }
++            }
++            else
++            {
++                v49 = GM_GameOverTimer;
++                work->field_57C = 0;
++                work->field_578 = 2;
++                if (v49 != 0)
++                    work->timer = 70;
++                v50 = work->timer;
++                GM_PlayerStatus |= 0x800000u;
++                if (v50 == 70)
++                    GarageCompanionFlags = 32;
++            }
++        }
++        else
++        {
++            v45 = GV_NearExp4(work->direction, work->control.rot.vy);
++            v46 = work->field_578;
++            work->direction = v45;
++            v47 = GV_NearExp8(v46, 0);
++            v48 = work->direction;
++            work->field_578 = v47;
++            Garage_800D9BBC(&work->control.mov, &work->control.rot.vy, v48, v47);
++            if (work->field_578 == 0)
++                work->timer = 60;
++            Garage_800D9E98(work, work->field_578);
++        }
++    LABEL_70:
++        if (work->control.mov.vz < -25000)
++        {
++            work->field_578 = 0;
++            work->control.mov.vz = -25000;
++        }
++        work->control.turn = work->control.rot;
++        GM_ActControl(&work->control);
++        GM_ActObject2(&work->body);
++        rot.vx = work->control.rot.vx;
++        vy = work->control.rot.vy;
++        rot.vz = 0;
++        rot.vy = vy;
++        v62 = (work->field_578 << 12) / 2199;
++        vx = work->wheels.rots[1].vx;
++        work->wheels.rots[2].vx += v62;
++        v64 = work->wheels.rots[4].vx;
++        work->wheels.rots[1].vx = vx + v62;
++        v65 = work->wheels.rots[3].vx;
++        work->wheels.rots[4].vx = v64 + v62;
++        work->wheels.rots[3].vx = v65 + v62;
++        work->wheels.rots[3].vy = (short)(work->direction) - work->control.rot.vy;
++        work->wheels.rots[4].vy = (short)(work->direction) - work->control.rot.vy;
++        DG_SetPos2(&work->control.mov, &rot);
++        GM_ActObject2(&work->wheels);
++        DG_MovePos(&GarageWheelOffset);
++        GM_ActObject2((OBJECT *)&work->gun);
++        Garage_800D9DBC(work);
++        if (GarageHeadlightIntensity >= 65)
++        {
++            DG_SetPos(&work->body.objs->world);
++            DG_PutVector(GarageHeadlightPositions, headlights, 2);
++            DG_SetTmpLight(&headlights[0], 4 * GarageHeadlightIntensity, 5 * GarageHeadlightIntensity);
++            DG_SetTmpLight(&headlights[1], 4 * GarageHeadlightIntensity, 5 * GarageHeadlightIntensity);
++        }
++        return;
++    default:
++        goto LABEL_70;
++    }
++}
++
++void Garage_800D974C(GarageJeep *work)
++{
++    GV_ACT  *snake;
++    GV_ACT  *companion;
++    int      v4;
++    int      v5;
++    HZD_SEG *v6;
++
++    GM_FreeControl(&work->control);
++    GM_FreeObject(&work->body);
++    GM_FreeObject(&work->wheels);
++    GM_FreeObject((OBJECT *)&work->gun);
++    GM_FreeObject((OBJECT *)&work->lamp1);
++    GM_FreeObject((OBJECT *)&work->lamp2);
++    snake = work->snake;
++    if (snake != NULL)
++        GV_DestroyActor(snake);
++    companion = work->companion;
++    if (companion != NULL)
++        GV_DestroyActor(companion);
++    v4 = 0;
++    v5 = 1440;
++    GM_PlayerStatus &= ~0x800000u;
++    do
++    {
++        v6 = (HZD_SEG *)((char *)work + v5);
++        v5 += 16;
++        ++v4;
++        HZD_DequeueDynamicSegment(work->hzd, v6);
++    } while (v4 < 8);
++}
++
++void Garage_800D981C(GarageJeep *work)
++{
++    TARGET *p_target;
++
++    p_target = &work->target;
++    GM_SetTarget(&work->target, 4, 1, &GarageJeepTargetSize);
++    GM_SetPowerTarget(p_target, 4, 2, 256, 0, &DG_ZeroVector);
++}
++
++int Garage_800D9878(GarageJeep *work, int name, int map)
++{
++    CONTROL *p_control;
++    char    *v8;
++    char    *Option;
++    int      v10;
++    MAP     *v11;
++    DG_OBJS *objs;
++    HZD_SEG *walls;
++    HZD_SEG *v18;
++    int      i;
++    int      vy;
++
++    p_control = &work->control;
++    if (GM_InitControl(&work->control, name, map) < 0)
++        return -1;
++    GM_ConfigControlHazard(p_control, -1, -2, -1);
++    GM_ConfigControlInterp(p_control, 0);
++    Option = GCL_GetOption(112);
++    v8 = GCL_GetOption(100);
++    GM_ConfigControlString(p_control, Option, v8);
++    work->procedure = THING_Gcl_GetInt(101);
++    GM_InitObject(&work->body, 9927, 109, 0);
++    GM_InitObject(&work->wheels, 9945, 45, 0);
++    GM_ConfigObjectJoint(&work->wheels);
++    GM_ConfigObjectLight(&work->body, work->light);
++    GM_ConfigObjectLight(&work->wheels, work->light);
++    GM_InitObjectNoRots(&work->gun, 16297, 109, 0);
++    GM_ConfigObjectLight((OBJECT *)&work->gun, work->light);
++    GarageGunWorld = &work->gun.objs->world;
++    GM_InitObjectNoRots(&work->lamp1, 30215, 365, 0);
++    work->lamp1.objs->root = &work->body.objs->world;
++    GM_ConfigObjectLight((OBJECT *)&work->lamp1, &work->lamp_light);
++    GM_InitObjectNoRots(&work->lamp2, 55824, 365, 0);
++    work->lamp2.objs->root = &work->body.objs->world;
++    GM_ConfigObjectLight((OBJECT *)&work->lamp2, &work->lamp_light);
++    v10 = 4;
++    work->lamp2.objs->flag |= 0x80u;
++    work->lamp_light.t[0] = 0;
++    work->lamp_light.t[1] = 0;
++    work->lamp_light.t[2] = 0;
++    Garage_800D981C(work);
++    v11 = GM_GetMap(map);
++    objs = work->body.objs;
++    work->hzd = v11->hzd;
++    objs->world = DG_ZeroMatrix;
++    Garage_800D9DBC(work);
++    walls = work->walls;
++    v18 = work->walls;
++    do
++    {
++        ++walls;
++        --v10;
++        HZD_QueueDynamicSegment2(work->hzd, v18, 256);
++        v18 = walls;
++    } while (v10 > 0);
++    for (i = 4; i > 0; --i)
++    {
++        ++walls;
++        HZD_QueueDynamicSegment2(work->hzd, v18, 69);
++        v18 = walls;
++    }
++    work->field_58C = THING_Gcl_GetInt(99);
++    work->map = map;
++    work->name = name;
++    work->timer = 0;
++    work->phase = 0;
++    work->field_578 = 0;
++    vy = p_control->rot.vy;
++    GarageHeadlightIntensity = 0;
++    work->field_584 = 0;
++    GarageIgnition = 0;
++    work->direction = vy;
++    return 0;
++}
++
++GarageJeep *Garage_800D9B28(int name, int map)
++{
++    GarageJeep *v4;
++    bool        v5;
++    GarageJeep *result;
++
++    v4 = (GarageJeep *)GV_NewActor(5, sizeof(GarageJeep));
++    if (v4 == NULL)
++        return NULL;
++    GV_SetNamedActor(v4, Garage_800D8E8C, Garage_800D974C, "pjeep.c");
++    v5 = Garage_800D9878(v4, name, map) >= 0;
++    result = v4;
++    if (!v5)
++    {
++        GV_DestroyActor(v4);
++        return NULL;
++    }
++    return result;
++}
++
++void Garage_800D9BBC(SVECTOR *position, short *direction, int turn, short distance)
++{
++    SVECTOR output;
++    SVECTOR vec2;
++    SVECTOR vec1;
++    SVECTOR input;
++    MATRIX  matrix;
++    int     flag[2];
++
++    vec1 = GarageSteeringOffset;
++    input = DG_ZeroVector;
++    input.vz = distance;
++    matrix = DG_ZeroMatrix;
++    RotMatrixY(*direction, &matrix);
++    SetRotMatrix(&matrix);
++    SetTransMatrix(&matrix);
++    RotTransSV(&vec1, &vec1, flag);
++    RotTransSV(&input, &vec2, flag);
++    GV_AddVec3(position, &vec2, position);
++    matrix = DG_ZeroMatrix;
++    RotMatrixY(turn, &matrix);
++    SetRotMatrix(&matrix);
++    RotTransSV(&input, &output, flag);
++    GV_AddVec3(&vec1, &output, &output);
++    GV_SubVec3(&output, &vec2, &vec1);
++    *direction = ratan2(vec1.vx, vec1.vz);
++}
++
++void Garage_800D9DBC(GarageJeep *work)
++{
++    HZD_SEG *walls;
++    int      v2;
++    DG_OBJS *objs;
++    HZD_SEG *v4;
++    SVECTOR *v5;
++    SVECTOR *v6;
++    int      v7;
++    SVECTOR *v8;
++    SVECTOR *v9;
++
++    walls = work->walls;
++    v2 = 0;
++    objs = work->body.objs;
++    v4 = work->walls;
++    do
++    {
++        ++walls;
++        v5 = &GarageJeepCorners[v2++];
++        v6 = &GarageJeepCorners[v2 & 3];
++        v5->vy = 0;
++        v6->vy = 1000;
++        THING_Hzd_800C45C4(v4, &objs->world, v5, v6);
++        v4 = walls;
++    } while (v2 < 4);
++    v7 = 0;
++    do
++    {
++        ++walls;
++        v8 = &GarageJeepCorners[v7++];
++        v9 = &GarageJeepCorners[v7 & 3];
++        v8->vy = 1000;
++        v9->vy = 2000;
++        THING_Hzd_800C45C4(v4, &objs->world, v8, v9);
++        v4 = walls;
++    } while (v7 < 4);
++}
++
++void Garage_800D9E98(GarageJeep *work, int speed)
++{
++    int      v3;
++    int      v4;
++    CONTROL *p_control;
++    int      v6;
++    u_short  damaged;
++
++    v3 = speed;
++    v4 = 0;
++    p_control = &work->control;
++    if (speed <= 0)
++    {
++        v4 = 1;
++        v3 = -speed;
++    }
++    GM_SetPowerTarget(&work->target, 1, 2, 256, 0, &DG_ZeroVector);
++    DG_SetPos2(&p_control->mov, &work->control.rot);
++    DG_PutVector(&GarageJeepAttackPositions[v4], &work->target.center, 1);
++    GarageJeepAttackForce.vz = v3 / 2;
++    DG_RotVector(&GarageJeepAttackForce, &work->target.force, 1);
++    v6 = GM_PowerTarget(&work->target);
++    damaged = work->target.damaged;
++    work->target.vital = 256;
++    work->target.damaged = damaged & 0xFFFB;
++    if (v6 != 0)
++    {
++        GM_SeSetMode(&work->target.center, 37, 1);
++        NewPadVibration(GarageVibrationCollision, 2);
++    }
++}
++
++int Garage_800D9FA8()
++{
++    int       v0;
++    int       v1;
++    CONTROL **i;
++    int       name;
++
++    v0 = 0;
++    v1 = GM_N_WhereList;
++    for (i = GM_WhereList; v1 > 0; ++i)
++    {
++        name = (*i)->name;
++        if (name == 38386)
++            v0 = 1;
++        if (name == 15660)
++            v0 = 1;
++        --v1;
++    }
++    return v0;
++}
+diff --git a/source/overlays/s19a/props_native.h b/source/overlays/s19a/props_native.h
+new file mode 100644
+index 000000000..54eed1b3f
+--- /dev/null
++++ b/source/overlays/s19a/props_native.h
+@@ -0,0 +1,273 @@
++#ifndef MGS_GARAGE_PROPS_H
++#define MGS_GARAGE_PROPS_H
++#include <stdbool.h>
++#include <stddef.h>
++#include <string.h>
++#include "game/game.h"
++#include "libgcl/libgcl.h"
++#include "okajima/bullet.h"
++#include "okajima/blood.h"
++#include "game/vibrate.h"
++#include "bullet/blast.h"
++#include "anime/animconv/anime.h"
++#include "takabe/thing.h"
++#include "overlays/s17a/rex_particles.h"
++typedef struct GarageDrum
++{
++    GV_ACT   actor;
++    int      map;
++    CONTROL  control;
++    OBJECT   body;
++    MATRIX   light[2];
++    SVECTOR  size;
++    TARGET  *target;
++    TARGET  *push_target;
++    int      unused_1D4[8];
++    HOMING  *homing;
++    int      field_1F8;
++    int      exploded;
++    int      phase;
++    int      airborne;
++    int      original_height;
++    int      wall_count;
++    HZD_HDL *hzd;
++    HZD_SEG  walls[8];
++    int      procedure;
++    int      bounce_count;
++    int      forced_velocity;
++    SVECTOR  spin;
++    SVECTOR  velocity;
++} GarageDrum;
++
++typedef struct GarageJeep
++{
++    GV_ACT         actor;
++    GV_ACT        *snake;
++    GV_ACT        *companion;
++    int            map;
++    int            name;
++    CONTROL        control;
++    OBJECT         body;
++    OBJECT         wheels;
++    OBJECT_NO_ROTS gun;
++    MATRIX         light[2];
++    TARGET         target;
++    OBJECT_NO_ROTS lamp1;
++    OBJECT_NO_ROTS lamp2;
++    MATRIX         lamp_light;
++    int            unused_388[122];
++    int            timer;
++    int            phase;
++    int            field_578;
++    int            field_57C;
++    int            direction;
++    int            field_584;
++    int            field_588;
++    int            field_58C;
++    int            field_590;
++    int            procedure;
++    int            field_598;
++    HZD_HDL       *hzd;
++    HZD_SEG        walls[8];
++} GarageJeep;
++
++typedef struct GarageSnake GarageSnake;
++typedef void (*GarageSnakeAction)(GarageSnake *, int);
++struct GarageSnake
++{
++    GV_ACT            actor;
++    CONTROL          *root_control;
++    MATRIX           *root_matrix;
++    CONTROL           control;
++    OBJECT            body;
++    MOTION_CONTROL    motion;
++    MOTION_SEGMENT    segments1[17];
++    MOTION_SEGMENT    segments2[17];
++    SVECTOR           rotations[16];
++    SVECTOR           adjustments[16];
++    MATRIX            light[2];
++    SVECTOR           field_7E0;
++    OBJECT            weapon;
++    SVECTOR           field_8CC;
++    SVECTOR           aim;
++    int               fields_8DC[2];
++    MATRIX            field_8E4;
++    int               field_904;
++    int               direction;
++    int               field_90C;
++    TARGET           *target;
++    int               field_914;
++    GarageSnakeAction action;
++    int               field_91C;
++    int               tick;
++    int               field_924;
++    int               field_928;
++    int               field_92C;
++    int               field_930;
++    int               field_934;
++    int               field_938;
++    int               health;
++    int               field_940;
++    int               field_944;
++    int               field_948;
++    int               field_94C;
++    int               field_950;
++    int               field_954;
++};
++
++typedef struct GarageCompanion GarageCompanion;
++typedef void (*GarageCompanionAction)(GarageCompanion *, int);
++struct GarageCompanion
++{
++    GV_ACT                actor;
++    CONTROL              *root_control;
++    MATRIX               *root_matrix;
++    CONTROL               control;
++    OBJECT                body;
++    MOTION_CONTROL        motion;
++    MOTION_SEGMENT        segments1[17];
++    MOTION_SEGMENT        segments2[17];
++    SVECTOR               rotations[16];
++    SVECTOR               adjustments[16];
++    MATRIX                light[2];
++    int                   motion_id;
++    int                   field_7E4;
++    TARGET               *target;
++    GarageCompanionAction action;
++    int                   field_7F0;
++    int                   tick;
++    int                   field_7F8;
++    int                   action_id;
++    int                   flags;
++    int                   field_804;
++    int                   field_808;
++    int                   field_80C;
++    int                   field_810;
++    int                   field_814;
++    short                 motions[4];
++};
++
++typedef struct GarageGate
++{
++    GV_ACT   actor;
++    int      map;
++    OBJECT   body;
++    TARGET  *target;
++    HZD_HDL *hzd;
++    HZD_SEG  wall;
++    int      broken;
++    int      lit_ready;
++} GarageGate;
++
++void                  Garage_800D7E50(GarageDrum *work);
++void                  Garage_800D833C(GarageDrum *work);
++void                  Garage_800D83CC(GarageDrum *work);
++int                   Garage_800D8504(GarageDrum *work, int name, int map);
++GarageDrum           *Garage_800D86E0(int name, int map);
++void                  Garage_800D8E8C(GarageJeep *work);
++void                  Garage_800D974C(GarageJeep *work);
++void                  Garage_800D981C(GarageJeep *work);
++int                   Garage_800D9878(GarageJeep *work, int name, int map);
++GarageJeep           *Garage_800D9B28(int name, int map);
++void                  Garage_800D9BBC(SVECTOR *position, short *direction, int turn, short distance);
++void                  Garage_800D9DBC(GarageJeep *work);
++void                  Garage_800D9E98(GarageJeep *work, int speed);
++int                   Garage_800D9FA8(void);
++void                  Garage_800DA004(GarageSnake *work);
++void                  Garage_800DA3EC(GarageSnake *work);
++int                   Garage_800DA480(GarageSnake *work, int name);
++void                  Garage_800DA638(GarageSnake *work);
++GarageSnake          *Garage_800DA684(CONTROL *root_control, MATRIX *root_matrix);
++void                  Garage_800DA728(GarageSnake *work, int joint, int count);
++int                   Garage_800DA798(GarageSnake *work);
++int                   Garage_800DA840(GarageSnake *work);
++void                  Garage_800DA8A0(GarageSnake *work);
++void                  Garage_800DA940(GarageSnake *work, int tick);
++void                  Garage_800DAA9C(GarageSnake *work, int tick);
++void                  Garage_800DABF0(GarageSnake *work, int tick);
++void                  Garage_800DACF4(GarageSnake *work, int tick);
++void                  Garage_800DAD68(GarageSnake *work);
++void                  Garage_800DAE40(GarageSnake *work);
++void                  Garage_800DB510(GarageSnake *work);
++void                  Garage_800DB53C(GarageCompanion *work);
++int                   Garage_800DB668(GarageCompanion *work, int name, int otacon);
++void                  Garage_800DB860(GarageCompanion *work);
++GarageCompanion      *Garage_800DB89C(CONTROL *root_control, MATRIX *root_matrix, int otacon);
++int                   Garage_800DB950(GarageCompanion *work);
++void                  Garage_800DBA10(GarageCompanion *work, int tick);
++void                  Garage_800DBA54(GarageCompanion *work, int tick);
++void                  Garage_800DBB44(GarageCompanion *work, int tick);
++void                  Garage_800DBC28(GarageCompanion *work, int tick);
++void                  Garage_800DBCF8(GarageCompanion *work, int tick);
++void                  Garage_800DBD6C(GarageCompanion *work, int tick);
++void                  Garage_800DBDE4(GarageCompanion *work, int tick);
++void                  Garage_800DBE58(GarageCompanion *work, int tick);
++void                  Garage_800DBECC(GarageCompanion *work, int tick);
++void                  Garage_800DBF44(GarageCompanion *work, int tick);
++void                  Garage_800DBFB8(GarageCompanion *work, int tick);
++void                  Garage_800DC028(GarageCompanion *work);
++void                  Garage_800DC0A0(GarageCompanion *work);
++void                  Garage_800DC0D4(MATRIX *matrix);
++void                  Garage_800DC18C(GarageGate *work);
++void                  Garage_800DC2A0(GarageGate *work);
++void                  Garage_800DC2E4(GarageGate *work);
++int                   Garage_800DC364(GarageGate *work, int name, int map);
++GarageGate           *Garage_800DC414(int name, int map);
++void                  Garage_800DC4A8(OBJECT *object, int model, int flags);
++extern SVECTOR        GarageDrumCorners[8];
++extern SVECTOR        GarageFallenDrumCorners[4];
++extern unsigned short GarageJeepMessages[4];
++extern unsigned char  GarageVibrationCollision[8];
++extern unsigned char  GarageVibrationDriving[16];
++extern SVECTOR        GarageWheelOffset;
++extern SVECTOR        GarageHeadlightPositions[2];
++extern SVECTOR        GarageJeepTargetSize;
++extern SVECTOR        GarageJeepCorners[4];
++extern SVECTOR        GarageJeepAttackPositions[2];
++extern SVECTOR        GarageJeepAttackForce;
++extern VECTOR         GarageSnakeScale;
++extern int            GarageSnakeAddress;
++extern SVECTOR        GarageSnakeTargetSize;
++extern short          GarageSnakeActions[6];
++extern unsigned char  GarageVibrationDamage1[4];
++extern unsigned char  GarageVibrationDamage2[8];
++extern unsigned char  GarageVibrationFire1[4];
++extern unsigned char  GarageVibrationFire2[4];
++extern SVECTOR        GarageBloodOffset;
++extern SVECTOR        GarageBloodRotation;
++extern SVECTOR        GarageBulletOffset;
++extern SVECTOR        GarageBulletRotation;
++extern SVECTOR        GarageGunOffset;
++extern SVECTOR        GarageSnakeOffset;
++extern int            GarageFirstPersonTime;
++extern SVECTOR        GarageCompanionOffset;
++extern ANIMATION      GarageCasingAnimation;
++extern SVECTOR        GarageGateTargetSize;
++extern SVECTOR        GarageGateTargetPosition;
++extern SVECTOR        GarageGateWallStart;
++extern SVECTOR        GarageGateWallEnd;
++extern SVECTOR        GarageSteeringOffset;
++extern MATRIX        *GarageGunWorld;
++extern int            GarageIgnition;
++extern int            GarageHeadlightIntensity;
++extern int            GarageCompanionFlags;
++DG_OBJS              *Takabe_MakeElevatorPreshade(int model, DG_LITS *lit);
++void                  Takabe_FreeObjs(DG_OBJS *objs);
++void                  Takabe_ReshadeModel(DG_OBJS *objs, DG_LITS *lit);
++void                  Voicesys_800CE2D0(void);
++void                  Voicesys_800CE310(void);
++void                  Voicesys_800CE5F8(int index, int delay);
++void                  Voicesys_800CE6AC(int index);
++void                  Voicesys_800CE734(void);
++void                  sna_act_helper2_helper2_80033054(int id, SVECTOR *vec);
++void                 *NewBullet(MATRIX *matrix, int side, int power, int noise);
++void                  Garage_800D8E54(int procedure, int value);
++_Static_assert(sizeof(GarageDrum) == 688, "GarageDrum original actor layout");
++_Static_assert(sizeof(GarageJeep) == 1568, "GarageJeep original actor layout");
++_Static_assert(sizeof(GarageSnake) == 2392, "GarageSnake original actor layout");
++_Static_assert(sizeof(GarageCompanion) == 2080, "GarageCompanion original actor layout");
++_Static_assert(sizeof(GarageGate) == 296, "GarageGate original actor layout");
++extern BLAST_DATA blast_data_8009F4B8[8];
++void              GM_CheckShukanReverse(unsigned short *status);
++void              GM_CheckShukanReverseAnalog(unsigned char *axis);
++#endif
+diff --git a/source/overlays/s19a/props_snake.c b/source/overlays/s19a/props_snake.c
+new file mode 100644
+index 000000000..e98e37ac7
+--- /dev/null
++++ b/source/overlays/s19a/props_snake.c
+@@ -0,0 +1,672 @@
++#include "props_native.h"
++
++void Garage_800DA004(GarageSnake *work)
++{
++    OBJECT  *p_body;
++    short    vz;
++    short    v4;
++    int      Address;
++    DG_OBJS *objs;
++    short    v9;
++    TARGET  *target;
++    int      v11;
++    int      v12;
++    int      v13;
++    int      v14;
++    int      v15;
++    short    v16;
++    SVECTOR  pos;
++    SVECTOR  rot;
++
++    p_body = &work->body;
++    rot = work->control.rot;
++    work->control.rot = DG_ZeroVector;
++    GM_ActMotion(&work->body);
++    work->control.rot = rot;
++    vz = work->control.step.vz;
++    work->field_7E0.vx += work->control.step.vx;
++    v4 = work->body.height - 503;
++    work->field_7E0.vz += vz;
++    work->field_7E0.vy = v4;
++    GM_ActControl(&work->control);
++    GM_ActObject(p_body);
++    ScaleMatrix(&work->body.objs->world, &GarageSnakeScale);
++    DG_GetLightMatrix(&work->control.mov, work->light);
++    Garage_800DB510(work);
++    GM_PlayerPosition = work->control.mov;
++    pos = work->control.mov;
++    pos.vy = 0;
++    Address = HZD_GetAddress(work->control.map->hzd, &pos, GarageSnakeAddress);
++    GM_SnakeCamera.position.vx = work->body.objs->objs[6].world.t[0];
++    GM_SnakeCamera.position.vy = work->body.objs->objs[6].world.t[1];
++    objs = work->body.objs;
++    GarageSnakeAddress = Address;
++    v9 = objs->objs[6].world.t[2];
++    GM_PlayerAddress = Address;
++    GM_SnakeCamera.position.vz = v9;
++    if (GM_GameOverTimer == 0)
++    {
++        if ((GM_PlayerStatus & 0x800000) != 0)
++            work->target->vital = work->health;
++        target = work->target;
++        v11 = target->vital + GM_Vitality - work->health;
++        v12 = v11 << 16;
++        if (GM_VitalityMax < v11)
++        {
++            v11 = GM_VitalityMax;
++            v12 = GM_VitalityMax << 16;
++        }
++        v13 = v12 >> 16;
++        target->vital = v11;
++        work->health = v13;
++        GM_Vitality = v13;
++        if (v13 <= 0)
++        {
++            if (GM_Item == 13 && (v14 = (unsigned short)GM_RationFlag - 1, GM_RationFlag != 0))
++            {
++                --GM_RationFlag;
++                if (v14 << 16 == 0)
++                    GM_Item = -1;
++                v15 = 256;
++                if (GM_GameLevel <= 0)
++                    v15 = 384;
++                work->target->vital = v15;
++                work->health = v15;
++                GM_Vitality = v15;
++                if (GM_GameLevel < 0)
++                {
++                    v16 = GM_VitalityMax;
++                    work->target->vital = GM_VitalityMax;
++                    work->health = v16;
++                    GM_Vitality = v16;
++                }
++                GM_SeSet2(0, 63, 12);
++                ++GM_RationUseCount;
++            }
++            else
++            {
++                GM_Vitality = 0;
++                GM_GameOver();
++                GM_GameOverTimer = -1;
++                work->field_950 = 1;
++                GM_SeSet(NULL, 26);
++                work->control.skip_flag |= 2u;
++                GM_GameStatus |= 0x10000000u;
++            }
++        }
++    }
++    GM_MoveTarget(work->target, &work->control.mov);
++    if (work->field_944 != 0)
++    {
++        work->target->class = 1;
++        if ((work->field_944 & 2) != 0)
++            work->body.objs->flag |= 0x80u;
++        else
++            work->body.objs->flag &= ~0x80u;
++        --work->field_944;
++    }
++    else
++    {
++        work->target->class = 20;
++        work->body.objs->flag &= ~0x80u;
++    }
++    if (work->field_948 != 0)
++        work->body.objs->flag |= 0x80u;
++}
++
++void Garage_800DA3EC(GarageSnake *work)
++{
++    TARGET *target;
++    int     v3;
++
++    target = work->target;
++    v3 = GM_Vitality;
++    GM_SetTarget(target, 20, 1, &GarageSnakeTargetSize);
++    GM_SetPowerTarget(target, 1, -1, v3, 0, &DG_ZeroVector);
++    target->map = work->root_control->map->index;
++}
++
++int Garage_800DA480(GarageSnake *work, int name)
++{
++    CONTROL *control;
++    CONTROL *root_control;
++    CONTROL *v6;
++    int      v8;
++    int      v9;
++    int      v10;
++
++    control = &work->control;
++    if (GM_InitControl(&work->control, name, work->root_control->map->index) < 0)
++        return -1;
++    root_control = work->root_control;
++    work->control.mov = root_control->mov;
++    v6 = work->root_control;
++    work->control.rot = v6->rot;
++    GM_ConfigControlInterp(control, 4);
++    GM_ConfigControlHazard(control, 750, 450, 450);
++    GM_ConfigControlAttribute(control, 1);
++    GM_ConfigControlTrapCheck(control);
++    GM_PlayerStatus = 0;
++    v9 = GV_StrCode("snake");
++    v8 = GV_StrCode("sne_19b");
++    GM_InitObject(&work->body, v9, 45, v8);
++    v10 = GV_StrCode("sne_19b");
++    GM_ConfigMotionControl(&work->body, &work->motion, v10, work->segments1, work->segments2, control, work->rotations);
++    GM_ConfigObjectLight(&work->body, work->light);
++    GM_ConfigObjectAction(&work->body, 0, 0, 0);
++    work->target = GM_AllocTarget();
++    Garage_800DA3EC(work);
++    control->r_sphere = -2;
++    GM_PlayerBody = &work->body;
++    GM_PlayerControl = control;
++    work->health = GM_Vitality;
++    return 0;
++}
++
++void Garage_800DA638(GarageSnake *work)
++{
++    GM_FreeTarget(work->target);
++    GM_FreeControl(&work->control);
++    GM_FreeObject(&work->body);
++    GM_PlayerControl = NULL;
++    GM_PlayerBody = NULL;
++}
++
++GarageSnake *Garage_800DA684(CONTROL *root_control, MATRIX *root_matrix)
++{
++    GarageSnake *v4;
++    int          v5;
++    bool         v6;
++    GarageSnake *result;
++
++    v4 = (GarageSnake *)GV_NewActor(6, sizeof(GarageSnake));
++    if (v4 == NULL)
++        return NULL;
++    GV_SetNamedActor(v4, Garage_800DA004, Garage_800DA638, "pkjp_sne.c");
++    v4->root_control = root_control;
++    v4->root_matrix = root_matrix;
++    v5 = GV_StrCode("\xa5\xb9\xa5\xcd\xa1\xbc\xa5\xaf");
++    v6 = Garage_800DA480(v4, v5) >= 0;
++    result = v4;
++    if (!v6)
++    {
++        GV_DestroyActor(v4);
++        return NULL;
++    }
++    return result;
++}
++
++void Garage_800DA728(GarageSnake *work, int joint, int count)
++{
++    MATRIX matrix;
++
++    DG_SetPos(&work->body.objs->objs[joint].world);
++    DG_MovePos(&GarageBloodOffset);
++    DG_RotatePos(&GarageBloodRotation);
++    ReadRotMatrix(&matrix);
++    NewBlood(&matrix, count);
++}
++
++int Garage_800DA798(GarageSnake *work)
++{
++    TARGET *target;
++
++    target = work->target;
++    if ((target->damaged & 4) == 0)
++        return 0;
++    target->force = DG_ZeroVector;
++    work->action = Garage_800DAA9C;
++    work->tick = 0;
++    work->control.turn.vz = 0;
++    work->control.turn.vx = 0;
++    target->damage = 0;
++    target->damaged = 0;
++    NewPadVibration(GarageVibrationDamage1, 1);
++    NewPadVibration(GarageVibrationDamage2, 2);
++    return 1;
++}
++
++int Garage_800DA840(GarageSnake *work)
++{
++    int v3;
++
++    if (Garage_800DA798(work) == 0)
++        return 0;
++    work->target->class = 1;
++    work->field_944 = 4;
++    v3 = work->direction + GV_RandS(512);
++    work->direction = v3;
++    return 1;
++}
++
++void Garage_800DA8A0(GarageSnake *work)
++{
++    MATRIX  right;
++    SVECTOR pos;
++    int     flag[2];
++
++    RotMatrixYXZ(&GarageBulletRotation, &right);
++    MulMatrix0(&work->field_8E4, &right, &right);
++    DG_SetPos(&work->field_8E4);
++    RotTrans(&GarageBulletOffset, (VECTOR *)right.t, flag);
++    NewBullet(&right, 1, 1, 0);
++    pos.vx = right.t[0];
++    pos.vy = right.t[1];
++    pos.vz = right.t[2];
++    GM_SeSet(&pos, 46);
++    Garage_800DC0D4(&right);
++}
++
++void Garage_800DA940(GarageSnake *work, int tick)
++{
++    int     v3;
++    int     v5;
++    OBJECT *p_body;
++    int     v7;
++
++    v3 = work->field_92C;
++    if (Garage_800DA840(work) == 0)
++    {
++        if ((v3 & 1) != 0)
++            Garage_800DA8A0(work);
++        v5 = v3 & 2;
++        if (tick == 0)
++        {
++            if (work->field_928 != 0)
++            {
++                work->field_928 = 0;
++                GM_ConfigObjectAction(&work->body, GarageSnakeActions[0], 0, 4);
++                work->field_7E0 = DG_ZeroVector;
++            }
++            v5 = v3 & 2;
++        }
++        if (v5 != 0)
++        {
++            p_body = &work->body;
++            if (work->field_928 == 2)
++                return;
++            work->field_928 = 2;
++            v7 = GarageSnakeActions[2];
++        }
++        else if ((v3 & 4) != 0)
++        {
++            p_body = &work->body;
++            if (work->field_928 == 3)
++                return;
++            work->field_928 = 3;
++            v7 = GarageSnakeActions[3];
++        }
++        else
++        {
++            p_body = &work->body;
++            if (work->field_928 == 0)
++                return;
++            work->field_928 = 0;
++            v7 = GarageSnakeActions[0];
++        }
++        GM_ConfigObjectAction(p_body, v7, 0, 4);
++        work->field_7E0 = DG_ZeroVector;
++    }
++}
++
++void Garage_800DAA9C(GarageSnake *work, int tick)
++{
++    int v3;
++    int v4;
++
++    work->field_944 = 4;
++    if (tick == 0)
++    {
++        v3 = work->field_928;
++        work->field_940 = 1;
++        if (v3 != 1)
++        {
++            work->field_928 = 1;
++            GM_ConfigObjectAction(&work->body, GarageSnakeActions[1], 0, 4);
++            work->field_7E0 = DG_ZeroVector;
++        }
++        Garage_800DA728(work, 5, 0);
++        if (GM_Vitality > 0)
++            GM_SeSet(&work->control.mov, 136);
++    }
++    if (work->body.is_end != 0)
++    {
++        if (work->field_950 != 0)
++        {
++            work->action = Garage_800DABF0;
++            work->tick = 0;
++            work->control.turn.vz = 0;
++            work->control.turn.vx = 0;
++        }
++        else
++        {
++            v4 = work->field_928;
++            work->action = Garage_800DA940;
++            work->tick = 0;
++            work->control.turn.vz = 0;
++            work->control.turn.vx = 0;
++            if (v4 != 0)
++            {
++                work->field_928 = 0;
++                GM_ConfigObjectAction(&work->body, GarageSnakeActions[0], 0, 4);
++                work->field_7E0 = DG_ZeroVector;
++            }
++            work->field_940 = 0;
++            work->field_944 = 45;
++        }
++    }
++}
++
++void Garage_800DABF0(GarageSnake *work, int tick)
++{
++    int     v4;
++    OBJECT *p_body;
++
++    if (tick == 0)
++    {
++        v4 = work->field_928;
++        p_body = &work->body;
++        if (v4 != 4)
++        {
++            work->field_928 = 4;
++            GM_ConfigObjectAction(p_body, GarageSnakeActions[4], 0, 4);
++            work->field_7E0 = DG_ZeroVector;
++        }
++        Voicesys_800CE310();
++        Voicesys_800CE5F8(12, 1);
++        Voicesys_800CE734();
++    }
++    if (tick == 61)
++    {
++        NewPadVibration(GarageVibrationFire1, 1);
++        NewPadVibration(GarageVibrationFire2, 2);
++        GM_SeSetMode(&work->control.mov, 51, 1);
++    }
++    if (work->body.is_end != 0)
++    {
++        GM_GameOverTimer = 1;
++        work->action = Garage_800DACF4;
++        work->tick = 0;
++        work->control.turn.vz = 0;
++        work->control.turn.vx = 0;
++    }
++}
++
++void Garage_800DACF4(GarageSnake *work, int tick)
++{
++    if (tick == 0 && work->field_928 != 5)
++    {
++        work->field_928 = 5;
++        GM_ConfigObjectAction(&work->body, GarageSnakeActions[5], 0, 4);
++        work->field_7E0 = DG_ZeroVector;
++    }
++}
++
++void Garage_800DAD68(GarageSnake *work)
++{
++    int               tick;
++    GarageSnakeAction action;
++    int               v4;
++
++    work->target->class = 1;
++    tick = work->tick;
++    action = work->action;
++    work->tick = tick + 1;
++    if (action == NULL)
++    {
++        v4 = work->field_928;
++        action = Garage_800DA940;
++        work->action = Garage_800DA940;
++        if (v4 != 0)
++        {
++            work->field_928 = 0;
++            GM_ConfigObjectAction(&work->body, GarageSnakeActions[0], 0, 4);
++            work->field_7E0 = DG_ZeroVector;
++        }
++    }
++    action(work, tick);
++    if ((GM_PlayerStatus & 0x800000) != 0)
++        work->target->class = 1;
++}
++
++void Garage_800DAE40(GarageSnake *work)
++{
++    int      v2;
++    int      v3;
++    int      v4;
++    int      v5;
++    int      v6;
++    int      first_person;
++    int      v8;
++    char     v16;
++    int      v17;
++    int      v18;
++    int      v19;
++    bool     v20;
++    int      v21;
++    int      v22;
++    int      v23;
++    int      v24;
++    int      v29;
++    int      v30;
++    CONTROL *v32;
++    MATRIX  *v33;
++    DG_OBJS *objs;
++    int      v35;
++    int      v36;
++    int      v37;
++    int      v38;
++    SVECTOR  mov;
++    MATRIX   right;
++    SVECTOR  vec3;
++    SVECTOR  vec2;
++    MATRIX   matrix;
++    SVECTOR  rot;
++    SVECTOR  vec;
++    VECTOR   output;
++    int      status;
++    int      left_dy;
++    int      yaw;
++    int      pitch;
++
++    v2 = work->field_950;
++    v3 = 0;
++    left_dy = 0;
++    work->field_92C = 0;
++    if (v2 != 0)
++    {
++        status = 0;
++        left_dy = 0;
++    }
++    else
++    {
++        status = GV_PadData[0].status;
++        if (GV_PadData[0].analog == 2)
++        {
++            left_dy = GV_PadData[0].left_dy;
++            if (GV_PadData[0].left_dx < 0x80u)
++            {
++                v4 = GV_PadData[0].left_dx - 64;
++                if (v4 > 0)
++                    v4 = 0;
++            }
++            else
++            {
++                v4 = GV_PadData[0].left_dx - 192;
++                if (v4 < 0)
++                    v4 = 0;
++            }
++            v5 = left_dy;
++            v6 = left_dy - 64;
++            if (left_dy < 128)
++            {
++                left_dy -= 64;
++                if (v6 > 0)
++                    left_dy = 0;
++            }
++            else
++            {
++                left_dy -= 192;
++                if (v5 - 192 < 0)
++                    left_dy = 0;
++            }
++            v3 = 2 * v4;
++            left_dy *= 2;
++        }
++        if (v3 == 0 && left_dy == 0)
++        {
++            if ((status & 0x8000) != 0)
++                v3 = -128;
++            if ((status & 0x2000) != 0)
++                v3 = 127;
++            if ((status & 0x1000) != 0)
++                left_dy = -128;
++            if ((status & 0x4000) != 0)
++                left_dy = 127;
++        }
++        if ((GM_PlayerStatus & 1) != 0)
++        {
++            {
++                unsigned short buttons = status;
++                GM_CheckShukanReverse(&buttons);
++                status = buttons;
++            }
++            left_dy += 128;
++            {
++                unsigned char axis = left_dy;
++                GM_CheckShukanReverseAnalog(&axis);
++                left_dy = axis;
++            }
++            left_dy -= 128;
++        }
++    }
++    first_person = GM_Camera.first_person;
++    if (GM_Camera.first_person != 0)
++    {
++        if (GarageFirstPersonTime < 15)
++            ++GarageFirstPersonTime;
++        v8 = 13;
++    }
++    else
++    {
++        if (GarageFirstPersonTime > 0)
++            --GarageFirstPersonTime;
++        v8 = 18;
++    }
++    work->field_948 = GarageFirstPersonTime >= v8;
++    mov = GarageGunOffset;
++    work->field_8CC.vy = (work->aim.vy + work->root_control->rot.vy) & 0xFFF;
++    DG_SetPos2(&mov, &work->aim);
++    RotMatrix(&work->aim, &right);
++    right.t[0] = mov.vx;
++    right.t[1] = mov.vy;
++    right.t[2] = mov.vz;
++    CompMatrix(work->root_matrix, &right, &work->field_8E4);
++    *GarageGunWorld = work->field_8E4;
++    v16 = status;
++    if (work->field_940 != 0 && work->field_950 == 0)
++    {
++        v3 = 0;
++        left_dy = 0;
++        if (GM_Camera.first_person != 0)
++            v16 = (status & 0xEF) | 0x10;
++        else
++            v16 = status & 0xEF;
++    }
++    work->direction -= v3 / 4;
++    if (v3 >= 0)
++    {
++        if (v3 <= 0)
++            goto LABEL_47;
++        v17 = work->field_92C | 4;
++    }
++    else
++    {
++        v17 = work->field_92C | 2;
++    }
++    work->field_92C = v17;
++LABEL_47:
++    work->aim.vy = GV_NearExp4P(work->aim.vy, work->direction);
++    v18 = 0;
++    if (first_person == 1)
++        v18 = 300 * left_dy / 128;
++    work->field_90C = GV_NearExp4P(work->field_90C, v18);
++    v19 = work->field_904;
++    v20 = v19 == 0;
++    v21 = v19 - 1;
++    if (!v20)
++        work->field_904 = v21;
++    v22 = v16 & 0x10;
++    if ((status & 0x80) != 0)
++    {
++        v22 = v16 & 0x10;
++        if (work->field_904 == 0)
++        {
++            v23 = work->field_92C;
++            work->field_904 = 3;
++            work->field_92C = v23 | 1;
++            v22 = v16 & 0x10;
++        }
++    }
++    if (v22 != 0)
++    {
++        GM_Camera.first_person = 1;
++        v24 = GM_PlayerStatus | 1;
++    }
++    else
++    {
++        GM_Camera.first_person = 0;
++        v24 = GM_PlayerStatus & 0xFFFFFFFE;
++    }
++    GM_PlayerStatus = v24;
++    vec2 = GarageGunOffset;
++    if (first_person != 0)
++    {
++        MATRIX *head = &GM_PlayerBody->objs->objs[6].world;
++        GM_PlayerControl->rot.vy = work->field_8CC.vy;
++        vec.vx = head->m[0][2];
++        vec.vy = 0;
++        vec.vz = head->m[2][2];
++        v29 = head->m[1][2];
++        v30 = GV_VecLen3(&vec);
++        GM_SnakeCamera.rotate2.vx = (short)(work->field_90C) - ratan2(v29, v30);
++    }
++    else
++    {
++        GM_PlayerControl->rot = work->field_8CC;
++    }
++    GM_SnakeCamera.rotate2.vy = work->field_8CC.vy;
++    rot = GM_PlayerControl->rot;
++    rot.vy -= work->root_control->rot.vy;
++    DG_SetPos2(&DG_ZeroVector, &rot);
++    GV_AddVec3(&GarageSnakeOffset, &work->field_7E0, &vec3);
++    DG_RotVector(&vec3, &vec3, 1);
++    GV_AddVec3(&vec3, &vec2, &vec3);
++    DG_SetPos2(&vec3, &rot);
++    ReadRotMatrix(&matrix);
++    CompMatrix(work->root_matrix, &matrix, &GM_PlayerBody->objs->world);
++    v32 = GM_PlayerControl;
++    GM_PlayerControl->mov.vx = work->body.objs->world.t[0];
++    v32->mov.vy = work->body.objs->world.t[1];
++    v33 = GarageGunWorld;
++    v32->mov.vz = work->body.objs->world.t[2];
++    GM_GetHomingTarget2(v33, work->field_8CC.vy, &yaw, &pitch, GM_CurrentMap, 6000, 128);
++    objs = GM_PlayerBody->objs;
++    v35 = GM_PlayerBody->objs->world.m[0][2];
++    output.vy = 0;
++    output.vx = v35;
++    output.vz = objs->world.m[2][2];
++    Square0(&output, &output);
++    v36 = SquareRoot0(output.vx + output.vz);
++    v37 = -ratan2(objs->world.m[1][2], v36);
++    v38 = 0;
++    if (yaw != -1)
++        v38 = pitch - v37;
++    work->aim.vx = GV_NearExp4(work->aim.vx, v38);
++}
++
++void Garage_800DB510(GarageSnake *work)
++{
++    Garage_800DAE40(work);
++    Garage_800DAD68(work);
++}
+diff --git a/source/stage/s19a.c b/source/stage/s19a.c
+index 748a913c8..2db930c78 100644
+--- a/source/stage/s19a.c
++++ b/source/stage/s19a.c
+@@ -1,26 +1,31 @@
+ #define DECLARE_NEWCHARA_PROTOS
+ #include "charalst.h"
+ 
+-CHARA _StageCharacterEntries[] = {
+-    { 0x0fad, (NEWCHARA *)0x800c429c }, //  CHARA_MOTIONSE,
+-    { 0xfed1, (NEWCHARA *)0x8005d508 }, //  CHARA_PADVIBRATE,   /* chara パッド振動 */
+-    { 0xeced, (NEWCHARA *)0x800c40ac }, //  CHARA_COUNTDOWN2,   /* chara カウントダウンタイマー */
+-    { 0x7bc2, (NEWCHARA *)0x800ddd2c }, //  CHARA_CAMERASHAKE,  /* chara カメラ揺らし */
+-    { 0x51c6, (NEWCHARA *)0x800de108 }, //  CHARA_CAT_IN,       /* chara カットインカメラ */
+-    { 0xa12e, (NEWCHARA *)0x800dcb54 }, //  CHARA_FADEIO,       /* chara フェードイン・アウト */
+-    { 0x7a05, (NEWCHARA *)0x800dd330 }, //  CHARA_CINEMA,       /* chara シネマスクリーン */
+-    { 0x92bc, (NEWCHARA *)0x800c9c0c }, //  CHARA_ASIOTOKUN,    /* chara 足音君 */
+-    { 0x0dc9, (NEWCHARA *)0x800ddaa4 }, //  CHARA_VOICESYS,     /* chara 音声制御 */
+-    { 0xa12e, (NEWCHARA *)0x800dcb54 }, //  CHARA_FADEIO,       /* chara フェードイン・アウト */
+-    { 0x8e88, (NEWCHARA *)0x800d7724 }, //  CHARA_ZAKO19COM,    /* chara ざこ１９コマンダー */
+-    { 0x31ec, (NEWCHARA *)0x800cdbf4 }, //  CHARA_ZAKO19,       /* chara ざこ１９ */
+-    { 0xb58d, (NEWCHARA *)0x800d86e0 }, //  CHARA_DRUMCAN,      /* chara ドラム缶 */
+-    { 0xb47a, (NEWCHARA *)0x800d9b28 }, //  CHARA_PK_JEEP,      /* chara 駐車ジープ */
+-    { 0x9c6c, (NEWCHARA *)0x800dc414 }, //  CHARA_PK_GATE,      /* chara 駐車場ゲート */
+-    { 0xe97e, (NEWCHARA *)0x800cabec }, //  CHARA_DEMODOLL,     /* chara デモ人形 */
+-    { 0x0dc9, (NEWCHARA *)0x800ddaa4 }, //  CHARA_VOICESYS,     // duplicate
+-    { 0x22c6, (NEWCHARA *)0x800c5330 }, //  CHARA_COUNTDOWN,    /* chara カウントダウン */
+-    { 0x56cc, (NEWCHARA *)0x800c6804 }, //  CHARA_CAMERA2,      /* chara カメラ２ */
++extern NEWCHARA s19a_800D7724;
++extern NEWCHARA s19a_800CDBF4;
++extern NEWCHARA Garage_800D86E0;
++extern NEWCHARA Garage_800D9B28;
++extern NEWCHARA Garage_800DC414;
++extern NEWCHARA NewS19Timer;
+ 
+-    CHARA_END
+-};
++CHARA _StageCharacterEntries[] = {{0x0fad, NewMotionSoundEffect}, //  CHARA_MOTIONSE,
++                                  {0xfed1, NewPadVibrationGcl},   //  CHARA_PADVIBRATE,   /* chara パッド振動 */
++                                  {0xeced, NewCountdownGcl}, //  CHARA_COUNTDOWN2,   /* chara カウントダウンタイマー */
++                                  {0x7bc2, NewCameraShake},  //  CHARA_CAMERASHAKE,  /* chara カメラ揺らし */
++                                  {0x51c6, NewCutInCameraSet},  //  CHARA_CAT_IN,       /* chara カットインカメラ */
++                                  {0xa12e, NewFadeInOutSet},    //  CHARA_FADEIO,       /* chara フェードイン・アウト */
++                                  {0x7a05, NewCinemaScreenSet}, //  CHARA_CINEMA,       /* chara シネマスクリーン */
++                                  {0x92bc, NewAsiotoKun},       //  CHARA_ASIOTOKUN,    /* chara 足音君 */
++                                  {0x0dc9, NewVoiceSystem},     //  CHARA_VOICESYS,     /* chara 音声制御 */
++                                  {0xa12e, NewFadeInOutSet},    //  CHARA_FADEIO,       /* chara フェードイン・アウト */
++                                  {0x8e88, s19a_800D7724},      //  CHARA_ZAKO19COM,    /* chara ざこ１９コマンダー */
++                                  {0x31ec, s19a_800CDBF4},      //  CHARA_ZAKO19,       /* chara ざこ１９ */
++                                  {0xb58d, Garage_800D86E0},    //  CHARA_DRUMCAN,      /* chara ドラム缶 */
++                                  {0xb47a, Garage_800D9B28},    //  CHARA_PK_JEEP,      /* chara 駐車ジープ */
++                                  {0x9c6c, Garage_800DC414},    //  CHARA_PK_GATE,      /* chara 駐車場ゲート */
++                                  {0xe97e, NewDemoDoll},        //  CHARA_DEMODOLL,     /* chara デモ人形 */
++                                  {0x0dc9, NewVoiceSystem},     //  CHARA_VOICESYS,     // duplicate
++                                  {0x22c6, NewS19Timer},        //  CHARA_COUNTDOWN,    /* chara カウントダウン */
++                                  {0x56cc, NewCamera2Set},      //  CHARA_CAMERA2,      /* chara カメラ２ */
++
++                                  CHARA_END};
+diff --git a/source/stage/s19ar.c b/source/stage/s19ar.c
+index 748a913c8..2db930c78 100644
+--- a/source/stage/s19ar.c
++++ b/source/stage/s19ar.c
+@@ -1,26 +1,31 @@
+ #define DECLARE_NEWCHARA_PROTOS
+ #include "charalst.h"
+ 
+-CHARA _StageCharacterEntries[] = {
+-    { 0x0fad, (NEWCHARA *)0x800c429c }, //  CHARA_MOTIONSE,
+-    { 0xfed1, (NEWCHARA *)0x8005d508 }, //  CHARA_PADVIBRATE,   /* chara パッド振動 */
+-    { 0xeced, (NEWCHARA *)0x800c40ac }, //  CHARA_COUNTDOWN2,   /* chara カウントダウンタイマー */
+-    { 0x7bc2, (NEWCHARA *)0x800ddd2c }, //  CHARA_CAMERASHAKE,  /* chara カメラ揺らし */
+-    { 0x51c6, (NEWCHARA *)0x800de108 }, //  CHARA_CAT_IN,       /* chara カットインカメラ */
+-    { 0xa12e, (NEWCHARA *)0x800dcb54 }, //  CHARA_FADEIO,       /* chara フェードイン・アウト */
+-    { 0x7a05, (NEWCHARA *)0x800dd330 }, //  CHARA_CINEMA,       /* chara シネマスクリーン */
+-    { 0x92bc, (NEWCHARA *)0x800c9c0c }, //  CHARA_ASIOTOKUN,    /* chara 足音君 */
+-    { 0x0dc9, (NEWCHARA *)0x800ddaa4 }, //  CHARA_VOICESYS,     /* chara 音声制御 */
+-    { 0xa12e, (NEWCHARA *)0x800dcb54 }, //  CHARA_FADEIO,       /* chara フェードイン・アウト */
+-    { 0x8e88, (NEWCHARA *)0x800d7724 }, //  CHARA_ZAKO19COM,    /* chara ざこ１９コマンダー */
+-    { 0x31ec, (NEWCHARA *)0x800cdbf4 }, //  CHARA_ZAKO19,       /* chara ざこ１９ */
+-    { 0xb58d, (NEWCHARA *)0x800d86e0 }, //  CHARA_DRUMCAN,      /* chara ドラム缶 */
+-    { 0xb47a, (NEWCHARA *)0x800d9b28 }, //  CHARA_PK_JEEP,      /* chara 駐車ジープ */
+-    { 0x9c6c, (NEWCHARA *)0x800dc414 }, //  CHARA_PK_GATE,      /* chara 駐車場ゲート */
+-    { 0xe97e, (NEWCHARA *)0x800cabec }, //  CHARA_DEMODOLL,     /* chara デモ人形 */
+-    { 0x0dc9, (NEWCHARA *)0x800ddaa4 }, //  CHARA_VOICESYS,     // duplicate
+-    { 0x22c6, (NEWCHARA *)0x800c5330 }, //  CHARA_COUNTDOWN,    /* chara カウントダウン */
+-    { 0x56cc, (NEWCHARA *)0x800c6804 }, //  CHARA_CAMERA2,      /* chara カメラ２ */
++extern NEWCHARA s19a_800D7724;
++extern NEWCHARA s19a_800CDBF4;
++extern NEWCHARA Garage_800D86E0;
++extern NEWCHARA Garage_800D9B28;
++extern NEWCHARA Garage_800DC414;
++extern NEWCHARA NewS19Timer;
+ 
+-    CHARA_END
+-};
++CHARA _StageCharacterEntries[] = {{0x0fad, NewMotionSoundEffect}, //  CHARA_MOTIONSE,
++                                  {0xfed1, NewPadVibrationGcl},   //  CHARA_PADVIBRATE,   /* chara パッド振動 */
++                                  {0xeced, NewCountdownGcl}, //  CHARA_COUNTDOWN2,   /* chara カウントダウンタイマー */
++                                  {0x7bc2, NewCameraShake},  //  CHARA_CAMERASHAKE,  /* chara カメラ揺らし */
++                                  {0x51c6, NewCutInCameraSet},  //  CHARA_CAT_IN,       /* chara カットインカメラ */
++                                  {0xa12e, NewFadeInOutSet},    //  CHARA_FADEIO,       /* chara フェードイン・アウト */
++                                  {0x7a05, NewCinemaScreenSet}, //  CHARA_CINEMA,       /* chara シネマスクリーン */
++                                  {0x92bc, NewAsiotoKun},       //  CHARA_ASIOTOKUN,    /* chara 足音君 */
++                                  {0x0dc9, NewVoiceSystem},     //  CHARA_VOICESYS,     /* chara 音声制御 */
++                                  {0xa12e, NewFadeInOutSet},    //  CHARA_FADEIO,       /* chara フェードイン・アウト */
++                                  {0x8e88, s19a_800D7724},      //  CHARA_ZAKO19COM,    /* chara ざこ１９コマンダー */
++                                  {0x31ec, s19a_800CDBF4},      //  CHARA_ZAKO19,       /* chara ざこ１９ */
++                                  {0xb58d, Garage_800D86E0},    //  CHARA_DRUMCAN,      /* chara ドラム缶 */
++                                  {0xb47a, Garage_800D9B28},    //  CHARA_PK_JEEP,      /* chara 駐車ジープ */
++                                  {0x9c6c, Garage_800DC414},    //  CHARA_PK_GATE,      /* chara 駐車場ゲート */
++                                  {0xe97e, NewDemoDoll},        //  CHARA_DEMODOLL,     /* chara デモ人形 */
++                                  {0x0dc9, NewVoiceSystem},     //  CHARA_VOICESYS,     // duplicate
++                                  {0x22c6, NewS19Timer},        //  CHARA_COUNTDOWN,    /* chara カウントダウン */
++                                  {0x56cc, NewCamera2Set},      //  CHARA_CAMERA2,      /* chara カメラ２ */
++
++                                  CHARA_END};

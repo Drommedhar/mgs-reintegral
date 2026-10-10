@@ -1,0 +1,6 @@
+.lines -e
+bu /1 mgs_integral_native!MgsNativeReloadOverlay "ew mgs_integral_native!var_buf+a ff; ew mgs_integral_native!var_buf+40e 0; ew mgs_integral_native!var_buf+2 800; ew mgs_integral_native!var_buf+4 0; ew mgs_integral_native!var_buf+44 9; ew mgs_integral_native!linkvarbuf+2 1; ew mgs_integral_native!linkvarbuf+10 17a 450 117 300 300; ew mgs_integral_native!linkvarbuf+1c ffff ffff; ew mgs_integral_native!linkvarbuf+2a 23; ew mgs_integral_native!linkvarbuf+3e 23; ew mgs_integral_native!linkvarbuf+30 9; ew mgs_integral_native!linkvarbuf+44 1b; ew mgs_integral_native!linkvarbuf+32 9; ew mgs_integral_native!linkvarbuf+46 1b; ew mgs_integral_native!linkvarbuf+5a 1; ew mgs_integral_native!linkvarbuf+5e 0 0; ew mgs_integral_native!linkvarbuf+64 5; ew mgs_integral_native!linkvarbuf+7a 5; .echo FIXTURE story255 phase0 Normal, d16e incoming pose, finite Stinger35 Chaff9 Stun9 Rations5 BodyArmor1 and post-Vulcan health768; gc"
+sxe -c "r;kv;q" av
+sxe -c "r;kv;q" dz
+g
+q

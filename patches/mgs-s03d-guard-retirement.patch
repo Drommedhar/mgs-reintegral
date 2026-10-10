@@ -1,0 +1,35 @@
+diff --git a/source/overlays/s03d/animal/zako/zakocom.c b/source/overlays/s03d/animal/zako/zakocom.c
+index d459fffe5..88b269d19 100644
+--- a/source/overlays/s03d/animal/zako/zakocom.c
++++ b/source/overlays/s03d/animal/zako/zakocom.c
+@@ -7,6 +7,9 @@
+ #include "game/vibrate.h" // for NewPadVibration
+ #include "takabe/cineutil.h"
+ #include <string.h>
++#ifdef MGS_NATIVE
++#include <limits.h>
++#endif
+ 
+ SVECTOR s03d_dword_800C3B88 = {30000, 30000, 30000};
+ 
+@@ -395,7 +398,12 @@ void s03d_800D47BC(ZakoComMgr *mgr)
+     for (i = 0; i < mgr->count; i++)
+     {
+         work = mgr->entries[ZAKOCOM_MGR->field_40[i]].field_C;
++#ifdef MGS_NATIVE
++        /* Encounter cleanup clears actor slots before the commander exits. */
++        dists[i] = work ? work->field_B90 : INT_MAX;
++#else
+         dists[i] = work->field_B90;
++#endif
+     }
+ 
+     for (t3 = mgr->count - 1; t3 > -1; t3 = t4)
+@@ -432,6 +440,7 @@ void s03d_800D47BC(ZakoComMgr *mgr)
+         work = mgr->entries[ZAKOCOM_MGR->field_40[i]].field_C;
+ #ifdef MGS_NATIVE
+         static const int distances[] = {3000, 4000, 7000, 8000, 8000, 8000, 8000, 8000};
++        if (!work) continue;
+         work->field_B64 = distances[ZAKOCOM_MGR->field_40[i]];
+ #else
+         work->field_B64 = (&s03d_dword_800C3BA0)[ZAKOCOM_MGR->field_40[i]];

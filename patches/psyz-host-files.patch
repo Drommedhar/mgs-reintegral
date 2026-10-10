@@ -1,0 +1,141 @@
+diff --git a/psyz/src/psyz/libsn.c b/psyz/src/psyz/libsn.c
+index 1577f9b..27c0646 100644
+--- a/psyz/src/psyz/libsn.c
++++ b/psyz/src/psyz/libsn.c
+@@ -1,36 +1,114 @@
+-#include <psyz/log.h>
++#include <limits.h>
++#include <stdio.h>
+ 
+-int PCinit(void) {
+-    NOT_IMPLEMENTED;
+-    return 0;
++#define HOST_FILE_LIMIT 32
++
++typedef struct HostFile
++{
++    FILE *stream;
++    int   access;
++} HostFile;
++
++static HostFile files[HOST_FILE_LIMIT];
++
++static int open_file(const char *name, const char *mode, int access)
++{
++    int index;
++    if (!name)
++        return -1;
++    for (index = 0; index < HOST_FILE_LIMIT; ++index)
++    {
++        if (!files[index].stream)
++        {
++            FILE *stream = fopen(name, mode);
++            if (!stream)
++                return -1;
++            files[index].stream = stream;
++            files[index].access = access;
++            return index;
++        }
++    }
++    return -1;
++}
++
++static HostFile *lookup(int descriptor)
++{
++    if (descriptor < 0 || descriptor >= HOST_FILE_LIMIT || !files[descriptor].stream)
++        return NULL;
++    return &files[descriptor];
++}
++
++int PCinit(void)
++{
++    int index, result = 0;
++    for (index = 0; index < HOST_FILE_LIMIT; ++index)
++    {
++        if (files[index].stream)
++        {
++            if (fclose(files[index].stream) != 0)
++                result = -1;
++            files[index].stream = NULL;
++        }
++    }
++    return result;
+ }
+ 
+-int PCopen(char* name, int flags, int perms) {
+-    NOT_IMPLEMENTED;
+-    return 0;
++int PCopen(const char *name, int flags, int permissions)
++{
++    (void)permissions;
++    if (flags < 0 || flags > 2)
++        return -1;
++    return open_file(name, flags == 0 ? "rb" : "r+b", flags);
+ }
+ 
+-int PCcreat(char* name, int perms) {
+-    NOT_IMPLEMENTED;
+-    return 0;
++int PCcreat(const char *name, int permissions)
++{
++    (void)permissions;
++    return open_file(name, "w+b", 2);
+ }
+ 
+-int PClseek(int fd, int offset, int mode) {
+-    NOT_IMPLEMENTED;
+-    return 0;
++int PClseek(int descriptor, int offset, int mode)
++{
++    static const int origins[] = {SEEK_SET, SEEK_CUR, SEEK_END};
++    HostFile        *file = lookup(descriptor);
++    long             position;
++    if (!file || mode < 0 || mode > 2 || fseek(file->stream, offset, origins[mode]) != 0)
++        return -1;
++    position = ftell(file->stream);
++    return position < 0 || position > INT_MAX ? -1 : (int)position;
+ }
+ 
+-int PCread(int fd, char* buff, int len) {
+-    NOT_IMPLEMENTED;
+-    return 0;
++int PCread(int descriptor, char *buffer, int length)
++{
++    HostFile *file = lookup(descriptor);
++    size_t    count;
++    if (!file || file->access == 1 || length < 0 || (!buffer && length))
++        return -1;
++    if (!length)
++        return 0;
++    count = fread(buffer, 1, (size_t)length, file->stream);
++    return !count && ferror(file->stream) ? -1 : (int)count;
+ }
+ 
+-int PCwrite(int fd, char* buff, int len) {
+-    NOT_IMPLEMENTED;
+-    return 0;
++int PCwrite(int descriptor, const char *buffer, int length)
++{
++    HostFile *file = lookup(descriptor);
++    size_t    count;
++    if (!file || file->access == 0 || length < 0 || (!buffer && length))
++        return -1;
++    if (!length)
++        return 0;
++    count = fwrite(buffer, 1, (size_t)length, file->stream);
++    return !count && ferror(file->stream) ? -1 : (int)count;
+ }
+ 
+-int PCclose(int fd) {
+-    NOT_IMPLEMENTED;
+-    return 0;
++int PCclose(int descriptor)
++{
++    HostFile *file = lookup(descriptor);
++    int       result;
++    if (!file)
++        return -1;
++    result = fclose(file->stream);
++    file->stream = NULL;
++    return result;
+ }

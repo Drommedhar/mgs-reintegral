@@ -1,0 +1,29 @@
+diff --git a/source/libgcl/expr.c b/source/libgcl/expr.c
+index 26afaae57..b767eb575 100644
+--- a/source/libgcl/expr.c
++++ b/source/libgcl/expr.c
+@@ -1,5 +1,8 @@
+ #include "libgcl.h"
+ #include "mgstype.h"
++#ifdef MGS_NATIVE
++#include "mgs_game_options.h"
++#endif
+ 
+ enum
+ {
+@@ -79,6 +82,15 @@ int GCL_Expr( char *data, int *value )
+             }
+             else
+             {
++#ifdef MGS_NATIVE
++                if (op == OP_EQ || op == OP_NE)
++                {
++                    int left = sp[-2].value;
++                    int right = sp[-1].value;
++                    sp[-2].value = MgsAutoCardOperand(sp[-2].ptr, left, right);
++                    sp[-1].value = MgsAutoCardOperand(sp[-1].ptr, right, left);
++                }
++#endif
+                 sp[ -2 ].value = calc( op, sp[ -2 ].value, sp[ -1 ].value );
+                 sp[ -2 ].ptr = NULL;
+             }

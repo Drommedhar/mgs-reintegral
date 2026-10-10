@@ -1,0 +1,195 @@
+diff --git a/psyz/src/psyz/psyz_spu.c b/psyz/src/psyz/psyz_spu.c
+index 8262c04..2a976a5 100644
+--- a/psyz/src/psyz/psyz_spu.c
++++ b/psyz/src/psyz/psyz_spu.c
+@@ -17,6 +17,11 @@ _Static_assert(
+ #define CD_RING_MASK (CD_RING_FRAMES - 1) // ring wrapper
+ #define CD_RING_LOW_WATER 1024            // refill when short of N frames
+ 
++typedef struct {
++    int level;
++    unsigned counter;
++} SpuVolumeSweep;
++
+ // Full SPU state
+ static struct {
+     u8 ram[PSYZ_SPU_RAM_SIZE];
+@@ -33,6 +38,8 @@ static struct {
+     short reverb_previous[2];
+ 
+     VoiceState voice[PSYZ_SPU_NUM_VOICES];
++    SpuVolumeSweep voice_volume[PSYZ_SPU_NUM_VOICES][2];
++    SpuVolumeSweep main_volume[2];
+ 
+     // CD audio ring buffer, refilled by Psyz_CdPullSamples
+     short cd_ring[CD_RING_FRAMES * N_CHANNELS];
+@@ -72,8 +79,12 @@ void Psyz_SpuInit(void) {
+ static void spu_reset(void) {
+     atomic_store(&spu_irq_latched, 0);
+     _spu_RXX->rxx.spustat = 0;
++    _spu_RXX->rxx.main_vol.left = _spu_RXX->rxx.main_vol.right = 0;
++    _spu_RXX->rxx.main_volx.left = _spu_RXX->rxx.main_volx.right = 0;
+     for (int v = 0; v < PSYZ_SPU_NUM_VOICES; v++) {
+         _spu_RXX->rxx.voice[v].volumex = 0;
++        _spu_RXX->rxx.voice[v].volume.left = 0;
++        _spu_RXX->rxx.voice[v].volume.right = 0;
+     }
+     memset(&spu, 0, sizeof(spu));
+ }
+@@ -158,6 +169,13 @@ static void write_spu_register(unsigned int reg_offset, unsigned short value) {
+         return;
+     }
+     _spu_RXX->raw[reg_offset >> 1] = value;
++    if (reg_offset < 0x180 && (reg_offset & 15) < 4) {
++        spu.voice_volume[reg_offset >> 4][(reg_offset >> 1) & 1].counter = 0;
++    } else if (reg_offset == 0x180 || reg_offset == 0x182) {
++        spu.main_volume[(reg_offset >> 1) & 1].counter = 0;
++    } else if (reg_offset == 0x1B8 || reg_offset == 0x1BA) {
++        spu.main_volume[(reg_offset >> 1) & 1].level = (short)value;
++    }
+     // MSVC's C-mode offsetof is not an integer constant expression, so it
+     // cannot appear in a case label. Use an if-chain instead.
+     if (reg_offset == offsetof(SPU_RXX, spucnt) && !(value & 0x40)) {
+@@ -198,6 +216,10 @@ void Psyz_SpuWrite(unsigned int reg_offset, unsigned short value) {
+ }
+ 
+ static unsigned short read_spu_register(unsigned int reg_offset) {
++    if (reg_offset >= 0x200 && reg_offset < 0x260 && !(reg_offset & 1)) {
++        return (unsigned short)spu.voice_volume[(reg_offset - 0x200) >> 2]
++                                                   [(reg_offset >> 1) & 1].level;
++    }
+     if (reg_offset >= sizeof(SPU_RXX) || (reg_offset & 1)) {
+         WARNF("Psyz_SpuRead: bad offset 0x%X", reg_offset);
+         return 0;
+@@ -232,13 +254,54 @@ static void write_capture(unsigned int idx, short val) {
+     }
+ }
+ 
+-static inline int voice_vol(unsigned short reg) {
+-    if (reg & 0x8000) {
+-        // https://problemkaputt.de/psxspx-spu-volume-and-adsr-generator.htm
+-        LOG_ONCE("voice volume bit15 not implemented");
+-        return 0;
++static void sweep_tick(SpuVolumeSweep* sweep, unsigned short control) {
++    unsigned shift = (control >> 2) & 31;
++    unsigned increment = 0x8000u >> (shift > 11 ? shift - 11 : 0);
++    int decreasing = !!(control & 0x2000);
++    int exponential = !!(control & 0x4000);
++    int negative = !!(control & 0x1000) && !(decreasing && exponential);
++    int step = 7 - (control & 3);
++    if (!(control & 0x8000)) {
++        sweep->level = (short)(control << 1);
++        sweep->counter = 0;
++        return;
++    }
++    if ((control & 127) == 127)
++        return;
++    if (decreasing ^ negative)
++        step = ~step;
++    step *= 1 << (shift < 11 ? 11 - shift : 0);
++    if (exponential && decreasing) {
++        step = (step * sweep->level) >> 15;
++    } else if (exponential && sweep->level > 0x6000) {
++        if (shift < 10) {
++            step >>= 2;
++        } else if (shift >= 11) {
++            increment >>= 2;
++        } else {
++            step >>= 1;
++            increment >>= 1;
++        }
+     }
+-    return (short)((reg & 0x7FFF) << 1);
++    sweep->counter += increment ? increment : 1;
++    if (!(sweep->counter & 0x8000))
++        return;
++    sweep->counter = 0;
++    sweep->level = clamp16(sweep->level + step);
++    if (decreasing && ((negative && sweep->level > 0) ||
++                       (!negative && sweep->level < 0)))
++        sweep->level = 0;
++}
++
++static void volume_tick(SPU_RXX* rxx) {
++    for (int v = 0; v < PSYZ_SPU_NUM_VOICES; ++v) {
++        sweep_tick(&spu.voice_volume[v][0], rxx->voice[v].volume.left);
++        sweep_tick(&spu.voice_volume[v][1], rxx->voice[v].volume.right);
++    }
++    sweep_tick(&spu.main_volume[0], rxx->main_vol.left);
++    sweep_tick(&spu.main_volume[1], rxx->main_vol.right);
++    rxx->main_volx.left = (short)spu.main_volume[0].level;
++    rxx->main_volx.right = (short)spu.main_volume[1].level;
+ }
+ 
+ static inline int spu_s16(u16 value) { return (short)value; }
+@@ -350,17 +413,7 @@ static void reverb_tick(int input_left, int input_right, int output[2]) {
+     spu.reverb_phase ^= 1;
+ }
+ 
+-// generate one frame at 44100hz with voices mix, cd playback and volume control
+-static void spu_tick(short* out) {
+-    SPU_RXX* rxx = (SPU_RXX*)&_spu_RXX->rxx;
+-    unsigned short spucnt = rxx->spucnt;
+-
+-    // accumulate frame to each separate channels
+-    int left_sum = 0, right_sum = 0;
+-    int reverb_input_left = 0, reverb_input_right = 0;
+-    int reverb_output[2];
+-
+-    // Pre-fill CD ring buffer if running low
++static void read_cd_frame(int* left, int* right) {
+     if (spu.cd_ring_count < CD_RING_LOW_WATER) {
+         size_t space = CD_RING_FRAMES - spu.cd_ring_count;
+         size_t write_pos =
+@@ -373,14 +426,25 @@ static void spu_tick(short* out) {
+         spu.cd_ring_count += got;
+     }
+ 
+-    // Read one stereo frame from CD ring buffer
+-    int cd_left = 0, cd_right = 0;
++    *left = *right = 0;
+     if (spu.cd_ring_count > 0) {
+-        cd_left = spu.cd_ring[spu.cd_ring_read * 2];
+-        cd_right = spu.cd_ring[spu.cd_ring_read * 2 + 1];
++        *left = spu.cd_ring[spu.cd_ring_read * 2];
++        *right = spu.cd_ring[spu.cd_ring_read * 2 + 1];
+         spu.cd_ring_read = (spu.cd_ring_read + 1) & CD_RING_MASK;
+         spu.cd_ring_count--;
+     }
++}
++
++// generate one frame at 44100hz with voices mix, cd playback and volume control
++static void spu_tick(short* out) {
++    SPU_RXX* rxx = (SPU_RXX*)&_spu_RXX->rxx;
++    unsigned short spucnt = rxx->spucnt;
++    int left_sum = 0, right_sum = 0;
++    int reverb_input_left = 0, reverb_input_right = 0;
++    int reverb_output[2];
++    int cd_left, cd_right;
++    volume_tick(rxx);
++    read_cd_frame(&cd_left, &cd_right);
+ 
+     // decode+resample, scale volume by ADSR envelope, then mix voices
+     short v1_sample = 0, v3_sample = 0;
+@@ -400,8 +464,8 @@ static void spu_tick(short* out) {
+             v3_sample = s;
+         }
+         {
+-            int voice_left = (s * voice_vol(rxx->voice[v].volume.left)) >> 15;
+-            int voice_right = (s * voice_vol(rxx->voice[v].volume.right)) >> 15;
++            int voice_left = (s * spu.voice_volume[v][0].level) >> 15;
++            int voice_right = (s * spu.voice_volume[v][1].level) >> 15;
+             left_sum += voice_left;
+             right_sum += voice_right;
+             if ((v < 16 && (rxx->rev_mode[0] & (1u << v))) ||
+@@ -429,8 +493,8 @@ static void spu_tick(short* out) {
+         right_sum += (cd_right * rxx->cd_vol.right) >> 15;
+     }
+ 
+-    out[0] = clamp16((left_sum * clamp15(rxx->main_vol.left)) >> 14);
+-    out[1] = clamp16((right_sum * clamp15(rxx->main_vol.right)) >> 14);
++    out[0] = clamp16(((long long)left_sum * spu.main_volume[0].level) >> 15);
++    out[1] = clamp16(((long long)right_sum * spu.main_volume[1].level) >> 15);
+ 
+     // Capture buffers back to SPU RAM, as per real hardware
+     write_capture(0, (short)cd_left);

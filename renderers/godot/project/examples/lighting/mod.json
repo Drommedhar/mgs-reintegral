@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "id": "example.lighting",
+  "priority": 10,
+  "replacements": {},
+  "stages": {
+    "s00a": { "scene": "lighting.tscn", "original_lighting": false },
+    "s01a": { "scene": "lighting.tscn", "original_lighting": false }
+  }
+}

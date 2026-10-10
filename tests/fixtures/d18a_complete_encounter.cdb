@@ -1,0 +1,6 @@
+.lines -e
+bu /1 mgs_integral_native!MgsNativeReloadOverlay "ew mgs_integral_native!var_buf+a 113; ew mgs_integral_native!linkvarbuf+2 1; ew mgs_integral_native!linkvarbuf+16 300; ew mgs_integral_native!linkvarbuf+18 300; ew mgs_integral_native!linkvarbuf+5e ffff ffff; .echo FIXTURE original d18a story275 Normal, incoming health cap768, first attempt and no earned bonus items; gc"
+sxe -c "r;kv;q" av
+sxe -c "r;kv;q" dz
+g
+q

@@ -1,0 +1,276 @@
+diff --git a/source/anime/effect/rcm.c b/source/anime/effect/rcm.c
+index 23223468e..2b7c8e12d 100644
+--- a/source/anime/effect/rcm.c
++++ b/source/anime/effect/rcm.c
+@@ -157,7 +157,7 @@ void s01a_object_800D93BC(MATRIX *world)
+     pre.s_anim = 0;
+ 
+     anm_800C3C04.pre_script = &pre;
+-    NewAnime(NULL, NULL, &anm_800C3C04);
++    NewAnime(NULL, 0, &anm_800C3C04);
+ }
+ 
+ void s01a_object_800D9424(SVECTOR *pos, short scr_num)
+@@ -170,7 +170,7 @@ void s01a_object_800D9424(SVECTOR *pos, short scr_num)
+     pre.s_anim = 0;
+ 
+     anm_800C3C04.pre_script = &pre;
+-    NewAnime(NULL, NULL, &anm_800C3C04);
++    NewAnime(NULL, 0, &anm_800C3C04);
+ }
+ 
+ void s01a_object_800D94A8(SVECTOR *pos)
+@@ -183,7 +183,7 @@ void s01a_object_800D94A8(SVECTOR *pos)
+     pre.s_anim = 0;
+ 
+     anm_800C3C3C.pre_script = &pre;
+-    NewAnime(NULL, NULL, &anm_800C3C3C);
++    NewAnime(NULL, 0, &anm_800C3C3C);
+ }
+ 
+ void s01a_object_800D952C(SVECTOR *pos, short scr_num)
+@@ -196,7 +196,7 @@ void s01a_object_800D952C(SVECTOR *pos, short scr_num)
+     pre.s_anim = 0;
+ 
+     anm_800C3C58.pre_script = &pre;
+-    NewAnime(NULL, NULL, &anm_800C3C58);
++    NewAnime(NULL, 0, &anm_800C3C58);
+ }
+ 
+ void s01a_object_800D95B0(SVECTOR *pos)
+@@ -209,7 +209,7 @@ void s01a_object_800D95B0(SVECTOR *pos)
+     pre.s_anim = 0;
+ 
+     anm_800C3C74.pre_script = &pre;
+-    NewAnime(NULL, NULL, &anm_800C3C74);
++    NewAnime(NULL, 0, &anm_800C3C74);
+ }
+ 
+ void s01a_object_800D9634(SVECTOR *pos)
+@@ -222,7 +222,7 @@ void s01a_object_800D9634(SVECTOR *pos)
+     pre.s_anim = 0;
+ 
+     anm_800C3C20.pre_script = &pre;
+-    NewAnime(NULL, NULL, &anm_800C3C20);
++    NewAnime(NULL, 0, &anm_800C3C20);
+ }
+ 
+ void s01a_object_800D96B8(MATRIX *world, int arg1, char arg2, char arg3, char arg4, char arg5, char arg6, char arg7, char arg8, char *ptr)
+diff --git a/source/chara/others/motse.c b/source/chara/others/motse.c
+index 1c10f651c..8afa4cdc2 100644
+--- a/source/chara/others/motse.c
++++ b/source/chara/others/motse.c
+@@ -49,7 +49,7 @@ static void Die(Work *work)
+ static int GetResources(Work *work, int name)
+ {
+     int            i, count;
+-    unsigned char *param;
++    char          *param;
+     MotseElem     *elems;
+ 
+     work->m_opt = GCL_StrToInt(GCL_GetOption('m'));
+diff --git a/source/enemy/camera.c b/source/enemy/camera.c
+index 94244d335..a0ba708d8 100644
+--- a/source/enemy/camera.c
++++ b/source/enemy/camera.c
+@@ -112,7 +112,7 @@ void s01a_camera_800D4CFC(DG_PRIM *prim, DG_TEX *tex, int r, int g, int b)
+ int s01a_camera_800D4D28(char *opt, SVECTOR *svecs)
+ {
+     int            count;
+-    unsigned char *param;
++    char          *param;
+ 
+     for (count = 0; (param = GCL_NextStr()); svecs++, count++)
+     {
+@@ -1017,6 +1017,8 @@ int CameraGetResources_800D65EC(Work *work, int arg1, int arg2)
+     char           *opt;
+     CONTROL        *ctrl;
+     OBJECT_NO_ROTS *body;
++    char           *position;
++    char           *direction;
+ 
+     ctrl = &work->control;
+     if (GM_InitControl(ctrl, arg1, arg2) < 0)
+@@ -1024,7 +1026,9 @@ int CameraGetResources_800D65EC(Work *work, int arg1, int arg2)
+         return -1;
+     }
+ 
+-    GM_ConfigControlString(ctrl, GCL_GetOption('p'), GCL_GetOption('d'));
++    position = GCL_GetOption('p');
++    direction = GCL_GetOption('d');
++    GM_ConfigControlString(ctrl, position, direction);
+     GM_ConfigControlAttribute(ctrl, 0x49);
+     GM_ConfigControlHazard(ctrl, -1, -2, -1);
+ 
+diff --git a/source/enemy/object.c b/source/enemy/object.c
+index f38c70d5b..f4deb1e5c 100644
+--- a/source/enemy/object.c
++++ b/source/enemy/object.c
+@@ -117,7 +117,7 @@ static int s01a_object_800D991C(char *opt, DVECTOR *out)
+ static int s01a_object_800D9984(char *opt, short *params)
+ {
+     int            count;
+-    unsigned char *param;
++    char          *param;
+ 
+     for (count = 0; (param = GCL_NextStr()) != NULL; params++, count++)
+     {
+@@ -505,6 +505,8 @@ static int GetResources(Work *work, int arg1)
+     OBJECT  *obj;
+     int      type;
+     char    *name;
++    char    *position;
++    char    *direction;
+ 
+     ctrl = &work->control;
+     if (GM_InitControl(ctrl, 0, arg1) < 0)
+@@ -512,7 +514,9 @@ static int GetResources(Work *work, int arg1)
+         return -1;
+     }
+ 
+-    GM_ConfigControlString(ctrl, GCL_GetOption('p'), GCL_GetOption('d'));
++    position = GCL_GetOption('p');
++    direction = GCL_GetOption('d');
++    GM_ConfigControlString(ctrl, position, direction);
+     GM_ConfigControlHazard(ctrl, -1, -1, -1);
+     work->control.step = DG_ZeroVector;
+ 
+diff --git a/source/enemy/searchli.c b/source/enemy/searchli.c
+index 88a2676a5..db930c095 100644
+--- a/source/enemy/searchli.c
++++ b/source/enemy/searchli.c
+@@ -70,7 +70,7 @@ extern int     COM_VibTime;
+ extern ENEMY_COMMAND     EnemyCommand;
+ extern TOPCOMMAND_STRUCT TOPCOMMAND;
+ 
+-const SVECTOR s01a_svec_800E4660 = {0, 0, 65024};
++const SVECTOR s01a_svec_800E4660 = {0, 0, -512};
+ 
+ const char aSearchliUDRotXLRRotY[] = "UD:ROT.X  LR:ROT.Y\n";
+ const char aSearchliUDPosXLRPosZ[] = "UD:POS.X  LR:POS.Z\n";
+@@ -265,7 +265,8 @@ void Searchli_800D783C(Work *work)
+     vy = work->f260.vy - work->f278 + (rnd * work->f278 * 2 >> 15);
+     rot->vy = vy & 0xFFF;
+ 
+-    rot->vx = vx = rand() * (vx = work->f276) >> 15;
++    vx = work->f276;
++    rot->vx = rand() * vx >> 15;
+     s01a_searchli_800D7500(&work->f260, rot, work);
+   }
+ 
+@@ -481,6 +482,26 @@ void Searchli_800D7D40(Work *work)
+     }
+ }
+ 
++#ifdef MGS_NATIVE
++static inline void gte_ld_intpol_sv0_xz(const SVECTOR *vec)
++{
++    Psyz_GteCtrlWrite(21, vec->vx);
++    Psyz_GteCtrlWrite(23, vec->vz);
++}
++
++static inline void gte_ld_intpol_sv1_xz(const SVECTOR *vec)
++{
++    Psyz_GteDataWrite(9, (unsigned short)vec->vx);
++    Psyz_GteDataWrite(11, (unsigned short)vec->vz);
++}
++
++static inline void gte_stsv_xz(SVECTOR *vec)
++{
++    vec->vx = (short)Psyz_GteDataRead(9);
++    vec->vy = 0;
++    vec->vz = (short)Psyz_GteDataRead(11);
++}
++#else
+ // clang-format off
+ // $13 replaced with $14 in gte_ld_intpol_sv0_xz
+ #define gte_ld_intpol_sv0_xz( r0 ) __asm__ volatile (           \
+@@ -511,6 +532,7 @@ void Searchli_800D7D40(Work *work)
+         : "r"( r0 )                                             \
+         : "$12", "$13", "$14", "memory" )
+ // clang-format on
++#endif
+ 
+ void Searchli_800D7DBC(SVECTOR *in, SVECTOR *out, int count)
+ {
+diff --git a/source/takabe/lit_mdl.c b/source/takabe/lit_mdl.c
+index 1c3f9ca0f..40fd52479 100644
+--- a/source/takabe/lit_mdl.c
++++ b/source/takabe/lit_mdl.c
+@@ -1,5 +1,7 @@
+ #include "lit_mdl.h"
+ 
++#include <stddef.h>
++
+ #include "mgstype.h"
+ #include "libgv/libgv.h"
+ #include "libdg/libdg.h"
+@@ -43,11 +45,26 @@ typedef struct _Work
+     unsigned short field_540_materialOffsets[36];
+ } Work;
+ 
++#ifdef MGS_NATIVE
++typedef struct
++{
++    DG_DEF header;
++    DG_MDL models[1];
++} NativeLitModel;
++
++_Static_assert(offsetof(NativeLitModel, models) == sizeof(DG_DEF), "KMD model follows its header");
++_Static_assert(offsetof(Work, field_E8) == offsetof(Work, field_C8) + sizeof(DG_DEF), "Actor KMD storage is contiguous");
++static const NativeLitModel litmdl_dg_def = {{
++#else
+ DG_DEF litmdl_dg_def = {
++#endif
+     1,                      // n_models
+     1,                      // n_x_models
+     -32000, -32000, -32000, // lx, ly, lz
+      32000,  32000,  32000, // ux, uy, uz
++#ifdef MGS_NATIVE
++    },
++#endif
+     {                       // model[]
+         {
+             1027,                   // flags
+@@ -258,11 +275,11 @@ void s01a_lit_mdl_800E2D64(Work *work, SVECTOR *unused)
+     int            i, j;
+     unsigned char *faceIndexOffsetIter;
+     int            curFaceIndexOffset;
+-    char          *uvOffsetIter;
++    unsigned char *uvOffsetIter;
+     SVECTOR       *vertexIndexOffsetIter;
+-    short         *materialOffsetIter;
++    unsigned short *materialOffsetIter;
+     SVECTOR       *normalIndexOffsetIter;
+-    char          *normalFaceOffsetIter;
++    unsigned char *normalFaceOffsetIter;
+     int            uvOff1, uvOff2, uvOff3, uvOff4;
+     short          hash;
+ 
+diff --git a/source/takabe/unknown4.c b/source/takabe/unknown4.c
+index 1baad18f6..6b232fc67 100644
+--- a/source/takabe/unknown4.c
++++ b/source/takabe/unknown4.c
+@@ -1,6 +1,9 @@
+ #include <sys/types.h>
+ #include <libgte.h>
+ #include <libgpu.h>
++#ifdef MGS_NATIVE
++#include <gtemac.h>
++#endif
+ 
+ // Unsure of type for in
+ void s01a_800E1E4C(short *in, SVECTOR *out)
+diff --git a/source/thing/sphere.c b/source/thing/sphere.c
+index e621e775b..4236d2a0a 100644
+--- a/source/thing/sphere.c
++++ b/source/thing/sphere.c
+@@ -56,7 +56,7 @@ static void Act(Work *work)
+     int            x_tile_iter_orig, tag, x, y, y_tile_iter, var_a2, map_idx, x_tile_iter, last_tile, last_texid;
+     short          xoff, yoff, tpage, clut, u0, v0, x1, y1;
+     int            x0;
+-    char          *tilemap;
++    unsigned char *tilemap;
+     DG_IMG_ATTRIB *attribs, *attrib;
+     DG_TEX       **tex;
+     unsigned short y0;

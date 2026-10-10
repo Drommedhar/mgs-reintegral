@@ -1,0 +1,7 @@
+.lines -e
+bu /1 mgs_integral_native!MgsNativeReloadOverlay "ew mgs_integral_native!var_buf+a 41; .printf \"FIXTURE original story variable $w:00000A=65 before s05a intro; all boss parameters left to original script\\n\"; gc"
+bu /1 mgs_integral_native!NewM1E1 ".printf \"FIXTURE original tank constructor reached\\n\"; gc"
+sxe -c "r;kv;q" av
+sxe -c "r;kv;q" dz
+g
+q

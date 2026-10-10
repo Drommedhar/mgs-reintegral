@@ -1,0 +1,20 @@
+diff --git a/source/kojo/demoexec.c b/source/kojo/demoexec.c
+index 5ad6703b7..5e9302c4d 100644
+--- a/source/kojo/demoexec.c
++++ b/source/kojo/demoexec.c
+@@ -396,8 +396,15 @@ BOOL FrameRunDemo(LPMGSDEMOACT lpAct, DMO_DAT *data)
+     lpAct->control.mov.vz = data->eye_z;
+ 
+     diff.vx = (data->center_x - data->eye_x) >> 2;
++#ifdef MGS_NATIVE
++    /* The PSX executable overwrites vx three times, then reads stack garbage
++       for vy/vz. Use the authored direction for native control rotation. */
++    diff.vy = (data->center_y - data->eye_y) >> 2;
++    diff.vz = (data->center_z - data->eye_z) >> 2;
++#else
+     diff.vx = (data->center_y - data->eye_y) >> 2;
+     diff.vx = (data->center_z - data->eye_z) >> 2;
++#endif
+ 
+     radius = SquareRoot0(diff.vx  * diff.vx  + diff.vz * diff.vz);
+     lpAct->control.rot.vx = ratan2(diff.vy, radius);

@@ -1,0 +1,1305 @@
+{
+  "stage": "s15a",
+  "disc": 2,
+  "overlay": {
+    "offset": 44812288,
+    "size": 90264,
+    "sha256": "ab3bf00937e226119c4649e9aa5db7f24e4aab844cb550c752bc3ce1a06f735e",
+    "load_address": "0x800c3208"
+  },
+  "native_source_reused_from": "overlays/s15c/okajima/valcan",
+  "code_comparison": [
+    {
+      "actor": "valcan",
+      "functions": 54,
+      "instruction_words": 4782,
+      "differences": "code/data relocation operands only",
+      "function_extents": [
+        {
+          "name": "s15c_crow_800DA2A8",
+          "old": "0x800da2a8",
+          "new": "0x800cac10",
+          "words": 172
+        },
+        {
+          "name": "s15c_crow_800DA990",
+          "old": "0x800da990",
+          "new": "0x800cb2f8",
+          "words": 207
+        },
+        {
+          "name": "s15c_crow_800DAE7C",
+          "old": "0x800dae7c",
+          "new": "0x800cb7e4",
+          "words": 84
+        },
+        {
+          "name": "s15c_crow_800DAFCC",
+          "old": "0x800dafcc",
+          "new": "0x800cb934",
+          "words": 141
+        },
+        {
+          "name": "s15c_crow_800DB200",
+          "old": "0x800db200",
+          "new": "0x800cbb68",
+          "words": 57
+        },
+        {
+          "name": "s15c_crow_800DB9F0",
+          "old": "0x800db9f0",
+          "new": "0x800cc358",
+          "words": 177
+        },
+        {
+          "name": "s15c_crow_800DBCB4",
+          "old": "0x800dbcb4",
+          "new": "0x800cc61c",
+          "words": 176
+        },
+        {
+          "name": "s15c_crow_800DC318",
+          "old": "0x800dc318",
+          "new": "0x800ccc80",
+          "words": 290
+        },
+        {
+          "name": "s15c_crow_800DC7A0",
+          "old": "0x800dc7a0",
+          "new": "0x800cd108",
+          "words": 313
+        },
+        {
+          "name": "s15c_crow_800DD03C",
+          "old": "0x800dd03c",
+          "new": "0x800cd9a4",
+          "words": 335
+        },
+        {
+          "name": "s15c_valcan_800D8ECC",
+          "old": "0x800d8ecc",
+          "new": "0x800c9834",
+          "words": 87
+        },
+        {
+          "name": "Valcan_800D8D20",
+          "old": "0x800d8d20",
+          "new": "0x800c9688",
+          "words": 15
+        },
+        {
+          "name": "ValcanQueueDynamicSegment_800D8D5C",
+          "old": "0x800d8d5c",
+          "new": "0x800c96c4",
+          "words": 17
+        },
+        {
+          "name": "ValcanDequeueDynamicSegment_800D8DA0",
+          "old": "0x800d8da0",
+          "new": "0x800c9708",
+          "words": 14
+        },
+        {
+          "name": "Valcan_800D8DD8",
+          "old": "0x800d8dd8",
+          "new": "0x800c9740",
+          "words": 44
+        },
+        {
+          "name": "ValcanGetInts_800D8E88",
+          "old": "0x800d8e88",
+          "new": "0x800c97f0",
+          "words": 17
+        },
+        {
+          "name": "Valcan_800D9028",
+          "old": "0x800d9028",
+          "new": "0x800c9990",
+          "words": 24
+        },
+        {
+          "name": "Valcan_800D9B5C",
+          "old": "0x800d9b5c",
+          "new": "0x800ca4c4",
+          "words": 141
+        },
+        {
+          "name": "ValcanAct_800D9088",
+          "old": "0x800d9088",
+          "new": "0x800c99f0",
+          "words": 136
+        },
+        {
+          "name": "Valcan_800D9B3C",
+          "old": "0x800d9b3c",
+          "new": "0x800ca4a4",
+          "words": 8
+        },
+        {
+          "name": "ValcanGetResources_800D92A8",
+          "old": "0x800d92a8",
+          "new": "0x800c9c10",
+          "words": 272
+        },
+        {
+          "name": "ValcanDie_800D96E8",
+          "old": "0x800d96e8",
+          "new": "0x800ca050",
+          "words": 35
+        },
+        {
+          "name": "ValcanGetResources2_800D9774",
+          "old": "0x800d9774",
+          "new": "0x800ca0dc",
+          "words": 47
+        },
+        {
+          "name": "ValcanGetResources_800D9830",
+          "old": "0x800d9830",
+          "new": "0x800ca198",
+          "words": 13
+        },
+        {
+          "name": "NewValcan_800D9864",
+          "old": "0x800d9864",
+          "new": "0x800ca1cc",
+          "words": 42
+        },
+        {
+          "name": "Valcan_800D990C",
+          "old": "0x800d990c",
+          "new": "0x800ca274",
+          "words": 57
+        },
+        {
+          "name": "Valcan_800D99F0",
+          "old": "0x800d99f0",
+          "new": "0x800ca358",
+          "words": 50
+        },
+        {
+          "name": "Valcan_800D9AB8",
+          "old": "0x800d9ab8",
+          "new": "0x800ca420",
+          "words": 33
+        },
+        {
+          "name": "Valcan_800DD578",
+          "old": "0x800dd578",
+          "new": "0x800cdee0",
+          "words": 152
+        },
+        {
+          "name": "Valcan_800D9D90",
+          "old": "0x800d9d90",
+          "new": "0x800ca6f8",
+          "words": 12
+        },
+        {
+          "name": "Valcan_800D9DC0",
+          "old": "0x800d9dc0",
+          "new": "0x800ca728",
+          "words": 63
+        },
+        {
+          "name": "Valcan_800D9EBC",
+          "old": "0x800d9ebc",
+          "new": "0x800ca824",
+          "words": 32
+        },
+        {
+          "name": "Valcan_800D9F3C",
+          "old": "0x800d9f3c",
+          "new": "0x800ca8a4",
+          "words": 20
+        },
+        {
+          "name": "Valcan_800D9F8C",
+          "old": "0x800d9f8c",
+          "new": "0x800ca8f4",
+          "words": 46
+        },
+        {
+          "name": "Valcan_800DA044",
+          "old": "0x800da044",
+          "new": "0x800ca9ac",
+          "words": 63
+        },
+        {
+          "name": "Valcan_800DA140",
+          "old": "0x800da140",
+          "new": "0x800caaa8",
+          "words": 27
+        },
+        {
+          "name": "Valcan_800DA1AC",
+          "old": "0x800da1ac",
+          "new": "0x800cab14",
+          "words": 28
+        },
+        {
+          "name": "Valcan_800DA21C",
+          "old": "0x800da21c",
+          "new": "0x800cab84",
+          "words": 35
+        },
+        {
+          "name": "Valcan_800DA558",
+          "old": "0x800da558",
+          "new": "0x800caec0",
+          "words": 227
+        },
+        {
+          "name": "Valcan_800DA8E4",
+          "old": "0x800da8e4",
+          "new": "0x800cb24c",
+          "words": 43
+        },
+        {
+          "name": "Valcan_800DACCC",
+          "old": "0x800daccc",
+          "new": "0x800cb634",
+          "words": 91
+        },
+        {
+          "name": "Valcan_800DAE38",
+          "old": "0x800dae38",
+          "new": "0x800cb7a0",
+          "words": 17
+        },
+        {
+          "name": "Valcan_800DB2E4",
+          "old": "0x800db2e4",
+          "new": "0x800cbc4c",
+          "words": 99
+        },
+        {
+          "name": "Valcan_800DB470",
+          "old": "0x800db470",
+          "new": "0x800cbdd8",
+          "words": 36
+        },
+        {
+          "name": "Valcan_800DB500",
+          "old": "0x800db500",
+          "new": "0x800cbe68",
+          "words": 218
+        },
+        {
+          "name": "Valcan_800DB868",
+          "old": "0x800db868",
+          "new": "0x800cc1d0",
+          "words": 98
+        },
+        {
+          "name": "Valcan_800DBF74",
+          "old": "0x800dbf74",
+          "new": "0x800cc8dc",
+          "words": 62
+        },
+        {
+          "name": "Valcan_800DC06C",
+          "old": "0x800dc06c",
+          "new": "0x800cc9d4",
+          "words": 46
+        },
+        {
+          "name": "Valcan_800DC124",
+          "old": "0x800dc124",
+          "new": "0x800cca8c",
+          "words": 91
+        },
+        {
+          "name": "Valcan_800DC290",
+          "old": "0x800dc290",
+          "new": "0x800ccbf8",
+          "words": 23
+        },
+        {
+          "name": "Valcan_800DC2EC",
+          "old": "0x800dc2ec",
+          "new": "0x800ccc54",
+          "words": 11
+        },
+        {
+          "name": "Valcan_800DCC84",
+          "old": "0x800dcc84",
+          "new": "0x800cd5ec",
+          "words": 119
+        },
+        {
+          "name": "Valcan_800DCE60",
+          "old": "0x800dce60",
+          "new": "0x800cd7c8",
+          "words": 75
+        },
+        {
+          "name": "Valcan_800DCF8C",
+          "old": "0x800dcf8c",
+          "new": "0x800cd8f4",
+          "words": 44
+        }
+      ],
+      "manual_relocation_checks": [
+        {
+          "function": "s15c_crow_800DA2A8",
+          "old": "0x800da470",
+          "new": "0x800cadd8",
+          "instructions": [
+            "lw $v0, 0x345c($v0)",
+            "lw $v0, -0x6d74($v0)"
+          ],
+          "classification": "Relocated phase-array load; base register set by predecessor branch path",
+          "predecessor_lui": "0x800da390"
+        },
+        {
+          "function": "s15c_crow_800DAE7C",
+          "old": "0x800daf88",
+          "new": "0x800cb8f0",
+          "instructions": [
+            "lw $v0, 0x3464($v0)",
+            "lw $v0, -0x6d6c($v0)"
+          ],
+          "classification": "Relocated phase-array load; base register set by predecessor branch path",
+          "predecessor_lui": "0x800daf78"
+        },
+        {
+          "function": "s15c_crow_800DAFCC",
+          "old": "0x800db1b8",
+          "new": "0x800cbb20",
+          "instructions": [
+            "lw $v0, 0x3458($v0)",
+            "lw $v0, -0x6d78($v0)"
+          ],
+          "classification": "Relocated phase-array load; base register set by predecessor branch path",
+          "predecessor_lui": "0x800db19c"
+        },
+        {
+          "function": "s15c_crow_800DC7A0",
+          "old": "0x800dcb7c",
+          "new": "0x800cd4e4",
+          "instructions": [
+            "lw $v0, 0x3460($v0)",
+            "lw $v0, -0x6d70($v0)"
+          ],
+          "classification": "Relocated phase-array load; base register set by predecessor branch path",
+          "predecessor_lui": "0x800dcb38"
+        }
+      ]
+    },
+    {
+      "actor": "dyncon",
+      "functions": 37,
+      "instruction_words": 5017,
+      "differences": "code/data relocation operands only",
+      "function_extents": [
+        {
+          "name": "s15c_dyncon_800D3F24",
+          "old": "0x800d3f24",
+          "new": "0x800ce5d4",
+          "words": 1115
+        },
+        {
+          "name": "s15c_dyncon_800D5910",
+          "old": "0x800d5910",
+          "new": "0x800cffc0",
+          "words": 44
+        },
+        {
+          "name": "s15c_dyncon_800D5A3C",
+          "old": "0x800d5a3c",
+          "new": "0x800d00ec",
+          "words": 127
+        },
+        {
+          "name": "s15c_dyncon_800D5C38",
+          "old": "0x800d5c38",
+          "new": "0x800d02e8",
+          "words": 98
+        },
+        {
+          "name": "s15c_dyncon_800D61E0",
+          "old": "0x800d61e0",
+          "new": "0x800d0890",
+          "words": 149
+        },
+        {
+          "name": "s15c_dyncon_800D6528",
+          "old": "0x800d6528",
+          "new": "0x800d0bd8",
+          "words": 1367
+        },
+        {
+          "name": "s15c_dyncon_800D7A84",
+          "old": "0x800d7a84",
+          "new": "0x800d2134",
+          "words": 12
+        },
+        {
+          "name": "s15c_dyncon_800D7AB4",
+          "old": "0x800d7ab4",
+          "new": "0x800d2164",
+          "words": 164
+        },
+        {
+          "name": "s15c_dyncon_800D7E30",
+          "old": "0x800d7e30",
+          "new": "0x800d24e0",
+          "words": 49
+        },
+        {
+          "name": "s15c_dyncon_800D7EF4",
+          "old": "0x800d7ef4",
+          "new": "0x800d25a4",
+          "words": 37
+        },
+        {
+          "name": "s15c_dyncon_800D7F88",
+          "old": "0x800d7f88",
+          "new": "0x800d2638",
+          "words": 221
+        },
+        {
+          "name": "s15c_dyncon_800D82FC",
+          "old": "0x800d82fc",
+          "new": "0x800d29ac",
+          "words": 133
+        },
+        {
+          "name": "s15c_dyncon_800D8510",
+          "old": "0x800d8510",
+          "new": "0x800d2bc0",
+          "words": 238
+        },
+        {
+          "name": "s15c_dyncon_800D88C8",
+          "old": "0x800d88c8",
+          "new": "0x800d2f78",
+          "words": 76
+        },
+        {
+          "name": "s15c_dyncon_800D8A9C",
+          "old": "0x800d8a9c",
+          "new": "0x800d314c",
+          "words": 128
+        },
+        {
+          "name": "s15c_dyncon_800D3EBC",
+          "old": "0x800d3ebc",
+          "new": "0x800ce56c",
+          "words": 26
+        },
+        {
+          "name": "s15c_dyncon_800D5090",
+          "old": "0x800d5090",
+          "new": "0x800cf740",
+          "words": 33
+        },
+        {
+          "name": "s15c_dyncon_800D5114",
+          "old": "0x800d5114",
+          "new": "0x800cf7c4",
+          "words": 30
+        },
+        {
+          "name": "s15c_dyncon_800D518C",
+          "old": "0x800d518c",
+          "new": "0x800cf83c",
+          "words": 57
+        },
+        {
+          "name": "s15c_dyncon_800D5270",
+          "old": "0x800d5270",
+          "new": "0x800cf920",
+          "words": 57
+        },
+        {
+          "name": "s15c_dyncon_800D5354",
+          "old": "0x800d5354",
+          "new": "0x800cfa04",
+          "words": 53
+        },
+        {
+          "name": "s15c_dyncon_800D5428",
+          "old": "0x800d5428",
+          "new": "0x800cfad8",
+          "words": 149
+        },
+        {
+          "name": "s15c_dyncon_800D567C",
+          "old": "0x800d567c",
+          "new": "0x800cfd2c",
+          "words": 165
+        },
+        {
+          "name": "s15c_dyncon_800D59C0",
+          "old": "0x800d59c0",
+          "new": "0x800d0070",
+          "words": 31
+        },
+        {
+          "name": "s15c_dyncon_800D5DC0",
+          "old": "0x800d5dc0",
+          "new": "0x800d0470",
+          "words": 58
+        },
+        {
+          "name": "s15c_dyncon_800D5EA8",
+          "old": "0x800d5ea8",
+          "new": "0x800d0558",
+          "words": 13
+        },
+        {
+          "name": "s15c_dyncon_800D5EDC",
+          "old": "0x800d5edc",
+          "new": "0x800d058c",
+          "words": 35
+        },
+        {
+          "name": "s15c_dyncon_800D5F68",
+          "old": "0x800d5f68",
+          "new": "0x800d0618",
+          "words": 39
+        },
+        {
+          "name": "s15c_dyncon_800D6004",
+          "old": "0x800d6004",
+          "new": "0x800d06b4",
+          "words": 14
+        },
+        {
+          "name": "s15c_dyncon_800D603C",
+          "old": "0x800d603c",
+          "new": "0x800d06ec",
+          "words": 13
+        },
+        {
+          "name": "s15c_dyncon_800D6070",
+          "old": "0x800d6070",
+          "new": "0x800d0720",
+          "words": 46
+        },
+        {
+          "name": "s15c_dyncon_800D6128",
+          "old": "0x800d6128",
+          "new": "0x800d07d8",
+          "words": 46
+        },
+        {
+          "name": "s15c_dyncon_800D6434",
+          "old": "0x800d6434",
+          "new": "0x800d0ae4",
+          "words": 61
+        },
+        {
+          "name": "s15c_dyncon_800D7D44",
+          "old": "0x800d7d44",
+          "new": "0x800d23f4",
+          "words": 59
+        },
+        {
+          "name": "s15c_dyncon_800D89F8",
+          "old": "0x800d89f8",
+          "new": "0x800d30a8",
+          "words": 15
+        },
+        {
+          "name": "s15c_dyncon_800D8A34",
+          "old": "0x800d8a34",
+          "new": "0x800d30e4",
+          "words": 26
+        },
+        {
+          "name": "s15c_dyncon_800D8C9C",
+          "old": "0x800d8c9c",
+          "new": "0x800d334c",
+          "words": 33
+        }
+      ],
+      "manual_relocation_checks": []
+    },
+    {
+      "actor": "crow",
+      "functions": 14,
+      "instruction_words": 1421,
+      "differences": "code/data relocation operands only",
+      "function_extents": [
+        {
+          "name": "Crow_800DD7D8",
+          "old": "0x800dd7d8",
+          "new": "0x800d33d0",
+          "words": 31
+        },
+        {
+          "name": "Crow_800DD854",
+          "old": "0x800dd854",
+          "new": "0x800d344c",
+          "words": 21
+        },
+        {
+          "name": "Crow_800DD8A8",
+          "old": "0x800dd8a8",
+          "new": "0x800d34a0",
+          "words": 22
+        },
+        {
+          "name": "Crow_800DD900",
+          "old": "0x800dd900",
+          "new": "0x800d34f8",
+          "words": 26
+        },
+        {
+          "name": "Crow_800DD968",
+          "old": "0x800dd968",
+          "new": "0x800d3560",
+          "words": 26
+        },
+        {
+          "name": "Crow_800DD9D0",
+          "old": "0x800dd9d0",
+          "new": "0x800d35c8",
+          "words": 65
+        },
+        {
+          "name": "Crow_800DDAD4",
+          "old": "0x800ddad4",
+          "new": "0x800d36cc",
+          "words": 31
+        },
+        {
+          "name": "Crow_800DDB50",
+          "old": "0x800ddb50",
+          "new": "0x800d3748",
+          "words": 96
+        },
+        {
+          "name": "Crow_800DDCD0",
+          "old": "0x800ddcd0",
+          "new": "0x800d38c8",
+          "words": 14
+        },
+        {
+          "name": "CrowAct_800DDD08",
+          "old": "0x800ddd08",
+          "new": "0x800d3900",
+          "words": 738
+        },
+        {
+          "name": "Crow_800DE890",
+          "old": "0x800de890",
+          "new": "0x800d4488",
+          "words": 43
+        },
+        {
+          "name": "Crow_800DE93C",
+          "old": "0x800de93c",
+          "new": "0x800d4534",
+          "words": 207
+        },
+        {
+          "name": "CrowDie_800DEC78",
+          "old": "0x800dec78",
+          "new": "0x800d4870",
+          "words": 36
+        },
+        {
+          "name": "NewCrow",
+          "old": "0x800ded08",
+          "new": "0x800d4900",
+          "words": 65
+        }
+      ],
+      "manual_relocation_checks": []
+    }
+  ],
+  "referenced_data": [
+    {
+      "name": "valcan_constants",
+      "old": "0x800c35e0",
+      "new": "0x800c34b0",
+      "bytes": 56,
+      "relocated_pointers": [],
+      "unexplained": [],
+      "excluded_padding_offsets": [],
+      "padding_reason": null
+    },
+    {
+      "name": "dyncon_constants",
+      "old": "0x800c35cc",
+      "new": "0x800c3560",
+      "bytes": 20,
+      "relocated_pointers": [],
+      "unexplained": [],
+      "excluded_padding_offsets": [
+        18,
+        19
+      ],
+      "padding_reason": "Bytes after the terminating NUL of C strings or after the 18 bytes of vibration tables; not referenced as data by the compared functions."
+    },
+    {
+      "name": "valcan_rodata",
+      "old": "0x800e2e3c",
+      "new": "0x800d8bc0",
+      "bytes": 224,
+      "relocated_pointers": [
+        {
+          "offset": 52,
+          "old": "0x800dabe4",
+          "new": "0x800cb54c"
+        },
+        {
+          "offset": 56,
+          "old": "0x800dabe4",
+          "new": "0x800cb54c"
+        },
+        {
+          "offset": 60,
+          "old": "0x800dabec",
+          "new": "0x800cb554"
+        },
+        {
+          "offset": 64,
+          "old": "0x800dabf4",
+          "new": "0x800cb55c"
+        },
+        {
+          "offset": 68,
+          "old": "0x800dabfc",
+          "new": "0x800cb564"
+        },
+        {
+          "offset": 76,
+          "old": "0x800dc358",
+          "new": "0x800cccc0"
+        },
+        {
+          "offset": 80,
+          "old": "0x800dc378",
+          "new": "0x800ccce0"
+        },
+        {
+          "offset": 84,
+          "old": "0x800dc38c",
+          "new": "0x800cccf4"
+        },
+        {
+          "offset": 88,
+          "old": "0x800dc3a8",
+          "new": "0x800ccd10"
+        },
+        {
+          "offset": 92,
+          "old": "0x800dc3d8",
+          "new": "0x800ccd40"
+        },
+        {
+          "offset": 96,
+          "old": "0x800dc490",
+          "new": "0x800ccdf8"
+        },
+        {
+          "offset": 100,
+          "old": "0x800dc4a8",
+          "new": "0x800cce10"
+        },
+        {
+          "offset": 104,
+          "old": "0x800dc790",
+          "new": "0x800cd0f8"
+        },
+        {
+          "offset": 108,
+          "old": "0x800dc4c0",
+          "new": "0x800cce28"
+        },
+        {
+          "offset": 112,
+          "old": "0x800dc54c",
+          "new": "0x800cceb4"
+        },
+        {
+          "offset": 116,
+          "old": "0x800dc790",
+          "new": "0x800cd0f8"
+        },
+        {
+          "offset": 120,
+          "old": "0x800dc790",
+          "new": "0x800cd0f8"
+        },
+        {
+          "offset": 124,
+          "old": "0x800dc564",
+          "new": "0x800ccecc"
+        },
+        {
+          "offset": 128,
+          "old": "0x800dc57c",
+          "new": "0x800ccee4"
+        },
+        {
+          "offset": 132,
+          "old": "0x800dc5a8",
+          "new": "0x800ccf10"
+        },
+        {
+          "offset": 136,
+          "old": "0x800dc790",
+          "new": "0x800cd0f8"
+        },
+        {
+          "offset": 140,
+          "old": "0x800dc790",
+          "new": "0x800cd0f8"
+        },
+        {
+          "offset": 144,
+          "old": "0x800dc5c8",
+          "new": "0x800ccf30"
+        },
+        {
+          "offset": 148,
+          "old": "0x800dc5e0",
+          "new": "0x800ccf48"
+        },
+        {
+          "offset": 152,
+          "old": "0x800dc60c",
+          "new": "0x800ccf74"
+        },
+        {
+          "offset": 156,
+          "old": "0x800dc62c",
+          "new": "0x800ccf94"
+        },
+        {
+          "offset": 160,
+          "old": "0x800dc6e4",
+          "new": "0x800cd04c"
+        },
+        {
+          "offset": 164,
+          "old": "0x800dc650",
+          "new": "0x800ccfb8"
+        },
+        {
+          "offset": 168,
+          "old": "0x800dc668",
+          "new": "0x800ccfd0"
+        },
+        {
+          "offset": 172,
+          "old": "0x800dc6a0",
+          "new": "0x800cd008"
+        },
+        {
+          "offset": 176,
+          "old": "0x800dc6c0",
+          "new": "0x800cd028"
+        },
+        {
+          "offset": 180,
+          "old": "0x800dc6e4",
+          "new": "0x800cd04c"
+        },
+        {
+          "offset": 184,
+          "old": "0x800dc730",
+          "new": "0x800cd098"
+        },
+        {
+          "offset": 188,
+          "old": "0x800dc768",
+          "new": "0x800cd0d0"
+        },
+        {
+          "offset": 192,
+          "old": "0x800dc740",
+          "new": "0x800cd0a8"
+        },
+        {
+          "offset": 196,
+          "old": "0x800dc768",
+          "new": "0x800cd0d0"
+        },
+        {
+          "offset": 204,
+          "old": "0x800dc904",
+          "new": "0x800cd26c"
+        },
+        {
+          "offset": 208,
+          "old": "0x800dc904",
+          "new": "0x800cd26c"
+        },
+        {
+          "offset": 212,
+          "old": "0x800dc938",
+          "new": "0x800cd2a0"
+        },
+        {
+          "offset": 216,
+          "old": "0x800dc97c",
+          "new": "0x800cd2e4"
+        },
+        {
+          "offset": 220,
+          "old": "0x800dc9c0",
+          "new": "0x800cd328"
+        }
+      ],
+      "unexplained": [],
+      "excluded_padding_offsets": [
+        41,
+        42,
+        43,
+        50,
+        51
+      ],
+      "padding_reason": "Bytes after the terminating NUL of C strings or after the 18 bytes of vibration tables; not referenced as data by the compared functions."
+    },
+    {
+      "name": "dyncon_rodata",
+      "old": "0x800e2d70",
+      "new": "0x800d9074",
+      "bytes": 204,
+      "relocated_pointers": [
+        {
+          "offset": 64,
+          "old": "0x800d6f34",
+          "new": "0x800d15e4"
+        },
+        {
+          "offset": 68,
+          "old": "0x800d733c",
+          "new": "0x800d19ec"
+        },
+        {
+          "offset": 72,
+          "old": "0x800d741c",
+          "new": "0x800d1acc"
+        },
+        {
+          "offset": 76,
+          "old": "0x800d7440",
+          "new": "0x800d1af0"
+        },
+        {
+          "offset": 80,
+          "old": "0x800d76fc",
+          "new": "0x800d1dac"
+        },
+        {
+          "offset": 84,
+          "old": "0x800d78dc",
+          "new": "0x800d1f8c"
+        }
+      ],
+      "unexplained": [],
+      "excluded_padding_offsets": [
+        201,
+        202,
+        203
+      ],
+      "padding_reason": "Bytes after the terminating NUL of C strings or after the 18 bytes of vibration tables; not referenced as data by the compared functions."
+    },
+    {
+      "name": "crow_rodata",
+      "old": "0x800e2f1c",
+      "new": "0x800d9140",
+      "bytes": 72,
+      "relocated_pointers": [
+        {
+          "offset": 0,
+          "old": "0x800ddff4",
+          "new": "0x800d3bec"
+        },
+        {
+          "offset": 4,
+          "old": "0x800de014",
+          "new": "0x800d3c0c"
+        },
+        {
+          "offset": 8,
+          "old": "0x800de1d8",
+          "new": "0x800d3dd0"
+        },
+        {
+          "offset": 12,
+          "old": "0x800de290",
+          "new": "0x800d3e88"
+        },
+        {
+          "offset": 16,
+          "old": "0x800de2c8",
+          "new": "0x800d3ec0"
+        },
+        {
+          "offset": 20,
+          "old": "0x800de46c",
+          "new": "0x800d4064"
+        },
+        {
+          "offset": 24,
+          "old": "0x800de494",
+          "new": "0x800d408c"
+        },
+        {
+          "offset": 28,
+          "old": "0x800de50c",
+          "new": "0x800d4104"
+        },
+        {
+          "offset": 32,
+          "old": "0x800de544",
+          "new": "0x800d413c"
+        },
+        {
+          "offset": 36,
+          "old": "0x800de7c0",
+          "new": "0x800d43b8"
+        },
+        {
+          "offset": 40,
+          "old": "0x800de550",
+          "new": "0x800d4148"
+        },
+        {
+          "offset": 44,
+          "old": "0x800de584",
+          "new": "0x800d417c"
+        },
+        {
+          "offset": 48,
+          "old": "0x800de760",
+          "new": "0x800d4358"
+        }
+      ],
+      "unexplained": [],
+      "excluded_padding_offsets": [
+        67
+      ],
+      "padding_reason": "Bytes after the terminating NUL of C strings or after the 18 bytes of vibration tables; not referenced as data by the compared functions."
+    }
+  ],
+  "constructors": [
+    {
+      "hash": "0x51c6",
+      "original": "0x800d7ddc",
+      "native": "NewCutInCameraSet",
+      "evidence": "retail table hash/address; upstream named constructor macro; major actors additionally complete relocated code comparison"
+    },
+    {
+      "hash": "0xec77",
+      "original": "0x800c4e24",
+      "native": "NewWallGcl",
+      "evidence": "retail table hash/address; upstream named constructor macro; major actors additionally complete relocated code comparison"
+    },
+    {
+      "hash": "0x92bc",
+      "original": "0x800c5c5c",
+      "native": "NewAsiotoKun",
+      "evidence": "retail table hash/address; upstream named constructor macro; major actors additionally complete relocated code comparison"
+    },
+    {
+      "hash": "0x4170",
+      "original": "0x800c48f8",
+      "native": "NewSnakeBreath",
+      "evidence": "retail table hash/address; upstream named constructor macro; major actors additionally complete relocated code comparison"
+    },
+    {
+      "hash": "0xa12e",
+      "original": "0x800d609c",
+      "native": "NewFadeInOutSet",
+      "evidence": "retail table hash/address; upstream named constructor macro; major actors additionally complete relocated code comparison"
+    },
+    {
+      "hash": "0x9ff5",
+      "original": "0x800ca1cc",
+      "native": "NewValcan_800D9864",
+      "evidence": "retail table hash/address; upstream named constructor macro; major actors additionally complete relocated code comparison"
+    },
+    {
+      "hash": "0xcc45",
+      "original": "0x800d334c",
+      "native": "s15c_dyncon_800D8C9C",
+      "evidence": "retail table hash/address; upstream named constructor macro; major actors additionally complete relocated code comparison"
+    },
+    {
+      "hash": "0x5a50",
+      "original": "0x800d4ebc",
+      "native": "NewGasEffectSet",
+      "evidence": "retail table hash/address; upstream named constructor macro; major actors additionally complete relocated code comparison"
+    },
+    {
+      "hash": "0x8e60",
+      "original": "0x800d4900",
+      "native": "NewCrow",
+      "evidence": "retail table hash/address; upstream named constructor macro; major actors additionally complete relocated code comparison"
+    },
+    {
+      "hash": "0x7a05",
+      "original": "0x800d6b8c",
+      "native": "NewCinemaScreenSet",
+      "evidence": "retail table hash/address; upstream named constructor macro; major actors additionally complete relocated code comparison"
+    },
+    {
+      "hash": "0x1ad3",
+      "original": "0x800c3e74",
+      "native": "NewTextureLamp",
+      "evidence": "retail table hash/address; upstream named constructor macro; major actors additionally complete relocated code comparison"
+    },
+    {
+      "hash": "0x711f",
+      "original": "0x800d63c4",
+      "native": "NewLifeUp",
+      "evidence": "retail table hash/address; upstream named constructor macro; major actors additionally complete relocated code comparison"
+    },
+    {
+      "hash": "0xb103",
+      "original": "0x800d6dbc",
+      "native": "NewDynamicWallSet",
+      "evidence": "retail table hash/address; upstream named constructor macro; major actors additionally complete relocated code comparison"
+    },
+    {
+      "hash": "0xaf6c",
+      "original": "0x800d8224",
+      "native": "NewDynamicFloorSet",
+      "evidence": "retail table hash/address; upstream named constructor macro; major actors additionally complete relocated code comparison"
+    },
+    {
+      "hash": "0x4e95",
+      "original": "0x800c72b8",
+      "native": "NewBloodCl",
+      "evidence": "retail table hash/address; upstream named constructor macro; major actors additionally complete relocated code comparison"
+    },
+    {
+      "hash": "0x2",
+      "original": "0x800c40c8",
+      "native": "AN_Smoke_800CE08C",
+      "evidence": "retail table hash/address; upstream named constructor macro; major actors additionally complete relocated code comparison"
+    },
+    {
+      "hash": "0x3",
+      "original": "0x800d6004",
+      "native": "NewFadeInOut",
+      "evidence": "retail table hash/address; upstream named constructor macro; major actors additionally complete relocated code comparison"
+    },
+    {
+      "hash": "0x4",
+      "original": "0x800d6004",
+      "native": "NewFadeInOut",
+      "evidence": "retail table hash/address; upstream named constructor macro; major actors additionally complete relocated code comparison"
+    },
+    {
+      "hash": "0x9",
+      "original": "0x80072728",
+      "native": "NewBlood",
+      "evidence": "retail table hash/address; upstream named constructor macro; major actors additionally complete relocated code comparison"
+    },
+    {
+      "hash": "0xa",
+      "original": "0x800c6234",
+      "native": "NewSplash_800C8D6C",
+      "evidence": "retail table hash/address; upstream named constructor macro; major actors additionally complete relocated code comparison"
+    },
+    {
+      "hash": "0xd",
+      "original": "0x800c6dc0",
+      "native": "NewKetchap_s",
+      "evidence": "retail table hash/address; upstream named constructor macro; major actors additionally complete relocated code comparison"
+    },
+    {
+      "hash": "0xe",
+      "original": "0x800c3f68",
+      "native": "AN_Breath",
+      "evidence": "retail table hash/address; upstream named constructor macro; major actors additionally complete relocated code comparison"
+    },
+    {
+      "hash": "0xf",
+      "original": "0x800c5600",
+      "native": "NewDemoKage",
+      "evidence": "retail table hash/address; upstream named constructor macro; major actors additionally complete relocated code comparison"
+    },
+    {
+      "hash": "0x21",
+      "original": "0x800d73d8",
+      "native": "NewFocusView",
+      "evidence": "retail table hash/address; upstream named constructor macro; major actors additionally complete relocated code comparison"
+    },
+    {
+      "hash": "0x25",
+      "original": "0x800c8f98",
+      "native": "NewBlurSet",
+      "evidence": "retail table hash/address; upstream named constructor macro; major actors additionally complete relocated code comparison"
+    },
+    {
+      "hash": "0x28",
+      "original": "0x800d7a20",
+      "native": "NewSepia_800C5214",
+      "evidence": "retail table hash/address; upstream named constructor macro; major actors additionally complete relocated code comparison"
+    },
+    {
+      "hash": "0x31",
+      "original": "0x800c95a0",
+      "native": "NewSmokeLn_800CDFA4",
+      "evidence": "retail table hash/address; upstream named constructor macro; major actors additionally complete relocated code comparison"
+    },
+    {
+      "hash": "0x37",
+      "original": "0x800c7e44",
+      "native": "NewRedAlert2",
+      "evidence": "retail table hash/address; upstream named constructor macro; major actors additionally complete relocated code comparison"
+    },
+    {
+      "hash": "0x38",
+      "original": "0x800c7f08",
+      "native": "RedAlert_800C4F48",
+      "evidence": "retail table hash/address; upstream named constructor macro; major actors additionally complete relocated code comparison"
+    },
+    {
+      "hash": "0x44",
+      "original": "0x800c8494",
+      "native": "NewBlurPure",
+      "evidence": "retail table hash/address; upstream named constructor macro; major actors additionally complete relocated code comparison"
+    }
+  ],
+  "differential_tests": {
+    "original_stage_executed": "s15a",
+    "navigation": 256,
+    "damage_update": 96,
+    "result": "all output fields and ordered boundary traces equal the s15c reference fixtures; unchanged native extracted definitions pass the same352cases",
+    "boundaries": "random service in navigation; deterministic engine and existing actor helper services in damage/update"
+  },
+  "runtime": {
+    "build": "Debug Win32",
+    "original_scenario": "ea54.g",
+    "story": 211,
+    "fixture": "tests/fixtures/s15a_story211.cdb",
+    "pose": [
+      2938,
+      1124,
+      -5737
+    ],
+    "pose_source": "original sub_13CE warehouse pose (later story217), reused as isolated fight test input, not asserted to be authentic incoming fight position",
+    "stage_map": "0x7df9",
+    "vsyncs": 1800,
+    "observed": [
+      "original scenario constructs native Raven",
+      "container actor mode1",
+      "warehouse rendered with Snake and RAVEN health bar",
+      "normal controller movement2996units across24movement ticks",
+      "clean bounded exit"
+    ],
+    "not_observed": [
+      "Raven gunfire from this safe test pose",
+      "boss defeat",
+      "continuous campaign arrival",
+      "human playability"
+    ],
+    "log": "build/movie-audit/raven211.log",
+    "capture": "build/movie-audit/raven211.bmp"
+  },
+  "patch": "patches/mgs-s15a.patch",
+  "patch_validation": "scoped fresh-index exact replay atop29locked MGS patches"
+}

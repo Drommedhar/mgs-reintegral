@@ -1,0 +1,74 @@
+diff --git a/source/thing/sphere.c b/source/thing/sphere.c
+index 67dd2782b..0d2390b9d 100644
+--- a/source/thing/sphere.c
++++ b/source/thing/sphere.c
+@@ -123,6 +123,11 @@ static void Act(Work *work)
+     tex = work->tex;
+ 
+     poly = work->prim->packs[GV_Clock];
++#ifdef MGS_NATIVE
++    MgsVideoSetDrawMode(poly, MGS_VIDEO_WORLD);
++    SSTOREL(63000, poly);
++    poly++;
++#endif
+     for (y = 0; y < sphere_visible_tiles_y; y++)
+     {
+         x0 = x0_orig;
+@@ -200,6 +205,10 @@ static void Act(Work *work)
+             y_tile_iter--;
+         }
+     }
++#ifdef MGS_NATIVE
++    MgsVideoSetDrawMode(poly, MGS_VIDEO_BACKGROUND);
++    SSTOREL(63000, poly);
++#endif
+ }
+ 
+ static void Die(Work *work)
+@@ -257,6 +266,9 @@ static int GetResources(Work *work, int map)
+     sphere_visible_tiles_x = (2 * sphere_halfwidth + sphere_tile_width - 1) / sphere_tile_width + 1;
+     sphere_visible_tiles_y = (FRAME_HEIGHT / sphere_tile_height) + 1;
+     n_prims = sphere_visible_tiles_y * sphere_visible_tiles_x;
++#ifdef MGS_NATIVE
++    n_prims += 2;
++#endif
+ 
+     prim = GM_MakePrim(DG_PRIM_SORTONLY | DG_PRIM_POLY_FT4, n_prims, NULL, NULL);
+     work->prim = prim;
+diff --git a/source/thing/sphere2.c b/source/thing/sphere2.c
+index cadd03b56..8a9cb8ee6 100644
+--- a/source/thing/sphere2.c
++++ b/source/thing/sphere2.c
+@@ -120,6 +120,11 @@ static void Act(Work *work)
+     tex = work->tex;
+ 
+     poly = work->prim->packs[GV_Clock];
++#ifdef MGS_NATIVE
++    MgsVideoSetDrawMode(poly, MGS_VIDEO_WORLD);
++    SSTOREL(63000, poly);
++    poly++;
++#endif
+     for (y = 0; y < sphere_visible_tiles_y; y++)
+     {
+         x0 = x0_orig;
+@@ -196,6 +201,10 @@ static void Act(Work *work)
+             ty--;
+         }
+     }
++#ifdef MGS_NATIVE
++    MgsVideoSetDrawMode(poly, MGS_VIDEO_BACKGROUND);
++    SSTOREL(63000, poly);
++#endif
+ }
+ 
+ void Die(Work *work)
+@@ -247,6 +256,9 @@ static int GetResources(Work *work, int map)
+     sphere_visible_tiles_x = (2 * sphere_halfwidth + sphere_tile_width - 1) / sphere_tile_width + 1;
+     sphere_visible_tiles_y = 224 / sphere_tile_height + 1;
+     n_prims = sphere_visible_tiles_y * sphere_visible_tiles_x;
++#ifdef MGS_NATIVE
++    n_prims += 2;
++#endif
+ 
+     work->prim = GM_MakePrim(DG_PRIM_SORTONLY | DG_PRIM_POLY_FT4, n_prims, NULL, NULL);
+     if (work->prim == NULL)

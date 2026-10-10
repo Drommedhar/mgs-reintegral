@@ -1,0 +1,89 @@
+diff --git a/psyz/src/platform/sdl3_audio.c b/psyz/src/platform/sdl3_audio.c
+index 5064eaf..1a4e3bc 100644
+--- a/psyz/src/platform/sdl3_audio.c
++++ b/psyz/src/platform/sdl3_audio.c
+@@ -15,6 +15,8 @@ static SDL_Mutex* mutex;
+ static void (*service_tasks)(void);
+ static bool pumping;
+ static bool queued_once;
++static bool output_paused;
++static bool timeline_priming = true;
+ static PsyzAudioStats audio_stats;
+ static Uint64 last_refill_ns;
+ 
+@@ -74,7 +76,7 @@ static void QueueTimelineAudio(const short* buffer, int frames) {
+     if (!sdl_stream) {
+         return;
+     }
+-    if (SDL_AudioStreamDevicePaused(sdl_stream)) {
++    if (output_paused) {
+         if (!SDL_ClearAudioStream(sdl_stream)) {
+             ERRORF("cannot clear paused audio: %s", SDL_GetError());
+             abort();
+@@ -93,6 +95,13 @@ static void QueueTimelineAudio(const short* buffer, int frames) {
+             ERRORF("cannot clear backlogged audio: %s", SDL_GetError());
+             abort();
+         }
++        queued = 0;
++        timeline_priming = true;
++    }
++    if (timeline_priming && !SDL_AudioStreamDevicePaused(sdl_stream) &&
++        !SDL_PauseAudioStreamDevice(sdl_stream)) {
++        ERRORF("cannot prime audio output: %s", SDL_GetError());
++        abort();
+     }
+     ObserveRefill(queued);
+     if (!SDL_PutAudioStreamData(sdl_stream, buffer,
+@@ -100,6 +109,25 @@ static void QueueTimelineAudio(const short* buffer, int frames) {
+         ERRORF("cannot queue generated audio: %s", SDL_GetError());
+         abort();
+     }
++    int buffered = queued / (N_CHANNELS * SAMPLE_SIZE) + frames;
++    if (timeline_priming) {
++        if (buffered >= BUFFER_FRAMES) {
++            if (!SDL_SetAudioStreamFrequencyRatio(sdl_stream, 1.0f) ||
++                !SDL_ResumeAudioStreamDevice(sdl_stream)) {
++                ERRORF("cannot start buffered audio: %s", SDL_GetError());
++                abort();
++            }
++            timeline_priming = false;
++        }
++    } else {
++        /* Correct host-device clock drift without changing emulated SPU time. */
++        float ratio = 1.0f + (buffered - BUFFER_FRAMES) / (float)(PSYZ_SPU_SAMPLE_RATE * 20);
++        ratio = SDL_clamp(ratio, 0.995f, 1.005f);
++        if (!SDL_SetAudioStreamFrequencyRatio(sdl_stream, ratio)) {
++            ERRORF("cannot synchronize audio output: %s", SDL_GetError());
++            abort();
++        }
++    }
+ }
+ 
+ static void PumpTimelineAudio(void) {
+@@ -216,6 +244,8 @@ void Psyz_AudioDestroy(void) {
+     is_audio_init = false;
+     service_tasks = NULL;
+     pumping = queued_once = false;
++    output_paused = false;
++    timeline_priming = true;
+     audio_stats = (PsyzAudioStats){0};
+     last_refill_ns = 0;
+ }
+@@ -233,13 +263,16 @@ void Psyz_AudioUnlock() {
+ }
+ 
+ void Psyz_AudioPause(void) {
++    output_paused = true;
++    timeline_priming = true;
+     if (sdl_stream) {
+         SDL_PauseAudioStreamDevice(sdl_stream);
+     }
+ }
+ 
+ void Psyz_AudioUnpause(void) {
+-    if (sdl_stream) {
++    output_paused = false;
++    if (sdl_stream && !Psyz_ClockDeterministic()) {
+         SDL_ResumeAudioStreamDevice(sdl_stream);
+     }
+ }

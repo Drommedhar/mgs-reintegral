@@ -1,0 +1,555 @@
+diff --git a/source/overlays/s10a/okajima/meryl10/action.c b/source/overlays/s10a/okajima/meryl10/action.c
+new file mode 100644
+index 000000000..fffd5ccb1
+--- /dev/null
++++ b/source/overlays/s10a/okajima/meryl10/action.c
+@@ -0,0 +1,225 @@
++#include "mel10.h"
++#include "libgcl/libgcl.h"
++#include "okajima/blood.h"
++#include "okajima/d_bloods.h"
++
++SVECTOR        Meryl10Position;
++static SVECTOR blood_offset = {0, 0, 100, 0};
++static SVECTOR blood_rotation = {-1024, 0, 0, 0};
++
++static void UpdateControl(Meryl10Work *work)
++{
++    work->targets[0]->class = TARGET_SEEK | TARGET_POWER | TARGET_AVAIL;
++    work->control.height = work->body.height;
++    work->control.r_sphere = GV_NearExp2(work->control.r_sphere, 450);
++    if (work->vertical_speed < 0 && work->control.grounded)
++        work->vertical_speed = 0;
++    work->vertical_speed -= 16;
++    work->control.step.vy = work->vertical_speed;
++}
++
++static void PlayVoice(Meryl10Work *work, int index)
++{
++    if (work->voices[0] != -1 && GM_StreamStatus() == -1)
++        GM_VoxStream(work->voices[index], 0);
++}
++
++static void ClearAdjust(Meryl10Work *work)
++{
++    for (int index = 0; index < 16; index++)
++        work->adjustments[index] = DG_ZeroVector;
++}
++
++static void PutBlood(Meryl10Work *work, int unit, int count)
++{
++    MATRIX  world;
++    SVECTOR position;
++    DG_SetPos(&work->body.objs->objs[unit].world);
++    DG_MovePos(&blood_offset);
++    blood_rotation.vx += GV_RandS(128);
++    blood_rotation.vy += GV_RandS(128);
++    blood_rotation.vz += GV_RandS(512);
++    DG_RotatePos(&blood_rotation);
++    ReadRotMatrix(&world);
++    NewBlood(&world, count);
++    position.vx = world.t[0];
++    position.vy = -30000;
++    position.vz = world.t[2];
++    NewKetchap_s(&position, 0, GV_RandU(256) + 256, 60);
++}
++
++static void SetAction(Meryl10Work *work, int action)
++{
++    work->action = action;
++    GM_ConfigObjectAction(&work->body, action, 0, 4);
++}
++
++static void ChangeAction(Meryl10Work *work, int action, int next_state)
++{
++    if (work->action != action)
++        SetAction(work, action);
++    else if (work->body.is_end == 1)
++        work->state = next_state;
++}
++
++static void NotifyDamage(Meryl10Work *work)
++{
++    if (work->damage_proc >= 0)
++    {
++        long     health = work->health_fraction;
++        GCL_ARGS args = {1, &health};
++        GCL_ForceExecProc(work->damage_proc, &args);
++    }
++}
++
++static void CycleVoice(Meryl10Work *work)
++{
++    if (work->hit_type == 0)
++    {
++        if (work->voice_cycle >= 0 && work->voice_cycle < 4)
++            PlayVoice(work, work->voice_cycle);
++        if (++work->voice_cycle >= 4)
++            work->voice_cycle = 0;
++    }
++    else
++    {
++        if (work->hit_voice_cycle >= 0 && work->hit_voice_cycle < 3)
++            PlayVoice(work, work->hit_voice_cycle + 4);
++        if (++work->hit_voice_cycle >= 3)
++            work->hit_voice_cycle = 0;
++    }
++    work->state = 0;
++}
++
++static int UpdateState(Meryl10Work *work)
++{
++    switch (work->state)
++    {
++    case 0:
++        ChangeAction(work, 0, 0);
++        break;
++    case 1:
++        CycleVoice(work);
++        break;
++    case 2:
++        ChangeAction(work, 1, 0);
++        break;
++    case 3:
++        ChangeAction(work, 2, 1);
++        break;
++    case 4:
++        ChangeAction(work, 3, 1);
++        break;
++    case 5:
++        ChangeAction(work, 4, 6);
++        work->death_time = 90;
++        return 0;
++    case 6:
++        if (--work->death_time <= 0)
++        {
++            work->exit_state = 1;
++            work->state = 7;
++        }
++        else
++            ChangeAction(work, 5, 6);
++        return 0;
++    case 7:
++        ChangeAction(work, 5, 7);
++        break;
++    }
++    return 1;
++}
++
++static void ApplyDamage(Meryl10Work *work)
++{
++    TARGET *target = work->targets[0];
++    if (work->voice_state != 0)
++        return;
++    if (!(target->damaged & TARGET_POWER) || target->a_mode == 2)
++    {
++        if (!(work->targets[1]->damaged & TARGET_POWER) && target->a_mode != 2)
++            return;
++        work->hit_type = 1;
++        work->health_fraction -= target->a_mode == 2 ? target->damage / 4 : work->targets[1]->damage / 8;
++        NotifyDamage(work);
++    }
++    else
++    {
++        work->health_fraction -= target->damage / 4;
++        NotifyDamage(work);
++        work->hit_type = 0;
++        ClearAdjust(work);
++        work->unused_6a4[0] = work->unused_6a4[1] = 0;
++    }
++    PutBlood(work, GV_RandU(8), 2);
++    if (work->health_fraction > 0)
++    {
++        work->voice_state = 1;
++        GM_SeSet2(0, 63, 133);
++        int choice = GV_RandU(4);
++        if (choice >= 0 && choice < 4)
++            work->state = choice < 2 ? 3 : 4;
++    }
++    else
++    {
++        work->state = 5;
++        if (work->voice_cycle != -1)
++        {
++            GM_SeSet2(0, 63, 134);
++            work->voice_cycle = -1;
++        }
++        if (work->death_proc != -1)
++            GCL_ForceExecProc(work->death_proc, NULL);
++        GM_GameOver();
++    }
++}
++
++static void ResetDamage(Meryl10Work *work)
++{
++    for (int index = 0; index < 2; index++)
++    {
++        TARGET *target = work->targets[index];
++        target->damaged &= ~TARGET_POWER;
++        target->damage = 0;
++        target->vital = 1024;
++        target->a_mode = 0;
++    }
++}
++
++static void UpdateVoice(Meryl10Work *work)
++{
++    if (work->voice_state == 1 && GM_StreamStatus() == 2)
++        work->voice_state = 2;
++    else if (work->voice_state == 2 && GM_StreamStatus() == -1)
++    {
++        work->voice_state = 0;
++        work->targets[0]->damaged &= ~TARGET_POWER;
++        work->targets[1]->damaged &= ~TARGET_POWER;
++        if (work->hit_type == 1 && work->hit_proc != -1)
++            GCL_ForceExecProc(work->hit_proc, NULL);
++    }
++}
++
++void Meryl10InitAction(Meryl10Work *work)
++{
++    work->unused_6a4[0] = work->unused_6a4[1] = 0;
++    work->death_time = work->intro_time = 0;
++    work->voice_state = work->state = 0;
++    work->action = 6;
++    GM_ConfigMotionAdjust(&work->body, work->adjustments);
++    ClearAdjust(work);
++    SetAction(work, 0);
++    work->exit_state = 0;
++}
++
++void Meryl10UpdateAction(Meryl10Work *work)
++{
++    Meryl10Position = work->control.mov;
++    if (UpdateState(work))
++    {
++        ApplyDamage(work);
++        ResetDamage(work);
++        UpdateVoice(work);
++    }
++    UpdateControl(work);
++}
+diff --git a/source/overlays/s10a/okajima/meryl10/mel10.c b/source/overlays/s10a/okajima/meryl10/mel10.c
+new file mode 100644
+index 000000000..a1badf565
+--- /dev/null
++++ b/source/overlays/s10a/okajima/meryl10/mel10.c
+@@ -0,0 +1,249 @@
++#include "mel10.h"
++#include "libgcl/libgcl.h"
++#include "takabe/fadeio.h"
++
++static SVECTOR shadow_offsets[2] = {{500, 0, 1000, 0}, {-500, 0, 1000, 0}};
++static SVECTOR target_size = {500, 500, 500, 0};
++static char    lifebar_name[16];
++
++static void ReadVectors(SVECTOR *values)
++{
++    char *parameter;
++    while ((parameter = GCL_NextStr()) != NULL)
++        GCL_StrToSV(parameter, (short *)values++);
++}
++
++static void ReadIntegers(int *values)
++{
++    char *parameter;
++    while ((parameter = GCL_NextStr()) != NULL)
++        *values++ = GCL_StrToInt(parameter);
++}
++
++static void UpdateShadow(Meryl10Work *work)
++{
++    SVECTOR  rotation = work->control.rot;
++    SVECTOR  from = DG_ZeroVector;
++    SVECTOR  transformed[2];
++    SVECTOR  position;
++    SVECTOR *vertices = work->shadow_vertices;
++
++    rotation.vy -= 512;
++    from.vz = -150;
++    DG_SetPos2(&DG_ZeroVector, &rotation);
++    DG_PutVector(shadow_offsets, transformed, 2);
++    DG_PutVector(&from, &from, 1);
++    GV_SubVec3(&work->control.mov, &from, &position);
++    vertices[0].vx = position.vx + transformed[0].vx;
++    vertices[3].vx = position.vx - transformed[0].vx;
++    vertices[0].vz = position.vz + transformed[0].vz;
++    vertices[3].vz = position.vz - transformed[0].vz;
++    vertices[1].vx = position.vx + transformed[1].vx;
++    vertices[2].vx = position.vx - transformed[1].vx;
++    vertices[1].vz = position.vz + transformed[1].vz;
++    vertices[2].vz = position.vz - transformed[1].vz;
++    vertices[0].vy = vertices[1].vy = vertices[2].vy = vertices[3].vy = position.vy - work->control.height;
++}
++
++static void SetShadowPacket(POLY_FT4 *packet, DG_TEX *texture)
++{
++    setPolyFT4(packet);
++    setSemiTrans(packet, 1);
++    DG_SetPacketTexture4(packet, texture);
++    setRGB0(packet, 50, 50, 50);
++}
++
++static void DrawLifebar(Meryl10Work *work)
++{
++    int current;
++    int rest;
++
++    work->life = GM_VitalityMax * work->health_fraction / 256;
++    current = MAX(work->life / 8 * 8, 0);
++    rest = MAX(work->displayed_life, current);
++    MENU_DrawBar2(40, rest, current, GM_VitalityMax, &work->lifebar);
++    if (current < rest)
++        work->displayed_life -= 8;
++}
++
++static void SetLifebar(Meryl10Work *work)
++{
++    memcpy(lifebar_name, "MERYL", sizeof("MERYL"));
++    work->lifebar.name = lifebar_name;
++    work->lifebar.left[0] = work->lifebar.right[0] = 31;
++    work->lifebar.left[1] = work->lifebar.right[1] = 191;
++    work->lifebar.left[2] = work->lifebar.right[2] = 95;
++    work->lifebar.height = 1;
++}
++
++static void UpdateLife(Meryl10Work *work)
++{
++    if (256 - work->health_fraction >= work->intro_time)
++    {
++        work->intro_time++;
++        if (work->mode != 0)
++        {
++            work->intro_time = 255;
++            work->life = GM_VitalityMax * work->health_fraction / 256;
++            work->displayed_life = work->life;
++        }
++        else
++        {
++            work->life = GM_VitalityMax * (256 - work->intro_time) / 256;
++        }
++        work->targets[0]->vital = 1024;
++    }
++}
++
++static void Act(Meryl10Work *work)
++{
++    if (work->voices[0] != -1)
++    {
++        if (GM_GameOverTimer != 0 && work->stream_stopped == 0)
++        {
++            work->stream_stopped = 1;
++            GM_StreamPlayStop();
++        }
++        if (work->stream_stopped == 0 && GM_StreamStatus() == 1)
++            GM_StreamPlayStop();
++    }
++    GM_CurrentMap = work->map;
++    DrawLifebar(work);
++    UpdateLife(work);
++    Meryl10UpdateAction(work);
++    UpdateShadow(work);
++    if (work->exit_state == 0)
++    {
++        GM_ActControl(&work->control);
++        GM_ActObject2(&work->body);
++        if (GM_Item == 6)
++            DG_AmbientObjs(work->body.objs);
++        else
++            DG_UnAmbientObjs(work->body.objs);
++        DG_GetLightMatrix2(&work->control.mov, work->light);
++    }
++    if (work->exit_state == 1)
++        work->exit_state = 2;
++    if (work->exit_state == 2)
++    {
++        work->exit_state = 3;
++        work->exit_time = 30;
++        NewFadeInOut(0, 20);
++    }
++    if (work->exit_state == 3 && work->exit_time-- < 0)
++        GV_DestroyActor(work);
++}
++
++static int IntegerOption(char key, int fallback)
++{
++    char *option = GCL_GetOption(key);
++    return option ? GCL_StrToInt(option) : fallback;
++}
++
++static int GetResources(Meryl10Work *work, int name, int where)
++{
++    work->map = where;
++    GM_CurrentMap = where;
++    work->unused_7b4 = 0;
++    if (GM_InitControl(&work->control, name, where) < 0)
++        return -1;
++    GM_ConfigControlAttribute(&work->control, 5);
++    GM_ConfigControlHazard(&work->control, -1, -2, -1);
++    GM_ConfigControlInterp(&work->control, 4);
++    work->mode = IntegerOption('m', 0);
++    work->health_fraction = IntegerOption('h', 128);
++    work->option_c = IntegerOption('c', 10);
++    if (GCL_GetOption('p'))
++        ReadVectors(&work->control.mov);
++    if (GCL_GetOption('d'))
++    {
++        ReadVectors(&work->control.turn);
++        work->control.rot = work->control.turn;
++    }
++    if (GCL_GetOption('v'))
++        ReadIntegers(work->voices);
++    else
++        work->voices[0] = -1;
++    work->proc_n = IntegerOption('n', 0);
++    work->damage_proc = IntegerOption('o', -1);
++    work->hit_proc = IntegerOption('a', -1);
++    work->death_proc = IntegerOption('b', -1);
++    GM_InitObject(&work->body, GV_StrCode("mel_wlf"), 557, GV_StrCode("mel10ad"));
++    GM_ConfigObjectJoint(&work->body);
++    GM_ConfigMotionControl(&work->body, &work->motion, GV_StrCode("mel10ad"), work->segments, NULL, &work->control,
++                           work->rotations);
++    GM_ConfigObjectLight(&work->body, work->light);
++    Meryl10InitAction(work);
++    UpdateShadow(work);
++    work->shadow = DG_MakePrim(DG_PRIM_POLY_FT4, 1, 0, work->shadow_vertices, NULL);
++    if (!work->shadow)
++        return -1;
++    DG_QueuePrim(work->shadow);
++    work->shadow->group_id = GM_CurrentMap;
++    DG_TEX *texture = DG_GetTexture(GV_StrCode("shadow"));
++    if (!texture)
++        return -1;
++    SetShadowPacket(work->shadow->packs[0], texture);
++    SetShadowPacket(work->shadow->packs[1], texture);
++    NewFadeInOut(1, 20);
++    work->exit_state = work->exit_time = 0;
++    work->voice_cycle = work->hit_voice_cycle = 0;
++    work->hit_type = 0;
++    work->homing = GM_SetHomingTarget(&work->homing_matrix, &work->control);
++    work->homing->flag = 1;
++    work->stream_stopped = 0;
++    return 0;
++}
++
++static void Die(Meryl10Work *work)
++{
++    GM_FreeControl(&work->control);
++    GM_FreeObject(&work->body);
++    if (work->shadow)
++    {
++        DG_DequeuePrim(work->shadow);
++        DG_FreePrim(work->shadow);
++    }
++    GM_FreeTarget(work->targets[0]);
++    GM_FreeTarget(work->targets[1]);
++    GM_ResetHomingTarget(work->homing);
++}
++
++static int CreateTargets(Meryl10Work *work)
++{
++    for (int index = 0; index < 2; index++)
++    {
++        TARGET *target = GM_AllocTarget();
++        work->targets[index] = target;
++        if (!target)
++            return -1;
++        GM_SetTarget(target, TARGET_SEEK | TARGET_POWER | TARGET_AVAIL, index + 1, &target_size);
++        GM_SetPowerTarget(target, 1, -1, GM_VitalityMax, 255, &DG_ZeroVector);
++        GM_MoveTarget(target, &work->control.mov);
++    }
++    return 0;
++}
++
++void *NewBloodyMeryl(int name, int where)
++{
++    Meryl10Work *work = GV_NewActor(GV_ACTOR_PREV, sizeof(Meryl10Work));
++    if (!work)
++        return NULL;
++    GV_SetNamedActor(work, Act, Die, "mel10.c");
++    if (GetResources(work, name, where) < 0)
++    {
++        GV_DestroyActor(work);
++        return NULL;
++    }
++    if (CreateTargets(work) < 0)
++        return NULL;
++    SVECTOR position = work->targets[0]->center;
++    position.vy += 300;
++    DG_SetPos2(&position, &DG_ZeroVector);
++    ReadRotMatrix(&work->homing_matrix);
++    if (work->mode == 0)
++        work->displayed_life = GM_VitalityMax;
++    SetLifebar(work);
++    DrawLifebar(work);
++    return work;
++}
+diff --git a/source/overlays/s10a/okajima/meryl10/mel10.h b/source/overlays/s10a/okajima/meryl10/mel10.h
+new file mode 100644
+index 000000000..7cc233b92
+--- /dev/null
++++ b/source/overlays/s10a/okajima/meryl10/mel10.h
+@@ -0,0 +1,63 @@
++#ifndef MGS_S10_MEL10_H
++#define MGS_S10_MEL10_H
++
++#include "game/game.h"
++
++typedef struct
++{
++    GV_ACT         actor;
++    int            map;
++    CONTROL        control;
++    OBJECT         body;
++    OBJECT         unused_object;
++    MOTION_CONTROL motion;
++    MOTION_SEGMENT segments[17];
++    SVECTOR        rotations[16];
++    SVECTOR        adjustments[16];
++    MATRIX         light[2];
++    TARGET        *targets[2];
++    HOMING        *homing;
++    MATRIX         homing_matrix;
++    int            action;
++    int            vertical_speed;
++    int            state;
++    int            unused_694[2];
++    int            intro_time;
++    int            death_time;
++    int            unused_6a4[2];
++    int            voice_state;
++    int            hit_type;
++    SVECTOR        shadow_vertices[4];
++    DG_PRIM       *shadow;
++    int            unused_6d8[5];
++    int            voices[32];
++    int            unused_76c;
++    int            voice_cycle;
++    int            hit_voice_cycle;
++    int            exit_state;
++    int            exit_time;
++    int            proc_n;
++    int            damage_proc;
++    int            hit_proc;
++    int            death_proc;
++    MENU_BAR_CONF  lifebar;
++    int            displayed_life;
++    int            life;
++    int            health_fraction;
++    int            mode;
++    int            option_c;
++    int            stream_stopped;
++    int            unused_7b4;
++} Meryl10Work;
++
++#ifdef MGS_NATIVE
++_Static_assert(sizeof(Meryl10Work) == 1976, "Meryl10 original actor layout");
++_Static_assert(offsetof(Meryl10Work, shadow_vertices) == 1716, "Meryl10 shadow offset");
++#endif
++
++extern SVECTOR Meryl10Position;
++void           Meryl10InitAction(Meryl10Work *work);
++void           Meryl10UpdateAction(Meryl10Work *work);
++void          *NewBloodyMeryl(int name, int where);
++
++#endif

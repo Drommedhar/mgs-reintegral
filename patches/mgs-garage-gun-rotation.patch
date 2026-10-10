@@ -1,0 +1,13 @@
+diff --git a/source/overlays/s19a/props_snake.c b/source/overlays/s19a/props_snake.c
+index e98e37ac7..2612349ff 100644
+--- a/source/overlays/s19a/props_snake.c
++++ b/source/overlays/s19a/props_snake.c
+@@ -557,7 +557,7 @@ void Garage_800DAE40(GarageSnake *work)
+     mov = GarageGunOffset;
+     work->field_8CC.vy = (work->aim.vy + work->root_control->rot.vy) & 0xFFF;
+     DG_SetPos2(&mov, &work->aim);
+-    RotMatrix(&work->aim, &right);
++    RotMatrixZYX(&work->aim, &right);
+     right.t[0] = mov.vx;
+     right.t[1] = mov.vy;
+     right.t[2] = mov.vz;

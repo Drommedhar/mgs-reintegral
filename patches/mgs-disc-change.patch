@@ -1,0 +1,57 @@
+diff --git a/source/onoda/change/change.c b/source/onoda/change/change.c
+index 95de7bb1b..ef45a1f9d 100644
+--- a/source/onoda/change/change.c
++++ b/source/onoda/change/change.c
+@@ -17,6 +17,9 @@
+ 
+ #include "met_logo.h"   // for NewMetalGearLogo
+ #include "safety.h"     // for Safety_*
++#ifdef MGS_NATIVE
++#include "mgs_disc.h"
++#endif
+ 
+ extern int    FS_DiskNum;
+ 
+@@ -281,10 +284,10 @@ static void change_800C3B90( Work *work )
+ 
+ static void change_800C3CD0( Work *work )
+ {
+-    char   result[8];
+-    char   result2[8];
++    u_char result[8];
++    u_char result2[8];
+     CdlLOC loc;
+-    char   param[8];
++    u_char param[8];
+     int    press;
+     int    status;
+     int    intr;
+@@ -375,6 +378,9 @@ static void change_800C3CD0( Work *work )
+         break;
+ 
+     case 2:
++#ifdef MGS_NATIVE
++        MgsDiscChangeOpen();
++#endif
+         param[ 0 ] = 0;
+         CdControlB( CdlNop, param, result );
+ 
+@@ -390,6 +396,9 @@ static void change_800C3CD0( Work *work )
+         break;
+ 
+     case 3:
++#ifdef MGS_NATIVE
++        MgsDiscChangeClose();
++#endif
+         param[ 0 ] = 0;
+         CdControlB( CdlNop, param, result );
+ 
+@@ -477,7 +486,7 @@ static void change_800C3CD0( Work *work )
+ 
+     case 8:
+         CdIntToPos( 16, &loc );
+-        status = CdControlB( CdlReadN, (char *)&loc, result );
++        status = CdControlB( CdlReadN, (u_char *)&loc, result );
+ 
+         if ( status == 0 )
+         {

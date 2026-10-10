@@ -1,0 +1,123 @@
+diff --git a/psyz/include/psyz/input.h b/psyz/include/psyz/input.h
+index 0850552..90a711d 100644
+--- a/psyz/include/psyz/input.h
++++ b/psyz/include/psyz/input.h
+@@ -68,6 +68,11 @@ typedef void (*PsyzPadPollHook)(char frames[2][PSYZ_PAD_BUF_LEN],
+  */
+ void Psyz_PadsSetPollHook(PsyzPadPollHook hook, void* userdata);
+ 
++/** Exchange the host input sources assigned to the two emulated ports. */
++void Psyz_PadsSetHostPortSwap(int swapped);
++/** Return the host source for a logical port, or -1 for an invalid port. */
++int Psyz_PadsHostPort(int port);
++
+ /**
+  * @brief Retrieve the internal 34-byte controller frame for a port
+  *
+diff --git a/psyz/src/platform/sdl3_common.h b/psyz/src/platform/sdl3_common.h
+index 3cb5eca..de5b28e 100644
+--- a/psyz/src/platform/sdl3_common.h
++++ b/psyz/src/platform/sdl3_common.h
+@@ -587,6 +587,7 @@ static bool is_pads_init = false;
+ static struct Gamepad gamepads[16] = {0};
+ 
+ int Psyz_PadsSupportsRumble(int port) {
++    port = Psyz_PadsHostPort(port);
+     if (port < 0 || port >= 2 || !gamepads[port].dev) {
+         return 0;
+     }
+@@ -599,6 +600,7 @@ int Psyz_PadsRumble(int port, unsigned short low, unsigned short high,
+     if (!Psyz_PadsSupportsRumble(port)) {
+         return 0;
+     }
++    port = Psyz_PadsHostPort(port);
+     return SDL_RumbleGamepad(gamepads[port].dev, low, high, duration_ms);
+ }
+ 
+@@ -814,6 +816,7 @@ static bool PortHasHostInput(int port) {
+ }
+ 
+ static void BuildPadFrame(int port, PsyzControllerKind kind, char* buf) {
++    port = Psyz_PadsHostPort(port);
+     memset(buf, 0, PSYZ_PAD_BUF_LEN);
+     // No physical input for this port -> report as disconnected regardless of
+     // the requested kind. Games look at buf[0]=0xFF / buf[1]=0xFF to know.
+diff --git a/psyz/src/platform/sdl3_gpu_debug.h b/psyz/src/platform/sdl3_gpu_debug.h
+index 57e2f6b..870db74 100644
+--- a/psyz/src/platform/sdl3_gpu_debug.h
++++ b/psyz/src/platform/sdl3_gpu_debug.h
+@@ -1,7 +1,7 @@
+ #ifndef SDL3_GPU_DEBUG_H
+ #define SDL3_GPU_DEBUG_H
+ 
+-enum { DEBUG_PANEL_W = 328, DEBUG_PANEL_H = 28 };
++enum { DEBUG_PANEL_W = 328, DEBUG_PANEL_H = 48 };
+ static SDL_Surface* debug_surface;
+ static SDL_Renderer* debug_renderer;
+ static SDL_GPUTexture* debug_texture;
+@@ -46,15 +46,20 @@ static bool DebugPanelInit(SDL_GPUDevice* gpu) {
+ static bool DebugPanelUpload(SDL_GPUDevice* gpu, SDL_GPUCommandBuffer* cmd, const char* text) {
+     char lines[256];
+     SDL_strlcpy(lines, text, sizeof(lines));
+-    char* second = strchr(lines, '\n');
+-    if (second)
+-        *second++ = 0;
+     if (!SDL_SetRenderDrawColor(debug_renderer, 12, 18, 24, 255) ||
+         !SDL_RenderClear(debug_renderer) ||
+-        !SDL_SetRenderDrawColor(debug_renderer, 230, 245, 240, 255) ||
+-        !SDL_RenderDebugText(debug_renderer, 4, 5, lines) ||
+-        (second && !SDL_RenderDebugText(debug_renderer, 4, 15, second)) ||
+-        !SDL_RenderPresent(debug_renderer))
++        !SDL_SetRenderDrawColor(debug_renderer, 230, 245, 240, 255))
++        return false;
++    char* line = lines;
++    for (int y = 5; line && y + 8 <= DEBUG_PANEL_H; y += 10) {
++        char* next = strchr(line, '\n');
++        if (next)
++            *next++ = 0;
++        if (!SDL_RenderDebugText(debug_renderer, 4, y, line))
++            return false;
++        line = next;
++    }
++    if (!SDL_RenderPresent(debug_renderer))
+         return false;
+     unsigned char* pixels = SDL_MapGPUTransferBuffer(gpu, debug_transfer, true);
+     if (!pixels)
+@@ -88,11 +93,15 @@ static bool DebugPanelDraw(SDL_GPUDevice* gpu, SDL_GPUCommandBuffer* cmd,
+     if (strcmp(text, debug_uploaded) && !DebugPanelUpload(gpu, cmd, text))
+         return false;
+     Uint32 scale = height >= 960 && width >= DEBUG_PANEL_W * 2 + 16 ? 2 : 1;
++    Uint32 rows = 1;
++    for (const char* p = text; *p; ++p)
++        rows += *p == '\n';
++    Uint32 content_h = SDL_min(rows * 10 + 8, DEBUG_PANEL_H);
+     Uint32 panel_w = SDL_min(DEBUG_PANEL_W * scale, width);
+-    Uint32 panel_h = SDL_min(DEBUG_PANEL_H * scale, height);
++    Uint32 panel_h = SDL_min(content_h * scale, height);
+     Uint32 margin = SDL_min(12, width - panel_w);
+     SDL_GPUBlitInfo blit = {
+-        .source = {.texture = debug_texture, .w = DEBUG_PANEL_W, .h = DEBUG_PANEL_H},
++        .source = {.texture = debug_texture, .w = DEBUG_PANEL_W, .h = content_h},
+         .destination = {.texture = output, .x = width - panel_w - margin,
+                         .y = SDL_min(12, height - panel_h), .w = panel_w, .h = panel_h},
+         .load_op = SDL_GPU_LOADOP_LOAD, .filter = SDL_GPU_FILTER_NEAREST,
+diff --git a/psyz/src/psyz/libapi.c b/psyz/src/psyz/libapi.c
+index ec86a4c..634ced0 100644
+--- a/psyz/src/psyz/libapi.c
++++ b/psyz/src/psyz/libapi.c
+@@ -38,6 +38,15 @@ static int pad_buffer_lens[2];
+ static int pads_running;
+ static PsyzPadPollHook pad_poll_hook;
+ static void* pad_poll_userdata;
++static int host_ports_swapped;
++
++void Psyz_PadsSetHostPortSwap(int swapped) {
++    host_ports_swapped = swapped != 0;
++}
++
++int Psyz_PadsHostPort(int port) {
++    return port >= 0 && port < 2 ? port ^ host_ports_swapped : -1;
++}
+ 
+ void Psyz_PadsSetPollHook(PsyzPadPollHook hook, void* userdata) {
+     pad_poll_hook = hook;

@@ -1,0 +1,1808 @@
+diff --git a/source/overlays/s03d/animal/zako/think.c b/source/overlays/s03d/animal/zako/think.c
+index 57fe29567..2188cba2c 100644
+--- a/source/overlays/s03d/animal/zako/think.c
++++ b/source/overlays/s03d/animal/zako/think.c
+@@ -20,7 +20,11 @@ extern int s03d_dword_800DC2F8;
+ extern int s03d_dword_800DC2FC;
+ extern int s03d_dword_800DC300;
+ extern SVECTOR s03d_dword_800DC308;
++#ifndef MGS_NATIVE
+ extern int s03d_dword_800DC32C;
++#else
++#define s03d_dword_800DC32C (ZAKOCOM_MGR->field_1C)
++#endif
+ 
+ void s03d_800D2C20(Work *work)
+ {
+diff --git a/source/overlays/s03d/animal/zako/zako.c b/source/overlays/s03d/animal/zako/zako.c
+index ae3eb9a48..f82af10c1 100644
+--- a/source/overlays/s03d/animal/zako/zako.c
++++ b/source/overlays/s03d/animal/zako/zako.c
+@@ -7,18 +7,65 @@
+ #include "libdg/libdg.h"
+ #include "libgcl/libgcl.h"
+ #include "okajima/blood.h"
+-
++#include "chara/snake/shadow.h"
++#include "enemy/glight.h"
++#include "enemy/asiato.h"
++#include "enemy/l_sight.h"
++#include "okajima/bullet.h"
++#include "anime/animconv/anime.h"
++#include "bullet/tenage.h"
++
++#ifdef MGS_NATIVE
++extern SVECTOR s03d_dword_800C39B0;
++#else
+ extern int s03d_dword_800C39B0;
++#endif
++#ifdef MGS_NATIVE
++extern SVECTOR s03d_dword_800C39B8;
++#else
+ extern int s03d_dword_800C39B8;
++#endif
++#ifdef MGS_NATIVE
++extern SVECTOR s03d_dword_800C39C0;
++#else
+ extern int s03d_dword_800C39C0;
++#endif
++#ifdef MGS_NATIVE
++extern SVECTOR s03d_dword_800C39C8;
++#else
+ extern int s03d_dword_800C39C8;
++#endif
+ extern int s03d_dword_800C3A90[];
++#ifdef MGS_NATIVE
++extern SVECTOR s03d_dword_800C3A64;
++#else
+ extern int s03d_dword_800C3A64;
++#endif
++#ifdef MGS_NATIVE
++extern SVECTOR s03d_dword_800C3A6C;
++#else
+ extern int s03d_dword_800C3A6C;
++#endif
++#ifdef MGS_NATIVE
++extern const char *s03d_dword_800C3A84;
++#else
+ extern int s03d_dword_800C3A84;
++#endif
++#ifdef MGS_NATIVE
++extern const char *s03d_dword_800C3A88;
++#else
+ extern int s03d_dword_800C3A88;
++#endif
++#ifdef MGS_NATIVE
++extern SVECTOR s03d_dword_800C3A74;
++#else
+ extern int s03d_dword_800C3A74;
++#endif
++#ifdef MGS_NATIVE
++extern SVECTOR s03d_dword_800C3A7C;
++#else
+ extern int s03d_dword_800C3A7C;
++#endif
+ extern short s03d_word_800C39F0[2];
+ extern int s03d_dword_800C39F4;
+ extern short s03d_word_800C3A00[2];
+@@ -31,15 +78,22 @@ extern short s03d_word_800C3A38[2];
+ extern short s03d_word_800C3A3C[2];
+ extern short s03d_word_800C39E8[2];
+ extern short s03d_word_800C39EC[2];
++#ifndef MGS_NATIVE
+ extern int s03d_dword_800DC310;
++#endif
+ extern SVECTOR s03d_dword_800C3B88;
++#ifdef MGS_NATIVE
++extern SVECTOR s03d_dword_800C3A5C;
++#else
+ extern int s03d_dword_800C3A5C;
++#endif
+ extern short s03d_word_800C3A10[20];
+ extern const SVECTOR s03d_dword_800DB548;
+ extern const SVECTOR s03d_dword_800DB550;
+ extern const SVECTOR s03d_dword_800DB558;
+ 
+ extern int s03d_dword_800DC2F8;
++extern int s03d_dword_800DC2F4;
+ 
+ void AN_Fog(SVECTOR *svec);
+ 
+@@ -69,6 +123,71 @@ void s03d_800D3B5C(Work *work);
+ void s03d_800D153C(Work *work);
+ void ZakoCom_800D4050(int idx);
+ 
++#ifdef MGS_NATIVE
++int ZakoCom_800D3FF4(ZakoActor *actor);
++int ZakoCom_800D4038(void);
++void s03d_800CE318(Work *work, int time);
++void s03d_800CE5B4(Work *work, int time);
++void s03d_800CE644(Work *work, int time);
++void s03d_800CE8F4(Work *work, int time);
++void s03d_800CE9E8(Work *work, int time);
++void s03d_800CEB38(Work *work, int time);
++void s03d_800CECBC(Work *work, int time);
++void s03d_800CF4D4(Work *work, int time);
++void s03d_800CF844(Work *work, int time);
++void s03d_800CF90C(Work *work, int time);
++void s03d_800CFA04(Work *work, int time);
++void s03d_800CFB04(Work *work, int time);
++void s03d_800CFFF0(Work *work, int time);
++void s03d_800D05DC(Work *work, int time);
++void s03d_800D0698(Work *work, int time);
++void s03d_800D0754(Work *work, int time);
++void s03d_800D07DC(Work *work, int time);
++void s03d_800D085C(Work *work, int time);
++void s03d_800D08DC(Work *work, int time);
++void s03d_800D0958(Work *work, int time);
++void s03d_800D09D8(Work *work, int time);
++void s03d_800CED94(Work *work, int time);
++int Zako_800D0408(Work *work);
++void AN_Sleep(SVECTOR *position);
++void AN_Breath(MATRIX *world);
++void *AN_HeadMark(MATRIX *world, int mark);
++int Zako_800D0F38(Work *work, int value);
++
++static const short s03d_motions[] = {
++    19, 20, 10, 22, 9, 34, 35, 36, 45, 13, 12, 26, 15, 14, 16, 27,
++    8, 21, 30, 31, 32, 33, 37, 25, 5, 2, 42, 4, 39, 40, 6, 7,
++    38, 3, 41, 17, 18, 43, 23, 24, 28, 29, 0, 1, 51, 17, 18, 43
++};
++
++static void S03dSetMotion(Work *work, int motion, int interp)
++{
++    work->field_8E0 = motion;
++    GM_ConfigObjectAction(&work->body, s03d_motions[motion], 0, interp);
++}
++
++static void S03dSetActionKeepAdjust(Work *work, void (*action)(Work *, int))
++{
++    work->field_8E8 = action;
++    work->field_8F0 = 0;
++    work->control.turn.vx = work->control.turn.vz = 0;
++}
++
++static void S03dSetAction(Work *work, void (*action)(Work *, int))
++{
++    S03dSetActionKeepAdjust(work, action);
++    GM_ConfigMotionAdjust(&work->body, NULL);
++}
++
++static void S03dClearOverride(Work *work)
++{
++    GM_ConfigObjectOverride(&work->body, s03d_motions[0], 0, 4, 0);
++    work->field_8EC = 0;
++    work->field_8F4 = 0;
++    work->control.turn.vx = work->control.turn.vz = 0;
++}
++#endif
++
+ void Zako_800CCAB0(DG_OBJS *objs, DG_DEF *def)
+ {
+     DG_OBJ *obj;
+@@ -171,7 +290,45 @@ void Zako_800CCDE0(Work *work)
+     work->field_8F4 = 0;
+ }
+ 
++#ifdef MGS_NATIVE
++int s03d_800CCE3C(Work *work, int name, int where)
++{
++    CONTROL *control = &work->control;
++    OBJECT *body = &work->body;
++    SVECTOR shadow = {0, 6, 12, 15};
++    char *position;
++    char *direction;
++
++    if (GM_InitControl(control, name, where) < 0)
++    {
++        return -1;
++    }
++    position = GCL_GetOption('p');
++    direction = GCL_GetOption('d');
++    GM_ConfigControlString(control, position, direction);
++    GM_ConfigControlAttribute(control, 5);
++    GM_ConfigControlInterp(control, 4);
++    GM_InitObject(body, GV_StrCode("ippanhei"), 0x32D, GV_StrCode("enemy"));
++    GM_ConfigObjectJoint(body);
++    GM_ConfigMotionControl(body, &work->m_ctrl, GV_StrCode("enemy"),
++                           work->m_segs1, work->m_segs2, control, work->rots);
++    GM_ConfigObjectLight(body, work->light);
++    work->models[1] = body->objs->def;
++    work->models[0] = GV_GetCache(GV_CacheID(0xC37, 'k'));
++    work->lod = 1;
++    work->hom = GM_SetHomingTarget(&body->objs->objs[6].world, control);
++    GM_InitObject(&work->weapon, GV_StrCode("famas"), 0x6D, 0);
++    GM_ConfigObjectLight(&work->weapon, work->light);
++    GM_ConfigObjectRoot(&work->weapon, body, 4);
++    work->shadow = NewShadow2(control, body, shadow, &work->enable_shadow);
++    work->glight = NewGunLight(&body->objs->objs[4].world, &work->enable_glight);
++    Zako_800D0EF0(work, 0);
++    Zako_800CCDE0(work);
++    return 0;
++}
++#else
+ #pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800CCE3C.s")
++#endif
+ 
+ void s03d_800CD054(Work *work)
+ {
+@@ -229,7 +386,97 @@ int Zako_800CD16C(char *opt, char *out)
+     return count;
+ }
+ 
++#ifdef MGS_NATIVE
++void s03d_800CD1C4(Work *work, int name, int where)
++{
++    PARAM *param = &work->param;
++    char *option;
++    int i;
++    static const int distances[] = {3000, 4000, 7000, 8000, 8000, 8000, 8000, 8000};
++
++    s03d_800CCE3C(work, name, where);
++    param->fAF8 = ZakoCom_800D3FF4((ZakoActor *)work);
++    if (param->fAF8 < 0)
++    {
++        fprintf(0, "Err not enough work !!\n");
++    }
++    work->field_B04 = ZakoCom_800D4038();
++    param->roots[0] = 0;
++    param->c_root = 0;
++    option = GCL_GetOption('r');
++    if (option && Zako_800CD16C(option, (char *)param->roots) >= 4)
++    {
++        fprintf(0, "Err Err Err Change Root Num Over !!\n");
++    }
++    if ((unsigned int)param->fAF8 < countof(distances))
++    {
++        work->field_B64 = distances[param->fAF8];
++    }
++    param->life = 192;
++    if ((option = GCL_GetOption('l')) != NULL) param->life = GCL_StrToInt(option);
++    param->max_life = 255;
++    if ((option = GCL_GetOption('f')) != NULL) param->max_life = GCL_StrToInt(option);
++    param->faint = 40;
++    if ((option = GCL_GetOption('z')) != NULL) param->faint = GCL_StrToInt(option);
++    param->fAF9 = 'A';
++    if ((option = GCL_GetOption('b')) != NULL) param->fAF9 = GCL_StrToInt(option);
++    param->defends[param->c_root] = -1;
++    option = GCL_GetOption('n');
++    if (option && Zako_800CD16C(option, param->defends) >= 4)
++    {
++        fprintf(0, "Err Err Err Change Defend Num Over !!\n");
++    }
++    param->fAFA = 'A';
++    if ((option = GCL_GetOption('a')) != NULL) param->fAFA = GCL_StrToInt(option);
++    if (param->fAFA == 'S') Zako_800D0EF0(work, 1);
++    fprintf(0, "Life=%d Faint=%d Blood=%c Area=%c \n", param->life,
++            param->max_life, param->fAF9, param->fAFA);
++    if (s03d_800CD0C8(work) < 0)
++    {
++        fprintf(1, "watchar.c : action point Err\n");
++    }
++    work->field_8FC = GM_AllocTarget();
++    if (work->field_8FC) Zako_800CCCF4(work);
++    work->field_AC8 = work->field_ACA = work->field_ACC = work->field_ACE = 0;
++    work->field_AD0 = work->field_AD4 = 0;
++    work->field_B48 = work->nodes[0];
++    work->field_B5C = HZD_GetAddress(work->control.map->hzd, &work->field_B48, -1);
++    work->field_B22 = 512;
++    work->field_B24 = 4000;
++    work->field_B28 = work->field_B20 = 0;
++    work->field_AE8 = work->field_AE4 = 0;
++    work->field_B60 = GM_CurrentMap;
++    work->field_B34 = (SVECTOR){30000, 30000, 30000, 0};
++    work->field_AF0 = 0;
++    work->control.mov = work->nodes[0];
++    work->field_AF6 = work->field_AF8 = 0;
++    work->field_B00 = 1;
++    work->field_BA0 = 0;
++    for (i = 0; i < 6; i++) work->field_B2C[i] = 0;
++    work->field_B32 = 0;
++    work->field_B33 = 23;
++    work->field_B2C[4] = -1;
++    GM_ConfigControlRadarparam(&work->control, 0, 512, 4000, 0);
++    work->field_B40 = work->nodes[0];
++    work->field_B54 = GM_CurrentMap;
++    work->field_B50 = HZD_GetAddress(work->control.map->hzd, &work->control.mov, -1);
++    work->field_B74 = work->field_B58 = work->field_B50;
++    work->field_B80 = work->field_B40;
++}
++
++void *NewS03dZako(int name, int where)
++{
++    Work *work = GV_NewActor(GV_ACTOR_PREV, sizeof(Work));
++    if (work)
++    {
++        GV_SetNamedActor(work, s03d_800CCC54, s03d_800CD054, "zako.c");
++        s03d_800CD1C4(work, name, where);
++    }
++    return work;
++}
++#else
+ #pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800CD1C4.s")
++#endif
+ 
+ int s03d_800CD61C(Work *work)
+ {
+@@ -286,7 +533,62 @@ int Zako_800CD720(SVECTOR *vec)
+ 
+     return ABS(x) + ABS(y) + ABS(z);
+ }
++#ifdef MGS_NATIVE
++int s03d_800CD75C(Work *work)
++{
++    TARGET *target = work->field_8FC;
++    void (*action)(Work *, int) = NULL;
++
++    if (!(target->damaged & TARGET_POWER)) return 0;
++    switch (target->a_mode)
++    {
++    case 1:
++        target->force = DG_ZeroVector;
++        if (target->vital > 0) action = s03d_800CFA04;
++        else
++        {
++            if (target->vital == work->field_BA2 - 64)
++                printf(" SNAKE KILLED !!! \n");
++            else
++            {
++                work->field_BA0 = 1;
++                printf(" meryl KILLED !!! \n");
++            }
++            work->field_8DC = 1;
++            action = s03d_800CFB04;
++        }
++        break;
++    case 2:
++        work->field_8DC = Zako_800CD720(&target->force) >= 100 ? 2 : 3;
++        action = s03d_800CFB04;
++        break;
++    case 3:
++        target->force = DG_ZeroVector;
++        if (target->faint > 0) action = s03d_800CFA04;
++        else
++        {
++            work->field_8DC = 1;
++            action = s03d_800CFB04;
++        }
++        break;
++    case 4:
++        work->field_8DC = 0;
++        action = s03d_800CFB04;
++        break;
++    case 5:
++        work->field_8DC = 3;
++        action = s03d_800CFB04;
++        break;
++    case 8: action = s03d_800CF4D4; break;
++    case 9: action = s03d_800CF548; break;
++    }
++    if (action) S03dSetAction(work, action);
++    target->damage = target->damaged = 0;
++    return 1;
++}
++#else
+ #pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800CD75C.s")
++#endif
+ int s03d_800CD984(Work *work)
+ {
+     if (work->control.mov.vx < 0x1194)
+@@ -331,7 +633,50 @@ void Zako_800CDA70(Work *work)
+     GM_SetTarget(&work->field_900, 4, 1, (SVECTOR *)&s03d_dword_800C39C0);
+     GM_SetPowerTarget(&work->field_900, 7, 5, 0, 3, (SVECTOR *)&s03d_dword_800C39C8);
+ }
++#ifdef MGS_NATIVE
++void s03d_800CDB5C(Work *work)
++{
++    CONTROL *control = &work->control;
++    HZD_ZON *zone;
++    int index;
++
++    work->field_B04 = ZakoCom_800D4038();
++    work->field_B00 = 1;
++    GM_ConfigControlAttribute(control, 13);
++    Zako_800CDA70(work);
++    if (s03d_dword_800DC2F8 >= 4)
++    {
++        index = ZAKOCOM_MGR->field_38[work->param.fAF8 % 2];
++        printf("bbb reset fight zone id = %d z=%d\n", work->param.fAF8, index);
++    }
++    else
++    {
++        index = 2 * work->param.fAF8 + 25;
++        printf("aaa reset wait zone id = %d z=%d\n", work->param.fAF8, index);
++    }
++    zone = &control->map->hzd->def->zones[index];
++    control->mov.vx = zone->x;
++    control->mov.vy = zone->y + 1000;
++    control->mov.vz = zone->z;
++    if (work->param.fAF8 == 2) control->mov.vz += 500;
++    control->map = GM_GetMap(work->field_B54);
++    work->field_AC8 = work->field_ACA = work->field_ACC = work->field_ACE = 0;
++    work->field_AD0 = 0;
++    work->field_AD4 = work->n_nodes - 1;
++    work->field_B5C = work->field_B50;
++    work->field_B48 = work->field_B40;
++    work->field_B22 = 512;
++    work->field_B24 = 4000;
++    work->field_B28 = work->field_B20 = work->field_AE8 = 0;
++    work->field_ADC = 1;
++    work->field_BA0 = 0;
++    work->field_B60 = work->field_B54;
++    work->field_B80 = work->field_B40;
++    work->field_B74 = work->field_B58 = work->field_B50;
++}
++#else
+ #pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800CDB5C.s")
++#endif
+ int Zako_800CDD40(int from, int to)
+ {
+     int dir;
+@@ -402,8 +747,72 @@ void Zako_800CDF2C(Work *work)
+     GM_MoveTarget(t, &work->control.mov);
+     GM_PowerTarget(t);
+ }
++#ifdef MGS_NATIVE
++int s03d_800CDF94(Work *work)
++{
++    int flags = work->field_AD8;
++    void (*override)(Work *, int) = NULL;
++
++    if (flags & 1) override = s03d_800D05DC;
++    else if (flags & 2) override = s03d_800D0698;
++    else if (flags & 4) override = s03d_800D0754;
++    else if (flags & 0x40) override = s03d_800D07DC;
++    else if (flags & 0x80) override = s03d_800D085C;
++    else if (flags & 0x400) override = s03d_800D08DC;
++    else if (flags & 0x800) override = s03d_800D0958;
++    else if (flags & 0x200) override = s03d_800D09D8;
++    else
++    {
++        if (flags & 0x100) S03dSetAction(work, s03d_800CE5B4);
++        else if (flags & 0x20) S03dSetAction(work, s03d_800CE644);
++        else if (flags & 0x30000)
++        {
++            S03dSetAction(work, s03d_800CE720);
++            work->adjust[2].vx = 0;
++        }
++        else return 0;
++        return 1;
++    }
++    if (work->field_8EC == 0)
++    {
++        work->field_8EC = (int)override;
++        work->field_8F4 = 0;
++    }
++    work->control.turn.vx = work->control.turn.vz = 0;
++    GM_ConfigMotionAdjust(&work->body, NULL);
++    return 0;
++}
++
++void s03d_800CE12C(Work *work, int time)
++{
++    int direction;
++
++    work->field_8FC->class |= 0x9E;
++    if (ZAKOCOM_MGR->field_1C == 0) work->field_8FC->class |= 0x40;
++    work->field_B24 = 4000;
++    if (time == 0) S03dSetMotion(work, 0, 4);
++    if (Zako_800CDA04(work) || s03d_800CDF94(work))
++    {
++        S03dClearOverride(work);
++        return;
++    }
++    direction = work->field_AE6;
++    if (direction >= 0)
++    {
++        if (GV_DiffDirAbs(work->control.rot.vy, direction) >= 256)
++            work->control.turn.vy = direction;
++        else
++        {
++            S03dSetMotion(work, (work->field_ADC & 1) ? 2 : 1, 4);
++            S03dSetAction(work, s03d_800CE318);
++        }
++    }
++    work->field_B20 = GV_NearExp4P(work->field_B20, work->control.rot.vy);
++}
++#else
+ #pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800CDF94.s")
+ #pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800CE12C.s")
++#endif
+ void s03d_800CE2C0(Work *work, int arg1)
+ {
+     int dir = GV_DiffDirS(arg1, work->control.rot.vy);
+@@ -419,7 +828,57 @@ void s03d_800CE2C0(Work *work, int arg1)
+ 
+     work->control.turn.vz = dir;
+ }
++#ifdef MGS_NATIVE
++void s03d_800CE318(Work *work, int time)
++{
++    CONTROL *control = &work->control;
++    int direction = work->field_AE6;
++    int motion = work->field_8E0;
++    int wall_dir = -1;
++    int other_dir;
++    int turn;
++    int speed = 0;
++
++    work->field_8FC->class |= 0x9E;
++    if (ZAKOCOM_MGR->field_1C == 0) work->field_8FC->class |= 0x40;
++    work->field_B24 = 4000;
++    if (Zako_800CDA04(work) || s03d_800CDF94(work))
++    {
++        S03dClearOverride(work);
++        return;
++    }
++    if ((work->field_ADC & 1) && motion != 2) S03dSetMotion(work, 2, 4);
++    if (direction < 0)
++    {
++        S03dSetAction(work, s03d_800CE12C);
++        S03dClearOverride(work);
++        return;
++    }
++    if (control->n_touches > 0)
++    {
++        wall_dir = GV_VecDir2(&control->vecs[0]);
++        if (control->n_touches >= 2)
++        {
++            other_dir = GV_VecDir2(&control->vecs[1]);
++            if (GV_DiffDirAbs(direction, other_dir) < GV_DiffDirAbs(direction, wall_dir))
++                wall_dir = other_dir;
++        }
++    }
++    turn = Zako_800CDD40(direction, wall_dir);
++    if (turn == 1) direction = (wall_dir - 1024) & 0xFFF;
++    else if (turn == 2) direction = (wall_dir + 1024) & 0xFFF;
++    if (!work->body.objs->bound_mode) control->rot.vy = direction;
++    control->turn.vy = direction;
++    if (motion == 1) speed = 50;
++    else if (motion == 2) speed = 100;
++    control->step.vx = speed * rsin(direction) / 4096;
++    control->step.vz = speed * rcos(direction) / 4096;
++    s03d_800CE2C0(work, direction);
++    work->field_B20 = GV_NearExp4P(work->field_B20, control->rot.vy);
++}
++#else
+ #pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800CE318.s")
++#endif
+ void s03d_800CE5B4(Work *work, int arg)
+ {
+     if (arg == 0)
+@@ -468,7 +927,37 @@ void s03d_800CE644(Work *work, int arg)
+         control->turn.vy = vy;
+     }
+ }
++#ifdef MGS_NATIVE
++void s03d_800CE720(Work *work, int time)
++{
++    int flags = work->field_AD8;
++
++    work->field_8FC->class |= 0x9E;
++    work->field_B24 = 4000;
++    if (time == 0)
++    {
++        S03dSetMotion(work, (flags & 0x10000) ? 3 : 5, 4);
++        GM_ConfigMotionAdjust(&work->body, work->adjust);
++    }
++    if (work->param.fAF8 != 1 || !(GV_Time & 0x100)) Zako_800CDD94(work);
++    if (Zako_800CDA04(work)) return;
++    if (!(flags & 0x30000)) S03dSetAction(work, s03d_800CE12C);
++    else if (flags & 0x40000) S03dSetActionKeepAdjust(work, s03d_800CE8F4);
++    else if (flags & 0x80000) S03dSetActionKeepAdjust(work, s03d_800CE9E8);
++    else if (flags & 0x100000) S03dSetActionKeepAdjust(work, s03d_800CEB38);
++    else if (flags & 0x200000) S03dSetActionKeepAdjust(work, s03d_800CECBC);
++    else
++    {
++        if (work->param.fAF8 == 1 && (GV_Time & 0x100))
++            work->control.turn.vy = work->field_B98;
++        else if (work->field_AE6 >= 0)
++            work->control.turn.vy = work->field_AE6;
++        work->field_B20 = work->control.rot.vy;
++    }
++}
++#else
+ #pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800CE720.s")
++#endif
+ void s03d_800CE8F4(Work *work, int arg)
+ {
+     work->field_8FC->class |= 0x9E;
+@@ -538,7 +1027,33 @@ void s03d_800CE9E8(Work *work, int arg)
+         work->control.rot.vy = rot->vy;
+     }
+ }
++#ifdef MGS_NATIVE
++void s03d_800CEB38(Work *work, int time)
++{
++    SVECTOR position = {4250, 250, 500, 0};
++    SVECTOR step = {0, 50, 200, 0};
++    SVECTOR difference;
++    SVECTOR direction = {0, 0, 0, 0};
++    SVECTOR velocity;
++
++    if (time == 0) S03dSetMotion(work, 7, 4);
++    if (time == 17) GM_SeSet(&work->control.mov, 44);
++    if (time == 45)
++    {
++        step.vz = GV_DiffVec3(&position, &work->field_B68) / 8;
++        GV_SubVec3(&work->field_B68, &position, &difference);
++        direction.vy = GV_VecDir2(&difference);
++        DG_SetPos2(&position, &direction);
++        DG_RotVector(&step, &velocity, 1);
++        NewTenage3(&position, &velocity, 60, 0, 15240, 0, 0);
++    }
++    if (Zako_800CDA04(work)) return;
++    if (work->body.is_end) S03dSetAction(work, s03d_800CE720);
++    work->control.turn.vy = work->field_AE6;
++}
++#else
+ #pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800CEB38.s")
++#endif
+ void s03d_800CECBC(Work *work, int arg)
+ {
+     work->field_8FC->class |= 0x9E;
+@@ -589,7 +1104,58 @@ void s03d_800CED94(Work *work, int arg)
+         GM_ConfigMotionAdjust(&work->body, NULL);
+     }
+ }
++#ifdef MGS_NATIVE
++void s03d_800CEE3C(Work *work, int time)
++{
++    CONTROL *control = &work->control;
++    TARGET *target = work->field_8FC;
++    int height;
++
++    work->field_8E4 = 0;
++    if (time == 0)
++    {
++        work->field_8DC = 6;
++        S03dSetMotion(work, 27, 4);
++    }
++    if ((unsigned int)(time - 8) < 10) Zako_800CDF2C(work);
++    if (work->field_8E0 == 27)
++    {
++        if (time == 22)
++        {
++            height = control->mov.vy - control->levels[0];
++            if (height < 2000)
++            {
++                GM_SeSet(&control->mov, 141);
++                GM_SeSet(&control->mov, 51);
++                Zako_800D0B18(work, 6, 0);
++                GM_SetNoise(100, 4, &control->mov);
++            }
++            else if (height > 4000)
++            {
++                target->vital = 0;
++                GM_SeSet(&control->mov, 142);
++            }
++        }
++        if (work->body.is_end)
++        {
++            if (!control->grounded) S03dSetMotion(work, 36, 4);
++            else S03dSetAction(work, s03d_800CF68C);
++        }
++    }
++    else if (control->grounded)
++    {
++        GM_SeSet(&control->mov, 141);
++        GM_SeSet(&control->mov, 51);
++        GM_SetNoise(100, 4, &control->mov);
++        Zako_800D0B18(work, 6, 1);
++        S03dSetAction(work, target->vital <= 0 ? s03d_800D01C4 : s03d_800CF68C);
++    }
++    if (time < 24) control->turn = *target->field_1C;
++    if (time < 22) control->hzd_height = -32767;
++}
++#else
+ #pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800CEE3C.s")
++#endif
+ void s03d_800CF114(Work *work)
+ {
+     SVECTOR vec;
+@@ -599,7 +1165,76 @@ void s03d_800CF114(Work *work)
+     DG_PutVector((SVECTOR *)&s03d_dword_800C3A5C, &vec, 1);
+     GV_SubVec3(&vec, &work->control.mov, &work->control.step);
+ }
++#ifdef MGS_NATIVE
++void s03d_800CF194(Work *work, int time)
++{
++    TARGET *target = work->field_8FC;
++    int motion = work->field_8E0;
++
++    work->field_8E4 = 0;
++    if (time == 0)
++    {
++        work->field_AF6 = target->faint;
++        GM_SeSet(&work->control.mov, 143);
++    }
++    if (work->field_AF6 != target->faint)
++    {
++        GM_SeSet(&work->control.mov, 143);
++        work->field_AF6 = target->faint;
++    }
++    if (target->damaged & TARGET_POWER)
++    {
++        Zako_800D0B18(work, 5, 0);
++        GM_SeSet(&work->control.mov, 143);
++        target->force = DG_ZeroVector;
++        target->damage = target->damaged = 0;
++        if (target->vital <= 0)
++        {
++            if (target->a_mode == 1) work->field_BA0 = 1;
++            work->field_8DC = 5;
++            target->side = 2;
++            S03dSetAction(work, s03d_800CFB04);
++            target->captured = 0;
++        }
++    }
++    switch (GM_PlayerAction)
++    {
++    case 7:
++    case 13:
++        if (motion != 23 && motion != 44)
++        {
++            target->side = 0;
++            S03dSetMotion(work, 23, 4);
++            work->field_AF8 = 0;
++        }
++        if (work->field_AF8 == 50 && target->faint > 0) S03dSetMotion(work, 44, 4);
++        if (motion == 44 && !(work->field_AF8 & 7)) s03d_dword_800DC2F4 = 4;
++        work->control.turn = GM_PlayerControl->rot;
++        s03d_800CF114(work);
++        work->field_AF8++;
++        break;
++    case 38:
++        if (motion != 24)
++        {
++            target->side = 0;
++            S03dSetMotion(work, 24, 4);
++        }
++        work->control.turn = GM_PlayerControl->rot;
++        s03d_800CF114(work);
++        break;
++    default:
++        work->field_8DC = GM_PlayerAction == 39 ? 4 : 5;
++        target->side = 2;
++        if (GM_PlayerAction == 39) target->vital = 0;
++        S03dSetAction(work, s03d_800CFB04);
++        return;
++    }
++    if (work->field_B90 > 800) target->captured = 0;
++    work->field_8FC->class |= 0x14;
++}
++#else
+ #pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800CF194.s")
++#endif
+ void s03d_800CF4D4(Work *work, int arg)
+ {
+     if (arg == 0)
+@@ -660,7 +1295,28 @@ void s03d_800CF548(Work *work, int arg)
+         GM_ConfigMotionAdjust(&work->body, NULL);
+     }
+ }
++#ifdef MGS_NATIVE
++void s03d_800CF68C(Work *work, int time)
++{
++    TARGET *target = work->field_8FC;
++    int remainder;
++
++    if (time == 0)
++    {
++        S03dSetMotion(work, work->field_8DC >= 3 ? 36 : work->field_8DC == 1 ? 37 : 35, 4);
++        remainder = work->control.mov.vx % (target->faint > 0 ? 30 : 90);
++        work->field_AF6 = ABS(remainder) + 10;
++    }
++    if (Zako_800CD6A8(work)) S03dSetAction(work, s03d_800CF844);
++    else if (work->field_AF6 < time)
++    {
++        if (target->faint <= 0) target->faint = work->param.max_life;
++        S03dSetAction(work, s03d_800CF90C);
++    }
++}
++#else
+ #pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800CF68C.s")
++#endif
+ void s03d_800CF844(Work *work, int arg)
+ {
+     if (arg == 0)
+@@ -766,7 +1422,106 @@ void s03d_800CFA04(Work *work, int arg)
+         GM_ConfigMotionAdjust(&work->body, NULL);
+     }
+ }
++#ifdef MGS_NATIVE
++static void S03dStartKnockdown(Work *work)
++{
++    SVECTOR *position = &work->control.mov;
++
++    switch (work->field_8DC)
++    {
++    case 0:
++        GM_SeSet(position, 52);
++        S03dSetMotion(work, 30, 4);
++        GM_SeSet(position, 141);
++        Zako_800D0B18(work, 5, 0);
++        work->field_AF6 = 17;
++        break;
++    case 1:
++        S03dSetMotion(work, 33, 4);
++        if (work->field_8FC->vital > 0) Zako_800D0B18(work, 5, 0);
++        else Zako_800D0B18(work, 6, GM_Weapon == 9 ? 2 : 1);
++        GM_SeSet(position, 141);
++        work->field_AF6 = 46;
++        break;
++    case 2:
++        GM_SeSet(position, 142);
++        S03dSetMotion(work, 32, 4);
++        Zako_800D0B18(work, 5, 0);
++        work->field_AF6 = 22;
++        break;
++    case 3:
++        GM_SeSet(position, 38);
++        S03dSetMotion(work, 31, 4);
++        Zako_800D0B18(work, 5, 0);
++        work->field_AF6 = 17;
++        break;
++    case 4:
++        GM_SeSet(position, 144);
++        S03dSetMotion(work, 25, 4);
++        work->field_AF6 = 67;
++        break;
++    case 5:
++        S03dSetMotion(work, 26, 4);
++        work->field_AF6 = 15;
++        break;
++    }
++}
++
++void s03d_800CFB04(Work *work, int time)
++{
++    CONTROL *control = &work->control;
++    TARGET *target = work->field_8FC;
++    int height;
++
++    control->step = target->force;
++    if (work->field_8DC != 1) work->field_8E4 = 0;
++    if (time == 0) S03dStartKnockdown(work);
++    switch (work->field_8DC)
++    {
++    case 0:
++        if (time < 12) control->turn.vy += 170;
++        if ((unsigned int)(time - 1) < 5) Zako_800CDF2C(work);
++        if (time < 20) control->hzd_height = -32767;
++        break;
++    case 1:
++        if (time == 24) GM_SeSet(&control->mov, 81);
++        break;
++    case 2:
++        if ((unsigned int)(time - 1) < 29) Zako_800CDF2C(work);
++        if (time < 20) control->hzd_height = -32767;
++        break;
++    case 3:
++        if ((unsigned int)(time - 1) < 14) Zako_800CDF2C(work);
++        if (time < 15) control->hzd_height = -32767;
++        break;
++    }
++    if (time >= 17 && control->grounded) control->step = DG_ZeroVector;
++    if (time == work->field_AF6)
++    {
++        height = control->mov.vy - control->levels[0];
++        if (height > 4000)
++        {
++            target->vital = 0;
++            S03dSetAction(work, s03d_800CFFF0);
++            return;
++        }
++        if (height < 2000)
++        {
++            GM_SeSet(&control->mov, 51);
++            GM_SetNoise(100, 4, &control->mov);
++            Zako_800D0B18(work, 6, 0);
++        }
++    }
++    if (work->body.is_end)
++    {
++        work->field_8E4 = 1;
++        target->force = DG_ZeroVector;
++        S03dSetAction(work, target->vital > 0 ? s03d_800CF68C : s03d_800D01C4);
++    }
++}
++#else
+ #pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800CFB04.s")
++#endif
+ void s03d_800CFFF0(Work *work, int arg)
+ {
+     CONTROL *ctrl = &work->control;
+@@ -908,10 +1663,9 @@ void s03d_800D0324(Work *work, int arg)
+ {
+     if (arg == 0)
+     {
+-        int *base = &s03d_dword_800DC310;
+         work->field_B00 = 0;
+         work->control.mov = s03d_dword_800C3B88;
+-        base[work->param.fAF8 * 4 + 0x90 / 4] = 1;
++        ZAKOCOM_MGR->entries[work->param.fAF8].field_4 = 1;
+         if (work->field_BA0 == 0)
+         {
+             unsigned short *lv = (unsigned short *)linkvarbuf;
+@@ -919,8 +1673,7 @@ void s03d_800D0324(Work *work, int arg)
+         }
+     }
+     {
+-        int *base = &s03d_dword_800DC310;
+-        if (base[work->param.fAF8 * 4 + 0x90 / 4] != 2)
++        if (ZAKOCOM_MGR->entries[work->param.fAF8].field_4 != 2)
+         {
+             return;
+         }
+@@ -936,7 +1689,47 @@ int Zako_800D0408(Work *work)
+ {
+     return work->control.mov.vx >= 0x1195;
+ }
++#ifdef MGS_NATIVE
++void s03d_800D041C(Work *work)
++{
++    CONTROL *control = &work->control;
++    void (*action)(Work *, int);
++    int time;
++    short *vertical_speed = (short *)&work->field_8CC;
++
++    work->field_AEC = 0;
++    work->field_B24 = 0;
++    work->field_8FC->class = 1;
++    work->field_8F8 = work->field_B9C = 0;
++    control->height = work->body.height;
++    control->hzd_height = control->levels[0] + 750;
++    action = work->field_8E8;
++    time = work->field_8F0++;
++    if (action == NULL) action = work->field_8E8 = s03d_800CE12C;
++    action(work, time);
++    if (work->field_8EC)
++    {
++        action = (void (*)(Work *, int))work->field_8EC;
++        time = work->field_8F4++;
++        action(work, time);
++    }
++    if (work->field_8E4) control->r_sphere = -1;
++    else control->r_sphere = GV_NearExp2(control->r_sphere, work->field_8E2);
++    work->hom->flag = (work->field_8FC->class & TARGET_POWER) != 0;
++    if (ZAKOCOM_MGR->entries[work->param.fAF8].field_4 == 1) work->hom->flag = 0;
++    if (!Zako_800D0408(work))
++    {
++        work->hom->flag = 0;
++        work->field_8FC->class = 1;
++    }
++    if (*vertical_speed < 0 && control->grounded) *vertical_speed = 0;
++    *vertical_speed -= 16;
++    control->step.vy = *vertical_speed;
++    work->field_BA2 = work->field_8FC->vital;
++}
++#else
+ #pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800D041C.s")
++#endif
+ void s03d_800D05DC(Work *work, int arg1)
+ {
+     if (arg1 == 0)
+@@ -1062,7 +1855,31 @@ void s03d_800D0958(Work *work, int arg1)
+         work->control.turn.vx = 0;
+     }
+ }
++#ifdef MGS_NATIVE
++void s03d_800D09D8(Work *work, int time)
++{
++    SVECTOR position;
++
++    work->field_B24 = 0;
++    if (time == 0)
++    {
++        GM_ConfigObjectOverride(&work->body, s03d_motions[18], 0, 4, 0x3FE);
++        if (work->control.map->index == GM_PlayerMap && GV_RandU(12) >= 5)
++            work->field_AE8 = 240;
++    }
++    if (time == 20)
++    {
++        position = work->control.mov;
++        position.vy += 500;
++        AN_Sleep(&position);
++    }
++    if (work->field_AD8 & 0x1000) S03dSetAction(work, s03d_800CED94);
++    else if (time != 130) return;
++    S03dClearOverride(work);
++}
++#else
+ #pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800D09D8.s")
++#endif
+ void Zako_800D0B18(Work *work, int index, int count)
+ {
+     MATRIX m;
+@@ -1113,7 +1930,59 @@ void Zako_800D0BEC(Work *work, int type)
+     info.time = 0x384;
+     NewItemPut(pos, &step, &info);
+ }
++#ifdef MGS_NATIVE
++void s03d_800D0C90(Work *work, int mark)
++{
++    if (work->control.map->index == GM_PlayerMap)
++        AN_HeadMark(&work->body.objs->objs[6].world, mark);
++}
++
++static void s03d_800D0CD4(Work *work)
++{
++    int sound = 160 + 2 * (work->param.fAF8 % 4);
++    int frame = work->m_ctrl.info1.frame;
++    int first;
++    int second;
++
++    if (work->field_8E0 == 1) { first = 11; second = 22; }
++    else if (work->field_8E0 == 2) { first = 8; second = 16; }
++    else return;
++    if (frame == first) GM_SeSet(&work->control.mov, sound);
++    else if (frame == second) GM_SeSet(&work->control.mov, sound + 1);
++}
++
++static void s03d_800D0D6C(Work *work)
++{
++    if (ZAKOCOM_MGR->field_1C != 1 && work->control.map->index == GM_PlayerMap &&
++        GV_Time % 64 == 16 * work->param.fAF8)
++        AN_Breath(&work->body.objs->objs[6].world);
++}
++
++static void s03d_800D0DF0(Work *work)
++{
++    if (work->field_B26 == 2) NewLSight(&GM_PlayerPosition, &work->control.mov, 143);
++}
++
++static void s03d_800D0E2C(Work *work)
++{
++    MATRIX matrix;
++    MATRIX *world = &work->body.objs->objs[4].world;
++    SVECTOR position = {5, -500, 80, 0};
++    SVECTOR rotation = {1024, 0, 0, 0};
++
++    DG_SetPos(world);
++    DG_MovePos(&position);
++    DG_RotatePos(&rotation);
++    ReadRotMatrix(&matrix);
++    NewBulletEx(256, &matrix, 2, 1, 0, 10, work->param.faint, 10000, 750);
++    GM_SeSet(&work->control.mov, 45);
++    AN_BulletSmoke(world, 0);
++    AN_FamasFlash(&matrix);
++    Zako_800D0F38(work, (int)s03d_800D0E2C);
++}
++#else
+ #pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800D0C90.s")
++#endif
+ int Zako_800D0EF0(Work *work, int index)
+ {
+     int i;
+@@ -1122,7 +1991,14 @@ int Zako_800D0EF0(Work *work, int index)
+     {
+         if (work->field_AA8[i] == 0)
+         {
++#ifdef MGS_NATIVE
++            static void (*const actions[])(Work *) = {
++                s03d_800D0CD4, s03d_800D0D6C, s03d_800D0DF0, s03d_800D0E2C
++            };
++            work->field_AA8[i] = (int)actions[index];
++#else
+             work->field_AA8[i] = s03d_dword_800C3A90[index];
++#endif
+             return 1;
+         }
+     }
+@@ -1179,7 +2055,73 @@ void Zako_800D0FF4(Work *work)
+         }
+     }
+ }
++#ifdef MGS_NATIVE
++int s03d_800D1054(HZD_HDL *hzd, SVECTOR *from, SVECTOR *to)
++{
++    unsigned char source = HZD_GetAddress(hzd, from, -1);
++    unsigned char destination = HZD_GetAddress(hzd, to, -1);
++    return HZD_ZoneDistance(hzd, source, destination);
++}
++
++void s03d_800D10B4(Work *work)
++{
++    int distance;
++
++    if (!(work->field_B33 & 1) || work->control.map->index != GM_PlayerMap) return;
++    switch (GM_NoisePower)
++    {
++    case 100:
++        distance = GV_DiffVec3(&GM_NoisePosition, &work->control.mov);
++        fprintf(1, "noise dis  =%d,\n", distance);
++        if (distance < 4000 &&
++            s03d_800D1054(work->control.map->hzd, &work->control.mov, &GM_NoisePosition) < 300)
++        {
++            work->field_B32 |= 1;
++            GM_NoiseLength = GM_NoisePower = 0;
++        }
++        break;
++    case 5:
++        if (GV_DiffVec3(&GM_NoisePosition, &work->control.mov) < 500) work->field_B32 |= 1;
++        break;
++    case 200:
++        if (GV_DiffVec3(&GM_NoisePosition, &work->control.mov) < 4000) work->field_B32 |= 1;
++        break;
++    case 255:
++        work->field_B32 |= 1;
++        break;
++    }
++}
++
++void s03d_800D123C(Work *work)
++{
++    if (!(work->field_B33 & 2) || work->field_B26 != 2 || !(GM_PlayerStatus & 0x1000)) return;
++    if (GV_DiffVec3(&work->field_B34, &GM_PlayerPosition) > 50 ||
++        work->field_B3C != GM_WhereList[0]->rot.vy)
++    {
++        if (ZAKOCOM_MGR->field_1C == 1) return;
++        work->field_B34 = GM_PlayerPosition;
++        work->field_B3C = GM_WhereList[0]->rot.vy;
++        work->field_B32 |= 2;
++    }
++    work->field_B26 = 0;
++}
++
++void s03d_800D1324(Work *work)
++{
++    HZD_HDL *hzd = work->control.map->hzd;
++
++    if (!(work->field_B33 & 0x10) || work->field_ACA == 5) return;
++    if (AsiatoCheck(hzd, &work->control.mov) &&
++        SearchNearAsiato(hzd, &work->control.mov, (short)work->field_B20,
++                         (short)work->field_B22, (short)work->field_B24) >= 0)
++    {
++        work->field_B32 |= 0x10;
++        fprintf(1, " Asiato mikke!! [%d]\n", NearAsiato());
++    }
++}
++#else
+ #pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800D1054.s")
++#endif
+ void Zako_800D13E8(Work *work)
+ {
+     SVECTOR unused[2];
+@@ -1215,7 +2157,24 @@ void s03d_800D13F8(Work *work)
+     }
+ }
+ 
++#ifdef MGS_NATIVE
++void s03d_800D14AC(Work *work)
++{
++    SVECTOR position = {8000, 0, -1000, 0};
++    SVECTOR difference;
++
++    GV_SubVec3(&position, &work->control.mov, &difference);
++    work->field_B98 = GV_VecDir2(&difference);
++    GV_SubVec3(&GM_PlayerPosition, &work->control.mov, &difference);
++    difference.vy = 0;
++    work->field_B94 = GV_VecDir2(&difference);
++    work->field_B96 = 0;
++    work->field_B90 = GV_VecLen3(&difference);
++    work->field_B26 = 2;
++}
++#else
+ #pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800D14AC.s")
++#endif
+ 
+ void s03d_800D153C(Work *work)
+ {
+diff --git a/source/overlays/s03d/animal/zako/zako.h b/source/overlays/s03d/animal/zako/zako.h
+index 9f50633bf..7a04fe47b 100644
+--- a/source/overlays/s03d/animal/zako/zako.h
++++ b/source/overlays/s03d/animal/zako/zako.h
+@@ -82,18 +82,22 @@ typedef struct _Work
+     short           field_AC8;      /* 0xAC8 */
+     short           field_ACA;      /* 0xACA */
+     short           field_ACC;      /* 0xACC */
+-    char            pad_ACE[0xAD0 - 0xACE];
++    short           field_ACE;
+     int             field_AD0;      /* 0xAD0 */
+-    char            pad_AD4[0xAD8 - 0xAD4];
++    int             field_AD4;
+     int             field_AD8;      /* 0xAD8 */
+     int             field_ADC;      /* 0xADC */
+     int             field_AE0;      /* 0xAE0 */
+-    char            pad_AE4[0xAE6 - 0xAE4];
++    short           field_AE4;
+     short           field_AE6;      /* 0xAE6 */
+     short           field_AE8;      /* 0xAE8 */
+-    char            pad_AEA[0xAF6 - 0xAEA];
++    short           field_AEA;
++    int             field_AEC;
++    int             field_AF0;
++    short           field_AF4;
+     short           field_AF6;      /* 0xAF6 */
+-    char            pad_AF8[0xB00 - 0xAF8];
++    short           field_AF8;
++    char            pad_AFA[0xB00 - 0xAFA];
+     int             field_B00;      /* 0xB00 */
+     int             field_B04;      /* 0xB04 */
+     PARAM           param;          /* 0xB08 */
+@@ -103,12 +107,14 @@ typedef struct _Work
+     unsigned short  field_B24;      /* 0xB24 */
+     short           field_B26;      /* 0xB26 */
+     int             field_B28;      /* 0xB28 */
+-    char            pad_B2C[0xB32 - 0xB2C];
++    signed char     field_B2C[6];
+     unsigned char   field_B32;      /* 0xB32 */
+     unsigned char   field_B33;      /* 0xB33 */
+-    char            pad_B34[0xB48 - 0xB34];
++    SVECTOR         field_B34;
++    int             field_B3C;
++    SVECTOR         field_B40;
+     SVECTOR         field_B48;      /* 0xB48 */
+-    char            pad_B50[0xB54 - 0xB50];
++    int             field_B50;
+     int             field_B54;      /* 0xB54*/
+     int             field_B58;      /* 0xB58 */
+     int             field_B5C;      /* 0xB5C */
+@@ -122,9 +128,11 @@ typedef struct _Work
+     char            pad_B88[0xB90 - 0xB88];
+     int             field_B90;      /* 0xB90 */
+     unsigned short  field_B94;      /* 0xB94 */
+-    char            pad_B96[0xBA0 - 0xB96];
++    short           field_B96;
++    int             field_B98;
++    int             field_B9C;
+     short           field_BA0;      /* 0xBA0 */
+-    char            pad_BA2[0xC00 - 0xBA2];
++    short           field_BA2;
+ } Work;
+ 
+ typedef struct _ZakoActor
+@@ -162,13 +170,15 @@ typedef struct _A4_STRUCT
+ 
+ typedef struct _ZakoComMgr
+ {
+-    char            pad_0[0x8];
++    int             field_0;
++    int             field_4;
+     int             count;          /* 0x08 */
+-    char            pad_C[0x14 - 0xC];
++    int             field_C;
++    int             field_10;
+     int             field_14;       /* 0x14 */
+     int             field_18;       /* 0x18 */
+     int             field_1C;       /* 0x1C */
+-    char            pad_20[0x24 - 0x20];
++    int             field_20;
+     int             field_24;       /* 0x24 */
+     int             field_28;       /* 0x28 */
+     SVECTOR         field_2C;       /* 0x2C */
+@@ -178,14 +188,38 @@ typedef struct _ZakoComMgr
+     int             field_40[8];    /* 0x40 */
+     int             field_60;       /* 0x60 */
+     MAP            *field_64;       /* 0x64 */
+-    char            pad_68[0x8C - 0x68];
++    A4_STRUCT       field_68;
+     ZakoComEntry    entries[8];     /* 0x8C - 0x10C */
+     int             field_10C;      /* 0x10C */
+-    char            pad_110[0x124 - 0x110];
++    int             field_110;
++    int             sounds[3];
++    int             on_destroy;
+     int             field_124[8];   /* 0x124 */
++    int             field_144;
+ } ZakoComMgr;
+ 
++#ifdef MGS_NATIVE
++#include <stddef.h>
++
++_Static_assert(sizeof(Work) == 0xBA4, "s03d guard allocation size");
++_Static_assert(offsetof(Work, body) == 0x9C, "s03d guard body offset");
++_Static_assert(offsetof(Work, weapon) == 0x7A4, "s03d guard weapon offset");
++_Static_assert(offsetof(Work, field_8E8) == 0x8E8, "s03d guard action offset");
++_Static_assert(offsetof(Work, field_900) == 0x900, "s03d guard target offset");
++_Static_assert(offsetof(Work, param) == 0xB08, "s03d guard parameters offset");
++_Static_assert(offsetof(Work, field_B34) == 0xB34, "s03d guard memory position offset");
++_Static_assert(offsetof(Work, field_B98) == 0xB98, "s03d guard aim direction offset");
++_Static_assert(sizeof(ZakoComMgr) == 0x148, "s03d commander state size");
++_Static_assert(offsetof(ZakoComMgr, field_68) == 0x68, "s03d commander zones offset");
++_Static_assert(offsetof(ZakoComMgr, entries) == 0x8C, "s03d commander guards offset");
++_Static_assert(offsetof(ZakoComMgr, sounds) == 0x114, "s03d commander sounds offset");
++_Static_assert(offsetof(ZakoComMgr, field_124) == 0x124, "s03d commander procedures offset");
++
++extern ZakoComMgr s03d_commander;
++#define ZAKOCOM_MGR (&s03d_commander)
++#else
+ extern int s03d_dword_800DC310;
+ #define ZAKOCOM_MGR ((ZakoComMgr *)&s03d_dword_800DC310)
++#endif
+ 
+ #endif // _S03D_ZAKO_H
+diff --git a/source/overlays/s03d/animal/zako/zakocom.c b/source/overlays/s03d/animal/zako/zakocom.c
+index 61a9d8d97..d459fffe5 100644
+--- a/source/overlays/s03d/animal/zako/zakocom.c
++++ b/source/overlays/s03d/animal/zako/zakocom.c
+@@ -5,6 +5,8 @@
+ #include "libgcl/libgcl.h" // for GCL_NextStr, GCL_StrToInt
+ #include "game/game.h"
+ #include "game/vibrate.h" // for NewPadVibration
++#include "takabe/cineutil.h"
++#include <string.h>
+ 
+ SVECTOR s03d_dword_800C3B88 = {30000, 30000, 30000};
+ 
+@@ -67,14 +69,18 @@ const char s03d_dword_800DBC84[] = {'c', 0x0, 0x0, 0xf};
+ extern int s03d_dword_800DC2E0;
+ extern int s03d_dword_800DC2E8;
+ extern int s03d_dword_800DC2EC;
+-extern int s03d_dword_800DC310;
+-extern int s03d_dword_800DC31C;
+-extern int s03d_dword_800DC378;
+ extern int s03d_dword_800DC2F4;
+ extern int s03d_dword_800DC2FC;
+ extern int s03d_dword_800DC300;
+ extern SVECTOR s03d_dword_800DC308;
++#ifndef MGS_NATIVE
++extern int s03d_dword_800DC310;
++extern int s03d_dword_800DC31C;
++extern int s03d_dword_800DC378;
+ extern int s03d_dword_800DC424;
++#endif
++extern int s03d_dword_800DC2F8;
++extern int s03d_dword_800DC2F0;
+ extern const char s03d_dword_800DBC50[];
+ extern const char s03d_dword_800DBBF0[];
+ extern int printf(const char *format, ...);
+@@ -145,21 +151,19 @@ void ZakoCom_800D40D4(void)
+ int s03d_800D414C(int map_id, int val)
+ {
+     int i;
+-    A4_STRUCT *unk = (A4_STRUCT *)&s03d_dword_800DC378;
++    A4_STRUCT *unk = &ZAKOCOM_MGR->field_68;
+ 
+-    if (unk->map_id == map_id)
++    if (unk->map_id != map_id)
+     {
+-        for (i = 0; i < unk->n_entry; i++)
++        return 0;
++    }
++    for (i = 0; i < unk->n_entry; i++)
++    {
++        if (unk->field_04[i].field_00 == val)
+         {
+-            if (unk->field_04[i].field_00 == val)
+-            {
+-                return unk->field_04[i].field_02;
+-            }
++            return unk->field_04[i].field_02;
+         }
+-        goto end;
+     }
+-    return 0;
+-end:
+     return -1;
+ }
+ void ZakoCom_800D41C0(void)
+@@ -234,7 +238,7 @@ void s03d_800D42DC(void)
+ }
+ int ZakoCom_800D43CC(int arg)
+ {
+-    return s03d_dword_800DC31C % arg;
++    return ZAKOCOM_MGR->field_C % arg;
+ }
+ 
+ void ZakoCom_800D440C(int *out)
+@@ -358,7 +362,25 @@ void ZakoCom_800D4694(int *out)
+         break;
+     }
+ }
++#ifdef MGS_NATIVE
++int s03d_800D46F8(int command)
++{
++    switch (command)
++    {
++    case 240: ZakoCom_800D440C(&command); break;
++    case 241: ZakoCom_800D4460(&command); break;
++    case 242: ZakoCom_800D44B4(&command); break;
++    case 243: ZakoCom_800D4508(&command); break;
++    case 244: ZakoCom_800D455C(&command); break;
++    case 245: ZakoCom_800D4640(&command); break;
++    case 246: ZakoCom_800D45B0(&command); break;
++    case 247: ZakoCom_800D4694(&command); break;
++    }
++    return command;
++}
++#else
+ #pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800D46F8.s")
++#endif
+ void s03d_800D47BC(ZakoComMgr *mgr)
+ {
+     int i;
+@@ -408,7 +430,12 @@ void s03d_800D47BC(ZakoComMgr *mgr)
+     for (i = 0; i < mgr->count; i++)
+     {
+         work = mgr->entries[ZAKOCOM_MGR->field_40[i]].field_C;
++#ifdef MGS_NATIVE
++        static const int distances[] = {3000, 4000, 7000, 8000, 8000, 8000, 8000, 8000};
++        work->field_B64 = distances[ZAKOCOM_MGR->field_40[i]];
++#else
+         work->field_B64 = (&s03d_dword_800C3BA0)[ZAKOCOM_MGR->field_40[i]];
++#endif
+     }
+ }
+ void ZakoCom_800D490C(ZakoComMgr *mgr)
+@@ -535,7 +562,7 @@ void s03d_800D4B84(ZakoComMgr *command)
+             command->field_18 = 0xFF;
+             GM_AlertModeSet(3);
+             command->field_1C = 1;
+-            GM_SeSet2(NULL, 0x3F, 0x2A);
++            GM_SeSet2(0, 0x3F, 0x2A);
+             ZAKOCOM_MGR->field_60 = 0;
+         }
+         break;
+@@ -632,7 +659,144 @@ int ZakoCom_800D4E48(char *str)
+ 
+     return count;
+ }
++#ifdef MGS_NATIVE
++static void S03dRunCommanderProc(int index)
++{
++    int proc = ZAKOCOM_MGR->field_124[index];
++    if (proc >= 0) GCL_ExecProc(proc, NULL);
++}
++
++static void S03dCommanderState(int state)
++{
++    s03d_dword_800DC2F8 = state;
++    ZAKOCOM_MGR->field_10 = 0;
++}
++
++void s03d_800D4EAC(void)
++{
++    ZakoComMgr *mgr = ZAKOCOM_MGR;
++    int i;
++
++    if (GM_GameOverTimer != 0 || GM_Vitality <= 0) return;
++    switch (s03d_dword_800DC2F8)
++    {
++    case 0:
++        if (mgr->field_10 == 0 && GM_StreamStatus() == -1)
++            GM_VoxStream(mgr->sounds[0], 0x40000000);
++        if (mgr->field_60 != 0) S03dCommanderState(1);
++        mgr->field_10++;
++        break;
++    case 1:
++        if (mgr->field_60 >= 3)
++        {
++            if (GM_ItemTypes[GM_Item + 1] & 2) GM_Item = -1;
++            if (GM_WeaponTypes[GM_Weapon + 1] & 0x200) GM_Weapon = -1;
++            OpenCinemaScreen(0, 60000);
++            S03dCommanderState(2);
++            GM_GameStatus |= 0x100A2000;
++        }
++        break;
++    case 2:
++        if (mgr->field_10 == 0)
++        {
++            if (GM_StreamStatus() == 1) GM_StreamPlayStart();
++            S03dRunCommanderProc(5);
++        }
++        if (mgr->field_10 >= 11) S03dCommanderState(3);
++        mgr->field_10++;
++        break;
++    case 3:
++        if (mgr->field_10 >= 31)
++        {
++            S03dRunCommanderProc(0);
++            S03dCommanderState(4);
++        }
++        mgr->field_10++;
++        break;
++    case 4:
++        if (mgr->field_10 >= 61 && GM_StreamStatus() == -1)
++        {
++            GM_VoxStream(mgr->sounds[1], 0);
++            S03dRunCommanderProc(1);
++            S03dCommanderState(5);
++            if (GM_Weapons[0] < 0)
++            {
++                GM_PlayerControl->mov.vx = s03d_dword_800C3B90;
++                GM_PlayerControl->mov.vz = s03d_dword_800C3B94;
++            }
++        }
++        mgr->field_10++;
++        break;
++    case 5:
++        if (mgr->field_10 == 60)
++        {
++            S03dRunCommanderProc(2);
++            S03dCommanderState(6);
++        }
++        mgr->field_10++;
++        break;
++    case 6:
++        if (mgr->field_10 == 30) S03dRunCommanderProc(3);
++        if (mgr->field_10 == 180) S03dRunCommanderProc(4);
++        if (mgr->field_10 >= 183)
++        {
++            CloseCinemaScreen();
++            S03dCommanderState(8);
++            GM_GameStatus &= ~0x100A2000;
++        }
++        mgr->field_10++;
++        break;
++    case 8:
++        if ((unsigned int)(mgr->field_60 - 13) < 2) S03dCommanderState(9);
++        mgr->field_10++;
++        break;
++    case 9:
++        if (mgr->field_60 >= 15) S03dCommanderState(10);
++        break;
++    case 10:
++        mgr->field_10++;
++        if (mgr->field_10++ >= 31) S03dCommanderState(11);
++        break;
++    case 11:
++        mgr->field_10++;
++        if (mgr->field_10++ >= 221) s03d_dword_800DC2F8 = 12;
++        break;
++    case 12:
++        if (mgr->field_60 >= 17) S03dCommanderState(13);
++        break;
++    case 13:
++        if (s03d_dword_800DC2E8 == 0)
++        {
++            S03dCommanderState(14);
++            for (i = 0; i < 8; i++)
++                if (mgr->entries[i].field_C) s03d_dword_800DC2F8 = 13;
++        }
++        break;
++    case 14:
++        if (mgr->field_10 >= 31) s03d_dword_800DC2F8 = 15;
++        mgr->field_10++;
++        break;
++    }
++}
++
++static void s03d_800D53EC(GV_ACT *actor)
++{
++    s03d_800D4EAC();
++    ZakoCom_800D4DD4();
++    s03d_800D4CE0(actor);
++    ZAKOCOM_MGR->field_C++;
++    ZakoCom_800D41C0();
++    if (s03d_dword_800DC2F8 == 15) GV_DestroyActor(actor);
++}
++
++static void s03d_800D5458(GV_ACT *actor)
++{
++    if (ZAKOCOM_MGR->on_destroy >= 0)
++        GCL_ExecProc(ZAKOCOM_MGR->on_destroy, NULL);
++}
++#else
+ #pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800D4EAC.s")
++#endif
+ int ZakoCom_800D5484(int arg0, int *out)
+ {
+     int *p = out;
+@@ -656,7 +820,7 @@ int ZakoCom_800D54DC(void)
+     {
+         return 0;
+     }
+-    if (ZakoCom_800D5484((int)opt, &s03d_dword_800DC424) < 4)
++    if (ZakoCom_800D5484((int)opt, ZAKOCOM_MGR->sounds) < 4)
+     {
+         return 0;
+     }
+@@ -691,4 +855,64 @@ int s03d_800D5538(void)
+ 
+     return i;
+ }
++#ifdef MGS_NATIVE
++void s03d_800D55C8(GV_ACT *actor, int name, int where)
++{
++    ZakoComMgr *mgr = ZAKOCOM_MGR;
++    char *option;
++    int i;
++
++    s03d_dword_800DC2E0 = 0;
++    s03d_dword_800DC2F8 = 0;
++    mgr->field_20 = mgr->field_18 = 0;
++    s03d_dword_800DC2F4 = 0;
++    mgr->field_60 = mgr->field_10 = 0;
++    ZakoCom_800D54DC();
++    GM_InitHomingSystem();
++    memset(mgr->entries, 0, sizeof(mgr->entries));
++    for (i = 0; i < 8; i++) mgr->field_40[i] = i;
++    mgr->field_C = mgr->field_1C = 0;
++    s03d_dword_800DC2E8 = s03d_dword_800DC2EC = 0;
++    mgr->field_64 = GM_GetMap(where);
++    mgr->on_destroy = GCL_GetOption('e') ? GCL_StrToInt(GCL_NextStr()) : -1;
++    s03d_800D5538();
++    mgr->field_144 = GCL_GetOption('b') ? GCL_StrToInt(GCL_NextStr()) : -1;
++    option = GCL_GetOption('v');
++    if (option) mgr->field_34 = ZakoCom_800D4284((int)option, mgr->field_38);
++    else
++    {
++        mgr->field_34 = 1;
++        mgr->field_38[0] = 0;
++    }
++    for (i = 0; i < mgr->field_34; i++) fprintf(1, "zone=%d ", mgr->field_38[i]);
++    mgr->field_36 = 0;
++    s03d_dword_800DC2F0 = 0;
++    option = GCL_GetOption('j');
++    if (option) mgr->field_68.n_entry = ZakoCom_800D4224((int)option, (short *)&mgr->field_68);
++    else
++    {
++        mgr->field_68.n_entry = 1;
++        mgr->field_68.field_04[0].field_00 = 0;
++        mgr->field_68.field_04[0].field_02 = 0;
++    }
++    mgr->field_68.map_id = where;
++    mgr->count = 0;
++    option = GCL_GetOption('n');
++    if (option) mgr->count = ZakoCom_800D4E48(option);
++    mgr->field_0 = mgr->field_4 = mgr->field_110 = 0;
++}
++
++void *NewS03dZakoCommander(int name, int where)
++{
++    typedef struct { GV_ACT actor; int unused; } CommanderActor;
++    CommanderActor *work = GV_NewActor(GV_ACTOR_PREV, sizeof(CommanderActor));
++    if (work)
++    {
++        GV_SetNamedActor(work, s03d_800D53EC, s03d_800D5458, "zakocom.c");
++        s03d_800D55C8(&work->actor, name, where);
++    }
++    return work;
++}
++#else
+ #pragma INCLUDE_ASM("asm/overlays/s03d/s03d_800D55C8.s")
++#endif
+diff --git a/source/overlays/s03d/overlay2.c b/source/overlays/s03d/overlay2.c
+index 7654da75f..56e13c8ab 100644
+--- a/source/overlays/s03d/overlay2.c
++++ b/source/overlays/s03d/overlay2.c
+@@ -1,5 +1,44 @@
+ #include "mgstype.h"
+ 
++#ifdef MGS_NATIVE
++#include <libgte.h>
++SVECTOR s03d_dword_800C39B0 = {300, 1500, 300, 0};
++SVECTOR s03d_dword_800C39B8 = {0, 0, 0, 0};
++SVECTOR s03d_dword_800C39C0 = {400, 500, 400, 0};
++SVECTOR s03d_dword_800C39C8 = {100, 0, 0, 0};
++SVECTOR s03d_dword_800C3A5C = {-150, 0, 300, 0};
++SVECTOR s03d_dword_800C3A64 = {0, 0, 100, 0};
++SVECTOR s03d_dword_800C3A6C = {-1024, 0, 0, 0};
++SVECTOR s03d_dword_800C3A74 = {0, 0, 100, 0};
++SVECTOR s03d_dword_800C3A7C = {-1024, 0, 0, 0};
++const char *s03d_dword_800C3A84 = "RATION";
++const char *s03d_dword_800C3A88 = "SOCOM/BULLET * 12";
++const SVECTOR s03d_dword_800DB548 = {-200, 1000, 600, 0};
++const SVECTOR s03d_dword_800DB550 = {5, 0, 100, 0};
++const SVECTOR s03d_dword_800DB558 = {400, 1000, 400, 0};
++int s03d_dword_800C39E0 = 0x00140013;
++int s03d_dword_800C39E4 = 0x0016000A;
++short s03d_word_800C39E8[2] = {0x0009, 0x0022};
++short s03d_word_800C39EC[2] = {0x0023, 0x0024};
++short s03d_word_800C39F0[2] = {0x002D, 0x000D};
++int s03d_dword_800C39F4 = 0x001A000C;
++int s03d_dword_800C39F8 = 0x000E000F;
++int s03d_dword_800C39FC = 0x001B0010;
++short s03d_word_800C3A00[2] = {0x0008, 0x0015};
++int s03d_dword_800C3A04 = 0x001F001E;
++int s03d_dword_800C3A08 = 0x00210020;
++int s03d_dword_800C3A0C = 0x00190025;
++
++short s03d_word_800C3A10[20] = {
++    0x0005, 0x0002, 0x002A, 0x0004, 0x0027, 0x0028, 0x0006, 0x0007,
++    0x0026, 0x0003, 0x0029, 0x0011, 0x0012, 0x002B, 0x0017, 0x0018,
++    0x001C, 0x001D, 0x0000, 0x0001,
++};
++
++short s03d_word_800C3A38[2] = {0x0033, 0x0011};
++short s03d_word_800C3A3C[2] = {0x0012, 0x002B};
++
++#else
+ int s03d_dword_800C39A8 = 0x75307530;
+ int s03d_dword_800C39AC = 0x00007530;
+ int s03d_dword_800C39B0 = 0x05DC012C;
+@@ -194,4 +233,5 @@ const int s03d_dword_800DB580 = 0x800CFDCC;
+ const int s03d_dword_800DB584 = 0x800CFE0C;
+ const int s03d_dword_800DB588 = 0x800CFDEC;
+ const int s03d_dword_800DB58C = 0x800CFE34;
+-const int s03d_dword_800DB590 = 0x800CFE34;
+\ No newline at end of file
++const int s03d_dword_800DB590 = 0x800CFE34;
++#endif
+diff --git a/source/overlays/s03d/overlay3.c b/source/overlays/s03d/overlay3.c
+index 03906d303..2689927cc 100644
+--- a/source/overlays/s03d/overlay3.c
++++ b/source/overlays/s03d/overlay3.c
+@@ -10,6 +10,11 @@ int SECTION(".bss") s03d_dword_800DC2F8;
+ int SECTION(".bss") s03d_dword_800DC2FC;
+ int SECTION(".bss") s03d_dword_800DC300;
+ int SECTION(".bss") s03d_dword_800DC304;
++#ifdef MGS_NATIVE
++#include "animal/zako/zako.h"
++SVECTOR s03d_dword_800DC308;
++ZakoComMgr s03d_commander;
++#else
+ int SECTION(".bss") s03d_dword_800DC308;
+ int SECTION(".bss") s03d_dword_800DC30C;
+ int SECTION(".bss") s03d_dword_800DC310;
+@@ -94,3 +99,5 @@ int SECTION(".bss") s03d_dword_800DC448;
+ int SECTION(".bss") s03d_dword_800DC44C;
+ int SECTION(".bss") s03d_dword_800DC450;
+ int SECTION(".bss") s03d_dword_800DC454;
++
++#endif
+diff --git a/source/stage/s03d.c b/source/stage/s03d.c
+index 7949f4aae..3cd8c6a6e 100644
+--- a/source/stage/s03d.c
++++ b/source/stage/s03d.c
+@@ -1,36 +1,40 @@
+ #define DECLARE_NEWCHARA_PROTOS
+ #include "charalst.h"
+ 
++extern NEWCHARA NewMeryl3;
++extern NEWCHARA NewS03dZakoCommander;
++extern NEWCHARA NewS03dZako;
++
+ CHARA _StageCharacterEntries[] = {
+-    { 0xaefb, (NEWCHARA *)0x800c68e4 }, //  CHARA_TOBCNT,
+-    { 0x92bc, (NEWCHARA *)0x800c8364 }, //  CHARA_ASIOTOKUN,    /* chara 足音君 */
+-    { 0x7a05, (NEWCHARA *)0x800d9808 }, //  CHARA_CINEMA,       /* chara シネマスクリーン */
+-    { 0xe97e, (NEWCHARA *)0x800c9344 }, //  CHARA_DEMODOLL,     /* chara デモ人形 */
+-    { 0x118c, (NEWCHARA *)0x800d8df0 }, //  CHARA_FINDTRAP,     /* chara 発見トラップ */
+-    { 0xc755, (NEWCHARA *)0x800cb954 }, //  CHARA_MERYL3,
+-    { 0x7cf7, (NEWCHARA *)0x800d580c }, //  CHARA_ZAKOCOM,      /* chara ざこコマンダー */
+-    { 0xec77, (NEWCHARA *)0x800c752c }, //  CHARA_WALL,         /* chara 障害物 */
+-    { 0xe253, (NEWCHARA *)0x800c531c }, //  CHARA_ELEVPANEL,    /* chara エレベーターパネル */
+-    { 0xf5c5, (NEWCHARA *)0x800d627c }, //  CHARA_UJI,          /* chara 蛆虫 */
+-    { 0xed87, (NEWCHARA *)0x800cd5a0 }, //  CHARA_ZAKO,         /* chara ざこ */
+-    { 0xb103, (NEWCHARA *)0x800d9a38 }, //  CHARA_DYNWALL,      /* chara 透明壁 */
+-    { 0x1ad3, (NEWCHARA *)0x800c5c98 }, //  CHARA_TEXTURE,      /* chara テクスチャ */
+-    { 0x0065, (NEWCHARA *)0x800d8320 }, //  CHARA_MOSAIC,       /* chara モザイク */
+-    { 0xa12e, (NEWCHARA *)0x800d8854 }, //  CHARA_FADEIO,       /* chara フェードイン・アウト */
+-    { 0x42e4, (NEWCHARA *)0x800d7994 }, //  CHARA_HIYOKO,       /* chara ヒヨコ星 */
+-    { 0x5147, (NEWCHARA *)0x800c6b78 }, //  CHARA_RADARPOINT,   /* chara レーダーポイント */
+-    { 0xdd8b, (NEWCHARA *)0x800c6e0c }, //  CHARA_INTRUDECAM,   /* chara イントルードカメラ */
+-    { 0x51c6, (NEWCHARA *)0x800daa58 }, //  CHARA_CAT_IN,       /* chara カットインカメラ */
+-    { 0x0fad, (NEWCHARA *)0x800c7008 }, //  CHARA_MOTIONSE,
++    { 0xaefb, NewToBeContinued }, //  CHARA_TOBCNT,
++    { 0x92bc, NewAsiotoKun }, //  CHARA_ASIOTOKUN,    /* chara 足音君 */
++    { 0x7a05, NewCinemaScreenSet }, //  CHARA_CINEMA,       /* chara シネマスクリーン */
++    { 0xe97e, NewDemoDoll }, //  CHARA_DEMODOLL,     /* chara デモ人形 */
++    { 0x118c, NewFindTrap }, //  CHARA_FINDTRAP,     /* chara 発見トラップ */
++    { 0xc755, NewMeryl3 }, //  CHARA_MERYL3,
++    { 0x7cf7, NewS03dZakoCommander }, //  CHARA_ZAKOCOM,      /* chara ざこコマンダー */
++    { 0xec77, NewWallGcl }, //  CHARA_WALL,         /* chara 障害物 */
++    { 0xe253, NewElevatorPanel }, //  CHARA_ELEVPANEL,    /* chara エレベーターパネル */
++    { 0xf5c5, NewUji }, //  CHARA_UJI,          /* chara 蛆虫 */
++    { 0xed87, NewS03dZako }, //  CHARA_ZAKO,         /* chara ざこ */
++    { 0xb103, NewDynamicWallSet }, //  CHARA_DYNWALL,      /* chara 透明壁 */
++    { 0x1ad3, NewTextureLamp }, //  CHARA_TEXTURE,      /* chara テクスチャ */
++    { 0x0065, NewMosaicSet }, //  CHARA_MOSAIC,       /* chara モザイク */
++    { 0xa12e, NewFadeInOutSet }, //  CHARA_FADEIO,       /* chara フェードイン・アウト */
++    { 0x42e4, NewHiyokoGcl }, //  CHARA_HIYOKO,       /* chara ヒヨコ星 */
++    { 0x5147, NewPoint }, //  CHARA_RADARPOINT,   /* chara レーダーポイント */
++    { 0xdd8b, NewIntrudeCamera }, //  CHARA_INTRUDECAM,   /* chara イントルードカメラ */
++    { 0x51c6, NewCutInCameraSet }, //  CHARA_CAT_IN,       /* chara カットインカメラ */
++    { 0x0fad, NewMotionSoundEffect }, //  CHARA_MOTIONSE,
+ 
+-    { 0x0003, (NEWCHARA *)0x800d87bc }, //  DEMO_FADEIN,
+-    { 0x0004, (NEWCHARA *)0x800d87bc }, //  DEMO_FADEOUT,
+-    { 0x000f, (NEWCHARA *)0x800c7d08 }, //  DEMO_SHADOW,
+-    { 0x0021, (NEWCHARA *)0x800da054 }, //  DEMO_UNSHAPEVIEW,
+-    { 0x0025, (NEWCHARA *)0x800d7370 }, //  DEMO_BLUR,
+-    { 0x0028, (NEWCHARA *)0x800da69c }, //  DEMO_MONOTONE,
+-    { 0x0044, (NEWCHARA *)0x800d686c }, //  DEMO_GHOST,
+-    { 0x0045, (NEWCHARA *)0x800daaec }, //  DEMO_FAMASLIGHT,
++    { 0x0003, NewFadeInOut }, //  DEMO_FADEIN,
++    { 0x0004, NewFadeInOut }, //  DEMO_FADEOUT,
++    { 0x000f, NewDemoKage }, //  DEMO_SHADOW,
++    { 0x0021, NewFocusView }, //  DEMO_UNSHAPEVIEW,
++    { 0x0025, NewBlurSet }, //  DEMO_BLUR,
++    { 0x0028, NewSepia_800C5214 }, //  DEMO_MONOTONE,
++    { 0x0044, NewBlurPure }, //  DEMO_GHOST,
++    { 0x0045, NewFamasLight }, //  DEMO_FAMASLIGHT,
+ 
+     CHARA_END
+ };

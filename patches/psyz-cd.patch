@@ -1,0 +1,215 @@
+diff --git a/psyz/include/libcd.h b/psyz/include/libcd.h
+index bb7472d..64ee665 100644
+--- a/psyz/include/libcd.h
++++ b/psyz/include/libcd.h
+@@ -435,6 +435,8 @@ int CdMix(CdlATV* vol);
+  * @return Number of bytes retrieved
+  */
+ int CdGetSector(void* madr, int size);
++int CdGetSector2(void* madr, int size);
++int CdDataSync(int mode);
+ 
+ /**
+  * @brief Read CD-ROM table of contents information
+diff --git a/psyz/src/internal.h b/psyz/src/internal.h
+index 6c5dc2d..7bc9f53 100644
+--- a/psyz/src/internal.h
++++ b/psyz/src/internal.h
+@@ -38,6 +38,9 @@ void Psyz_KernelPost(void (*fn)(void));
+ // Raises the vblank interrupt; VSync calls it once per emulated frame.
+ void Psyz_KernelVBlank(void);
+ 
++// Advances the data CD controller and dispatches ready callbacks each frame.
++void Psyz_CdVBlank(void);
++
+ // Services due timers when the host has no thread to run them.
+ void Psyz_KernelPoll(void);
+ 
+diff --git a/psyz/src/psyz/libcd.c b/psyz/src/psyz/libcd.c
+index c783fb2..f79249c 100644
+--- a/psyz/src/psyz/libcd.c
++++ b/psyz/src/psyz/libcd.c
+@@ -343,7 +343,9 @@ static u_char data_sector[SECTOR_SIZE];
+ static int data_read_active = 0;
+ static int data_sector_valid = 0;
+ static int data_sector_number = 0;
+-static int data_getsector_count = 0;
++static size_t data_sector_offset = 0;
++static size_t data_sector_end = 0;
++static unsigned int data_frame_accumulator = 0;
+ 
+ // Compute the absolute sector of the disc lead-out, used by CdlGetTD with
+ // param = 0x00. Equals the absolute sector where the last track's file ends.
+@@ -916,7 +918,11 @@ int CD_init(void) {
+ }
+ 
+ void CD_initintr(void) { NOT_IMPLEMENTED; }
+-void CD_flush(void) { NOT_IMPLEMENTED; }
++void CD_flush(void) {
++    data_sector_valid = 0;
++    data_sector_offset = 0;
++    data_sector_end = 0;
++}
+ 
+ int CD_vol(CdlATV* vol) {
+     // 0x1F801800 = 2
+@@ -931,22 +937,23 @@ int CD_vol(CdlATV* vol) {
+ }
+ 
+ int CD_getsector(void* madr, int size) {
+-    size_t bytes = (size_t)size * 4;
+-    if (!data_sector_valid || !madr)
++    if (!data_sector_valid || !madr || size <= 0 || size > SECTOR_SIZE / 4)
+         return -1;
+-    size_t offset = data_getsector_count++ == 0 ? 12u : 24u;
+-    if (offset + bytes > sizeof(data_sector))
++    size_t bytes = (size_t)size * 4;
++    if (bytes > data_sector_end - data_sector_offset)
+         return -1;
+-    memcpy(madr, data_sector + offset, bytes);
+-    if (offset == 24u) {
++    memcpy(madr, data_sector + data_sector_offset, bytes);
++    data_sector_offset += bytes;
++    if (data_sector_offset == data_sector_end) {
+         data_sector_valid = 0;
+-        data_sector_number++;
+-        data_getsector_count = 0;
+     }
+     return 0;
+ }
+-int CD_getsector2(void) { NOT_IMPLEMENTED; }
+-void CD_datasync(int mode) { NOT_IMPLEMENTED; }
++int CD_getsector2(void* madr, int size) { return CD_getsector(madr, size); }
++int CD_datasync(int mode) {
++    (void)mode;
++    return 0; // Host copies complete before CdGetSector returns.
++}
+ 
+ int CD_initvol(void) {
+     CdlATV vol = {128, 0, 128, 0};
+@@ -978,19 +985,55 @@ int CD_ready(int mode, u_char* result) {
+         if (disk_read_cb) {
+             struct PsyzCdRead read = {
+                 (unsigned int)data_sector_number, SECTOR_SIZE, data_sector};
+-            if (disk_read_cb(&read) < 0)
++            if (disk_read_cb(&read) != SECTOR_SIZE)
+                 return CdlDiskError;
+         } else if (read_raw_sector(data_sector_number, data_sector) < 0) {
+             return CdlDiskError;
+         }
+         data_sector_valid = 1;
+-        data_getsector_count = 0;
++        data_sector_number++;
++        switch (CD_mode & (CdlModeSize0 | CdlModeSize1)) {
++        case 0:
++            data_sector_offset = data_sector[15] == 2 ? 24 : 16;
++            data_sector_end = data_sector_offset + 2048;
++            break;
++        case CdlModeSize1:
++            data_sector_offset = 12;
++            data_sector_end = SECTOR_SIZE;
++            break;
++        default:
++            data_sector_offset = 24;
++            data_sector_end = SECTOR_SIZE;
++            break;
++        }
+     }
+     if (result) {
+         result[0] = (u_char)CD_status;
+     }
+     return CdlDataReady;
+ }
++
++void Psyz_CdVBlank(void) {
++    unsigned int frame_scale = GetVideoMode() == MODE_PAL ? 1000 : 1001;
++    unsigned int frame_rate = GetVideoMode() == MODE_PAL ? 50000 : 60000;
++    if (!data_read_active || !CD_cbready) {
++        data_frame_accumulator = 0;
++        return;
++    }
++    data_frame_accumulator += (CD_mode & CdlModeSpeed ? 150 : 75) * frame_scale;
++    while (data_frame_accumulator >= frame_rate && data_read_active && CD_cbready) {
++        u_char result[8] = {0};
++        data_frame_accumulator -= frame_rate;
++        data_sector_valid = 0;
++        int status = CD_ready(1, result);
++        if (status == CdlDiskError) {
++            data_read_active = 0;
++            CD_status = (CD_status & ~CdlStatRead) | CdlStatError;
++            result[0] = (u_char)CD_status;
++        }
++        CD_cbready((u_char)status, result);
++    }
++}
+ static int CD_command(u_char com, u_char* param, u_char* result, s32 arg3);
+ 
+ int CD_cw(u_char com, u_char* param, u_char* result, s32 arg3) {
+@@ -1006,6 +1049,13 @@ static int CD_command(u_char com, u_char* param, u_char* result, s32 arg3) {
+ 
+     CD_sync(0, 0);
+     switch (com) {
++    case CdlReset:
++        psyz_stop();
++        CD_mode = 0;
++        CD_status = shell_is_open ? CdlStatShellOpen : CdlStatStandby;
++        last_intr = CdlComplete;
++        last_result_len = 0;
++        break;
+     case CdlNop:
+         if (shell_is_open) {
+             if (result) {
+@@ -1047,9 +1097,9 @@ static int CD_command(u_char com, u_char* param, u_char* result, s32 arg3) {
+             Psyz_AudioUnlock();
+             data_sector_number = CdPosToInt(&CD_pos);
+             data_sector_valid = 0;
+-            data_getsector_count = 0;
++            data_frame_accumulator = 0;
+             data_read_active = 1;
+-            CD_status |= CdlStatRead;
++            CD_status = (CD_status & ~CdlStatError) | CdlStatRead;
+         }
+         break;
+     case CdlSetfilter:
+@@ -1089,21 +1139,6 @@ static int CD_command(u_char com, u_char* param, u_char* result, s32 arg3) {
+         if (*param & CdlModeRept) {
+             LOG_ONCE("%s does not support CdlModeRept", CD_comstr[com]);
+         }
+-        if (*param & CdlModeSize0) {
+-            LOG_ONCE("%s does not support CdlModeSize0", CD_comstr[com]);
+-        }
+-        if (*param & CdlModeSize1) {
+-            LOG_ONCE("%s does not support CdlModeSize1", CD_comstr[com]);
+-        }
+-        if (*param & CdlModeSpeed) {
+-            LOG_ONCE("%s does not support CdlModeSpeed", CD_comstr[com]);
+-        }
+-        if (*param & CdlModeStream2) {
+-            LOG_ONCE("%s does not support CdlModeStream2", CD_comstr[com]);
+-        }
+-        if (*param & CdlModeStream) {
+-            LOG_ONCE("%s does not support CdlModeStream", CD_comstr[com]);
+-        }
+         Psyz_AudioLock();
+         CD_mode = *param;
+         Psyz_AudioUnlock();
+@@ -1168,7 +1203,6 @@ static int CD_command(u_char com, u_char* param, u_char* result, s32 arg3) {
+             return -1;
+         }
+         t = btoi(param[0]);
+-        abs_sector;
+         if (t == 0) {
+             abs_sector = lead_out_sector();
+         } else if (t < 1 || t > g_track_count || !g_tracks[t - 1].is_valid) {
+diff --git a/psyz/src/psyz/libapi.c b/psyz/src/psyz/libapi.c
+index bf4d015..b81b60c 100644
+--- a/psyz/src/psyz/libapi.c
++++ b/psyz/src/psyz/libapi.c
+@@ -72,6 +76,7 @@ int VSync(int mode) {
+         g_PsyzVsyncCb();
+     }
+     for (; n > 0; n--) {
++        Psyz_CdVBlank();
+         Psyz_KernelVBlank();
+     }
+     return elapsed;

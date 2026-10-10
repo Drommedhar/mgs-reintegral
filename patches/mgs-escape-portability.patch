@@ -1,0 +1,205 @@
+diff --git a/source/overlays/s19b/takabe/jeep/jblast.c b/source/overlays/s19b/takabe/jeep/jblast.c
+index b43dfb89b..6f27576ce 100644
+--- a/source/overlays/s19b/takabe/jeep/jblast.c
++++ b/source/overlays/s19b/takabe/jeep/jblast.c
+@@ -12,7 +12,7 @@ typedef struct _Work
+     TARGET   target;
+ } Work;
+ 
+-SVECTOR s19b_dword_800C349C = {100, 0, 0};
++SVECTOR s19b_dword_800C349C = {100, 0, 0, 0};
+ 
+ void s19b_jblood_800C8610(SVECTOR *);
+ 
+diff --git a/source/overlays/s19b/takabe/jeep/jbullet.c b/source/overlays/s19b/takabe/jeep/jbullet.c
+index b2688c6b3..51cb99dbf 100644
+--- a/source/overlays/s19b/takabe/jeep/jbullet.c
++++ b/source/overlays/s19b/takabe/jeep/jbullet.c
+@@ -39,18 +39,18 @@ typedef struct _Work
+ 
+ static SVECTOR s19b_dword_800C3380[4] =
+ {
+-    {0, 0, 0},
+-    {0, 0, 0},
+-    {0, 0, 0},
+-    {0, 0, 0}
++    {0, 0, 0, 0},
++    {0, 0, 0, 0},
++    {0, 0, 0, 0},
++    {0, 0, 0, 0}
+ };
+ 
+-static SVECTOR s19b_dword_800C33A0 = {0, 400, 0};
+-static VECTOR  s19b_dword_800C33A8 = {0, 0, 0};
+-static SVECTOR s19b_dword_800C33B8 = {0, -15000, 0};
+-static SVECTOR s19b_dword_800C33C0 = {100, 100, 100};
+-static SVECTOR s19b_dword_800C33C8 = {0, 0, 0};
+-static SVECTOR s19b_dword_800C33D0 = {0, 400, 0};
++static SVECTOR s19b_dword_800C33A0 = {0, 400, 0, 0};
++static VECTOR  s19b_dword_800C33A8 = {0, 0, 0, 0};
++static SVECTOR s19b_dword_800C33B8 = {0, -15000, 0, 0};
++static SVECTOR s19b_dword_800C33C0 = {100, 100, 100, 0};
++static SVECTOR s19b_dword_800C33C8 = {0, 0, 0, 0};
++static SVECTOR s19b_dword_800C33D0 = {0, 400, 0, 0};
+ 
+ void NewJeepSpark(MATRIX *, int);
+ 
+@@ -178,6 +178,9 @@ static int FindIntersection(Work *work, MATRIX *world, int mode2)
+     MAP     *map;
+     HZD_FLR *floor;
+ 
++    (void)world;
++    (void)mode2;
++
+     DG_PutVector(&s19b_dword_800C33A0, &origin, 1);
+     from = origin;
+ 
+@@ -370,6 +373,8 @@ static int GetResources(Work *work, MATRIX *world, int mode, int mode2, int side
+     DG_PRIM *prim;
+     DG_TEX  *tex;
+ 
++    (void)side;
++
+     work->hit_type = 0;
+     work->map = GM_CurrentMap;
+     work->world = *world;
+diff --git a/source/overlays/s19b/takabe/jeep/jdrum.c b/source/overlays/s19b/takabe/jeep/jdrum.c
+index b202a583a..01b7ce04a 100644
+--- a/source/overlays/s19b/takabe/jeep/jdrum.c
++++ b/source/overlays/s19b/takabe/jeep/jdrum.c
+@@ -47,7 +47,7 @@ typedef struct _Work
+ 
+ extern BLAST_DATA blast_data_8009F4B8[8];
+ 
+-SVECTOR s19b_dword_800C3494 = {435, 375, 185};
++SVECTOR s19b_dword_800C3494 = {435, 375, 185, 0};
+ 
+ void *NewJeepBlast(MATRIX *world, BLAST_DATA *blast);
+ void *NewJeepDrumSmoke(MATRIX *world, int, int);
+@@ -55,7 +55,7 @@ void *NewJeepDrumFire(MATRIX *world, int, int);
+ 
+ static void Act(Work *work)
+ {
+-    VECTOR   scale = {2048, 2048, 2048};
++    VECTOR   scale = {2048, 2048, 2048, 0};
+     MATRIX   world;
+     CONTROL *control;
+     int      changed;
+diff --git a/source/overlays/s19b/takabe/jeep/jeep_gte.c b/source/overlays/s19b/takabe/jeep/jeep_gte.c
+index 4774b9fa7..1e59f9f84 100644
+--- a/source/overlays/s19b/takabe/jeep/jeep_gte.c
++++ b/source/overlays/s19b/takabe/jeep/jeep_gte.c
+@@ -51,7 +51,7 @@ void s19b_jeep_gls_800CEC24(int, SVECTOR *);
+ 
+ static void Act(Work *work)
+ {
+-    VECTOR   scale = {2048, 2048, 2048};
++    VECTOR   scale = {2048, 2048, 2048, 0};
+     SVECTOR  vec;
+     CONTROL *control;
+     TARGET  *trg;
+diff --git a/source/overlays/s19b/takabe/jeep/jlamp.c b/source/overlays/s19b/takabe/jeep/jlamp.c
+index 56ff53a7a..cc6f2cf69 100644
+--- a/source/overlays/s19b/takabe/jeep/jlamp.c
++++ b/source/overlays/s19b/takabe/jeep/jlamp.c
+@@ -82,6 +82,8 @@ static int GetResources(Work *work, SVECTOR *root_pos, int tex_id, int unused)
+ {
+     DG_PRIM *prim;
+ 
++    (void)unused;
++
+     work->root_pos = root_pos;
+ 
+     work->map = GM_CurrentMap;
+diff --git a/source/overlays/s19b/takabe/jeep/jlamp2.c b/source/overlays/s19b/takabe/jeep/jlamp2.c
+index b9ece1c0e..2bd60ae06 100644
+--- a/source/overlays/s19b/takabe/jeep/jlamp2.c
++++ b/source/overlays/s19b/takabe/jeep/jlamp2.c
+@@ -9,9 +9,9 @@ typedef struct _Work
+     DG_PRIM *prim;
+ } Work;
+ 
+-SVECTOR lamp_falloff = {0, 0, 4096};
++SVECTOR lamp_falloff = {0, 0, 4096, 0};
+ RECT lamp_rect = {200, 200, 400, 400};
+-SVECTOR lamp_position[] = {{330, 890, 1436}, {-330, 890, 1436}};
++SVECTOR lamp_position[] = {{330, 890, 1436, 0}, {-330, 890, 1436, 0}};
+ 
+ static void InitPacks(DG_PRIM *prim, DG_TEX *tex)
+ {
+diff --git a/source/overlays/s19b/takabe/jeep/jspark.c b/source/overlays/s19b/takabe/jeep/jspark.c
+index 0a6533028..0fc6b5187 100644
+--- a/source/overlays/s19b/takabe/jeep/jspark.c
++++ b/source/overlays/s19b/takabe/jeep/jspark.c
+@@ -179,7 +179,12 @@ static void InitPacks(POLY_FT4 *packs, int n_packs, DG_TEX *tex)
+ 
+     while (--n_packs >= 0)
+     {
++#ifdef MGS_NATIVE
++        setPolyFT4(packs);
++        setSemiTrans(packs, 1);
++#else
+         LCOPY2(&spad->tag, &packs->tag, &spad->r0, &packs->r0);
++#endif
+         LCOPY(&spad->u0, &packs->u0);
+         LCOPY(&spad->u1, &packs->u1);
+         LCOPY(&spad->u2, &packs->u2);
+@@ -202,7 +207,6 @@ static void ShadePacks(POLY_FT4 *packs, int n_packs, int shade)
+ 
+ static void Act(Work *work)
+ {
+-    int      unused[2];
+     int      val1, val2;
+     DG_PRIM *prim;
+     int      bright;
+diff --git a/source/overlays/s19b/takabe/jeep/spark2_m.c b/source/overlays/s19b/takabe/jeep/spark2_m.c
+index c29fa3e94..4bb4fa60c 100644
+--- a/source/overlays/s19b/takabe/jeep/spark2_m.c
++++ b/source/overlays/s19b/takabe/jeep/spark2_m.c
+@@ -88,6 +88,8 @@ static void UpdateVerts(SVECTOR *speeds, SVECTOR *verts, int count)
+ 
+ static void InitPacks(LINE_F2 *packs, int n_packs, int bright)
+ {
++    (void)bright;
++
+     while (--n_packs >= 0)
+     {
+         setLineF2(packs);
+diff --git a/source/overlays/s19b/takabe/jeep_emy/jeep_emy.c b/source/overlays/s19b/takabe/jeep_emy/jeep_emy.c
+index 35566e24d..1526cb2ef 100644
+--- a/source/overlays/s19b/takabe/jeep_emy/jeep_emy.c
++++ b/source/overlays/s19b/takabe/jeep_emy/jeep_emy.c
+@@ -78,11 +78,11 @@ static short s19b_dword_800C32C0[] =
+     19, 10, 22, 9, 8, 27, 3, 7, 38, 24, 23, 17, 18, 43, 22
+ };
+ 
+-static SVECTOR s19b_dword_800C32E0 = {0, 0, 100};
+-static SVECTOR s19b_dword_800C32E8 = {-1024, 0, 0};
+-static SVECTOR s19b_dword_800C32F0 = {200, 500, 200};
+-static SVECTOR s19b_dword_800C32F8 = {0, 0, 0};
+-static SVECTOR s19b_dword_800C3300 = {5, -500, 80};
++static SVECTOR s19b_dword_800C32E0 = {0, 0, 100, 0};
++static SVECTOR s19b_dword_800C32E8 = {-1024, 0, 0, 0};
++static SVECTOR s19b_dword_800C32F0 = {200, 500, 200, 0};
++static SVECTOR s19b_dword_800C32F8 = {0, 0, 0, 0};
++static SVECTOR s19b_dword_800C3300 = {5, -500, 80, 0};
+ 
+ void s01a_800E2364(MATRIX *mtx, SVECTOR *in, VECTOR *out);
+ void *NewJeepBlood(MATRIX *world, int count, MATRIX *root);
+@@ -111,7 +111,7 @@ void s19b_jbullet_800C66BC(Work *work);
+ 
+ static void Act(Work *work)
+ {
+-    VECTOR   scale = {2048, 2048, 2048};
++    VECTOR   scale = {2048, 2048, 2048, 0};
+     VECTOR   player_dist;
+     CONTROL *control;
+     SVECTOR *vec;
+@@ -897,6 +897,7 @@ void s19b_jbullet_800C5D18(Work *work, int arg1)
+ 
+ void s19b_jbullet_800C5E40(Work *work, int arg1)
+ {
++    (void)arg1;
+     GV_DestroyActor(work);
+ }
+ 

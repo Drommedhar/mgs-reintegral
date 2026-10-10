@@ -1,0 +1,1117 @@
+diff --git a/build/linker_command_file.txt b/build/linker_command_file.txt
+index 39bd530de..2c662403d 100644
+--- a/build/linker_command_file.txt
++++ b/build/linker_command_file.txt
+@@ -2364,8 +2364,8 @@ overlay_bss group   file("{{OBJ_DIR}}\{{OVERLAY}}_{{OVERLAY_SUFFIX}}_bss.bin")
+     include "{{OBJ_DIR}}\onoda\abst\ab_demo2.obj", overlay
+     include "{{OBJ_DIR}}\onoda\change\met_logo.obj", overlay
+ ;------------------------------------------------------------------------------
+-{% elif OVERLAY == "s03d" %}
+-    include "{{OBJ_DIR}}\stage\s03d.obj", overlay
++{% elif OVERLAY in ["s03d", "s03dr"] %}
++    include "{{OBJ_DIR}}\stage\{{OVERLAY}}.obj", overlay
+     include "{{OBJ_DIR}}\game\evpanel.obj", overlay
+     include "{{OBJ_DIR}}\game\lamp.obj", overlay
+     include "{{OBJ_DIR}}\game\tobcnt.obj", overlay
+diff --git a/source/game/select.c b/source/game/select.c
+index 73f1aad2a..30640afa2 100644
+--- a/source/game/select.c
++++ b/source/game/select.c
+@@ -10,40 +10,40 @@
+ 
+ typedef struct _Work
+ {
+-    GV_ACT         actor;
+-    unsigned char *gcl_menu_entries;
+-    char          *current_entry_name;
+-    int            current_entry_proc_id;
+-    int            current_idx;
++    GV_ACT actor;
++    char  *gcl_menu_entries;
++    char  *current_entry_name;
++    int    current_entry_proc_id;
++    int    current_idx;
+ 
+     // when you are holding PAD_DOWN/PAD_UP
+     // it will continue moving through entries,
+     // this slows down the speed of this movement
+-    int            movement_delay_remaining;
++    int movement_delay_remaining;
+ 
+-    int            previous_dir;
++    int previous_dir;
+ } Work;
+ 
+ #ifdef DEV_EXE
+-int isStageSelectionMenu; // Used to print the extended info below only in stage selection menu.
+-char* extendedInfo[] = {
+-    "%s [ %d ]", // TITLE
+-    "%s: LOADING DOCK - CUTSCENE [ %d ]", // D00A
+-    "%s: LOADING DOCK [ %d ]", // S00A
+-    "%s: HELIPORT - CUTSCENE [ %d ]", // D01A
+-    "%s: HELIPORT - USING SCOPE [ %d ]", // S01A
+-    "%s: HELIPORT [ %d ]", // S01A1
+-    "%s: TANK HANGAR [ %d ]", // S02A
+-    "%s: TANK HANGAR 2 [ %d ]", // S02B
++int   isStageSelectionMenu; // Used to print the extended info below only in stage selection menu.
++char *extendedInfo[] = {
++    "%s [ %d ]",                                        // TITLE
++    "%s: LOADING DOCK - CUTSCENE [ %d ]",               // D00A
++    "%s: LOADING DOCK [ %d ]",                          // S00A
++    "%s: HELIPORT - CUTSCENE [ %d ]",                   // D01A
++    "%s: HELIPORT - USING SCOPE [ %d ]",                // S01A
++    "%s: HELIPORT [ %d ]",                              // S01A1
++    "%s: TANK HANGAR [ %d ]",                           // S02A
++    "%s: TANK HANGAR 2 [ %d ]",                         // S02B
+     "%s: TANK HANGAR - BEFORE CONTACTING MERYL [ %d ]", // S02C
+-    "%s: TANK HANGAR - AFTER CONTACTING MERYL [ %d ]", // S02D
+-    "%s: TANK HANGAR - AFTER TORTURE [ %d ]", // S02E
+-    "%s: HOLDING CELL [ %d ]", // S03A
+-    "%s: MEDICAL ROOM [ %d ]", // S03B
+-    "%s: MEDICAL ROOM 2 [ %d ]", // S03C
+-    "%s: ARMORY [ %d ]", // S04A
+-    "%s: ARMORY SOUTH - VS OCELOT [ %d ]", // S04B
+-    "%s [ %d ]" // RETURN
++    "%s: TANK HANGAR - AFTER CONTACTING MERYL [ %d ]",  // S02D
++    "%s: TANK HANGAR - AFTER TORTURE [ %d ]",           // S02E
++    "%s: HOLDING CELL [ %d ]",                          // S03A
++    "%s: MEDICAL ROOM [ %d ]",                          // S03B
++    "%s: MEDICAL ROOM 2 [ %d ]",                        // S03C
++    "%s: ARMORY [ %d ]",                                // S04A
++    "%s: ARMORY SOUTH - VS OCELOT [ %d ]",              // S04B
++    "%s [ %d ]"                                         // RETURN
+ };
+ #endif // DEV_EXE
+ 
+@@ -137,20 +137,23 @@ static void Act(Work *work)
+ #ifdef DEV_EXE
+     if (isStageSelectionMenu)
+     {
+-        sprintf(stageInfo, extendedInfo[work->current_idx], work->current_entry_name, work->current_entry_proc_id);
++        snprintf(stageInfo, sizeof(stageInfo), extendedInfo[work->current_idx], work->current_entry_name,
++                 work->current_entry_proc_id);
+     }
+     else
+     {
+-        strcpy(stageInfo, work->current_entry_name);
++        snprintf(stageInfo, sizeof(stageInfo), "%s", work->current_entry_name);
+     }
+-    MENU_Printf(stageInfo);
++    MENU_Printf("%s", stageInfo);
+ #else
+-    MENU_Printf(work->current_entry_name);
++    MENU_Printf("%s", work->current_entry_name);
+ #endif
+ }
+ 
+ static int GetResources(Work *work, int where, int name)
+ {
++    (void)where;
++    (void)name;
+     if (!GCL_GetOption('s'))
+     {
+         printf("NO MENU\n");
+@@ -168,6 +171,8 @@ static int GetResources(Work *work, int where, int name)
+ 
+ void *NewSelect(int name, int where, int argc, char **argv)
+ {
++    (void)argc;
++    (void)argv;
+     Work *work;
+ 
+     work = GV_NewActor(GV_ACTOR_PREV2, sizeof(Work));
+diff --git a/source/game/sndtst.c b/source/game/sndtst.c
+index 4cba4ea7a..e9146ad9e 100644
+--- a/source/game/sndtst.c
++++ b/source/game/sndtst.c
+@@ -9,7 +9,8 @@
+ 
+ /*---------------------------------------------------------------------------*/
+ 
+-typedef struct _Work {
++typedef struct _Work
++{
+     GV_ACT actor;
+     int    playing;
+     char  *script;
+@@ -18,35 +19,35 @@ typedef struct _Work {
+     int    field_30;
+     int    field_34;
+     int    field_38;
+-    int    field_3C[ PAKU_MAX - 1 ];
++    int    field_3C[PAKU_MAX - 1];
+ } Work;
+ 
+ /*---------------------------------------------------------------------------*/
+ 
+-static void RunScripts( Work *work, int param_2 )
++static void RunScripts(Work *work, int param_2)
+ {
+     int   i;
+     char *name;
+     int   code;
+ 
+     work->field_30 += param_2;
+-    if ( work->field_30 < 0 )
++    if (work->field_30 < 0)
+     {
+         work->field_30 = 0;
+     }
+ 
+-    GCL_SetArgTop( work->script );
++    GCL_SetArgTop(work->script);
+ 
+-    for ( i = 0; i <= work->field_30; i++ )
++    for (i = 0; i <= work->field_30; i++)
+     {
+-        if ( GCL_NextStr() == NULL )
++        if (GCL_NextStr() == NULL)
+         {
+             work->field_30 = i;
+             break;
+         }
+ 
+-        name = GCL_GetString( GCL_NextStr() );
+-        code = GCL_StrToInt( GCL_NextStr() );
++        name = GCL_GetString(GCL_NextStr());
++        code = GCL_StrToInt(GCL_NextStr());
+     }
+ 
+     work->name = name;
+@@ -55,7 +56,7 @@ static void RunScripts( Work *work, int param_2 )
+ 
+ /*---------------------------------------------------------------------------*/
+ 
+-static void Act( Work *work )
++static void Act(Work *work)
+ {
+     GV_PAD *pad;
+     int     var_s0;
+@@ -65,28 +66,28 @@ static void Act( Work *work )
+ 
+     pad = &GV_PadData[0];
+ 
+-    if ( work->playing == 0 )
++    if (work->playing == 0)
+     {
+-        if ( pad->status & (PAD_DOWN | PAD_UP) )
++        if (pad->status & (PAD_DOWN | PAD_UP))
+         {
+             var_s0 = (pad->status & PAD_UP) ? -1 : 1;
+ 
+-            if ( pad->status & PAD_L1 )
++            if (pad->status & PAD_L1)
+             {
+                 var_s0 *= 10;
+             }
+ 
+-            if ( work->field_38 == var_s0 )
++            if (work->field_38 == var_s0)
+             {
+-                if ( --work->field_34 < 0 )
++                if (--work->field_34 < 0)
+                 {
+-                    RunScripts( work, var_s0 );
++                    RunScripts(work, var_s0);
+                     work->field_34 = 2;
+                 }
+             }
+             else
+             {
+-                RunScripts( work, var_s0 );
++                RunScripts(work, var_s0);
+                 work->field_34 = 10;
+                 work->field_38 = var_s0;
+             }
+@@ -96,48 +97,48 @@ static void Act( Work *work )
+             work->field_38 = 0;
+         }
+ 
+-        if ( pad->press & PAD_CIRCLE )
++        if (pad->press & PAD_CIRCLE)
+         {
+             work->playing = 1;
+-            GM_VoxStream( work->code, 0 );
++            GM_VoxStream(work->code, 0);
+         }
+ 
+-        MENU_Locate( 160, 120, 0x2 );
+-        MENU_Printf( work->name );
++        MENU_Locate(160, 120, 0x2);
++        MENU_Printf(work->name);
+     }
+     else
+     {
+-        MENU_Locate( 160, 120, 0x2 );
+-        MENU_Printf( "PLAYING" );
++        MENU_Locate(160, 120, 0x2);
++        MENU_Printf("PLAYING");
+ 
+-        if ( pad->press & PAD_CROSS )
++        if (pad->press & PAD_CROSS)
+         {
+             GM_StreamPlayStop();
+         }
+ 
+-        if ( GM_StreamStatus() == -1 )
++        if (GM_StreamStatus() == -1)
+         {
+             work->playing = 0;
+-            GM_VoxStream( work->code, 0 );
++            GM_VoxStream(work->code, 0);
+         }
+ 
+         paku = jimctrl_80038698();
+ 
+-        for ( i = 0; i < PAKU_MAX - 1; i++ )
++        for (i = 0; i < PAKU_MAX - 1; i++)
+         {
+-            if ( paku[i].eye != 0 )
++            if (paku[i].eye != 0)
+             {
+                 paku[i].eye = 0;
+                 work->field_3C[i] = 1;
+             }
+ 
+-            if ( work->field_3C[i] > 0 )
++            if (work->field_3C[i] > 0)
+             {
+                 work->field_3C[i]++;
+ 
+                 eye = "-=O"[(work->field_3C[i] / 2) - 1];
+ 
+-                if ( work->field_3C[i] > 6 )
++                if (work->field_3C[i] > 6)
+                 {
+                     work->field_3C[i] = 0;
+                 }
+@@ -147,26 +148,28 @@ static void Act( Work *work )
+                 eye = '0';
+             }
+ 
+-            MENU_Locate( 116, 32 + i * 10, 0 );
+-            MENU_Printf( "%c  %c  :%d", eye, "-0=-"[paku[i].mouth], paku[i].id );
++            MENU_Locate(116, 32 + i * 10, 0);
++            MENU_Printf("%c  %c  :%d", eye, "-0=-"[paku[i].mouth], paku[i].id);
+         }
+     }
+ }
+ 
+ /*---------------------------------------------------------------------------*/
+ 
+-static int GetResources( Work *work, int where, int name )
++static int GetResources(Work *work, int where, int name)
+ {
+-    if ( !GCL_GetOption( 's' ) )
++    (void)where;
++    (void)name;
++    if (!GCL_GetOption('s'))
+     {
+-        printf( "NO MENU\n" );
++        printf("NO MENU\n");
+         return -1;
+     }
+ 
+     work->script = GCL_NextStr();
+     work->field_30 = 0;
+     work->field_38 = 0;
+-    RunScripts( work, 0 );
++    RunScripts(work, 0);
+     work->playing = 0;
+ 
+     return 0;
+@@ -174,19 +177,21 @@ static int GetResources( Work *work, int where, int name )
+ 
+ /*---------------------------------------------------------------------------*/
+ 
+-void *NewSoundTest( int name, int where, int argc, char **argv )
++void *NewSoundTest(int name, int where, int argc, char **argv)
+ {
++    (void)argc;
++    (void)argv;
+     Work *work;
+ 
+     GM_GameStatus |= STATE_ALL_OFF;
+ 
+-    work = GV_NewActor( GV_ACTOR_PREV2, sizeof( Work ) );
+-    if ( work != NULL )
++    work = GV_NewActor(GV_ACTOR_PREV2, sizeof(Work));
++    if (work != NULL)
+     {
+-        GV_SetNamedActor( &( work->actor ), Act, NULL, "sndtst.c" );
+-        if (GetResources( work, where, name ) < 0)
++        GV_SetNamedActor(&(work->actor), Act, NULL, "sndtst.c");
++        if (GetResources(work, where, name) < 0)
+         {
+-            GV_DestroyActor( &work->actor );
++            GV_DestroyActor(&work->actor);
+             return NULL;
+         }
+     }
+diff --git a/source/onoda/demosel/demosel.c b/source/onoda/demosel/demosel.c
+index a24d5c096..7689ecdc1 100644
+--- a/source/onoda/demosel/demosel.c
++++ b/source/onoda/demosel/demosel.c
+@@ -17,7 +17,7 @@
+ 
+ #include "../change/met_logo.h" // for NewMetalGearLogo
+ 
+-extern int    FS_DiskNum;
++extern int FS_DiskNum;
+ 
+ /*---------------------------------------------------------------------------*/
+ 
+@@ -87,24 +87,16 @@ typedef struct _Unknown2
+ #define GET_SHADE(s) ((s) * 25 / 64)
+ 
+ static Unknown2 dword_800C3218[10] = {
+-    {1, 160, 190, GET_COLOR(GET_SHADE(64))},
+-    {1, 160, 190, GET_COLOR(GET_SHADE(64))},
+-    {1, 160, 210, GET_COLOR(GET_SHADE(64))},
+-    {1, 160, 190, GET_COLOR(GET_SHADE(64))},
+-    {1, 160, 190, GET_COLOR(GET_SHADE(64))},
+-    {1, 160, 190, GET_COLOR(GET_SHADE(64))},
+-    {1, 160, 195, GET_COLOR(GET_SHADE(64))},
+-    {1, 160, 195, GET_COLOR(GET_SHADE(64))},
+-    {1, 160, 195, GET_COLOR(GET_SHADE(64))},
+-    {1, 160, 195, GET_COLOR(GET_SHADE(64))},
++    {1, 160, 190, GET_COLOR(GET_SHADE(64))}, {1, 160, 190, GET_COLOR(GET_SHADE(64))},
++    {1, 160, 210, GET_COLOR(GET_SHADE(64))}, {1, 160, 190, GET_COLOR(GET_SHADE(64))},
++    {1, 160, 190, GET_COLOR(GET_SHADE(64))}, {1, 160, 190, GET_COLOR(GET_SHADE(64))},
++    {1, 160, 195, GET_COLOR(GET_SHADE(64))}, {1, 160, 195, GET_COLOR(GET_SHADE(64))},
++    {1, 160, 195, GET_COLOR(GET_SHADE(64))}, {1, 160, 195, GET_COLOR(GET_SHADE(64))},
+ };
+ 
+ // Same as byte_800C3260 in change overlay
+ static signed char text_outline_direction_offsets_800C3290[] = {
+-    -1,  0,
+-     1,  0,
+-     0,  1,
+-     0, -1,
++    -1, 0, 1, 0, 0, 1, 0, -1,
+ };
+ 
+ /*---------------------------------------------------------------------------*/
+@@ -262,7 +254,7 @@ static void demosel_800C3B34(Work *work)
+     }
+     else if (work->fDDC != 0)
+     {
+-        switch(work->fDD4)
++        switch (work->fDD4)
+         {
+         case 0:
+         case 1:
+@@ -296,315 +288,315 @@ static void demosel_800C3B34(Work *work)
+ 
+ static void demosel_800C3C74(Work *work)
+ {
+-    char   result[8];
+-    char   result2[8];
+-    CdlLOC loc;
+-    char   param[8];
+-    int    press;
+-    int    status;
+-    int    intr;
+-    int    error;
+-    void  *alloc;
++    unsigned char result[8];
++    unsigned char result2[8];
++    CdlLOC        loc;
++    unsigned char param[8];
++    int           press;
++    int           status;
++    int           intr;
++    int           error;
++    void         *alloc;
+ 
+     press = work->pad->press;
+ 
+-    switch ( work->fDD4 )
++    switch (work->fDD4)
+     {
+     case 0:
+-        param[ 0 ] = 0;
+-        CdControlB( CdlNop, param, result );
++        param[0] = 0;
++        CdControlB(CdlNop, param, result);
+ 
+-        if ( result[ 0 ] & CdlStatShellOpen )
++        if (result[0] & CdlStatShellOpen)
+         {
+             work->fDD4 = 3;
+-            printf( "CD CASE OPEN!!\n" );
+-            mts_wait_vbl( 3 );
++            printf("CD CASE OPEN!!\n");
++            mts_wait_vbl(3);
+             break;
+         }
+ 
+-        param[ 0 ] = 0;
+-        status = CdControlB( CdlSetmode, param, result );
++        param[0] = 0;
++        status = CdControlB(CdlSetmode, param, result);
+ 
+-        if ( status == 0 )
++        if (status == 0)
+         {
+-            printf( "CD NORMAL SPEED SET FAILED!!\n" );
++            printf("CD NORMAL SPEED SET FAILED!!\n");
+             work->fDEC++;
+         }
+-        else if ( status == 1 )
++        else if (status == 1)
+         {
+             work->fDD4 = 1;
+-            printf( "CD NORMAL SPEED SET SUCCESS!!\n" );
+-            mts_wait_vbl( 3 );
++            printf("CD NORMAL SPEED SET SUCCESS!!\n");
++            mts_wait_vbl(3);
+             work->fDEC = 0;
+         }
+         else
+         {
+-            printf( "???????\n" );
++            printf("???????\n");
+         }
+ 
+-        if ( work->fDEC >= 300 )
++        if (work->fDEC >= 300)
+         {
+             work->fDD4 = 10;
+             work->fDE8 = 0;
+-            printf( "THIS IS NOT PS DISC!!\n" );
++            printf("THIS IS NOT PS DISC!!\n");
+         }
+         break;
+ 
+     case 1:
+-        param[ 0 ] = 0;
+-        CdControlB( CdlNop, param, result );
++        param[0] = 0;
++        CdControlB(CdlNop, param, result);
+ 
+-        if ( result[ 0 ] & CdlStatShellOpen )
++        if (result[0] & CdlStatShellOpen)
+         {
+             work->fDD4 = 3;
+-            printf( "CD CASE OPEN!!\n" );
+-            mts_wait_vbl( 3 );
++            printf("CD CASE OPEN!!\n");
++            mts_wait_vbl(3);
+             break;
+         }
+ 
+-        param[ 0 ] = 0;
+-        status = CdControlB( CdlStop, param, result );
++        param[0] = 0;
++        status = CdControlB(CdlStop, param, result);
+ 
+-        if ( status == 0 )
++        if (status == 0)
+         {
+-            printf( "CD STOP FAILED!!\n" );
++            printf("CD STOP FAILED!!\n");
+             work->fDEC++;
+         }
+-        else if ( status == 1 )
++        else if (status == 1)
+         {
+             work->fDD4 = 2;
+-            printf( "CD STOP SUCCESS!!\n" );
++            printf("CD STOP SUCCESS!!\n");
+             work->fDEC = 0;
+         }
+         else
+         {
+-            printf( "???????\n" );
++            printf("???????\n");
+         }
+ 
+-        if ( work->fDEC >= 300 )
++        if (work->fDEC >= 300)
+         {
+             work->fDD4 = 10;
+             work->fDE8 = 0;
+-            printf( "THIS IS NOT PS DISC!!\n" );
++            printf("THIS IS NOT PS DISC!!\n");
+         }
+         break;
+ 
+     case 2:
+-        param[ 0 ] = 0;
+-        CdControlB( CdlNop, param, result );
++        param[0] = 0;
++        CdControlB(CdlNop, param, result);
+ 
+-        if ( !( result[ 0 ] & CdlStatShellOpen ) )
++        if (!(result[0] & CdlStatShellOpen))
+         {
+-            printf( "CD CASE CLOSE!!\n" );
++            printf("CD CASE CLOSE!!\n");
+         }
+         else
+         {
+             work->fDD4 = 3;
+-            printf( "CD CASE OPEN!!\n" );
++            printf("CD CASE OPEN!!\n");
+         }
+         break;
+ 
+     case 3:
+-        param[ 0 ] = 0;
+-        CdControlB( CdlNop, param, result );
++        param[0] = 0;
++        CdControlB(CdlNop, param, result);
+ 
+-        if ( !( result[ 0 ] & CdlStatShellOpen ) )
++        if (!(result[0] & CdlStatShellOpen))
+         {
+             work->fDD4 = 4;
+-            printf( "CD CASE CLOSE!!\n" );
++            printf("CD CASE CLOSE!!\n");
+         }
+         else
+         {
+-            printf( "CD CASE OPEN!!\n" );
++            printf("CD CASE OPEN!!\n");
+         }
+         break;
+ 
+     case 4:
+-        if ( work->fDDC != 0 && ( press & PAD_START ) )
++        if (work->fDDC != 0 && (press & PAD_START))
+         {
+             work->fDD4 = 5;
+-            printf( "START BUTTON PUSH!!\n" );
++            printf("START BUTTON PUSH!!\n");
+ 
+-            GM_SeSet2( 0, 63, SE_MENU_SELECT );
++            GM_SeSet2(0, 63, SE_MENU_SELECT);
+ 
+             work->fDEC = 0;
+         }
+         break;
+ 
+     case 5:
+-        param[ 0 ] = 0;
+-        CdControlB( CdlNop, param, result );
++        param[0] = 0;
++        CdControlB(CdlNop, param, result);
+ 
+         work->fDEC++;
+ 
+-        if ( result[ 0 ] & CdlStatStandby )
++        if (result[0] & CdlStatStandby)
+         {
+             work->fDD4 = 6;
+-            printf( "CD SPIN START!!\n" );
++            printf("CD SPIN START!!\n");
+             work->fDEC = 0;
+         }
+         else
+         {
+-            printf( "CD NOT SPIN!!\n" );
++            printf("CD NOT SPIN!!\n");
+         }
+ 
+-        if ( work->fDEC >= 300 )
++        if (work->fDEC >= 300)
+         {
+             work->fDD4 = 10;
+             work->fDE8 = 0;
+-            printf( "THIS IS NOT PS DISC!!\n" );
++            printf("THIS IS NOT PS DISC!!\n");
+         }
+         break;
+ 
+     case 6:
+-        param[ 0 ] = 0;
+-        status = CdControlB( CdlGetTN, param, result );
++        param[0] = 0;
++        status = CdControlB(CdlGetTN, param, result);
+ 
+-        if ( status == 0 )
++        if (status == 0)
+         {
+-            printf( "CD TOC READ NOT FINISH!!\n" );
++            printf("CD TOC READ NOT FINISH!!\n");
+             work->fDEC++;
+         }
+-        else if ( status == 1 )
++        else if (status == 1)
+         {
+             work->fDD4 = 7;
+-            printf( "CD TOC READ SUCCESS!!\n" );
++            printf("CD TOC READ SUCCESS!!\n");
+             work->fDEC = 0;
+         }
+         else
+         {
+-            printf( "???????\n" );
++            printf("???????\n");
+         }
+ 
+-        if ( work->fDEC >= 300 )
++        if (work->fDEC >= 300)
+         {
+             work->fDD4 = 10;
+             work->fDE8 = 0;
+-            printf( "THIS IS NOT PS DISC!!\n" );
++            printf("THIS IS NOT PS DISC!!\n");
+         }
+         break;
+ 
+     case 7:
+-        param[ 0 ] = CdlModeSpeed | CdlModeSize1;
+-        status = CdControlB( CdlSetmode, param, result );
++        param[0] = CdlModeSpeed | CdlModeSize1;
++        status = CdControlB(CdlSetmode, param, result);
+ 
+-        if ( status == 0 )
++        if (status == 0)
+         {
+-            printf( "CD SPEED INIT FAILED!!\n" );
++            printf("CD SPEED INIT FAILED!!\n");
+             work->fDEC++;
+         }
+-        else if ( status == 1 )
++        else if (status == 1)
+         {
+             work->fDD4 = 8;
+             work->fDEC = 0;
+-            printf( "CD SPEED INIT SUCCESS!!\n" );
+-            mts_wait_vbl( 3 );
++            printf("CD SPEED INIT SUCCESS!!\n");
++            mts_wait_vbl(3);
+         }
+         else
+         {
+-            printf( "???????\n" );
++            printf("???????\n");
+         }
+ 
+-        if ( work->fDEC >= 300 )
++        if (work->fDEC >= 300)
+         {
+             work->fDD4 = 10;
+             work->fDE8 = 0;
+-            printf( "THIS IS NOT PS DISC!!\n" );
++            printf("THIS IS NOT PS DISC!!\n");
+         }
+         break;
+ 
+     case 8:
+-        CdIntToPos( 16, &loc );
+-        status = CdControlB( CdlReadN, (char *)&loc, result );
++        CdIntToPos(16, &loc);
++        status = CdControlB(CdlReadN, (unsigned char *)&loc, result);
+ 
+-        if ( status == 0 )
++        if (status == 0)
+         {
+-            printf( "CD CHECK FAILED!!\n" );
++            printf("CD CHECK FAILED!!\n");
+             work->fDEC++;
+ 
+-            if ( result[ 0 ] & CdlStatError && result[ 1 ] & CdlStatSeek )
++            if (result[0] & CdlStatError && result[1] & CdlStatSeek)
+             {
+                 work->fDD4 = 10;
+                 work->fDE8 = 0;
+-                printf( "THIS IS NOT PS DISC!!\n" );
++                printf("THIS IS NOT PS DISC!!\n");
+             }
+ 
+-            if ( work->fDEC >= 300 )
++            if (work->fDEC >= 300)
+             {
+                 work->fDD4 = 10;
+                 work->fDE8 = 0;
+-                printf( "THIS IS NOT PS DISC!!\n" );
++                printf("THIS IS NOT PS DISC!!\n");
+             }
+             break;
+         }
+-        else if ( status == 1 )
++        else if (status == 1)
+         {
+-            intr = CdReady( 0, result2 );
++            intr = CdReady(0, result2);
+ 
+             error = 0;
+-            if ( intr == CdlDataReady )
++            if (intr == CdlDataReady)
+             {
+-                printf( "CD CHECK OK!!\n" );
++                printf("CD CHECK OK!!\n");
+ 
+-                if ( result[ 0 ] & CdlStatError && result[ 1 ] & CdlStatSeek )
++                if (result[0] & CdlStatError && result[1] & CdlStatSeek)
+                 {
+                     error = 1;
+-                    printf( "THIS IS NOT PS DISC!!!\n" );
++                    printf("THIS IS NOT PS DISC!!!\n");
+                     work->fDD4 = 10;
+                     work->fDE8 = 0;
+                 }
+             }
+-            else if ( intr == CdlDiskError )
++            else if (intr == CdlDiskError)
+             {
+                 error = 1;
+-                printf( "CD CHECK ERROR!!\n" );
++                printf("CD CHECK ERROR!!\n");
+             }
+ 
+-            if ( error )
++            if (error)
+             {
+                 break;
+             }
+ 
+-            printf( "THIS IS PS DISC!!\n" );
++            printf("THIS IS PS DISC!!\n");
+ 
+-            alloc = GV_Malloc( 8192 );
+-            status = FS_ResetCdFilePosition( alloc );
++            alloc = GV_Malloc(8192);
++            status = FS_ResetCdFilePosition(alloc);
+ 
+-            if ( status == 0 )
++            if (status == 0)
+             {
+-                printf( "THIS IS DISC 1!!\n" );
++                printf("THIS IS DISC 1!!\n");
+                 work->fDD4 = 9;
+                 FS_DiskNum = 0;
+             }
+             else
+             {
+-                printf( "THIS IS NOT DISC 1!!!\n" );
++                printf("THIS IS NOT DISC 1!!!\n");
+                 work->fDD4 = 10;
+                 work->fDE8 = 0;
+             }
+ 
+-            GV_Free( alloc );
++            GV_Free(alloc);
+         }
+         else
+         {
+-            printf( "???????\n" );
++            printf("???????\n");
+         }
+         break;
+ 
+     case 9:
+-        param[ 0 ] = 0;
+-        status = CdControlB( CdlPause, param, result );
++        param[0] = 0;
++        status = CdControlB(CdlPause, param, result);
+ 
+         work->fDD8 = 1;
+         work->fDF8 = 1;
+-        printf( "OK! OK!\n" );
++        printf("OK! OK!\n");
+         break;
+ 
+     case 10:
+         work->fDE8++;
+-        printf( "NOT OK! NOT OK!\n" );
++        printf("NOT OK! NOT OK!\n");
+ 
+-        if ( work->fDE8 >= 30 )
++        if (work->fDE8 >= 30)
+         {
+             work->fDD4 = 0;
+         }
+@@ -729,7 +721,8 @@ static void demosel_800C43D8(Work *work, int x0, int y0, int x1, int y1, int sha
+         setXY4(&poly[0], x0 - 6, y0 - 6, x0 + 2, y0 - 6, x0 - 6, y0 + 2, x0 + 2, y0 + 2);
+         setXY4(&poly[1], x0 + x1 - 2, y0 - 6, x0 + x1 + 6, y0 - 6, x0 + x1 - 2, y0 + 2, x0 + x1 + 6, y0 + 2);
+         setXY4(&poly[2], x0 - 6, y0 + y1 - 2, x0 + 2, y0 + y1 - 2, x0 - 6, y0 + y1 + 6, x0 + 2, y0 + y1 + 6);
+-        setXY4(&poly[3], x0 + x1 - 2, y0 + y1 - 2, x0 + x1 + 6, y0 + y1 - 2, x0 + x1 - 2, y0 + y1 + 6, x0 + x1 + 6, y0 + y1 + 6);
++        setXY4(&poly[3], x0 + x1 - 2, y0 + y1 - 2, x0 + x1 + 6, y0 + y1 - 2, x0 + x1 - 2, y0 + y1 + 6, x0 + x1 + 6,
++               y0 + y1 + 6);
+         setXY4(&poly[4], x0 + 2, y0 - 6, x0 + x1 - 2, y0 - 6, x0 + 2, y0 + 2, x0 + x1 - 2, y0 + 2);
+         setXY4(&poly[5], x0 + 2, y0 + y1 - 2, x0 + x1 - 2, y0 + y1 - 2, x0 + 2, y0 + y1 + 6, x0 + x1 - 2, y0 + y1 + 6);
+         setXY4(&poly[6], x0 - 6, y0 + 2, x0 + 2, y0 + 2, x0 - 6, y0 + y1 - 2, x0 + 2, y0 + y1 - 2);
+@@ -757,9 +750,7 @@ static void demosel_800C46BC(Work *work)
+             r0 = dst->r0;
+             g0 = dst->g0;
+             b0 = dst->b0;
+-            setRGB0(dst, r0 - r0 * work->fDC8 / 16,
+-                         g0 - g0 * work->fDC8 / 16,
+-                         b0 - b0 * work->fDC8 / 16);
++            setRGB0(dst, r0 - r0 * work->fDC8 / 16, g0 - g0 * work->fDC8 / 16, b0 - b0 * work->fDC8 / 16);
+         }
+ 
+         SSTOREL(work->f2D4[i], dst);
+@@ -777,8 +768,8 @@ static void demosel_800C46BC(Work *work)
+ 
+ static void demosel_800C4880(Work *work)
+ {
+-    GCL_ARGS args;
+-    POLY_FT4 *polys;
++    GCL_ARGS       args;
++    POLY_FT4      *polys;
+     unsigned short press;
+ 
+     args.argc = 3;
+@@ -1356,6 +1347,7 @@ static void Die(Work *work)
+ 
+ static void demosel_800C5884(Work *work, POLY_FT4 *poly, int x0, int y0, int x1, int y1, int abe)
+ {
++    (void)work;
+     setPolyFT4(poly);
+     setRGB0(poly, 128, 128, 128);
+     setXY4(poly, x0, y0, x1, y0, x0, y1, x1, y1);
+@@ -1579,6 +1571,7 @@ static int GetResources(Work *work, int map)
+ 
+ void *NewDemoSelect(int arg0, int arg1)
+ {
++    (void)arg0;
+     Work *work;
+ 
+     GM_GameStatus |= STATE_ALL_OFF;
+diff --git a/source/stage/s03dr.c b/source/stage/s03dr.c
+index 7949f4aae..5f72a2ae9 100644
+--- a/source/stage/s03dr.c
++++ b/source/stage/s03dr.c
+@@ -1,36 +1,38 @@
+ #define DECLARE_NEWCHARA_PROTOS
+ #include "charalst.h"
+ 
+-CHARA _StageCharacterEntries[] = {
+-    { 0xaefb, (NEWCHARA *)0x800c68e4 }, //  CHARA_TOBCNT,
+-    { 0x92bc, (NEWCHARA *)0x800c8364 }, //  CHARA_ASIOTOKUN,    /* chara 足音君 */
+-    { 0x7a05, (NEWCHARA *)0x800d9808 }, //  CHARA_CINEMA,       /* chara シネマスクリーン */
+-    { 0xe97e, (NEWCHARA *)0x800c9344 }, //  CHARA_DEMODOLL,     /* chara デモ人形 */
+-    { 0x118c, (NEWCHARA *)0x800d8df0 }, //  CHARA_FINDTRAP,     /* chara 発見トラップ */
+-    { 0xc755, (NEWCHARA *)0x800cb954 }, //  CHARA_MERYL3,
+-    { 0x7cf7, (NEWCHARA *)0x800d580c }, //  CHARA_ZAKOCOM,      /* chara ざこコマンダー */
+-    { 0xec77, (NEWCHARA *)0x800c752c }, //  CHARA_WALL,         /* chara 障害物 */
+-    { 0xe253, (NEWCHARA *)0x800c531c }, //  CHARA_ELEVPANEL,    /* chara エレベーターパネル */
+-    { 0xf5c5, (NEWCHARA *)0x800d627c }, //  CHARA_UJI,          /* chara 蛆虫 */
+-    { 0xed87, (NEWCHARA *)0x800cd5a0 }, //  CHARA_ZAKO,         /* chara ざこ */
+-    { 0xb103, (NEWCHARA *)0x800d9a38 }, //  CHARA_DYNWALL,      /* chara 透明壁 */
+-    { 0x1ad3, (NEWCHARA *)0x800c5c98 }, //  CHARA_TEXTURE,      /* chara テクスチャ */
+-    { 0x0065, (NEWCHARA *)0x800d8320 }, //  CHARA_MOSAIC,       /* chara モザイク */
+-    { 0xa12e, (NEWCHARA *)0x800d8854 }, //  CHARA_FADEIO,       /* chara フェードイン・アウト */
+-    { 0x42e4, (NEWCHARA *)0x800d7994 }, //  CHARA_HIYOKO,       /* chara ヒヨコ星 */
+-    { 0x5147, (NEWCHARA *)0x800c6b78 }, //  CHARA_RADARPOINT,   /* chara レーダーポイント */
+-    { 0xdd8b, (NEWCHARA *)0x800c6e0c }, //  CHARA_INTRUDECAM,   /* chara イントルードカメラ */
+-    { 0x51c6, (NEWCHARA *)0x800daa58 }, //  CHARA_CAT_IN,       /* chara カットインカメラ */
+-    { 0x0fad, (NEWCHARA *)0x800c7008 }, //  CHARA_MOTIONSE,
++extern NEWCHARA NewMeryl3;
++extern NEWCHARA NewS03dZakoCommander;
++extern NEWCHARA NewS03dZako;
+ 
+-    { 0x0003, (NEWCHARA *)0x800d87bc }, //  DEMO_FADEIN,
+-    { 0x0004, (NEWCHARA *)0x800d87bc }, //  DEMO_FADEOUT,
+-    { 0x000f, (NEWCHARA *)0x800c7d08 }, //  DEMO_SHADOW,
+-    { 0x0021, (NEWCHARA *)0x800da054 }, //  DEMO_UNSHAPEVIEW,
+-    { 0x0025, (NEWCHARA *)0x800d7370 }, //  DEMO_BLUR,
+-    { 0x0028, (NEWCHARA *)0x800da69c }, //  DEMO_MONOTONE,
+-    { 0x0044, (NEWCHARA *)0x800d686c }, //  DEMO_GHOST,
+-    { 0x0045, (NEWCHARA *)0x800daaec }, //  DEMO_FAMASLIGHT,
++CHARA _StageCharacterEntries[] = {{0xaefb, NewToBeContinued},     //  CHARA_TOBCNT,
++                                  {0x92bc, NewAsiotoKun},         //  CHARA_ASIOTOKUN,    /* chara 足音君 */
++                                  {0x7a05, NewCinemaScreenSet},   //  CHARA_CINEMA,       /* chara シネマスクリーン */
++                                  {0xe97e, NewDemoDoll},          //  CHARA_DEMODOLL,     /* chara デモ人形 */
++                                  {0x118c, NewFindTrap},          //  CHARA_FINDTRAP,     /* chara 発見トラップ */
++                                  {0xc755, NewMeryl3},            //  CHARA_MERYL3,
++                                  {0x7cf7, NewS03dZakoCommander}, //  CHARA_ZAKOCOM,      /* chara ざこコマンダー */
++                                  {0xec77, NewWallGcl},           //  CHARA_WALL,         /* chara 障害物 */
++                                  {0xe253, NewElevatorPanel},     //  CHARA_ELEVPANEL,    /* chara エレベーターパネル */
++                                  {0xf5c5, NewUji},               //  CHARA_UJI,          /* chara 蛆虫 */
++                                  {0xed87, NewS03dZako},          //  CHARA_ZAKO,         /* chara ざこ */
++                                  {0xb103, NewDynamicWallSet},    //  CHARA_DYNWALL,      /* chara 透明壁 */
++                                  {0x1ad3, NewTextureLamp},       //  CHARA_TEXTURE,      /* chara テクスチャ */
++                                  {0x0065, NewMosaicSet},         //  CHARA_MOSAIC,       /* chara モザイク */
++                                  {0xa12e, NewFadeInOutSet},   //  CHARA_FADEIO,       /* chara フェードイン・アウト */
++                                  {0x42e4, NewHiyokoGcl},      //  CHARA_HIYOKO,       /* chara ヒヨコ星 */
++                                  {0x5147, NewPoint},          //  CHARA_RADARPOINT,   /* chara レーダーポイント */
++                                  {0xdd8b, NewIntrudeCamera},  //  CHARA_INTRUDECAM,   /* chara イントルードカメラ */
++                                  {0x51c6, NewCutInCameraSet}, //  CHARA_CAT_IN,       /* chara カットインカメラ */
++                                  {0x0fad, NewMotionSoundEffect}, //  CHARA_MOTIONSE,
+ 
+-    CHARA_END
+-};
++                                  {0x0003, NewFadeInOut},      //  DEMO_FADEIN,
++                                  {0x0004, NewFadeInOut},      //  DEMO_FADEOUT,
++                                  {0x000f, NewDemoKage},       //  DEMO_SHADOW,
++                                  {0x0021, NewFocusView},      //  DEMO_UNSHAPEVIEW,
++                                  {0x0025, NewBlurSet},        //  DEMO_BLUR,
++                                  {0x0028, NewSepia_800C5214}, //  DEMO_MONOTONE,
++                                  {0x0044, NewBlurPure},       //  DEMO_GHOST,
++                                  {0x0045, NewFamasLight},     //  DEMO_FAMASLIGHT,
++
++                                  CHARA_END};
+diff --git a/source/takabe/vib_edit.c b/source/takabe/vib_edit.c
+index 30a36d61d..b45dc90db 100644
+--- a/source/takabe/vib_edit.c
++++ b/source/takabe/vib_edit.c
+@@ -13,22 +13,11 @@
+ 
+ /*---------------------------------------------------------------------------*/
+ 
+-// XXX Can't include libsn.h here since PCopen and PCcreat are called with
+-// XXX missing parameters for some reason.
+-// XXX PCopen and PCcreat's permission flags are ignored, as they're only
+-// XXX provided for Unix compatibility and should be set to 0.
+-
+-extern int PCinit(void);
+-extern int PCopen(const char *name /*, int flags, int perms*/);
+-extern int PCcreat(char *name /*, int perms */);
+-extern int PClseek(int fd, int offset, int mode);
+-extern int PCread(int fd, char *buff, int len);
+-extern int PCwrite(int fd, char *buff, int len);
+-extern int PCclose(int fd);
++#include <libsn.h>
+ 
+ /*---------------------------------------------------------------------------*/
+ 
+-#define VIB_EDIT_FILE   "VIB_EDIT.DAT"
++#define VIB_EDIT_FILE "VIB_EDIT.DAT"
+ 
+ typedef struct _VibEditPrims
+ {
+@@ -45,25 +34,25 @@ typedef struct VibPair
+ 
+ typedef struct _Work
+ {
+-    GV_ACT         actor;
+-    int            field_20_status;
+-    int            field_24;
+-    int            field_28;
+-    int            field_2C;
+-    int            field_30;
+-    int            field_34;
+-    int            field_38;
+-    int            field_3C;
+-    int            field_40;
+-    VibEditPrims  *field_44_prims;
+-    void          *field_48_vibrate;
+-    VibPair        field_4C_pairs[16];
+-    int            field_6C;
+-    VibPair        field_70_pairs[16];
+-    int            field_90;
+-    VibPair        field_94_pairs[32][32];
+-    VibPair        field_894_pairs[16];
+-    VibPair        field_8B4_pairs[16];
++    GV_ACT        actor;
++    int           field_20_status;
++    int           field_24;
++    int           field_28;
++    int           field_2C;
++    int           field_30;
++    int           field_34;
++    int           field_38;
++    int           field_3C;
++    int           field_40;
++    VibEditPrims *field_44_prims;
++    void         *field_48_vibrate;
++    VibPair       field_4C_pairs[16];
++    int           field_6C;
++    VibPair       field_70_pairs[16];
++    int           field_90;
++    VibPair       field_94_pairs[32][32];
++    VibPair       field_894_pairs[16];
++    VibPair       field_8B4_pairs[16];
+ } Work;
+ 
+ /*---------------------------------------------------------------------------*/
+@@ -76,11 +65,7 @@ const char *select_dword_800C3220[4] = {
+ };
+ 
+ const char *select_dword_800C3230[5] = {
+-    "CHANGE BANK",
+-    "QUICK SAVE HIGH",
+-    "QUICK SAVE LOW",
+-    "QUICK LOAD HIGH",
+-    "QUICK LOAD LOW",
++    "CHANGE BANK", "QUICK SAVE HIGH", "QUICK SAVE LOW", "QUICK LOAD HIGH", "QUICK LOAD LOW",
+ };
+ 
+ /*---------------------------------------------------------------------------*/
+@@ -138,7 +123,7 @@ static void VibEdit_800C36BC(Work *work)
+     VibPair *pairs;
+     LINE_F2 *line;
+     TILE    *tile;
+-    OT_TYPE  *ot;
++    OT_TYPE *ot;
+     int      x0;
+     int      i;
+ 
+@@ -239,7 +224,7 @@ static void VibEdit_800C3974(Work *work)
+     {
+         if (iter->first == 0 && iter->second == 0)
+         {
+-            printf("0,0", iter->first, iter->second); // unnecessary args...
++            printf("0,0");
+             break;
+         }
+         printf("%d,%d,", iter->first, iter->second);
+@@ -251,7 +236,7 @@ static void VibEdit_800C3974(Work *work)
+     {
+         if (iter->first == 0 && iter->second == 0)
+         {
+-            printf("0,0", iter->first, iter->second); // unnecessary args...
++            printf("0,0");
+             break;
+         }
+         printf("%d,%d,", iter->first, iter->second);
+@@ -714,11 +699,16 @@ static void Die(Work *work)
+ 
+     VibEdit_800C3CBC(work, work->field_28);
+ 
+-    // Should be called like:
+-    // fd = PCcreat(VIB_EDIT_FILE, 0);
+-    fd = PCcreat(VIB_EDIT_FILE);
+-    PCwrite(fd, (char *)work->field_94_pairs, sizeof(work->field_94_pairs));
+-    PCclose(fd);
++    fd = PCcreat(VIB_EDIT_FILE, 0);
++    if (fd < 0)
++        printf("Cannot create vibration editor data\n");
++    else
++    {
++        if (PCwrite(fd, (char *)work->field_94_pairs, sizeof(work->field_94_pairs)) != sizeof(work->field_94_pairs))
++            printf("Cannot write vibration editor data\n");
++        if (PCclose(fd) < 0)
++            printf("Cannot close vibration editor data\n");
++    }
+ 
+     GM_GameStatus &= ~(work->field_20_status & STATE_PAUSE_ONLY);
+     GM_PlayerStatus &= ~PLAYER_PAD_OFF;
+@@ -726,17 +716,26 @@ static void Die(Work *work)
+ 
+ static int GetResources(Work *work, int name, int where)
+ {
++    (void)name;
++    (void)where;
+     int fd;
+ 
+     work->field_40 = THING_Gcl_GetInt('e');
+ 
+     VibEdit_800C34F0(work);
+ 
+-    // Should be called like:
+-    // fd = PCopen(VIB_EDIT_FILE, 0, 0);
+-    fd = PCopen(VIB_EDIT_FILE);
+-    PCread(fd, (char *)work->field_94_pairs, sizeof(work->field_94_pairs));
+-    PCclose(fd);
++    fd = PCopen(VIB_EDIT_FILE, 0, 0);
++    if (fd >= 0)
++    {
++        VibPair saved[32][32];
++        int     bytes = PCread(fd, (char *)saved, sizeof(saved));
++        if (bytes == sizeof(saved))
++            memcpy(work->field_94_pairs, saved, sizeof(saved));
++        else
++            printf("Incomplete vibration editor data (%d bytes)\n", bytes);
++        if (PCclose(fd) < 0)
++            printf("Cannot close vibration editor data\n");
++    }
+ 
+     VibEdit_800C3D20(work, work->field_28);
+ 

@@ -1,0 +1,166 @@
+diff --git a/source/takabe/gas_efct.c b/source/takabe/gas_efct.c
+index 8c995b915..501e1adf7 100644
+--- a/source/takabe/gas_efct.c
++++ b/source/takabe/gas_efct.c
+@@ -11,11 +11,17 @@
+ #include "game/game.h"
+ #include "takabe/thing.h"
+ #include "strcode.h"
++#ifdef MGS_NATIVE
++#include "mgs_video.h"
++#endif
+ 
+ typedef struct _GasEfctPrims
+ {
+     DR_TPAGE tpage[2];
+     POLY_G4  poly[2][16];
++#ifdef MGS_NATIVE
++    POLY_F4  border[2][16];
++#endif
+ } GasEfctPrims;
+ 
+ typedef struct _Work
+@@ -286,6 +292,27 @@ void d11c_800C4FFC(Work *work)
+     d11c_800C49A4(work, prims->poly[1]);
+ }
+ 
++#ifdef MGS_NATIVE
++static void ExtendVignette(Work *work, OT_TYPE *ot)
++{
++    int halfwidth = MgsVideoHalfWidth();
++    int i;
++    POLY_G4 *ring = work->prims->poly[GV_Clock];
++    POLY_F4 *border = work->prims->border[GV_Clock];
++    if (halfwidth <= 160) return;
++    for (i = 0; i < 16; i++, ring++, border++)
++    {
++        setPolyF4(border);
++        setSemiTrans(border, 1);
++        setRGB0(border, ring->r2, ring->g2, ring->b2);
++        setXY4(border, ring->x2, ring->y2, ring->x3, ring->y3,
++               ring->x2 * halfwidth / 160, ring->y2 * halfwidth / 160,
++               ring->x3 * halfwidth / 160, ring->y3 * halfwidth / 160);
++        addPrim(ot, border);
++    }
++}
++#endif
++
+ void d11c_800C5094(Work *work, int arg1)
+ {
+     MATRIX   sp10;
+@@ -335,6 +362,9 @@ void d11c_800C5094(Work *work, int arg1)
+             addPrim(ot, poly);
+         }
+ 
++#ifdef MGS_NATIVE
++        ExtendVignette(work, ot);
++#endif
+         addPrim(ot, &work->prims->tpage[GV_Clock]);
+     }
+ }
+diff --git a/source/thing/sphere.c b/source/thing/sphere.c
+index 4236d2a0a..67dd2782b 100644
+--- a/source/thing/sphere.c
++++ b/source/thing/sphere.c
+@@ -2,6 +2,9 @@
+ 
+ #include "libgcl/libgcl.h"
+ #include "game/game.h"
++#ifdef MGS_NATIVE
++#include "mgs_video.h"
++#endif
+ 
+ /*---------------------------------------------------------------------------*/
+ 
+@@ -26,6 +29,7 @@ static short SECTION(".bss") sphere_tile_width;
+ static short SECTION(".bss") sphere_tile_height;
+ static short SECTION(".bss") sphere_elevation;
+ static short SECTION(".bss") sphere_scroll;
++static int sphere_halfwidth;
+ 
+ /*---------------------------------------------------------------------------*/
+ 
+@@ -80,7 +84,7 @@ static void Act(Work *work)
+         svec.vx -= sphere_image_width;
+     }
+ 
+-    x_tile_iter = svec.vx - 160;
++    x_tile_iter = (svec.vx - sphere_halfwidth) % sphere_image_width;
+     if (x_tile_iter < 0)
+     {
+         x_tile_iter += sphere_image_width;
+@@ -94,7 +98,7 @@ static void Act(Work *work)
+         y_tile_iter = 0;
+     }
+ 
+-    x0 = -(x_tile_iter % sphere_tile_width) - 160;
++    x0 = -(x_tile_iter % sphere_tile_width) - sphere_halfwidth;
+     y0 = var_a2 - 112 - y_tile_iter % sphere_tile_height;
+     x_tile_iter = x_tile_iter / sphere_tile_width;
+     if (x_tile_iter >= sphere_tiles_x)
+@@ -246,7 +250,11 @@ static int GetResources(Work *work, int map)
+         *tex++ = DG_GetTexture(name);
+     }
+ 
+-    sphere_visible_tiles_x = (FRAME_WIDTH / sphere_tile_width) + 1;
++    sphere_halfwidth = FRAME_WIDTH / 2;
++#ifdef MGS_NATIVE
++    sphere_halfwidth = MgsVideoHalfWidth();
++#endif
++    sphere_visible_tiles_x = (2 * sphere_halfwidth + sphere_tile_width - 1) / sphere_tile_width + 1;
+     sphere_visible_tiles_y = (FRAME_HEIGHT / sphere_tile_height) + 1;
+     n_prims = sphere_visible_tiles_y * sphere_visible_tiles_x;
+ 
+diff --git a/source/thing/sphere2.c b/source/thing/sphere2.c
+index 8615abd09..cadd03b56 100644
+--- a/source/thing/sphere2.c
++++ b/source/thing/sphere2.c
+@@ -2,6 +2,9 @@
+ 
+ #include "libgcl/libgcl.h"
+ #include "game/game.h"
++#ifdef MGS_NATIVE
++#include "mgs_video.h"
++#endif
+ 
+ /*---------------------------------------------------------------------------*/
+ 
+@@ -26,6 +29,7 @@ static u_short SECTION(".bss") sphere_tile_width;
+ static u_short SECTION(".bss") sphere_tile_height;
+ static u_short SECTION(".bss") sphere_elevation;
+ static u_short SECTION(".bss") sphere_scroll;
++static int sphere_halfwidth;
+ 
+ /*---------------------------------------------------------------------------*/
+ 
+@@ -78,7 +82,7 @@ static void Act(Work *work)
+         dir.vx -= sphere_image_width;
+     }
+ 
+-    tx = dir.vx - 160;
++    tx = (dir.vx - sphere_halfwidth) % sphere_image_width;
+     if (tx < 0)
+     {
+         tx += sphere_image_width;
+@@ -90,7 +94,7 @@ static void Act(Work *work)
+         ty = 0;
+     }
+ 
+-    x0 = -(tx % sphere_tile_width) - 160;
++    x0 = -(tx % sphere_tile_width) - sphere_halfwidth;
+     y0 = -(ty % sphere_tile_height) - 112;
+ 
+     tx /= sphere_tile_width;
+@@ -236,7 +240,11 @@ static int GetResources(Work *work, int map)
+         tex++;
+     }
+ 
+-    sphere_visible_tiles_x = 320 / sphere_tile_width + 1;
++    sphere_halfwidth = 160;
++#ifdef MGS_NATIVE
++    sphere_halfwidth = MgsVideoHalfWidth();
++#endif
++    sphere_visible_tiles_x = (2 * sphere_halfwidth + sphere_tile_width - 1) / sphere_tile_width + 1;
+     sphere_visible_tiles_y = 224 / sphere_tile_height + 1;
+     n_prims = sphere_visible_tiles_y * sphere_visible_tiles_x;
+ 

@@ -1,0 +1,15 @@
+.tools/
+.local/
+.venv/
+build/
+vendor/
+bu00/
+bu10/
+test-data/**/*.zip
+test-data/campaign-completion-20261010/manifest.json
+__pycache__/
+*.pyc
+.ruff_cache/
+renderers/godot/project/.godot/
+renderers/godot/project/.generated/
+renderers/godot/project/mods/

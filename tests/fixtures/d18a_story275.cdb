@@ -1,0 +1,9 @@
+.lines -e
+bu /1 mgs_integral_native!MgsNativeReloadOverlay "ew mgs_integral_native!var_buf+a 113; .echo FIXTURE original d18a story275 branch - original sub_9142 sets277 and starts s2501e0.dmo; gc"
+bu /1 mgs_integral_native!NewLiquid ".echo OBSERVED authored cinematic continuation creates native Liquid; gc"
+bu /1 mgs_integral_native!d18a_snake18_800D4E94 ".echo OBSERVED original script creates native Snake18; gc"
+bu /1 mgs_integral_native!NewCountdown ".echo OBSERVED original sequence starts countdown; gc"
+sxe -c "r;kv;q" av
+sxe -c "r;kv;q" dz
+g
+q

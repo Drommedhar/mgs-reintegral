@@ -1,0 +1,139 @@
+diff --git a/source/game/gamed.c b/source/game/gamed.c
+index 5b9d01dd2..95a3fd78a 100644
+--- a/source/game/gamed.c
++++ b/source/game/gamed.c
+@@ -21,6 +21,9 @@
+ #include "game/loader.h"
+ #include "game/over.h"
+ #include "menu/menuman.h"
++#ifdef MGS_NATIVE
++#include "mgs_bonus_items.h"
++#endif
+ 
+ /*---------------------------------------------------------------------------*/
+ 
+@@ -409,6 +412,9 @@ static void Act(Work *work)
+         DG_StorePalette();
+         GM_AlertReset();
+ 
++#ifdef MGS_NATIVE
++        MgsBonusItemsApply(GM_GetArea(0));
++#endif
+         if ((GM_LoadRequest & 0x10) != 0)
+         {
+             GCL_SaveVar();
+diff --git a/source/libgcl/variable.c b/source/libgcl/variable.c
+index 668a398a2..3d0644d71 100644
+--- a/source/libgcl/variable.c
++++ b/source/libgcl/variable.c
+@@ -1,9 +1,13 @@
+ #include <stdio.h>
++#include <stdlib.h>
+ #include "mgstype.h"
+ #include "libgcl.h"
+ 
+ #include "game/game.h"
+ #include "menu/menuman.h"   // for RadioMemory
++#ifdef MGS_NATIVE
++#include "mgs_bonus_items.h"
++#endif
+ 
+ short        linkvarbuf[ MAX_LINKVARBUF ];
+ static short var_buf[ 1024 ];
+@@ -84,7 +88,7 @@ static unsigned int crc32(int len, unsigned char *ptr)
+ 
+ int GCL_MakeSaveFile(char *save_buf)
+ {
+-    typedef struct { short f[sizeof(radio_memory) / sizeof(short)]; } RdMem;
++    typedef struct { short f[sizeof(radio_memory) / (sizeof(short))]; } RdMem;
+ 
+     SAVE_FILE *save_file;
+     SAVE_DATA *save_data;
+@@ -106,7 +110,7 @@ int GCL_MakeSaveFile(char *save_buf)
+     save_data->padding[1] = 0;
+     save_data->padding[2] = 0;
+ 
+-    strcpy(save_data->stage_name, stage_name);
++    memcpy(save_data->stage_name, stage_name, sizeof(stage_name));
+     GM_GetAreaHistory(save_data->area_history);
+ 
+     memcpy(save_data->linkvar, sv_linkvarbuf, 0xC0);
+@@ -115,14 +119,14 @@ int GCL_MakeSaveFile(char *save_buf)
+     *(RdMem *)&save_data->radio_memory = *(RdMem *)&radio_memory;
+ 
+     save_file->size = (void *)save_data + sizeof(SAVE_DATA) - (void *)save_buf;
+-    save_file->checksum = crc32(sizeof(SAVE_DATA), (char *)save_data); // size 0xA38
++    save_file->checksum = crc32(sizeof(SAVE_DATA), (unsigned char *)save_data); // size 0xA38
+ 
+     return save_file->size;
+ }
+ 
+ int GCL_SetLoadFile(char *save_buf)
+ {
+-    typedef struct { short f[sizeof(radio_memory) / sizeof(short)]; } RdMem;
++    typedef struct { short f[sizeof(radio_memory) / (sizeof(short))]; } RdMem;
+ 
+     SAVE_FILE *save_file;
+     SAVE_DATA *save_data;
+@@ -134,14 +138,20 @@ int GCL_SetLoadFile(char *save_buf)
+     {
+         printf("SAVE DATA VERSION ERROR!!\n");
+     }
+-    if (save_file->checksum != crc32(sizeof(SAVE_DATA), (char *)save_data))
++    if ((unsigned int)save_file->checksum != crc32(sizeof(SAVE_DATA), (unsigned char *)save_data))
+     {
+         printf("CRC ERROR !!\n");
+         return 0;
+     }
+ 
++    if (memchr(save_data->stage_name, '\0', sizeof(save_data->stage_name)) == NULL)
++    {
++        printf("SAVE DATA STAGE NAME ERROR!!\n");
++        return 0;
++    }
++
+     gTotalFrameTime = save_data->totalFrameTime;
+-    strcpy(stage_name, save_data->stage_name);
++    memcpy(stage_name, save_data->stage_name, sizeof(stage_name));
+     GM_SetAreaHistory(save_data->area_history);
+ 
+     memcpy(sv_linkvarbuf, save_data->linkvar, 0xC0);
+@@ -151,6 +161,9 @@ int GCL_SetLoadFile(char *save_buf)
+ 
+     *(RdMem *)&radio_memory = *(RdMem *)&save_data->radio_memory;
+ 
++#ifdef MGS_NATIVE
++    MgsBonusItemsReset();
++#endif
+     return 1;
+ }
+ 
+@@ -169,6 +182,9 @@ void GCL_InitVar( void )
+ 
+     GM_GameLevel = level;
+     GM_Configuration = option;
++#ifdef MGS_NATIVE
++    MgsBonusItemsReset();
++#endif
+ }
+ 
+ void GCL_InitClearVar( void )
+@@ -181,9 +197,17 @@ void GCL_InitClearVar( void )
+ 
+ void GCL_SaveVar( void )
+ {
++    const char *name = GM_GetArea( 0 );
++    size_t length = strlen(name);
++
++    if (length >= sizeof(stage_name))
++    {
++        printf("STAGE NAME TOO LONG!!\n");
++        abort();
++    }
+     memcpy( sv_linkvarbuf, linkvarbuf, MAX_LINKVARBUF * sizeof(short) );
+     memcpy( sv_var_buf, var_buf, 1024 * sizeof(short) );
+-    strcpy( stage_name, GM_GetArea( 0 ) );
++    memcpy( stage_name, name, length + 1 );
+ }
+ 
+ void GCL_RestoreVar( void )

@@ -1,0 +1,231 @@
+diff --git a/source/okajima/lens_fl.c b/source/okajima/lens_fl.c
+new file mode 100644
+index 000000000..d0adf2afa
+--- /dev/null
++++ b/source/okajima/lens_fl.c
+@@ -0,0 +1,177 @@
++#include "lens_fl.h"
++#include "stngrnd.h"
++#include "game/game.h"
++#include "takabe/fadeio.h"
++
++typedef struct
++{
++    GV_ACT actor;
++    RECT rects[8];
++    DG_PRIM *prims[8];
++    int scales[8];
++    SVECTOR vertices[8];
++    SVECTOR position;
++    int timer;
++    int unused;
++    int lifetime;
++    int map;
++    int ready;
++} LensFlareWork;
++
++_Static_assert(sizeof(LensFlareWork) == 0xfc, "LensFlare actor layout");
++
++static void LensFlarePacket(POLY_FT4 *packet, DG_TEX *texture, int r, int g, int b)
++{
++    setPolyFT4(packet);
++    setSemiTrans(packet, 1);
++    setRGB0(packet, r, g, b);
++    DG_SetPacketTexture4(packet, texture);
++}
++
++static void LensFlareVertex(LensFlareWork *work, int index, DVECTOR screen)
++{
++    work->vertices[index].vx = screen.vx - screen.vx * work->scales[index] / 16;
++    work->vertices[index].vy = screen.vy - screen.vy * work->scales[index] / 16;
++    work->vertices[index].vz = 320;
++}
++
++static DVECTOR LensFlareProject(LensFlareWork *work)
++{
++    int packed, p, flag;
++    DVECTOR screen;
++
++    SetRotMatrix(&DG_Chanl(0)->eye_inv);
++    SetTransMatrix(&DG_Chanl(0)->eye_inv);
++    RotTransPers(&work->position, &packed, &p, &flag);
++    screen.vx = (short)packed;
++    screen.vy = (short)((unsigned int)packed >> 16);
++    return screen;
++}
++
++static void LensFlareAct(LensFlareWork *work)
++{
++    DVECTOR screen;
++    int i;
++
++    GM_CurrentMap = work->map;
++    if (work->timer == 15)
++    {
++        sub_800790E8();
++        GM_GameStatus |= STATE_STUN;
++    }
++    if (work->timer == 14)
++    {
++        GM_GameStatus &= ~STATE_STUN;
++    }
++    --work->timer;
++    screen = LensFlareProject(work);
++    for (i = 0; i < 8; ++i)
++    {
++        LensFlareVertex(work, i, screen);
++    }
++    if (work->timer == work->lifetime - 2)
++    {
++        GM_SeSet2(0, 63, 186);
++    }
++    if (work->timer == work->lifetime / 2)
++    {
++        NewFadeInOut(2, 10);
++    }
++    if (work->timer <= 0)
++    {
++        sub_8007913C();
++        GV_DestroyActor(&work->actor);
++    }
++}
++
++static void LensFlareFreePrims(LensFlareWork *work, int count)
++{
++    int i;
++
++    for (i = 0; i < count; ++i)
++    {
++        if (work->prims[i])
++        {
++            DG_DequeuePrim(work->prims[i]);
++            DG_FreePrim(work->prims[i]);
++            work->prims[i] = NULL;
++        }
++    }
++}
++
++static void LensFlareDie(LensFlareWork *work)
++{
++    LensFlareFreePrims(work, 8);
++}
++
++static int LensFlareGetResources(LensFlareWork *work, MATRIX *world, int lifetime)
++{
++    static const int dimensions[8][2] = {
++        {8, 8}, {34, 11}, {6, 20}, {25, 33},
++        {12, 37}, {70, 50}, {11, -7}, {50, -9}
++    };
++    DVECTOR screen;
++    DG_PRIM *prim;
++    DG_TEX *texture;
++    int i;
++
++    work->ready = 0;
++    work->map = GM_CurrentMap;
++    work->position.vx = world->t[0];
++    work->position.vy = world->t[1];
++    work->position.vz = world->t[2];
++    AN_Stn_G_Sonic(&work->position);
++    AN_Stn_G_Center(&work->position);
++    screen = LensFlareProject(work);
++    for (i = 0; i < 8; ++i)
++    {
++        work->rects[i].x = work->rects[i].y = dimensions[i][0] / 2;
++        work->rects[i].w = work->rects[i].h = dimensions[i][0];
++        work->scales[i] = dimensions[i][1];
++        LensFlareVertex(work, i, screen);
++        prim = GM_MakePrim(DG_PRIM_RECTANGLE | DG_PRIM_ON_CAMERA | DG_PRIM_POLY_FT4,
++                          1, &work->vertices[i], &work->rects[i]);
++        work->prims[i] = prim;
++        if (!prim)
++        {
++            return -1;
++        }
++        prim->root = NULL;
++        prim->raise = 320;
++        texture = DG_GetTexture(GV_StrCode("refrection6"));
++        if (!texture)
++        {
++            return -1;
++        }
++        LensFlarePacket((POLY_FT4 *)prim->packs[0], texture, 30, 30, 30);
++        LensFlarePacket((POLY_FT4 *)prim->packs[1], texture, 25, 25, 25);
++    }
++    work->timer = lifetime;
++    work->lifetime = lifetime;
++    work->ready = 1;
++    return 0;
++}
++
++void *NewLensFlare(MATRIX *world, int lifetime)
++{
++    LensFlareWork *work;
++
++    if (GM_GameStatus & STATE_STUN)
++    {
++        return NULL;
++    }
++    work = GV_NewActor(GV_ACTOR_USER, sizeof(LensFlareWork));
++    if (!work)
++    {
++        return NULL;
++    }
++    GV_SetNamedActor(&work->actor, LensFlareAct, LensFlareDie, "lens_fl.c");
++    if (LensFlareGetResources(work, world, lifetime) < 0)
++    {
++        GV_DestroyActor(&work->actor);
++        return NULL;
++    }
++    GM_StunBlastPosition = work->position;
++    GM_SetNoise(255, 32, &work->position);
++    return work;
++}
+diff --git a/source/okajima/lens_fl.h b/source/okajima/lens_fl.h
+new file mode 100644
+index 000000000..203114357
+--- /dev/null
++++ b/source/okajima/lens_fl.h
+@@ -0,0 +1,9 @@
++#ifndef __MGS_OKAJIMA_LENS_FL_H__
++#define __MGS_OKAJIMA_LENS_FL_H__
++
++#include <sys/types.h>
++#include <libgte.h>
++
++void *NewLensFlare(MATRIX *world, int lifetime);
++
++#endif
+diff --git a/source/okajima/stngrnd.c b/source/okajima/stngrnd.c
+index fc6483bc5..3605c8580 100644
+--- a/source/okajima/stngrnd.c
++++ b/source/okajima/stngrnd.c
+@@ -12,7 +12,7 @@
+ #include "game/game.h"
+ #include "strcode.h"
+ 
+-static SVECTOR stru_800BDF90;
++SVECTOR GM_StunBlastPosition;
+ 
+ /*---------------------------------------------------------------------------*/
+ 
+@@ -218,7 +218,7 @@ void *NewStanBlast(MATRIX *world)
+             return NULL;
+         }
+ 
+-        stru_800BDF90 = work->field_E0;
++        GM_StunBlastPosition = work->field_E0;
+         GM_SeSet(&work->field_E0, SE_EXPLOSION);
+ 
+         GM_SetNoise(255, 32, &work->field_E0);
+diff --git a/source/okajima/stngrnd.h b/source/okajima/stngrnd.h
+index 010163784..20bb78e76 100644
+--- a/source/okajima/stngrnd.h
++++ b/source/okajima/stngrnd.h
+@@ -9,4 +9,6 @@ void *NewStanBlast( MATRIX *world );
+ void AN_Stn_G_Sonic( SVECTOR *pos );
+ void AN_Stn_G_Center( SVECTOR *pos );
+ 
++extern SVECTOR GM_StunBlastPosition;
++
+ #endif // __MGS_OKAJIMA_STNGRND_H__

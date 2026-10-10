@@ -1,0 +1,216 @@
+{
+  "stages": [
+    "d18a",
+    "d18ar"
+  ],
+  "overlay_size": 97756,
+  "sha256": [
+    "c388e19be2811a05075a0da664b5b4264040ecd7e2f6eb6cd761d8e579c35103",
+    "df7d5353a7b3be3d6d0f2550179181de27538c41b65b900c7f4a90068ee9d18a"
+  ],
+  "constructors": [
+    {
+      "hash": "92bc",
+      "constructor": "800c75ec"
+    },
+    {
+      "hash": "a12e",
+      "constructor": "800d72e4"
+    },
+    {
+      "hash": "7a05",
+      "constructor": "800d81a0"
+    },
+    {
+      "hash": "e97e",
+      "constructor": "800c8a7c"
+    },
+    {
+      "hash": "760e",
+      "constructor": "800d4e94"
+    },
+    {
+      "hash": "ec77",
+      "constructor": "800c67b4"
+    },
+    {
+      "hash": "175b",
+      "constructor": "800d5770"
+    },
+    {
+      "hash": "41a3",
+      "constructor": "800c6298"
+    },
+    {
+      "hash": "3453",
+      "constructor": "800c5610"
+    },
+    {
+      "hash": "0003",
+      "constructor": "800d724c"
+    },
+    {
+      "hash": "0004",
+      "constructor": "800d724c"
+    },
+    {
+      "hash": "000f",
+      "constructor": "800c6f90"
+    },
+    {
+      "hash": "001a",
+      "constructor": "800615fc"
+    },
+    {
+      "hash": "001b",
+      "constructor": "80061708"
+    },
+    {
+      "hash": "0025",
+      "constructor": "800d67b4"
+    },
+    {
+      "hash": "002f",
+      "constructor": "800c579c"
+    },
+    {
+      "hash": "0031",
+      "constructor": "800d6dbc"
+    },
+    {
+      "hash": "004a",
+      "constructor": "800c78f8"
+    }
+  ],
+  "differences": [
+    {
+      "address": "800c3482",
+      "bytes": 2,
+      "classification": "15-entry motion table alignment"
+    },
+    {
+      "address": "800da283",
+      "bytes": 1,
+      "classification": "terminated animation-script alignment"
+    },
+    {
+      "address": "800da28b",
+      "bytes": 1,
+      "classification": "NUL-terminated string alignment"
+    },
+    {
+      "address": "800da2b7",
+      "bytes": 1,
+      "classification": "NUL-terminated string alignment"
+    },
+    {
+      "address": "800da2cb",
+      "bytes": 1,
+      "classification": "NUL-terminated string alignment"
+    },
+    {
+      "address": "800da31d",
+      "bytes": 3,
+      "classification": "NUL-terminated string alignment"
+    },
+    {
+      "address": "800da38a",
+      "bytes": 2,
+      "classification": "NUL-terminated string alignment"
+    },
+    {
+      "address": "800da3b6",
+      "bytes": 2,
+      "classification": "terminated animation-script alignment"
+    },
+    {
+      "address": "800da4d3",
+      "bytes": 1,
+      "classification": "NUL-terminated string alignment"
+    },
+    {
+      "address": "800da4e5",
+      "bytes": 3,
+      "classification": "NUL-terminated string alignment"
+    },
+    {
+      "address": "800da4f2",
+      "bytes": 2,
+      "classification": "NUL-terminated string alignment"
+    },
+    {
+      "address": "800da575",
+      "bytes": 3,
+      "classification": "terminated animation-script alignment"
+    },
+    {
+      "address": "800da7fe",
+      "bytes": 2,
+      "classification": "NUL-terminated string alignment"
+    },
+    {
+      "address": "800da80a",
+      "bytes": 2,
+      "classification": "NUL-terminated string alignment"
+    },
+    {
+      "address": "800da96b",
+      "bytes": 1,
+      "classification": "NUL-terminated string alignment"
+    },
+    {
+      "address": "800da9a6",
+      "bytes": 2,
+      "classification": "NUL-terminated string alignment"
+    },
+    {
+      "address": "800da9b1",
+      "bytes": 3,
+      "classification": "NUL-terminated string alignment"
+    },
+    {
+      "address": "800da9bd",
+      "bytes": 3,
+      "classification": "NUL-terminated string alignment"
+    }
+  ],
+  "different_bytes": 35,
+  "native_selection": "Existing vendor d18a module selection, with 18 recovered Snake18 C files replacing the old assembly actor and raw overlay data.",
+  "validation": "Debug original story275 cinematic rendered at1800VSync; authored transition loaded s18a and created Liquid, Snake18 and countdown by7200VSync; no input or forced continuation, clean exit.",
+  "runtime": {
+    "fixture": "tests/fixtures/d18a_story275.cdb",
+    "stage": "d18a",
+    "disc": 2,
+    "story": 275,
+    "map": "0x7df9",
+    "controller_input": false,
+    "script_path": [
+      "sub_9142 sets277 and starts s2501e0.dmo",
+      "sub_EF70 fades and waits35ticks",
+      "sub_6493 loads s18a"
+    ],
+    "captures": [
+      {
+        "frames": 1800,
+        "file": "build/movie-audit/d18a275-cinematic.bmp",
+        "observed": "Liquid, Snake and Meryl rendered in cinematic"
+      },
+      {
+        "frames": 6000,
+        "file": "build/movie-audit/d18a275.bmp",
+        "observed": "authored s18a load requested; exits during loading"
+      },
+      {
+        "frames": 7200,
+        "file": "build/movie-audit/d18a275-transition.bmp",
+        "observed": "s18a initialization complete; native Liquid/Snake18/countdown created; fight introduction visible"
+      }
+    ],
+    "limitations": [
+      "fight introduction still active at exit",
+      "combat/victory not exercised",
+      "d18ar runtime not exercised",
+      "continuous campaign and human playability not established"
+    ]
+  }
+}

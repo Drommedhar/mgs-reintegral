@@ -1,0 +1,43 @@
+diff --git a/source/okajima/claymore.c b/source/okajima/claymore.c
+index 93ed0dfae..e574883fa 100644
+--- a/source/okajima/claymore.c
++++ b/source/okajima/claymore.c
+@@ -177,20 +177,19 @@ STATIC void claymore_loader_helper_80073490(POLY_FT4 *pPoly, DG_TEX *pTex)
+ 
+ STATIC int claymore_loader_helper_800735A0(Work *work, SVECTOR *arg1, SVECTOR *arg2)
+ {
+-    SVECTOR  vec;
+-    SVECTOR  vec2;
++    SVECTOR  ray[2];
+     HZD_FLR *floor;
+     int      var_s2;
+     int      len;
+ 
+     DG_SetPos2(arg1, arg2);
+-    DG_PutVector(stru_8009F650, &vec, 2);
++    DG_PutVector(stru_8009F650, ray, 2);
+ 
+     var_s2 = 0;
+ 
+-    if (HZD_OnlineHazardCheck(claymore_MAP_800bdf08->hzd, &vec, &vec2, HZD_CHK_ALL, SEGMENT_ATR))
++    if (HZD_OnlineHazardCheck(claymore_MAP_800bdf08->hzd, &ray[0], &ray[1], HZD_CHK_ALL, SEGMENT_ATR))
+     {
+-        HZD_GetOnlinePoint(&vec2);
++        HZD_GetOnlinePoint(&ray[1]);
+         floor = HZD_GetOnlineHazard();
+ 
+         if (HZD_HAZARD_IS_WALL(floor))
+@@ -208,10 +207,10 @@ STATIC int claymore_loader_helper_800735A0(Work *work, SVECTOR *arg1, SVECTOR *a
+         var_s2 = 1;
+     }
+ 
+-    work->field_110 = vec2;
++    work->field_110 = ray[1];
+ 
+-    GV_SubVec3(&vec2, &vec, &vec);
+-    len = GV_VecLen3(&vec);
++    GV_SubVec3(&ray[1], &ray[0], &ray[0]);
++    len = GV_VecLen3(&ray[0]);
+     work->field_128 = var_s2;
+ 
+     return len;

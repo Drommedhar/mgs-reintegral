@@ -1,0 +1,4 @@
+.lines -e
+sxe -c "r;kv;q" av
+g
+q

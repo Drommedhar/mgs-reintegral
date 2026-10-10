@@ -1,0 +1,12 @@
+.lines -e
+bu /1 mgs_integral_native!MgsNativeReloadOverlay "ew mgs_integral_native!var_buf+a 11c; ew mgs_integral_native!var_buf+1ec 258; eb mgs_integral_native!var_buf+435 1; .echo FIXTURE escape alternate resources incoming story284 and garage countdown600; gc"
+bu /1 mgs_integral_native!NewJeep " .echo OBSERVED original player jeep constructor; gc"
+bu /1 mgs_integral_native!s19b_jeep2_800D6F24 " .echo OBSERVED original rival jeep constructor; gc"
+bu /1 mgs_integral_native!s19b_spark2_m_800D8670 " .echo OBSERVED original Liquid gunner constructor; gc"
+bu /1 mgs_integral_native!NewJeepSnake " .echo OBSERVED original mounted Snake constructor; gc"
+bu /1 mgs_integral_native!EscapeState_800D7468 " .echo OBSERVED original final rival jeep event; gc"
+bu /1 mgs_integral_native!NewCountdown ".printf \"COUNTDOWN initial ticks=%d\n\", poi(@esp+4); gc"
+sxe -c "r;kv;q" av
+sxe -c "r;kv;q" dz
+g
+q

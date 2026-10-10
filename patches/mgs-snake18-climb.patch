@@ -1,0 +1,29 @@
+diff --git a/source/overlays/d18a/animal/snake18/native_02.c b/source/overlays/d18a/animal/snake18/native_02.c
+--- a/source/overlays/d18a/animal/snake18/native_02.c
++++ b/source/overlays/d18a/animal/snake18/native_02.c
+@@ -168,7 +168,7 @@
+     int      f8F0;
+     int      v12;
+     int      v13;
+-    SVECTOR  vect_ptr;
++    SVECTOR  near_vectors[2];
+     short    out[4];
+ 
+     if ((GM_PlayerStatus & 4) != 0)
+@@ -184,12 +184,12 @@
+     if ((v4 & 1) != 0)
+         seg_flag = 32;
+     if (HZD_NearHazardCheck(work->control.map->hzd, &work->control.mov, 5000, 4, seg_flag) != 0)
+-        HZD_GetNearVector(&vect_ptr);
++        HZD_GetNearVector(near_vectors);
+     else
+         printf(" Err Err Err Liquid Near Err !! \n");
+-    p_control->mov.vx += vect_ptr.vx;
+-    work->control.mov.vy += vect_ptr.vy;
+-    work->control.mov.vz += vect_ptr.vz;
++    p_control->mov.vx += near_vectors[0].vx;
++    work->control.mov.vy += near_vectors[0].vy;
++    work->control.mov.vz += near_vectors[0].vz;
+     v6 = *(unsigned int *)&work->control.mov.vz;
+     *(unsigned int *)&work->f938.vx = *(unsigned int *)&p_control->mov.vx;
+     *(unsigned int *)&work->f938.vz = v6;

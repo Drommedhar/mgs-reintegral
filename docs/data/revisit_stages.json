@@ -1,0 +1,684 @@
+{
+  "disc": 1,
+  "status": "selected original vendor aliases; compiled in the 592-unit milestone; runtime checks pending",
+  "overlays": {
+    "s03a": {
+      "identity": "46fb.b",
+      "offset": 15058944,
+      "size": 76108,
+      "sha256": "c42bba970bdc968ee48b572efb03c41f15869cfc00d6aa0d7c8106487534f580"
+    },
+    "s03ar": {
+      "identity": "dfda.b",
+      "offset": 55986176,
+      "size": 76108,
+      "sha256": "f34b46313625005b6aef5006b184556c4dd8f13e97a3b0c346f0f4fc7b9fbf04",
+      "base_stage": "s03a",
+      "identical_bytes": false,
+      "difference_count": 49,
+      "first_difference": "0x3a6",
+      "shared_vendor_source_selection": true,
+      "constructors_identical": [
+        {
+          "hash": "92bc",
+          "address": "800c72a0"
+        },
+        {
+          "hash": "7a05",
+          "address": "800d3878"
+        },
+        {
+          "hash": "e97e",
+          "address": "800c8280"
+        },
+        {
+          "hash": "118c",
+          "address": "800d260c"
+        },
+        {
+          "hash": "ec77",
+          "address": "800c6468"
+        },
+        {
+          "hash": "e253",
+          "address": "800c4ca8"
+        },
+        {
+          "hash": "f5c5",
+          "address": "800cad00"
+        },
+        {
+          "hash": "b103",
+          "address": "800d3aa8"
+        },
+        {
+          "hash": "1ad3",
+          "address": "800c5834"
+        },
+        {
+          "hash": "0065",
+          "address": "800d1b3c"
+        },
+        {
+          "hash": "a9c5",
+          "address": "800ccfb4"
+        },
+        {
+          "hash": "a12e",
+          "address": "800d2070"
+        },
+        {
+          "hash": "5a50",
+          "address": "800d14ec"
+        },
+        {
+          "hash": "42e4",
+          "address": "800d018c"
+        },
+        {
+          "hash": "5147",
+          "address": "800c5ab4"
+        },
+        {
+          "hash": "cbf8",
+          "address": "800c4eb8"
+        },
+        {
+          "hash": "dd8b",
+          "address": "800c5d48"
+        },
+        {
+          "hash": "51c6",
+          "address": "800d4ac8"
+        },
+        {
+          "hash": "0fad",
+          "address": "800c5f44"
+        },
+        {
+          "hash": "0003",
+          "address": "800d1fd8"
+        },
+        {
+          "hash": "0004",
+          "address": "800d1fd8"
+        },
+        {
+          "hash": "000b",
+          "address": "80076708"
+        },
+        {
+          "hash": "000f",
+          "address": "800c6c44"
+        },
+        {
+          "hash": "0021",
+          "address": "800d40c4"
+        },
+        {
+          "hash": "0025",
+          "address": "800cfb68"
+        },
+        {
+          "hash": "0028",
+          "address": "800d470c"
+        },
+        {
+          "hash": "0037",
+          "address": "800cea14"
+        },
+        {
+          "hash": "0038",
+          "address": "800cead8"
+        },
+        {
+          "hash": "0042",
+          "address": "800d1588"
+        },
+        {
+          "hash": "0044",
+          "address": "800cf064"
+        },
+        {
+          "hash": "004c",
+          "address": "800d3000"
+        }
+      ]
+    },
+    "s03e": {
+      "identity": "46ff.b",
+      "offset": 19195904,
+      "size": 38080,
+      "sha256": "af0e15b223431977c2ad233596c37a51c0367da6470c1b760d3f211eb82e894c"
+    },
+    "s03er": {
+      "identity": "e05a.b",
+      "offset": 58085376,
+      "size": 38080,
+      "sha256": "b1e60c25c0ee92e8c347b7f6a51b2e3fdb10d9ea33a2a77e1acbd8bfc7367114",
+      "base_stage": "s03e",
+      "identical_bytes": false,
+      "difference_count": 30,
+      "first_difference": "0x8daa",
+      "shared_vendor_source_selection": true,
+      "constructors_identical": [
+        {
+          "hash": "92bc",
+          "address": "800c6558"
+        },
+        {
+          "hash": "7a05",
+          "address": "800cba94"
+        },
+        {
+          "hash": "ec77",
+          "address": "800c5e68"
+        },
+        {
+          "hash": "e253",
+          "address": "800c4ad8"
+        },
+        {
+          "hash": "f5c5",
+          "address": "800c6edc"
+        },
+        {
+          "hash": "1ad3",
+          "address": "800c5454"
+        },
+        {
+          "hash": "a9c5",
+          "address": "800c9190"
+        },
+        {
+          "hash": "a12e",
+          "address": "800cb2b8"
+        },
+        {
+          "hash": "dd8b",
+          "address": "800c5748"
+        },
+        {
+          "hash": "51c6",
+          "address": "800cbe84"
+        },
+        {
+          "hash": "0fad",
+          "address": "800c5944"
+        }
+      ]
+    },
+    "s04b": {
+      "identity": "471c.b",
+      "offset": 20975616,
+      "size": 117988,
+      "sha256": "bca0c362260565051a8d41ffc49d3b9ae84d1bc9dc758164ea019cae82de7fa7"
+    },
+    "s04br": {
+      "identity": "e3fa.b",
+      "offset": 58945536,
+      "size": 117988,
+      "sha256": "3ceb35994af2c7da7955ab356cbbb7471c749ff6788ecdfbffab1c5679bb4f9b",
+      "base_stage": "s04b",
+      "identical_bytes": false,
+      "difference_count": 57,
+      "first_difference": "0x412",
+      "shared_vendor_source_selection": true,
+      "constructors_identical": [
+        {
+          "hash": "92bc",
+          "address": "800c7884"
+        },
+        {
+          "hash": "05af",
+          "address": "800d5aec"
+        },
+        {
+          "hash": "7eca",
+          "address": "800dab60"
+        },
+        {
+          "hash": "9988",
+          "address": "800db368"
+        },
+        {
+          "hash": "b99f",
+          "address": "800dcdbc"
+        },
+        {
+          "hash": "a9c5",
+          "address": "800cb3b8"
+        },
+        {
+          "hash": "58f0",
+          "address": "800cf258"
+        },
+        {
+          "hash": "0dc9",
+          "address": "800d2430"
+        },
+        {
+          "hash": "3c0c",
+          "address": "8006b76c"
+        },
+        {
+          "hash": "b103",
+          "address": "800d16b4"
+        },
+        {
+          "hash": "7a05",
+          "address": "800d1484"
+        },
+        {
+          "hash": "1ad3",
+          "address": "800c5c70"
+        },
+        {
+          "hash": "3453",
+          "address": "800c52f4"
+        },
+        {
+          "hash": "711f",
+          "address": "800d0468"
+        },
+        {
+          "hash": "a12e",
+          "address": "800d0140"
+        },
+        {
+          "hash": "ec77",
+          "address": "800c6a4c"
+        },
+        {
+          "hash": "51c6",
+          "address": "800d280c"
+        },
+        {
+          "hash": "0001",
+          "address": "8006dfdc"
+        },
+        {
+          "hash": "0002",
+          "address": "800c5ef8"
+        },
+        {
+          "hash": "0003",
+          "address": "800d00a8"
+        },
+        {
+          "hash": "0004",
+          "address": "800d00a8"
+        },
+        {
+          "hash": "0005",
+          "address": "800d0d28"
+        },
+        {
+          "hash": "0009",
+          "address": "80072728"
+        },
+        {
+          "hash": "000a",
+          "address": "800c8548"
+        },
+        {
+          "hash": "000d",
+          "address": "800c90d4"
+        },
+        {
+          "hash": "000f",
+          "address": "800c7228"
+        },
+        {
+          "hash": "0011",
+          "address": "800c5d64"
+        },
+        {
+          "hash": "001a",
+          "address": "800615fc"
+        },
+        {
+          "hash": "001b",
+          "address": "80061708"
+        },
+        {
+          "hash": "001d",
+          "address": "800cd8c8"
+        },
+        {
+          "hash": "0021",
+          "address": "800d1cd0"
+        },
+        {
+          "hash": "0025",
+          "address": "800ce4ec"
+        },
+        {
+          "hash": "002d",
+          "address": "800c7f18"
+        },
+        {
+          "hash": "0036",
+          "address": "8005e6a4"
+        },
+        {
+          "hash": "003c",
+          "address": "800cecb4"
+        },
+        {
+          "hash": "003d",
+          "address": "80074564"
+        },
+        {
+          "hash": "0048",
+          "address": "800d28a0"
+        }
+      ]
+    },
+    "s07c": {
+      "identity": "477d.b",
+      "offset": 26939392,
+      "size": 73992,
+      "sha256": "03904064a3d2d2bcd83f719cf7de0d780886ebeae5645dcc7e345acd7fe8cba1"
+    },
+    "s07cr": {
+      "identity": "f01a.b",
+      "offset": 60905472,
+      "size": 73992,
+      "sha256": "e3c3503599693be3d3729e0bfc09d364de85b46520eff3909b822a14a7dadfbd",
+      "base_stage": "s07c",
+      "identical_bytes": false,
+      "difference_count": 63,
+      "first_difference": "0x113ea",
+      "shared_vendor_source_selection": true,
+      "constructors_identical": [
+        {
+          "hash": "92bc",
+          "address": "800c6a84"
+        },
+        {
+          "hash": "a12e",
+          "address": "800d2bb8"
+        },
+        {
+          "hash": "b997",
+          "address": "8006fd00"
+        },
+        {
+          "hash": "ec77",
+          "address": "800c5c4c"
+        },
+        {
+          "hash": "c218",
+          "address": "800d23a0"
+        },
+        {
+          "hash": "e253",
+          "address": "800c4c30"
+        },
+        {
+          "hash": "b103",
+          "address": "800d3e18"
+        },
+        {
+          "hash": "1ad3",
+          "address": "800c55ac"
+        },
+        {
+          "hash": "e271",
+          "address": "800c7bc4"
+        },
+        {
+          "hash": "7a05",
+          "address": "800d3be8"
+        },
+        {
+          "hash": "9ffd",
+          "address": "800c5790"
+        },
+        {
+          "hash": "0003",
+          "address": "800d2b20"
+        },
+        {
+          "hash": "0004",
+          "address": "800d2b20"
+        },
+        {
+          "hash": "0005",
+          "address": "800d348c"
+        },
+        {
+          "hash": "000f",
+          "address": "800c6428"
+        },
+        {
+          "hash": "0021",
+          "address": "800d4434"
+        },
+        {
+          "hash": "0042",
+          "address": "800d1500"
+        },
+        {
+          "hash": "0044",
+          "address": "800d07d0"
+        }
+      ]
+    },
+    "s08c": {
+      "identity": "479d.b",
+      "offset": 29777920,
+      "size": 61212,
+      "sha256": "5badd1f304a57a3e55af6d5fe15694c51398c602779a31ee2b7276ad9f9aafbb"
+    },
+    "s08cr": {
+      "identity": "f41a.b",
+      "offset": 62789632,
+      "size": 61212,
+      "sha256": "1521588d917c0558839f915191ed5b643fba37a7d1fa4dc228951b433e1070c9",
+      "base_stage": "s08c",
+      "identical_bytes": false,
+      "difference_count": 36,
+      "first_difference": "0x3be",
+      "shared_vendor_source_selection": true,
+      "constructors_identical": [
+        {
+          "hash": "92bc",
+          "address": "800c4fcc"
+        },
+        {
+          "hash": "a12e",
+          "address": "800cf394"
+        },
+        {
+          "hash": "1ad3",
+          "address": "800c40a0"
+        },
+        {
+          "hash": "e97e",
+          "address": "800c6698"
+        },
+        {
+          "hash": "7a05",
+          "address": "800cfb70"
+        },
+        {
+          "hash": "b103",
+          "address": "800d0284"
+        },
+        {
+          "hash": "2b24",
+          "address": "800cb4a4"
+        },
+        {
+          "hash": "5a50",
+          "address": "800ce3b8"
+        },
+        {
+          "hash": "5d64",
+          "address": "800d0060"
+        },
+        {
+          "hash": "4e95",
+          "address": "800c9df0"
+        },
+        {
+          "hash": "6a4c",
+          "address": "800cd7cc"
+        },
+        {
+          "hash": "51c6",
+          "address": "800d12a4"
+        },
+        {
+          "hash": "cbf8",
+          "address": "800c3724"
+        },
+        {
+          "hash": "fed1",
+          "address": "8005d508"
+        },
+        {
+          "hash": "0003",
+          "address": "800cf2fc"
+        },
+        {
+          "hash": "0004",
+          "address": "800cf2fc"
+        },
+        {
+          "hash": "0009",
+          "address": "80072728"
+        },
+        {
+          "hash": "000a",
+          "address": "800c8d6c"
+        },
+        {
+          "hash": "000d",
+          "address": "800c98f8"
+        },
+        {
+          "hash": "000f",
+          "address": "800c4970"
+        },
+        {
+          "hash": "0011",
+          "address": "800c4194"
+        },
+        {
+          "hash": "001a",
+          "address": "800615fc"
+        },
+        {
+          "hash": "001b",
+          "address": "80061708"
+        },
+        {
+          "hash": "0021",
+          "address": "800d08a0"
+        },
+        {
+          "hash": "0025",
+          "address": "800caee4"
+        },
+        {
+          "hash": "0028",
+          "address": "800d0ee8"
+        },
+        {
+          "hash": "002d",
+          "address": "800c5660"
+        },
+        {
+          "hash": "0044",
+          "address": "800ca3e0"
+        }
+      ]
+    },
+    "s09a": {
+      "identity": "47bb.b",
+      "offset": 30486528,
+      "size": 123456,
+      "sha256": "4c698b375890c793c3622d410bffab7db48c01cfff393f458cd5712e316a7177"
+    },
+    "s09ar": {
+      "identity": "f7da.b",
+      "offset": 63500288,
+      "size": 123456,
+      "sha256": "362fbe4c139197907498e38a1f56e403fe39b4a0217d34bfcf49cf86e86cb76b",
+      "base_stage": "s09a",
+      "identical_bytes": false,
+      "difference_count": 438,
+      "first_difference": "0x1c7d3",
+      "shared_vendor_source_selection": true,
+      "constructors_identical": [
+        {
+          "hash": "ec77",
+          "address": "800c54a0"
+        },
+        {
+          "hash": "92bc",
+          "address": "800c62d8"
+        },
+        {
+          "hash": "02c4",
+          "address": "800c4fa4"
+        },
+        {
+          "hash": "a12e",
+          "address": "800deef0"
+        },
+        {
+          "hash": "4170",
+          "address": "800c411c"
+        },
+        {
+          "hash": "e271",
+          "address": "800ca394"
+        },
+        {
+          "hash": "6c0e",
+          "address": "800dca80"
+        },
+        {
+          "hash": "81ea",
+          "address": "800dd1fc"
+        },
+        {
+          "hash": "e97e",
+          "address": "800c72b8"
+        },
+        {
+          "hash": "1ad3",
+          "address": "800c3eac"
+        },
+        {
+          "hash": "7a05",
+          "address": "800df6cc"
+        },
+        {
+          "hash": "8185",
+          "address": "800d2b10"
+        },
+        {
+          "hash": "5a50",
+          "address": "800ddf14"
+        },
+        {
+          "hash": "901e",
+          "address": "800d347c"
+        },
+        {
+          "hash": "b103",
+          "address": "800df8fc"
+        },
+        {
+          "hash": "000f",
+          "address": "800c5c7c"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,272 @@
+diff --git a/build/linker_command_file.txt b/build/linker_command_file.txt
+index 838ea9110..1ba2ce27c 100644
+--- a/build/linker_command_file.txt
++++ b/build/linker_command_file.txt
+@@ -2792,6 +2792,49 @@ overlay_bss group   file("{{OBJ_DIR}}\{{OVERLAY}}_{{OVERLAY_SUFFIX}}_bss.bin")
+ 
+     include "{{PSYQ_SDK}}\psyq_4.4\lib\libgte\MTX_10.OBJ", overlay
+ ;------------------------------------------------------------------------------
++{% elif OVERLAY in ["s17a", "s17ar"] %}
++    include "{{OBJ_DIR}}\stage\s17a.obj", overlay
++    include "{{OBJ_DIR}}\game\lamp.obj", overlay
++    include "{{OBJ_DIR}}\anime\effect\smoke_ln.obj", overlay
++    include "{{OBJ_DIR}}\enemy\wall.obj", overlay
++    include "{{OBJ_DIR}}\enemy\demokage.obj", overlay
++    include "{{OBJ_DIR}}\enemy\asioto.obj", overlay
++    include "{{OBJ_DIR}}\okajima\splash.obj", overlay
++    include "{{OBJ_DIR}}\okajima\d_bloods.obj", overlay
++    include "{{OBJ_DIR}}\okajima\plasma.obj", overlay
++    include "{{OBJ_DIR}}\okajima\red_alrt.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s11g\okajima\blst_ln.obj", overlay
++    include "{{OBJ_DIR}}\okajima\crsh_smk.obj", overlay
++    include "{{OBJ_DIR}}\okajima\blurpure.obj", overlay
++    include "{{OBJ_DIR}}\okajima\blur.obj", overlay
++    include "{{OBJ_DIR}}\okajima\smke_ln.obj", overlay
++    include "{{OBJ_DIR}}\takabe\spark2.obj", overlay
++    include "{{OBJ_DIR}}\takabe\breakobj.obj", overlay
++    include "{{OBJ_DIR}}\takabe\object.obj", overlay
++    include "{{OBJ_DIR}}\takabe\fadeio.obj", overlay
++    include "{{OBJ_DIR}}\takabe\thing.obj", overlay
++    include "{{OBJ_DIR}}\takabe\cinema.obj", overlay
++    include "{{OBJ_DIR}}\takabe\voicesys.obj", overlay
++    include "{{OBJ_DIR}}\takabe\sepia.obj", overlay
++    include "{{OBJ_DIR}}\takabe\windcrcl.obj", overlay
++    include "{{OBJ_DIR}}\takabe\puthzd.obj", overlay
++    include "{{OBJ_DIR}}\kojo\inverlt.obj", overlay
++    include "{{OBJ_DIR}}\kojo\inverlt2.obj", overlay
++    include "{{OBJ_DIR}}\kojo\blooddrp.obj", overlay
++    include "{{OBJ_DIR}}\kojo\mgrex.obj", overlay
++    include "{{OBJ_DIR}}\kojo\rex_particles.obj", overlay
++    include "{{OBJ_DIR}}\kojo\hmissile.obj", overlay
++    include "{{OBJ_DIR}}\kojo\mgrexlzr.obj", overlay
++    include "{{OBJ_DIR}}\kojo\mg_hatch.obj", overlay
++    include "{{OBJ_DIR}}\kojo\ninjalzr.obj", overlay
++    include "{{OBJ_DIR}}\kojo\rex_anime.obj", overlay
++    include "{{OBJ_DIR}}\kojo\bloodhzd.obj", overlay
++    include "{{OBJ_DIR}}\kojo\mg_laser.obj", overlay
++    include "{{OBJ_DIR}}\kojo\drum2.obj", overlay
++    include "{{OBJ_DIR}}\kojo\spark2l.obj", overlay
++    include "{{OBJ_DIR}}\takabe\mg_demo1.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s17a\rex_data.obj", overlay
++;------------------------------------------------------------------------------
+ {% elif OVERLAY in ["s18a", "s18ar"] %}
+     include "{{OBJ_DIR}}\stage\s18a.obj", overlay
+     include "{{OBJ_DIR}}\game\cancel.obj", overlay
+diff --git a/source/stage/s17a.c b/source/stage/s17a.c
+index 6db61bfe5..96dd5aacf 100644
+--- a/source/stage/s17a.c
++++ b/source/stage/s17a.c
+@@ -1,48 +1,61 @@
+ #define DECLARE_NEWCHARA_PROTOS
+ #include "charalst.h"
+ 
+-CHARA _StageCharacterEntries[] = {
+-    { 0x92bc, (NEWCHARA *)0x800c7a9c }, //  CHARA_ASIOTOKUN,    /* chara 足音君 */
+-    { 0x4754, (NEWCHARA *)0x800d7b38 }, //  CHARA_MGREX,
+-    { 0x954b, (NEWCHARA *)0x800d1ec4 }, //  CHARA_MG_DEMO1,
+-    { 0x0dc9, (NEWCHARA *)0x800d0848 }, //  CHARA_VOICESYS,     /* chara 音声制御 */
+-    { 0xec77, (NEWCHARA *)0x800c6c64 }, //  CHARA_WALL,         /* chara 障害物 */
+-    { 0x4be8, (NEWCHARA *)0x800cf424 }, //  CHARA_DRUMCAN2,     /* chara ドラム缶２ */
+-    { 0x7a05, (NEWCHARA *)0x800d00d4 }, //  CHARA_CINEMA,       /* chara シネマスクリーン */
+-    { 0xa12e, (NEWCHARA *)0x800cf8f8 }, //  CHARA_FADEIO,       /* chara フェードイン・アウト */
+-    { 0x1ad3, (NEWCHARA *)0x800c601c }, //  CHARA_TEXTURE,      /* chara テクスチャ */
+-    { 0x32fc, (NEWCHARA *)0x800ce534 }, //  CHARA_BREAK_OBJECT,
+-    { 0x91aa, (NEWCHARA *)0x800d214c }, //  CHARA_PUTHZD,
++extern NEWCHARA AN_Blast_high2;
++extern NEWCHARA AN_Smoke_800CE0F8;
++extern NEWCHARA NewBlastLine;
++extern NEWCHARA NewCrashSmoke;
++extern NEWCHARA NewInverseLight;
++extern NEWCHARA NewPlasma_800CD268;
++extern NEWCHARA NewPutHzd;
++extern NEWCHARA NewRex;
++extern NEWCHARA NewWindcrcl_800CF784;
++extern NEWCHARA RexNewBloodHazard;
++extern NEWCHARA RexNewDemo;
++extern NEWCHARA RexNewDrum;
++extern NEWCHARA RexNewMeshLaser;
++extern NEWCHARA RexNewNinjaLaser;
+ 
+-    { 0x0001, (NEWCHARA *)0x8006dfdc }, //  DEMO_EXPLOSION,
+-    { 0x0003, (NEWCHARA *)0x800cf860 }, //  DEMO_FADEIN,
+-    { 0x0004, (NEWCHARA *)0x800cf860 }, //  DEMO_FADEOUT,
+-    { 0x0009, (NEWCHARA *)0x80072728 }, //  DEMO_BLOOD,
+-    { 0x000a, (NEWCHARA *)0x800c8074 }, //  DEMO_BLOOD2,
+-    { 0x000b, (NEWCHARA *)0x80076708 }, //  DEMO_BULLET,
+-    { 0x000d, (NEWCHARA *)0x800c8c00 }, //  DEMO_BLOODCIRCLE,
+-    { 0x000f, (NEWCHARA *)0x800c7440 }, //  DEMO_SHADOW,
+-    { 0x001d, (NEWCHARA *)0x800ca26c }, //  DEMO_PLASMA,
+-    { 0x0020, (NEWCHARA *)0x800d6480 }, //  DEMO_METALGEARLASER,
+-    { 0x0024, (NEWCHARA *)0x800ca330 }, //  DEMO_PLASMA2,
+-    { 0x0025, (NEWCHARA *)0x800cd3d8 }, //  DEMO_BLUR,
+-    { 0x0028, (NEWCHARA *)0x800d0e90 }, //  DEMO_MONOTONE,
+-    { 0x002a, (NEWCHARA *)0x800c617c }, //  DEMO_BLACKSMOKE,
+-    { 0x0030, (NEWCHARA *)0x800cb34c }, //  DEMO_BLASTLINE,
+-    { 0x0031, (NEWCHARA *)0x800cd9e0 }, //  DEMO_SMOKELINE,
+-    { 0x0037, (NEWCHARA *)0x800caf90 }, //  DEMO_ENVIRONMENTLIGHT,
+-    { 0x0038, (NEWCHARA *)0x800cb054 }, //  DEMO_ENVIRONMENTLIGHT2,
+-    { 0x0039, (NEWCHARA *)0x800cb7f8 }, //  DEMO_CRASHSMOKE,
+-    { 0x003b, (NEWCHARA *)0x800d33cc }, //  DEMO_INVERSLIGHT,
+-    { 0x003c, (NEWCHARA *)0x800ce0f4 }, //  DEMO_SPACK,
+-    { 0x003d, (NEWCHARA *)0x80074564 }, //  DEMO_SPACK2,
+-    { 0x003e, (NEWCHARA *)0x8006e6cc }, //  DEMO_STEAMEXPLOSION,
+-    { 0x003f, (NEWCHARA *)0x800d3ad8 }, //  DEMO_INVERSLIGHT2,
+-    { 0x0041, (NEWCHARA *)0x800d4994 }, //  DEMO_NINJALASER,
+-    { 0x0044, (NEWCHARA *)0x800cc8d4 }, //  DEMO_GHOST,
+-    { 0x0047, (NEWCHARA *)0x800d6a4c }, //  DEMO_BLOODHAZARD,
+-    { 0x0048, (NEWCHARA *)0x800d7538 }, //  DEMO_BLOODDRIP,
+-    { 0x0049, (NEWCHARA *)0x800d15fc }, //  DEMO_NINJAGROUND,
++CHARA _StageCharacterEntries[] = {{0x92bc, NewAsiotoKun},       //  CHARA_ASIOTOKUN,    /* chara 足音君 */
++                                  {0x4754, NewRex},             //  CHARA_MGREX,
++                                  {0x954b, RexNewDemo},         //  CHARA_MG_DEMO1,
++                                  {0x0dc9, NewVoiceSystem},     //  CHARA_VOICESYS,     /* chara 音声制御 */
++                                  {0xec77, NewWallGcl},         //  CHARA_WALL,         /* chara 障害物 */
++                                  {0x4be8, RexNewDrum},         //  CHARA_DRUMCAN2,     /* chara ドラム缶２ */
++                                  {0x7a05, NewCinemaScreenSet}, //  CHARA_CINEMA,       /* chara シネマスクリーン */
++                                  {0xa12e, NewFadeInOutSet},    //  CHARA_FADEIO,       /* chara フェードイン・アウト */
++                                  {0x1ad3, NewTextureLamp},     //  CHARA_TEXTURE,      /* chara テクスチャ */
++                                  {0x32fc, NewBreakObject},     //  CHARA_BREAK_OBJECT,
++                                  {0x91aa, NewPutHzd},          //  CHARA_PUTHZD,
+ 
+-    CHARA_END
+-};
++                                  {0x0001, NewBlast},             //  DEMO_EXPLOSION,
++                                  {0x0003, NewFadeInOut},         //  DEMO_FADEIN,
++                                  {0x0004, NewFadeInOut},         //  DEMO_FADEOUT,
++                                  {0x0009, NewBlood},             //  DEMO_BLOOD,
++                                  {0x000a, NewSplash_800C8D6C},   //  DEMO_BLOOD2,
++                                  {0x000b, NewBulletEx},          //  DEMO_BULLET,
++                                  {0x000d, NewKetchap_s},         //  DEMO_BLOODCIRCLE,
++                                  {0x000f, NewDemoKage},          //  DEMO_SHADOW,
++                                  {0x001d, NewPlasma_800CD1A4},   //  DEMO_PLASMA,
++                                  {0x0020, RexNewMeshLaser},      //  DEMO_METALGEARLASER,
++                                  {0x0024, NewPlasma_800CD268},   //  DEMO_PLASMA2,
++                                  {0x0025, NewBlurSet},           //  DEMO_BLUR,
++                                  {0x0028, NewSepia_800C5214},    //  DEMO_MONOTONE,
++                                  {0x002a, AN_Smoke_800CE0F8},    //  DEMO_BLACKSMOKE,
++                                  {0x0030, NewBlastLine},         //  DEMO_BLASTLINE,
++                                  {0x0031, NewSmokeLn_800CDFA4},  //  DEMO_SMOKELINE,
++                                  {0x0037, NewRedAlert2},         //  DEMO_ENVIRONMENTLIGHT,
++                                  {0x0038, RedAlert_800C4F48},    //  DEMO_ENVIRONMENTLIGHT2,
++                                  {0x0039, NewCrashSmoke},        //  DEMO_CRASHSMOKE,
++                                  {0x003b, NewInverseLight},      //  DEMO_INVERSLIGHT,
++                                  {0x003c, NewSpark2_800CA714},   //  DEMO_SPACK,
++                                  {0x003d, NewSpark},             //  DEMO_SPACK2,
++                                  {0x003e, AN_Blast_high2},       //  DEMO_STEAMEXPLOSION,
++                                  {0x003f, NewInverseLight2},     //  DEMO_INVERSLIGHT2,
++                                  {0x0041, RexNewNinjaLaser},     //  DEMO_NINJALASER,
++                                  {0x0044, NewBlurPure},          //  DEMO_GHOST,
++                                  {0x0047, RexNewBloodHazard},    //  DEMO_BLOODHAZARD,
++                                  {0x0048, NewBloodDrip},         //  DEMO_BLOODDRIP,
++                                  {0x0049, NewWindcrcl_800CF784}, //  DEMO_NINJAGROUND,
++
++                                  CHARA_END};
+diff --git a/source/stage/s17ar.c b/source/stage/s17ar.c
+index 6db61bfe5..96dd5aacf 100644
+--- a/source/stage/s17ar.c
++++ b/source/stage/s17ar.c
+@@ -1,48 +1,61 @@
+ #define DECLARE_NEWCHARA_PROTOS
+ #include "charalst.h"
+ 
+-CHARA _StageCharacterEntries[] = {
+-    { 0x92bc, (NEWCHARA *)0x800c7a9c }, //  CHARA_ASIOTOKUN,    /* chara 足音君 */
+-    { 0x4754, (NEWCHARA *)0x800d7b38 }, //  CHARA_MGREX,
+-    { 0x954b, (NEWCHARA *)0x800d1ec4 }, //  CHARA_MG_DEMO1,
+-    { 0x0dc9, (NEWCHARA *)0x800d0848 }, //  CHARA_VOICESYS,     /* chara 音声制御 */
+-    { 0xec77, (NEWCHARA *)0x800c6c64 }, //  CHARA_WALL,         /* chara 障害物 */
+-    { 0x4be8, (NEWCHARA *)0x800cf424 }, //  CHARA_DRUMCAN2,     /* chara ドラム缶２ */
+-    { 0x7a05, (NEWCHARA *)0x800d00d4 }, //  CHARA_CINEMA,       /* chara シネマスクリーン */
+-    { 0xa12e, (NEWCHARA *)0x800cf8f8 }, //  CHARA_FADEIO,       /* chara フェードイン・アウト */
+-    { 0x1ad3, (NEWCHARA *)0x800c601c }, //  CHARA_TEXTURE,      /* chara テクスチャ */
+-    { 0x32fc, (NEWCHARA *)0x800ce534 }, //  CHARA_BREAK_OBJECT,
+-    { 0x91aa, (NEWCHARA *)0x800d214c }, //  CHARA_PUTHZD,
++extern NEWCHARA AN_Blast_high2;
++extern NEWCHARA AN_Smoke_800CE0F8;
++extern NEWCHARA NewBlastLine;
++extern NEWCHARA NewCrashSmoke;
++extern NEWCHARA NewInverseLight;
++extern NEWCHARA NewPlasma_800CD268;
++extern NEWCHARA NewPutHzd;
++extern NEWCHARA NewRex;
++extern NEWCHARA NewWindcrcl_800CF784;
++extern NEWCHARA RexNewBloodHazard;
++extern NEWCHARA RexNewDemo;
++extern NEWCHARA RexNewDrum;
++extern NEWCHARA RexNewMeshLaser;
++extern NEWCHARA RexNewNinjaLaser;
+ 
+-    { 0x0001, (NEWCHARA *)0x8006dfdc }, //  DEMO_EXPLOSION,
+-    { 0x0003, (NEWCHARA *)0x800cf860 }, //  DEMO_FADEIN,
+-    { 0x0004, (NEWCHARA *)0x800cf860 }, //  DEMO_FADEOUT,
+-    { 0x0009, (NEWCHARA *)0x80072728 }, //  DEMO_BLOOD,
+-    { 0x000a, (NEWCHARA *)0x800c8074 }, //  DEMO_BLOOD2,
+-    { 0x000b, (NEWCHARA *)0x80076708 }, //  DEMO_BULLET,
+-    { 0x000d, (NEWCHARA *)0x800c8c00 }, //  DEMO_BLOODCIRCLE,
+-    { 0x000f, (NEWCHARA *)0x800c7440 }, //  DEMO_SHADOW,
+-    { 0x001d, (NEWCHARA *)0x800ca26c }, //  DEMO_PLASMA,
+-    { 0x0020, (NEWCHARA *)0x800d6480 }, //  DEMO_METALGEARLASER,
+-    { 0x0024, (NEWCHARA *)0x800ca330 }, //  DEMO_PLASMA2,
+-    { 0x0025, (NEWCHARA *)0x800cd3d8 }, //  DEMO_BLUR,
+-    { 0x0028, (NEWCHARA *)0x800d0e90 }, //  DEMO_MONOTONE,
+-    { 0x002a, (NEWCHARA *)0x800c617c }, //  DEMO_BLACKSMOKE,
+-    { 0x0030, (NEWCHARA *)0x800cb34c }, //  DEMO_BLASTLINE,
+-    { 0x0031, (NEWCHARA *)0x800cd9e0 }, //  DEMO_SMOKELINE,
+-    { 0x0037, (NEWCHARA *)0x800caf90 }, //  DEMO_ENVIRONMENTLIGHT,
+-    { 0x0038, (NEWCHARA *)0x800cb054 }, //  DEMO_ENVIRONMENTLIGHT2,
+-    { 0x0039, (NEWCHARA *)0x800cb7f8 }, //  DEMO_CRASHSMOKE,
+-    { 0x003b, (NEWCHARA *)0x800d33cc }, //  DEMO_INVERSLIGHT,
+-    { 0x003c, (NEWCHARA *)0x800ce0f4 }, //  DEMO_SPACK,
+-    { 0x003d, (NEWCHARA *)0x80074564 }, //  DEMO_SPACK2,
+-    { 0x003e, (NEWCHARA *)0x8006e6cc }, //  DEMO_STEAMEXPLOSION,
+-    { 0x003f, (NEWCHARA *)0x800d3ad8 }, //  DEMO_INVERSLIGHT2,
+-    { 0x0041, (NEWCHARA *)0x800d4994 }, //  DEMO_NINJALASER,
+-    { 0x0044, (NEWCHARA *)0x800cc8d4 }, //  DEMO_GHOST,
+-    { 0x0047, (NEWCHARA *)0x800d6a4c }, //  DEMO_BLOODHAZARD,
+-    { 0x0048, (NEWCHARA *)0x800d7538 }, //  DEMO_BLOODDRIP,
+-    { 0x0049, (NEWCHARA *)0x800d15fc }, //  DEMO_NINJAGROUND,
++CHARA _StageCharacterEntries[] = {{0x92bc, NewAsiotoKun},       //  CHARA_ASIOTOKUN,    /* chara 足音君 */
++                                  {0x4754, NewRex},             //  CHARA_MGREX,
++                                  {0x954b, RexNewDemo},         //  CHARA_MG_DEMO1,
++                                  {0x0dc9, NewVoiceSystem},     //  CHARA_VOICESYS,     /* chara 音声制御 */
++                                  {0xec77, NewWallGcl},         //  CHARA_WALL,         /* chara 障害物 */
++                                  {0x4be8, RexNewDrum},         //  CHARA_DRUMCAN2,     /* chara ドラム缶２ */
++                                  {0x7a05, NewCinemaScreenSet}, //  CHARA_CINEMA,       /* chara シネマスクリーン */
++                                  {0xa12e, NewFadeInOutSet},    //  CHARA_FADEIO,       /* chara フェードイン・アウト */
++                                  {0x1ad3, NewTextureLamp},     //  CHARA_TEXTURE,      /* chara テクスチャ */
++                                  {0x32fc, NewBreakObject},     //  CHARA_BREAK_OBJECT,
++                                  {0x91aa, NewPutHzd},          //  CHARA_PUTHZD,
+ 
+-    CHARA_END
+-};
++                                  {0x0001, NewBlast},             //  DEMO_EXPLOSION,
++                                  {0x0003, NewFadeInOut},         //  DEMO_FADEIN,
++                                  {0x0004, NewFadeInOut},         //  DEMO_FADEOUT,
++                                  {0x0009, NewBlood},             //  DEMO_BLOOD,
++                                  {0x000a, NewSplash_800C8D6C},   //  DEMO_BLOOD2,
++                                  {0x000b, NewBulletEx},          //  DEMO_BULLET,
++                                  {0x000d, NewKetchap_s},         //  DEMO_BLOODCIRCLE,
++                                  {0x000f, NewDemoKage},          //  DEMO_SHADOW,
++                                  {0x001d, NewPlasma_800CD1A4},   //  DEMO_PLASMA,
++                                  {0x0020, RexNewMeshLaser},      //  DEMO_METALGEARLASER,
++                                  {0x0024, NewPlasma_800CD268},   //  DEMO_PLASMA2,
++                                  {0x0025, NewBlurSet},           //  DEMO_BLUR,
++                                  {0x0028, NewSepia_800C5214},    //  DEMO_MONOTONE,
++                                  {0x002a, AN_Smoke_800CE0F8},    //  DEMO_BLACKSMOKE,
++                                  {0x0030, NewBlastLine},         //  DEMO_BLASTLINE,
++                                  {0x0031, NewSmokeLn_800CDFA4},  //  DEMO_SMOKELINE,
++                                  {0x0037, NewRedAlert2},         //  DEMO_ENVIRONMENTLIGHT,
++                                  {0x0038, RedAlert_800C4F48},    //  DEMO_ENVIRONMENTLIGHT2,
++                                  {0x0039, NewCrashSmoke},        //  DEMO_CRASHSMOKE,
++                                  {0x003b, NewInverseLight},      //  DEMO_INVERSLIGHT,
++                                  {0x003c, NewSpark2_800CA714},   //  DEMO_SPACK,
++                                  {0x003d, NewSpark},             //  DEMO_SPACK2,
++                                  {0x003e, AN_Blast_high2},       //  DEMO_STEAMEXPLOSION,
++                                  {0x003f, NewInverseLight2},     //  DEMO_INVERSLIGHT2,
++                                  {0x0041, RexNewNinjaLaser},     //  DEMO_NINJALASER,
++                                  {0x0044, NewBlurPure},          //  DEMO_GHOST,
++                                  {0x0047, RexNewBloodHazard},    //  DEMO_BLOODHAZARD,
++                                  {0x0048, NewBloodDrip},         //  DEMO_BLOODDRIP,
++                                  {0x0049, NewWindcrcl_800CF784}, //  DEMO_NINJAGROUND,
++
++                                  CHARA_END};

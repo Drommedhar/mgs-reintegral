@@ -1,0 +1,6 @@
+.lines -e
+bu /1 mgs_integral_native!MgsNativeReloadOverlay "ew mgs_integral_native!var_buf+a 75; ew mgs_integral_native!var_buf+2 400; ew mgs_integral_native!linkvarbuf+10 1a5e; ew mgs_integral_native!linkvarbuf+14 cf72; eb mgs_integral_native!var_buf+4f 1; ew mgs_integral_native!linkvarbuf+6a 1 5; .printf \"FIXTURE original story variable $w:00000A=117 with original sub_7658 poseX6750/Z-12430, heading1024, var4F1 and inventory6A1/6C5; CLI map9987\\n\"; gc"
+bu /1 mgs_integral_native!NewMeryl72_800C7BC4 ".printf \"FIXTURE observed original Meryl72 constructor\\n\"; gc"
+sxe -c "r;kv;q" av
+g
+q

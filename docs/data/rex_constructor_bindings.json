@@ -1,0 +1,231 @@
+{
+  "stages": [
+    "s17a",
+    "s17ar"
+  ],
+  "entries": [
+    {
+      "hash": "0x92bc",
+      "original_constructor": "0x800c7a9c",
+      "native_constructor": "NewAsiotoKun"
+    },
+    {
+      "hash": "0x4754",
+      "original_constructor": "0x800d7b38",
+      "native_constructor": "NewRex"
+    },
+    {
+      "hash": "0x954b",
+      "original_constructor": "0x800d1ec4",
+      "native_constructor": "RexNewDemo"
+    },
+    {
+      "hash": "0x0dc9",
+      "original_constructor": "0x800d0848",
+      "native_constructor": "NewVoiceSystem"
+    },
+    {
+      "hash": "0xec77",
+      "original_constructor": "0x800c6c64",
+      "native_constructor": "NewWallGcl"
+    },
+    {
+      "hash": "0x4be8",
+      "original_constructor": "0x800cf424",
+      "native_constructor": "RexNewDrum"
+    },
+    {
+      "hash": "0x7a05",
+      "original_constructor": "0x800d00d4",
+      "native_constructor": "NewCinemaScreenSet"
+    },
+    {
+      "hash": "0xa12e",
+      "original_constructor": "0x800cf8f8",
+      "native_constructor": "NewFadeInOutSet"
+    },
+    {
+      "hash": "0x1ad3",
+      "original_constructor": "0x800c601c",
+      "native_constructor": "NewTextureLamp"
+    },
+    {
+      "hash": "0x32fc",
+      "original_constructor": "0x800ce534",
+      "native_constructor": "NewBreakObject"
+    },
+    {
+      "hash": "0x91aa",
+      "original_constructor": "0x800d214c",
+      "native_constructor": "NewPutHzd"
+    },
+    {
+      "hash": "0x0001",
+      "original_constructor": "0x8006dfdc",
+      "native_constructor": "NewBlast"
+    },
+    {
+      "hash": "0x0003",
+      "original_constructor": "0x800cf860",
+      "native_constructor": "NewFadeInOut"
+    },
+    {
+      "hash": "0x0004",
+      "original_constructor": "0x800cf860",
+      "native_constructor": "NewFadeInOut"
+    },
+    {
+      "hash": "0x0009",
+      "original_constructor": "0x80072728",
+      "native_constructor": "NewBlood"
+    },
+    {
+      "hash": "0x000a",
+      "original_constructor": "0x800c8074",
+      "native_constructor": "NewSplash_800C8D6C"
+    },
+    {
+      "hash": "0x000b",
+      "original_constructor": "0x80076708",
+      "native_constructor": "NewBulletEx"
+    },
+    {
+      "hash": "0x000d",
+      "original_constructor": "0x800c8c00",
+      "native_constructor": "NewKetchap_s"
+    },
+    {
+      "hash": "0x000f",
+      "original_constructor": "0x800c7440",
+      "native_constructor": "NewDemoKage"
+    },
+    {
+      "hash": "0x001d",
+      "original_constructor": "0x800ca26c",
+      "native_constructor": "NewPlasma_800CD1A4"
+    },
+    {
+      "hash": "0x0020",
+      "original_constructor": "0x800d6480",
+      "native_constructor": "RexNewMeshLaser"
+    },
+    {
+      "hash": "0x0024",
+      "original_constructor": "0x800ca330",
+      "native_constructor": "NewPlasma_800CD268"
+    },
+    {
+      "hash": "0x0025",
+      "original_constructor": "0x800cd3d8",
+      "native_constructor": "NewBlurSet"
+    },
+    {
+      "hash": "0x0028",
+      "original_constructor": "0x800d0e90",
+      "native_constructor": "NewSepia_800C5214"
+    },
+    {
+      "hash": "0x002a",
+      "original_constructor": "0x800c617c",
+      "native_constructor": "AN_Smoke_800CE0F8"
+    },
+    {
+      "hash": "0x0030",
+      "original_constructor": "0x800cb34c",
+      "native_constructor": "NewBlastLine"
+    },
+    {
+      "hash": "0x0031",
+      "original_constructor": "0x800cd9e0",
+      "native_constructor": "NewSmokeLn_800CDFA4"
+    },
+    {
+      "hash": "0x0037",
+      "original_constructor": "0x800caf90",
+      "native_constructor": "NewRedAlert2"
+    },
+    {
+      "hash": "0x0038",
+      "original_constructor": "0x800cb054",
+      "native_constructor": "RedAlert_800C4F48"
+    },
+    {
+      "hash": "0x0039",
+      "original_constructor": "0x800cb7f8",
+      "native_constructor": "NewCrashSmoke"
+    },
+    {
+      "hash": "0x003b",
+      "original_constructor": "0x800d33cc",
+      "native_constructor": "NewInverseLight"
+    },
+    {
+      "hash": "0x003c",
+      "original_constructor": "0x800ce0f4",
+      "native_constructor": "NewSpark2_800CA714"
+    },
+    {
+      "hash": "0x003d",
+      "original_constructor": "0x80074564",
+      "native_constructor": "NewSpark"
+    },
+    {
+      "hash": "0x003e",
+      "original_constructor": "0x8006e6cc",
+      "native_constructor": "AN_Blast_high2"
+    },
+    {
+      "hash": "0x003f",
+      "original_constructor": "0x800d3ad8",
+      "native_constructor": "NewInverseLight2"
+    },
+    {
+      "hash": "0x0041",
+      "original_constructor": "0x800d4994",
+      "native_constructor": "RexNewNinjaLaser"
+    },
+    {
+      "hash": "0x0044",
+      "original_constructor": "0x800cc8d4",
+      "native_constructor": "NewBlurPure"
+    },
+    {
+      "hash": "0x0047",
+      "original_constructor": "0x800d6a4c",
+      "native_constructor": "RexNewBloodHazard"
+    },
+    {
+      "hash": "0x0048",
+      "original_constructor": "0x800d7538",
+      "native_constructor": "NewBloodDrip"
+    },
+    {
+      "hash": "0x0049",
+      "original_constructor": "0x800d15fc",
+      "native_constructor": "NewWindcrcl_800CF784"
+    }
+  ],
+  "binding_evidence": "Original retail constructor decompilation and vendor CHARA/DEMO identities; complete actor validation is recorded separately.",
+  "overlays_identical": true,
+  "count": 40,
+  "black_smoke": {
+    "constructor": "800C617C",
+    "native": "AN_Smoke_800CE0F8",
+    "descriptor": "800C3388",
+    "descriptor_values": [
+      20781,
+      8,
+      4,
+      30,
+      1,
+      1000,
+      2,
+      1500,
+      1500,
+      128
+    ],
+    "script_bytes": 63,
+    "script_sha256": "1acfed592b289c6bc7c826928dcf0a22f8606a71338797c3b99ed78a40780cc2",
+    "verification": "All descriptor values and every script byte match vendor d16e animation. Wrapper zeroes PRESCRIPT, copies position, selects script0."
+  }
+}

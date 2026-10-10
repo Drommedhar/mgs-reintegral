@@ -1,0 +1,1273 @@
+{
+  "stage": "s11h",
+  "disc": 1,
+  "overlay_sha256": "de8b36f6bdeb9871b28bf53c2fd13f3f53d836cadcf26fe735358e42151a478b",
+  "new_actor_functions": [
+    {
+      "name": "PutHzdAct",
+      "address": "0x800cca04",
+      "end": "0x800cca70",
+      "instruction_words": 27
+    },
+    {
+      "name": "PutHzdDie",
+      "address": "0x800cca70",
+      "end": "0x800ccab8",
+      "instruction_words": 18
+    },
+    {
+      "name": "PutHzdGetResources",
+      "address": "0x800ccab8",
+      "end": "0x800ccbf0",
+      "instruction_words": 78
+    },
+    {
+      "name": "NewPutHzd",
+      "address": "0x800ccbf0",
+      "end": "0x800ccc84",
+      "instruction_words": 37
+    },
+    {
+      "name": "sub_800CCC84",
+      "address": "0x800ccc84",
+      "end": "0x800ccd40",
+      "instruction_words": 47
+    },
+    {
+      "name": "sub_800CCD40",
+      "address": "0x800ccd40",
+      "end": "0x800ccdc8",
+      "instruction_words": 34
+    },
+    {
+      "name": "sub_800CCDC8",
+      "address": "0x800ccdc8",
+      "end": "0x800ccfa4",
+      "instruction_words": 119
+    },
+    {
+      "name": "NewInverseLight",
+      "address": "0x800ccfa4",
+      "end": "0x800cd4d4",
+      "instruction_words": 332
+    },
+    {
+      "name": "InverseLightAct",
+      "address": "0x800cd4d4",
+      "end": "0x800cd5d4",
+      "instruction_words": 64
+    },
+    {
+      "name": "InverseLightDie",
+      "address": "0x800cd5d4",
+      "end": "0x800cd638",
+      "instruction_words": 25
+    },
+    {
+      "name": "sub_800CD638",
+      "address": "0x800cd638",
+      "end": "0x800cd6b0",
+      "instruction_words": 30
+    }
+  ],
+  "shared_hind_code": {
+    "sections": [
+      {
+        "section": "Hind core",
+        "old_begin": "0x800d11e0",
+        "old_end": "0x800db880",
+        "new_begin": "0x800ce56c",
+        "new_end": "0x800d8c0c",
+        "instruction_words": 10664
+      },
+      {
+        "section": "Blastoff",
+        "old_begin": "0x800db880",
+        "old_end": "0x800dbf88",
+        "new_begin": "0x800d9274",
+        "new_end": "0x800d997c",
+        "instruction_words": 450
+      },
+      {
+        "section": "Hind aim",
+        "old_begin": "0x800dbf88",
+        "old_end": "0x800dc7e0",
+        "new_begin": "0x800da02c",
+        "new_end": "0x800da884",
+        "instruction_words": 534
+      }
+    ],
+    "relocations": {
+      "0x800d11f0": [
+        "0x800ce57c"
+      ],
+      "0x800d2bfc": [
+        "0x800cff88"
+      ],
+      "0x800d3404": [
+        "0x800d0790"
+      ],
+      "0x800d45c0": [
+        "0x800d194c"
+      ],
+      "0x800dd0dc": [
+        "0x800db120"
+      ],
+      "0x800dd0e4": [
+        "0x800db128"
+      ],
+      "0x800dd0ec": [
+        "0x800db130"
+      ],
+      "0x800dd0fc": [
+        "0x800db140"
+      ],
+      "0x800d2154": [
+        "0x800cf4e0"
+      ],
+      "0x800d2314": [
+        "0x800cf6a0"
+      ],
+      "0x800d2310": [
+        "0x800cf69c"
+      ],
+      "0x800d11e0": [
+        "0x800ce56c"
+      ],
+      "0x800d29a0": [
+        "0x800cfd2c"
+      ],
+      "0x800d29c8": [
+        "0x800cfd54"
+      ],
+      "0x800d2a78": [
+        "0x800cfe04"
+      ],
+      "0x800c3598": [
+        "0x800c35c4"
+      ],
+      "0x800dd114": [
+        "0x800db158"
+      ],
+      "0x800d2b94": [
+        "0x800cff20"
+      ],
+      "0x800c35a0": [
+        "0x800c35cc"
+      ],
+      "0x800dd34c": [
+        "0x800db3b0"
+      ],
+      "0x800dc800": [
+        "0x800da8a4"
+      ],
+      "0x800d2f10": [
+        "0x800d029c"
+      ],
+      "0x800d3004": [
+        "0x800d0390"
+      ],
+      "0x800d3040": [
+        "0x800d03cc"
+      ],
+      "0x800d31f4": [
+        "0x800d0580"
+      ],
+      "0x800d31d4": [
+        "0x800d0560"
+      ],
+      "0x800dd128": [
+        "0x800db16c"
+      ],
+      "0x800dd36c": [
+        "0x800db3d0"
+      ],
+      "0x800d3484": [
+        "0x800d0810"
+      ],
+      "0x800dd130": [
+        "0x800db174"
+      ],
+      "0x800dd13c": [
+        "0x800db180"
+      ],
+      "0x800dd148": [
+        "0x800db18c"
+      ],
+      "0x800d3334": [
+        "0x800d06c0"
+      ],
+      "0x800d3570": [
+        "0x800d08fc"
+      ],
+      "0x800d356c": [
+        "0x800d08f8"
+      ],
+      "0x800d45a0": [
+        "0x800d192c"
+      ],
+      "0x800dd150": [
+        "0x800db194"
+      ],
+      "0x800d3750": [
+        "0x800d0adc"
+      ],
+      "0x800d37d8": [
+        "0x800d0b64"
+      ],
+      "0x800d2f60": [
+        "0x800d02ec"
+      ],
+      "0x800d3830": [
+        "0x800d0bbc"
+      ],
+      "0x800d39b8": [
+        "0x800d0d44"
+      ],
+      "0x800d3998": [
+        "0x800d0d24"
+      ],
+      "0x800d2c1c": [
+        "0x800cffa8"
+      ],
+      "0x800d3ac4": [
+        "0x800d0e50"
+      ],
+      "0x800d5820": [
+        "0x800d2bac"
+      ],
+      "0x800daac8": [
+        "0x800d7e54"
+      ],
+      "0x800d3b78": [
+        "0x800d0f04"
+      ],
+      "0x800d3bb4": [
+        "0x800d0f40"
+      ],
+      "0x800d3d9c": [
+        "0x800d1128"
+      ],
+      "0x800d3d7c": [
+        "0x800d1108"
+      ],
+      "0x800dbf88": [
+        "0x800da02c"
+      ],
+      "0x800d428c": [
+        "0x800d1618"
+      ],
+      "0x800c82d4": [
+        "0x800c906c"
+      ],
+      "0x800d4380": [
+        "0x800d170c"
+      ],
+      "0x800d33cc": [
+        "0x800d0758"
+      ],
+      "0x800d2cb4": [
+        "0x800d0040"
+      ],
+      "0x800d3214": [
+        "0x800d05a0"
+      ],
+      "0x800d32cc": [
+        "0x800d0658"
+      ],
+      "0x800cfcb8": [
+        "0x800cbc98"
+      ],
+      "0x800d48bc": [
+        "0x800d1c48"
+      ],
+      "0x800d48b4": [
+        "0x800d1c40"
+      ],
+      "0x800d46d8": [
+        "0x800d1a64"
+      ],
+      "0x800dd164": [
+        "0x800db1a8"
+      ],
+      "0x800d4a80": [
+        "0x800d1e0c"
+      ],
+      "0x800d50e0": [
+        "0x800d246c"
+      ],
+      "0x800d4f64": [
+        "0x800d22f0"
+      ],
+      "0x800d5098": [
+        "0x800d2424"
+      ],
+      "0x800d5410": [
+        "0x800d279c"
+      ],
+      "0x800d4744": [
+        "0x800d1ad0"
+      ],
+      "0x800d5344": [
+        "0x800d26d0"
+      ],
+      "0x800d533c": [
+        "0x800d26c8"
+      ],
+      "0x800d48e8": [
+        "0x800d1c74"
+      ],
+      "0x800d539c": [
+        "0x800d2728"
+      ],
+      "0x800d5400": [
+        "0x800d278c"
+      ],
+      "0x800d5810": [
+        "0x800d2b9c"
+      ],
+      "0x800d4990": [
+        "0x800d1d1c"
+      ],
+      "0x800d560c": [
+        "0x800d2998"
+      ],
+      "0x800d5604": [
+        "0x800d2990"
+      ],
+      "0x800d575c": [
+        "0x800d2ae8"
+      ],
+      "0x800d567c": [
+        "0x800d2a08"
+      ],
+      "0x800d566c": [
+        "0x800d29f8"
+      ],
+      "0x800d5714": [
+        "0x800d2aa0"
+      ],
+      "0x800d56ec": [
+        "0x800d2a78"
+      ],
+      "0x800d590c": [
+        "0x800d2c98"
+      ],
+      "0x800d4dd0": [
+        "0x800d215c"
+      ],
+      "0x800d50f0": [
+        "0x800d247c"
+      ],
+      "0x800d5420": [
+        "0x800d27ac"
+      ],
+      "0x800d59d0": [
+        "0x800d2d5c"
+      ],
+      "0x800d4a24": [
+        "0x800d1db0"
+      ],
+      "0x800d4b68": [
+        "0x800d1ef4"
+      ],
+      "0x800d5c54": [
+        "0x800d2fe0"
+      ],
+      "0x800dd17c": [
+        "0x800db1c0"
+      ],
+      "0x800d46b8": [
+        "0x800d1a44"
+      ],
+      "0x800d5c5c": [
+        "0x800d2fe8"
+      ],
+      "0x800d5cd8": [
+        "0x800d3064"
+      ],
+      "0x800d5eec": [
+        "0x800d3278"
+      ],
+      "0x800d5de4": [
+        "0x800d3170"
+      ],
+      "0x800d5e54": [
+        "0x800d31e0"
+      ],
+      "0x800d6068": [
+        "0x800d33f4"
+      ],
+      "0x800d682c": [
+        "0x800d3bb8"
+      ],
+      "0x800c81f8": [
+        "0x800c8f90"
+      ],
+      "0x800dd190": [
+        "0x800db1d4"
+      ],
+      "0x800d62bc": [
+        "0x800d3648"
+      ],
+      "0x800d7628": [
+        "0x800d49b4"
+      ],
+      "0x800d619c": [
+        "0x800d3528"
+      ],
+      "0x800ce0b0": [
+        "0x800d9178"
+      ],
+      "0x800d5fb4": [
+        "0x800d3340"
+      ],
+      "0x800cfd50": [
+        "0x800cbd30"
+      ],
+      "0x800d60f0": [
+        "0x800d347c"
+      ],
+      "0x800dbed4": [
+        "0x800d98c8"
+      ],
+      "0x800d732c": [
+        "0x800d46b8"
+      ],
+      "0x800d66f0": [
+        "0x800d3a7c"
+      ],
+      "0x800dd1e8": [
+        "0x800db22c"
+      ],
+      "0x800d776c": [
+        "0x800d4af8"
+      ],
+      "0x800d9264": [
+        "0x800d65f0"
+      ],
+      "0x800d9260": [
+        "0x800d65ec"
+      ],
+      "0x800ce7d8": [
+        "0x800d9fa8"
+      ],
+      "0x800d835c": [
+        "0x800d56e8"
+      ],
+      "0x800d63a4": [
+        "0x800d3730"
+      ],
+      "0x800cee08": [
+        "0x800caad4"
+      ],
+      "0x800d9324": [
+        "0x800d66b0"
+      ],
+      "0x800d9698": [
+        "0x800d6a24"
+      ],
+      "0x800d5e44": [
+        "0x800d31d0"
+      ],
+      "0x800d9484": [
+        "0x800d6810"
+      ],
+      "0x800d9488": [
+        "0x800d6814"
+      ],
+      "0x800d9478": [
+        "0x800d6804"
+      ],
+      "0x800dd240": [
+        "0x800db284"
+      ],
+      "0x800d9748": [
+        "0x800d6ad4"
+      ],
+      "0x800d9b70": [
+        "0x800d6efc"
+      ],
+      "0x800d9a3c": [
+        "0x800d6dc8"
+      ],
+      "0x800d997c": [
+        "0x800d6d08"
+      ],
+      "0x800d61f8": [
+        "0x800d3584"
+      ],
+      "0x800dd260": [
+        "0x800db2a4"
+      ],
+      "0x800da520": [
+        "0x800d78ac"
+      ],
+      "0x800d9c8c": [
+        "0x800d7018"
+      ],
+      "0x800d9d44": [
+        "0x800d70d0"
+      ],
+      "0x800d9d40": [
+        "0x800d70cc"
+      ],
+      "0x800d9e34": [
+        "0x800d71c0"
+      ],
+      "0x800d9e64": [
+        "0x800d71f0"
+      ],
+      "0x800d9ed4": [
+        "0x800d7260"
+      ],
+      "0x800d9efc": [
+        "0x800d7288"
+      ],
+      "0x800da500": [
+        "0x800d788c"
+      ],
+      "0x800d9fc8": [
+        "0x800d7354"
+      ],
+      "0x800da044": [
+        "0x800d73d0"
+      ],
+      "0x800da174": [
+        "0x800d7500"
+      ],
+      "0x800da34c": [
+        "0x800d76d8"
+      ],
+      "0x800da724": [
+        "0x800d7ab0"
+      ],
+      "0x800da74c": [
+        "0x800d7ad8"
+      ],
+      "0x800dd288": [
+        "0x800db2cc"
+      ],
+      "0x800daab4": [
+        "0x800d7e40"
+      ],
+      "0x800da8d8": [
+        "0x800d7c64"
+      ],
+      "0x800da614": [
+        "0x800d79a0"
+      ],
+      "0x800da534": [
+        "0x800d78c0"
+      ],
+      "0x800dad78": [
+        "0x800d8104"
+      ],
+      "0x800da7c4": [
+        "0x800d7b50"
+      ],
+      "0x800d9b80": [
+        "0x800d6f0c"
+      ],
+      "0x800d96b0": [
+        "0x800d6a3c"
+      ],
+      "0x800d9344": [
+        "0x800d66d0"
+      ],
+      "0x800d6848": [
+        "0x800d3bd4"
+      ],
+      "0x800d7644": [
+        "0x800d49d0"
+      ],
+      "0x800daedc": [
+        "0x800d8268"
+      ],
+      "0x800daed0": [
+        "0x800d825c"
+      ],
+      "0x800daf0c": [
+        "0x800d8298"
+      ],
+      "0x800d6260": [
+        "0x800d35ec"
+      ],
+      "0x800db078": [
+        "0x800d8404"
+      ],
+      "0x800db0c0": [
+        "0x800d844c"
+      ],
+      "0x800db0e8": [
+        "0x800d8474"
+      ],
+      "0x800db2b8": [
+        "0x800d8644"
+      ],
+      "0x800db2b0": [
+        "0x800d863c"
+      ],
+      "0x800d648c": [
+        "0x800d3818"
+      ],
+      "0x800db5ec": [
+        "0x800d8978"
+      ],
+      "0x800db638": [
+        "0x800d89c4"
+      ],
+      "0x800d5f94": [
+        "0x800d3320"
+      ],
+      "0x800db7b8": [
+        "0x800d8b44"
+      ],
+      "0x800db880": [
+        "0x800d9274"
+      ],
+      "0x800dbc08": [
+        "0x800d95fc"
+      ],
+      "0x800dbc18": [
+        "0x800d960c"
+      ],
+      "0x800dd2ac": [
+        "0x800db2fc"
+      ],
+      "0x800dbc64": [
+        "0x800d9658"
+      ],
+      "0x800dbd34": [
+        "0x800d9728"
+      ],
+      "0x800dbb60": [
+        "0x800d9554"
+      ],
+      "0x800dbc28": [
+        "0x800d961c"
+      ],
+      "0x800dd2b8": [
+        "0x800db308"
+      ],
+      "0x800dbe44": [
+        "0x800d9838"
+      ],
+      "0x800dbf68": [
+        "0x800d995c"
+      ],
+      "0x800dc460": [
+        "0x800da504"
+      ],
+      "0x800dd2c4": [
+        "0x800db328"
+      ],
+      "0x800dc788": [
+        "0x800da82c"
+      ],
+      "0x800dc7c8": [
+        "0x800da86c"
+      ]
+    },
+    "unexplained": []
+  },
+  "shared_hind_data": {
+    "rodata_source": "0x800dd0dc",
+    "rodata_destination": "0x800db120",
+    "bytes": 464,
+    "switch_relocations": [
+      [
+        "0x800d20ec",
+        "0x800cf478"
+      ],
+      [
+        "0x800d20ec",
+        "0x800cf478"
+      ],
+      [
+        "0x800d20f8",
+        "0x800cf484"
+      ],
+      [
+        "0x800d20f8",
+        "0x800cf484"
+      ],
+      [
+        "0x800d2190",
+        "0x800cf51c"
+      ],
+      [
+        "0x800d2b48",
+        "0x800cfed4"
+      ],
+      [
+        "0x800d2b48",
+        "0x800cfed4"
+      ],
+      [
+        "0x800d2b5c",
+        "0x800cfee8"
+      ],
+      [
+        "0x800d2b70",
+        "0x800cfefc"
+      ],
+      [
+        "0x800d2b84",
+        "0x800cff10"
+      ],
+      [
+        "0x800d3818",
+        "0x800d0ba4"
+      ],
+      [
+        "0x800d36f8",
+        "0x800d0a84"
+      ],
+      [
+        "0x800d3704",
+        "0x800d0a90"
+      ],
+      [
+        "0x800d3734",
+        "0x800d0ac0"
+      ],
+      [
+        "0x800d37e8",
+        "0x800d0b74"
+      ],
+      [
+        "0x800d4e10",
+        "0x800d219c"
+      ],
+      [
+        "0x800d4e40",
+        "0x800d21cc"
+      ],
+      [
+        "0x800d4ea8",
+        "0x800d2234"
+      ],
+      [
+        "0x800d4f94",
+        "0x800d2320"
+      ],
+      [
+        "0x800d50b0",
+        "0x800d243c"
+      ],
+      [
+        "0x800d5be8",
+        "0x800d2f74"
+      ],
+      [
+        "0x800d5bd0",
+        "0x800d2f5c"
+      ],
+      [
+        "0x800d5bfc",
+        "0x800d2f88"
+      ],
+      [
+        "0x800d5c18",
+        "0x800d2fa4"
+      ],
+      [
+        "0x800d5c34",
+        "0x800d2fc0"
+      ],
+      [
+        "0x800d68e0",
+        "0x800d3c6c"
+      ],
+      [
+        "0x800d68f0",
+        "0x800d3c7c"
+      ],
+      [
+        "0x800d69e4",
+        "0x800d3d70"
+      ],
+      [
+        "0x800d7628",
+        "0x800d49b4"
+      ],
+      [
+        "0x800d7628",
+        "0x800d49b4"
+      ],
+      [
+        "0x800d7020",
+        "0x800d43ac"
+      ],
+      [
+        "0x800d70a8",
+        "0x800d4434"
+      ],
+      [
+        "0x800d724c",
+        "0x800d45d8"
+      ],
+      [
+        "0x800d743c",
+        "0x800d47c8"
+      ],
+      [
+        "0x800d7628",
+        "0x800d49b4"
+      ],
+      [
+        "0x800d7628",
+        "0x800d49b4"
+      ],
+      [
+        "0x800d7628",
+        "0x800d49b4"
+      ],
+      [
+        "0x800d7628",
+        "0x800d49b4"
+      ],
+      [
+        "0x800d7628",
+        "0x800d49b4"
+      ],
+      [
+        "0x800d7628",
+        "0x800d49b4"
+      ],
+      [
+        "0x800d7628",
+        "0x800d49b4"
+      ],
+      [
+        "0x800d7628",
+        "0x800d49b4"
+      ],
+      [
+        "0x800d6a54",
+        "0x800d3de0"
+      ],
+      [
+        "0x800d6be0",
+        "0x800d3f6c"
+      ],
+      [
+        "0x800d7628",
+        "0x800d49b4"
+      ],
+      [
+        "0x800d7628",
+        "0x800d49b4"
+      ],
+      [
+        "0x800d6d40",
+        "0x800d40cc"
+      ],
+      [
+        "0x800d7700",
+        "0x800d4a8c"
+      ],
+      [
+        "0x800d776c",
+        "0x800d4af8"
+      ],
+      [
+        "0x800d7868",
+        "0x800d4bf4"
+      ],
+      [
+        "0x800d9260",
+        "0x800d65ec"
+      ],
+      [
+        "0x800d9260",
+        "0x800d65ec"
+      ],
+      [
+        "0x800d7fb4",
+        "0x800d5340"
+      ],
+      [
+        "0x800d80d8",
+        "0x800d5464"
+      ],
+      [
+        "0x800d827c",
+        "0x800d5608"
+      ],
+      [
+        "0x800d8458",
+        "0x800d57e4"
+      ],
+      [
+        "0x800d8d58",
+        "0x800d60e4"
+      ],
+      [
+        "0x800d90b4",
+        "0x800d6440"
+      ],
+      [
+        "0x800d9260",
+        "0x800d65ec"
+      ],
+      [
+        "0x800d9260",
+        "0x800d65ec"
+      ],
+      [
+        "0x800d9260",
+        "0x800d65ec"
+      ],
+      [
+        "0x800d9260",
+        "0x800d65ec"
+      ],
+      [
+        "0x800d9260",
+        "0x800d65ec"
+      ],
+      [
+        "0x800d9260",
+        "0x800d65ec"
+      ],
+      [
+        "0x800d78d8",
+        "0x800d4c64"
+      ],
+      [
+        "0x800d7a68",
+        "0x800d4df4"
+      ],
+      [
+        "0x800d9260",
+        "0x800d65ec"
+      ],
+      [
+        "0x800d9260",
+        "0x800d65ec"
+      ],
+      [
+        "0x800d7c3c",
+        "0x800d4fc8"
+      ],
+      [
+        "0x800d96f0",
+        "0x800d6a7c"
+      ],
+      [
+        "0x800d9b70",
+        "0x800d6efc"
+      ],
+      [
+        "0x800d9b70",
+        "0x800d6efc"
+      ],
+      [
+        "0x800d9b70",
+        "0x800d6efc"
+      ],
+      [
+        "0x800d974c",
+        "0x800d6ad8"
+      ],
+      [
+        "0x800d9858",
+        "0x800d6be4"
+      ],
+      [
+        "0x800d9a74",
+        "0x800d6e00"
+      ],
+      [
+        "0x800d9b40",
+        "0x800d6ecc"
+      ],
+      [
+        "0x800d9bc4",
+        "0x800d6f50"
+      ],
+      [
+        "0x800da520",
+        "0x800d78ac"
+      ],
+      [
+        "0x800da520",
+        "0x800d78ac"
+      ],
+      [
+        "0x800da520",
+        "0x800d78ac"
+      ],
+      [
+        "0x800d9c08",
+        "0x800d6f94"
+      ],
+      [
+        "0x800d9d74",
+        "0x800d7100"
+      ],
+      [
+        "0x800d9fd8",
+        "0x800d7364"
+      ],
+      [
+        "0x800da0e0",
+        "0x800d746c"
+      ],
+      [
+        "0x800da2b4",
+        "0x800d7640"
+      ],
+      [
+        "0x800da808",
+        "0x800d7b94"
+      ],
+      [
+        "0x800daab4",
+        "0x800d7e40"
+      ],
+      [
+        "0x800daab4",
+        "0x800d7e40"
+      ],
+      [
+        "0x800daab4",
+        "0x800d7e40"
+      ],
+      [
+        "0x800da83c",
+        "0x800d7bc8"
+      ],
+      [
+        "0x800da85c",
+        "0x800d7be8"
+      ],
+      [
+        "0x800da9b4",
+        "0x800d7d40"
+      ],
+      [
+        "0x800daa48",
+        "0x800d7dd4"
+      ],
+      [
+        "0x800daa84",
+        "0x800d7e10"
+      ],
+      [
+        "0x800dc774",
+        "0x800da818"
+      ],
+      [
+        "0x800dc774",
+        "0x800da818"
+      ],
+      [
+        "0x800dc77c",
+        "0x800da820"
+      ],
+      [
+        "0x800dc77c",
+        "0x800da820"
+      ],
+      [
+        "0x800dc784",
+        "0x800da828"
+      ]
+    ],
+    "unexplained": [],
+    "vector_bytes_identical": true
+  },
+  "constructors": [
+    {
+      "hash": "0x51c6",
+      "original": "0x800cc970",
+      "native": "NewCutInCameraSet",
+      "evidence": "original table hash + upstream CHARA/DEMO declaration"
+    },
+    {
+      "hash": "0x4170",
+      "original": "0x800c410c",
+      "native": "NewSnakeBreath",
+      "evidence": "original table hash + upstream CHARA/DEMO declaration"
+    },
+    {
+      "hash": "0x92bc",
+      "original": "0x800c6de4",
+      "native": "NewAsiotoKun",
+      "evidence": "original table hash + upstream CHARA/DEMO declaration"
+    },
+    {
+      "hash": "0x73ea",
+      "original": "0x800c5a84",
+      "native": "NewSphere",
+      "evidence": "original table hash + upstream CHARA/DEMO declaration"
+    },
+    {
+      "hash": "0x1ad3",
+      "original": "0x800c3e9c",
+      "native": "NewTextureLamp",
+      "evidence": "original table hash + upstream CHARA/DEMO declaration"
+    },
+    {
+      "hash": "0x18e3",
+      "original": "0x800c511c",
+      "native": "NewSnow",
+      "evidence": "original table hash + upstream CHARA/DEMO declaration"
+    },
+    {
+      "hash": "0x7a05",
+      "original": "0x800cbd3c",
+      "native": "NewCinemaScreenSet",
+      "evidence": "original table hash + upstream CHARA/DEMO declaration"
+    },
+    {
+      "hash": "0xa12e",
+      "original": "0x800cab6c",
+      "native": "NewFadeInOutSet",
+      "evidence": "original table hash + upstream CHARA/DEMO declaration"
+    },
+    {
+      "hash": "0x1787",
+      "original": "0x800ce5b0",
+      "native": "NewHindBoss",
+      "evidence": "original table hash + upstream CHARA/DEMO declaration"
+    },
+    {
+      "hash": "0xe068",
+      "original": "0x800ca494",
+      "native": "NewStage11Objects",
+      "evidence": "original table hash + upstream CHARA/DEMO declaration"
+    },
+    {
+      "hash": "0xec77",
+      "original": "0x800c5fac",
+      "native": "NewWallGcl",
+      "evidence": "original table hash + upstream CHARA/DEMO declaration"
+    },
+    {
+      "hash": "0xb103",
+      "original": "0x800cbf6c",
+      "native": "NewDynamicWallSet",
+      "evidence": "original table hash + upstream CHARA/DEMO declaration"
+    },
+    {
+      "hash": "0x711f",
+      "original": "0x800cb574",
+      "native": "NewLifeUp",
+      "evidence": "original table hash + upstream CHARA/DEMO declaration"
+    },
+    {
+      "hash": "0x91aa",
+      "original": "0x800ccbf0",
+      "native": "NewPutHzd",
+      "evidence": "original actor code and typed native recovery"
+    },
+    {
+      "hash": "0x0003",
+      "original": "0x800caad4",
+      "native": "NewFadeInOut",
+      "evidence": "original table hash + upstream CHARA/DEMO declaration"
+    },
+    {
+      "hash": "0x0004",
+      "original": "0x800caad4",
+      "native": "NewFadeInOut",
+      "evidence": "original table hash + upstream CHARA/DEMO declaration"
+    },
+    {
+      "hash": "0x000f",
+      "original": "0x800c6788",
+      "native": "NewDemoKage",
+      "evidence": "original table hash + upstream CHARA/DEMO declaration"
+    },
+    {
+      "hash": "0x0025",
+      "original": "0x800c87c8",
+      "native": "NewBlurSet",
+      "evidence": "original table hash + upstream CHARA/DEMO declaration"
+    },
+    {
+      "hash": "0x0028",
+      "original": "0x800cc5b4",
+      "native": "NewSepia_800C5214",
+      "evidence": "original table hash + upstream CHARA/DEMO declaration"
+    },
+    {
+      "hash": "0x0030",
+      "original": "0x800c7d1c",
+      "native": "NewBlastLine",
+      "evidence": "original actor code and typed native recovery"
+    },
+    {
+      "hash": "0x0031",
+      "original": "0x800c8dd0",
+      "native": "NewSmokeLn_800CDFA4",
+      "evidence": "original table hash + upstream CHARA/DEMO declaration"
+    },
+    {
+      "hash": "0x0037",
+      "original": "0x800c7960",
+      "native": "NewRedAlert2",
+      "evidence": "original table hash + upstream CHARA/DEMO declaration"
+    },
+    {
+      "hash": "0x0038",
+      "original": "0x800c7a24",
+      "native": "RedAlert_800C4F48",
+      "evidence": "original table hash + upstream CHARA/DEMO declaration"
+    },
+    {
+      "hash": "0x003b",
+      "original": "0x800ccfa4",
+      "native": "NewInverseLight",
+      "evidence": "original actor code and typed native recovery"
+    },
+    {
+      "hash": "0x003f",
+      "original": "0x800cd6b0",
+      "native": "NewInverseLight2",
+      "evidence": "original table hash + upstream CHARA/DEMO declaration"
+    }
+  ],
+  "tests": {
+    "shared_hind_original_variant_cases": 720,
+    "new_geometry_cases": 448,
+    "native_target_total_cases": 1456,
+    "native_target": "mgs_hind_helpers_test"
+  },
+  "runtime": {
+    "frames": 1800,
+    "story": 186,
+    "fixture": "tests/fixtures/s11h_story186.cdb",
+    "position": [
+      5011,
+      0,
+      -3505
+    ],
+    "heading": 1024,
+    "setup_source": "original story185 pre-demo assignments, then original script advances story186/restarts",
+    "observed": [
+      "PutHzd constructor",
+      "Hind constructor",
+      "recovered aiming controller",
+      "player input movement2888units across25movement ticks",
+      "clean bounded exit"
+    ],
+    "not_observed": [
+      "late combat state",
+      "completed boss fight",
+      "continuous campaign arrival",
+      "human playability"
+    ],
+    "log": "build/movie-audit/hind186.log",
+    "capture": "build/movie-audit/hind186.bmp"
+  },
+  "patch": "patches/mgs-hind-variants.patch",
+  "aislop": {
+    "errors": 0,
+    "warnings": 0
+  }
+}

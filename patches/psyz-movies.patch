@@ -1,0 +1,1305 @@
+diff --git a/psyz/LICENSE-psxe.txt b/psyz/LICENSE-psxe.txt
+new file mode 100644
+index 0000000..b91ae0e
+--- /dev/null
++++ b/psyz/LICENSE-psxe.txt
+@@ -0,0 +1,21 @@
++MIT License
++
++Copyright (c) 2024 Allkern (Lisandro Alarc√≥n)
++
++Permission is hereby granted, free of charge, to any person obtaining a copy
++of this software and associated documentation files (the "Software"), to deal
++in the Software without restriction, including without limitation the rights
++to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++copies of the Software, and to permit persons to whom the Software is
++furnished to do so, subject to the following conditions:
++
++The above copyright notice and this permission notice shall be included in all
++copies or substantial portions of the Software.
++
++THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
++SOFTWARE.
+diff --git a/psyz/MPL-2.0-PSn00bSDK.md b/psyz/MPL-2.0-PSn00bSDK.md
+new file mode 100644
+index 0000000..2e548dd
+--- /dev/null
++++ b/psyz/MPL-2.0-PSn00bSDK.md
+@@ -0,0 +1,407 @@
++
++# PSn00bSDK licenses
++
++## Overview
++
++As PSn00bSDK is made up of several independent components, it is covered by
++multiple licenses.
++
++- The PSn00bSDK core (libraries, CMake scripts and some command-line tools) is
++  licensed under the [MPL 2.0](#mpl-20). The license allows you to use the SDK
++  in a closed-source project ("larger work") but requires you to share any
++  changes you make to the SDK itself. You don't have to publish anything if you
++  are using PSn00bSDK asis.
++
++- The examples and template are also MPL licensed, however you may additionally
++  copy and modify their code and build scripts for use in your project without
++  having to share your changes.
++
++- `mkpsxiso` and `dumpsxiso` are maintained as a separate project and licensed
++  under the [GPLv2](#gnu-gplv2) or later.
++
++- The GCC toolchain bundled with binary releases is [GPLv3](#gnu-gplv3)
++  licensed. Source code is not provided as part of PSn00bSDK as none of it is
++  patched or modified in any way: a copy of the sources used to build the
++  toolchain can thus be [obtained from GNU](https://gcc.gnu.org/releases.html).
++
++- Some tools include code from the following third-party libraries:
++  - [tinyxml2](https://github.com/leethomason/tinyxml2) (zlib license)
++  - [miniaudio](https://miniaud.io) (public domain)
++  - [libflac](https://xiph.org/flac) (Xiph license)
++
++## MPL 2.0
++
++    Mozilla Public License Version 2.0
++    ==================================
++    
++    1. Definitions
++    --------------
++
++    1.1. "Contributor"
++        means each individual or legal entity that creates, contributes to
++        the creation of, or owns Covered Software.
++    
++    1.2. "Contributor Version"
++        means the combination of the Contributions of others (if any) used
++        by a Contributor and that particular Contributor's Contribution.
++    
++    1.3. "Contribution"
++        means Covered Software of a particular Contributor.
++    
++    1.4. "Covered Software"
++        means Source Code Form to which the initial Contributor has attached
++        the notice in Exhibit A, the Executable Form of such Source Code
++        Form, and Modifications of such Source Code Form, in each case
++        including portions thereof.
++    
++    1.5. "Incompatible With Secondary Licenses"
++        means
++    
++        (a) that the initial Contributor has attached the notice described
++            in Exhibit B to the Covered Software; or
++    
++        (b) that the Covered Software was made available under the terms of
++            version 1.1 or earlier of the License, but not also under the
++            terms of a Secondary License.
++    
++    1.6. "Executable Form"
++        means any form of the work other than Source Code Form.
++    
++    1.7. "Larger Work"
++        means a work that combines Covered Software with other material, in
++        a separate file or files, that is not Covered Software.
++    
++    1.8. "License"
++        means this document.
++    
++    1.9. "Licensable"
++        means having the right to grant, to the maximum extent possible,
++        whether at the time of the initial grant or subsequently, any and
++        all of the rights conveyed by this License.
++    
++    1.10. "Modifications"
++        means any of the following:
++    
++        (a) any file in Source Code Form that results from an addition to,
++            deletion from, or modification of the contents of Covered
++            Software; or
++    
++        (b) any new file in Source Code Form that contains any Covered
++            Software.
++    
++    1.11. "Patent Claims" of a Contributor
++        means any patent claim(s), including without limitation, method,
++        process, and apparatus claims, in any patent Licensable by such
++        Contributor that would be infringed, but for the grant of the
++        License, by the making, using, selling, offering for sale, having
++        made, import, or transfer of either its Contributions or its
++        Contributor Version.
++    
++    1.12. "Secondary License"
++        means either the GNU General Public License, Version 2.0, the GNU
++        Lesser General Public License, Version 2.1, the GNU Affero General
++        Public License, Version 3.0, or any later versions of those
++        licenses.
++    
++    1.13. "Source Code Form"
++        means the form of the work preferred for making modifications.
++    
++    1.14. "You" (or "Your")
++        means an individual or a legal entity exercising rights under this
++        License. For legal entities, "You" includes any entity that
++        controls, is controlled by, or is under common control with You. For
++        purposes of this definition, "control" means (a) the power, direct
++        or indirect, to cause the direction or management of such entity,
++        whether by contract or otherwise, or (b) ownership of more than
++        fifty percent (50%) of the outstanding shares or beneficial
++        ownership of such entity.
++    
++    2. License Grants and Conditions
++    --------------------------------
++    
++    2.1. Grants
++    
++    Each Contributor hereby grants You a world-wide, royalty-free,
++    non-exclusive license:
++    
++    (a) under intellectual property rights (other than patent or trademark)
++        Licensable by such Contributor to use, reproduce, make available,
++        modify, display, perform, distribute, and otherwise exploit its
++        Contributions, either on an unmodified basis, with Modifications, or
++        as part of a Larger Work; and
++    
++    (b) under Patent Claims of such Contributor to make, use, sell, offer
++        for sale, have made, import, and otherwise transfer either its
++        Contributions or its Contributor Version.
++    
++    2.2. Effective Date
++    
++    The licenses granted in Section 2.1 with respect to any Contribution
++    become effective for each Contribution on the date the Contributor first
++    distributes such Contribution.
++    
++    2.3. Limitations on Grant Scope
++    
++    The licenses granted in this Section 2 are the only rights granted under
++    this License. No additional rights or licenses will be implied from the
++    distribution or licensing of Covered Software under this License.
++    Notwithstanding Section 2.1(b) above, no patent license is granted by a
++    Contributor:
++    
++    (a) for any code that a Contributor has removed from Covered Software;
++        or
++    
++    (b) for infringements caused by: (i) Your and any other third party's
++        modifications of Covered Software, or (ii) the combination of its
++        Contributions with other software (except as part of its Contributor
++        Version); or
++    
++    (c) under Patent Claims infringed by Covered Software in the absence of
++        its Contributions.
++    
++    This License does not grant any rights in the trademarks, service marks,
++    or logos of any Contributor (except as may be necessary to comply with
++    the notice requirements in Section 3.4).
++    
++    2.4. Subsequent Licenses
++    
++    No Contributor makes additional grants as a result of Your choice to
++    distribute the Covered Software under a subsequent version of this
++    License (see Section 10.2) or under the terms of a Secondary License (if
++    permitted under the terms of Section 3.3).
++    
++    2.5. Representation
++    
++    Each Contributor represents that the Contributor believes its
++    Contributions are its original creation(s) or it has sufficient rights
++    to grant the rights to its Contributions conveyed by this License.
++    
++    2.6. Fair Use
++    
++    This License is not intended to limit any rights You have under
++    applicable copyright doctrines of fair use, fair dealing, or other
++    equivalents.
++    
++    2.7. Conditions
++    
++    Sections 3.1, 3.2, 3.3, and 3.4 are conditions of the licenses granted
++    in Section 2.1.
++    
++    3. Responsibilities
++    -------------------
++    
++    3.1. Distribution of Source Form
++    
++    All distribution of Covered Software in Source Code Form, including any
++    Modifications that You create or to which You contribute, must be under
++    the terms of this License. You must inform recipients that the Source
++    Code Form of the Covered Software is governed by the terms of this
++    License, and how they can obtain a copy of this License. You may not
++    attempt to alter or restrict the recipients' rights in the Source Code
++    Form.
++    
++    3.2. Distribution of Executable Form
++    
++    If You distribute Covered Software in Executable Form then:
++    
++    (a) such Covered Software must also be made available in Source Code
++        Form, as described in Section 3.1, and You must inform recipients of
++        the Executable Form how they can obtain a copy of such Source Code
++        Form by reasonable means in a timely manner, at a charge no more
++        than the cost of distribution to the recipient; and
++    
++    (b) You may distribute such Executable Form under the terms of this
++        License, or sublicense it under different terms, provided that the
++        license for the Executable Form does not attempt to limit or alter
++        the recipients' rights in the Source Code Form under this License.
++    
++    3.3. Distribution of a Larger Work
++    
++    You may create and distribute a Larger Work under terms of Your choice,
++    provided that You also comply with the requirements of this License for
++    the Covered Software. If the Larger Work is a combination of Covered
++    Software with a work governed by one or more Secondary Licenses, and the
++    Covered Software is not Incompatible With Secondary Licenses, this
++    License permits You to additionally distribute such Covered Software
++    under the terms of such Secondary License(s), so that the recipient of
++    the Larger Work may, at their option, further distribute the Covered
++    Software under the terms of either this License or such Secondary
++    License(s).
++    
++    3.4. Notices
++    
++    You may not remove or alter the substance of any license notices
++    (including copyright notices, patent notices, disclaimers of warranty,
++    or limitations of liability) contained within the Source Code Form of
++    the Covered Software, except that You may alter any license notices to
++    the extent required to remedy known factual inaccuracies.
++    
++    3.5. Application of Additional Terms
++    
++    You may choose to offer, and to charge a fee for, warranty, support,
++    indemnity or liability obligations to one or more recipients of Covered
++    Software. However, You may do so only on Your own behalf, and not on
++    behalf of any Contributor. You must make it absolutely clear that any
++    such warranty, support, indemnity, or liability obligation is offered by
++    You alone, and You hereby agree to indemnify every Contributor for any
++    liability incurred by such Contributor as a result of warranty, support,
++    indemnity or liability terms You offer. You may include additional
++    disclaimers of warranty and limitations of liability specific to any
++    jurisdiction.
++    
++    4. Inability to Comply Due to Statute or Regulation
++    ---------------------------------------------------
++    
++    If it is impossible for You to comply with any of the terms of this
++    License with respect to some or all of the Covered Software due to
++    statute, judicial order, or regulation then You must: (a) comply with
++    the terms of this License to the maximum extent possible; and (b)
++    describe the limitations and the code they affect. Such description must
++    be placed in a text file included with all distributions of the Covered
++    Software under this License. Except to the extent prohibited by statute
++    or regulation, such description must be sufficiently detailed for a
++    recipient of ordinary skill to be able to understand it.
++    
++    5. Termination
++    --------------
++    
++    5.1. The rights granted under this License will terminate automatically
++    if You fail to comply with any of its terms. However, if You become
++    compliant, then the rights granted under this License from a particular
++    Contributor are reinstated (a) provisionally, unless and until such
++    Contributor explicitly and finally terminates Your grants, and (b) on an
++    ongoing basis, if such Contributor fails to notify You of the
++    non-compliance by some reasonable means prior to 60 days after You have
++    come back into compliance. Moreover, Your grants from a particular
++    Contributor are reinstated on an ongoing basis if such Contributor
++    notifies You of the non-compliance by some reasonable means, this is the
++    first time You have received notice of non-compliance with this License
++    from such Contributor, and You become compliant prior to 30 days after
++    Your receipt of the notice.
++    
++    5.2. If You initiate litigation against any entity by asserting a patent
++    infringement claim (excluding declaratory judgment actions,
++    counter-claims, and cross-claims) alleging that a Contributor Version
++    directly or indirectly infringes any patent, then the rights granted to
++    You by any and all Contributors for the Covered Software under Section
++    2.1 of this License shall terminate.
++    
++    5.3. In the event of termination under Sections 5.1 or 5.2 above, all
++    end user license agreements (excluding distributors and resellers) which
++    have been validly granted by You or Your distributors under this License
++    prior to termination shall survive termination.
++    
++    ************************************************************************
++    *                                                                      *
++    *  6. Disclaimer of Warranty                                           *
++    *  -------------------------                                           *
++    *                                                                      *
++    *  Covered Software is provided under this License on an "as is"       *
++    *  basis, without warranty of any kind, either expressed, implied, or  *
++    *  statutory, including, without limitation, warranties that the       *
++    *  Covered Software is free of defects, merchantable, fit for a        *
++    *  particular purpose or non-infringing. The entire risk as to the     *
++    *  quality and performance of the Covered Software is with You.        *
++    *  Should any Covered Software prove defective in any respect, You     *
++    *  (not any Contributor) assume the cost of any necessary servicing,   *
++    *  repair, or correction. This disclaimer of warranty constitutes an   *
++    *  essential part of this License. No use of any Covered Software is   *
++    *  authorized under this License except under this disclaimer.         *
++    *                                                                      *
++    ************************************************************************
++    
++    ************************************************************************
++    *                                                                      *
++    *  7. Limitation of Liability                                          *
++    *  --------------------------                                          *
++    *                                                                      *
++    *  Under no circumstances and under no legal theory, whether tort      *
++    *  (including negligence), contract, or otherwise, shall any           *
++    *  Contributor, or anyone who distributes Covered Software as          *
++    *  permitted above, be liable to You for any direct, indirect,         *
++    *  special, incidental, or consequential damages of any character      *
++    *  including, without limitation, damages for lost profits, loss of    *
++    *  goodwill, work stoppage, computer failure or malfunction, or any    *
++    *  and all other commercial damages or losses, even if such party      *
++    *  shall have been informed of the possibility of such damages. This   *
++    *  limitation of liability shall not apply to liability for death or   *
++    *  personal injury resulting from such party's negligence to the       *
++    *  extent applicable law prohibits such limitation. Some               *
++    *  jurisdictions do not allow the exclusion or limitation of           *
++    *  incidental or consequential damages, so this exclusion and          *
++    *  limitation may not apply to You.                                    *
++    *                                                                      *
++    ************************************************************************
++    
++    8. Litigation
++    -------------
++    
++    Any litigation relating to this License may be brought only in the
++    courts of a jurisdiction where the defendant maintains its principal
++    place of business and such litigation shall be governed by laws of that
++    jurisdiction, without reference to its conflict-of-law provisions.
++    Nothing in this Section shall prevent a party's ability to bring
++    cross-claims or counter-claims.
++    
++    9. Miscellaneous
++    ----------------
++    
++    This License represents the complete agreement concerning the subject
++    matter hereof. If any provision of this License is held to be
++    unenforceable, such provision shall be reformed only to the extent
++    necessary to make it enforceable. Any law or regulation which provides
++    that the language of a contract shall be construed against the drafter
++    shall not be used to construe this License against a Contributor.
++    
++    10. Versions of the License
++    ---------------------------
++    
++    10.1. New Versions
++    
++    Mozilla Foundation is the license steward. Except as provided in Section
++    10.3, no one other than the license steward has the right to modify or
++    publish new versions of this License. Each version will be given a
++    distinguishing version number.
++    
++    10.2. Effect of New Versions
++    
++    You may distribute the Covered Software under the terms of the version
++    of the License under which You originally received the Covered Software,
++    or under the terms of any subsequent version published by the license
++    steward.
++    
++    10.3. Modified Versions
++    
++    If you create software not governed by this License, and you want to
++    create a new license for such software, you may create and use a
++    modified version of this License if you rename the license and remove
++    any references to the name of the license steward (except to note that
++    such modified license differs from this License).
++    
++    10.4. Distributing Source Code Form that is Incompatible With Secondary
++    Licenses
++    
++    If You choose to distribute Source Code Form that is Incompatible With
++    Secondary Licenses under the terms of this version of the License, the
++    notice described in Exhibit B of this License must be attached.
++    
++    Exhibit A - Source Code Form License Notice
++    -------------------------------------------
++    
++      This Source Code Form is subject to the terms of the Mozilla Public
++      License, v. 2.0. If a copy of the MPL was not distributed with this
++      file, You can obtain one at http://mozilla.org/MPL/2.0/.
++    
++    If it is not possible or desirable to put the notice in a particular
++    file, then You may include the notice in a location (such as a LICENSE
++    file in a relevant directory) where a recipient would be likely to look
++    for such a notice.
++    
++    You may add additional accurate notices of copyright ownership.
++    
++    Exhibit B - "Incompatible With Secondary Licenses" Notice
++    ---------------------------------------------------------
++    
++      This Source Code Form is "Incompatible With Secondary Licenses", as
++      defined by the Mozilla Public License, v. 2.0.
++
+diff --git a/psyz/include/libpress.h b/psyz/include/libpress.h
+index 7cb94a6..c67972c 100644
+--- a/psyz/include/libpress.h
++++ b/psyz/include/libpress.h
+@@ -71,10 +71,10 @@ typedef struct {
+  * @brief VLC table type
+  *
+  * VLC (Variable Length Code) decoding table. Size can be obtained with
+- * sizeof(DECDCTTAB). The table is held in compressed format (4KB) and
+- * decompressed to 64KB when used.
++ * sizeof(DECDCTTAB). This native decoder expands its compressed lookup
++ * table into 34,816 bytes of caller-owned storage.
+  */
+-typedef u_short DECDCTTAB[0x2000];
++typedef u_short DECDCTTAB[0x4400];
+ 
+ /* Functions */
+ 
+@@ -248,11 +248,14 @@ int DecDCTvlc(u_long* bs, u_long* buf);
+  */
+ int DecDCTvlc2(u_long* bs, u_long* buf, DECDCTTAB table);
+ 
++/* Native bounded variant for callers that know their compressed frame size. */
++int Psyz_DecDCTvlcBounded(const void *bs, unsigned input_bytes, u_long *buf,
++                        unsigned output_words, void *table);
++
+ /**
+  * @brief Build the VLC table
+  *
+- * Builds the VLC table for use with DecDCTvlc2(). The VLC table is held in
+- * compressed format (4KB) and decompressed to 64KB when used.
++ * Builds the native VLC lookup table for use with DecDCTvlc2().
+  *
+  * @param table VLC buffer (size: sizeof(DECDCTTAB))
+  */
+diff --git a/psyz/src/psyz/libcd.c b/psyz/src/psyz/libcd.c
+index f79249c..e2177f8 100644
+--- a/psyz/src/psyz/libcd.c
++++ b/psyz/src/psyz/libcd.c
+@@ -10,6 +10,7 @@
+ #include <limits.h>
+ #include <kernel.h>
+ #include "../internal.h"
++#include "../../../decomp/src/libcd/libcd_stream.h"
+ #include "../../decomp/src/libspu/libspu_private.h"
+ 
+ #define SECTOR_SIZE 2352
+@@ -468,11 +469,10 @@ end:
+ 
+ #define XA_DECODED_MAX_FRAMES 4032            // 18 blocks * 4 sub * 28 samples
+ #define XA_STEP_Q16 ((37800u << 16) / 44100u) // 56173
+-// Real hardware keeps reading sectors and discards the ones rejected by the
+-// filter, so once the selected file/channel ends playback goes silent. Give up
+-// after this many consecutive rejected sectors instead of scanning the disc
+-// for the next matching one, which is unrelated audio.
+-#define XA_MAX_SECTOR_GAP 64
++// The VBlank producer supplies interleaved XA sectors to the audio thread.
++#define XA_QUEUE_SECTORS 32
++static unsigned char xa_queue[XA_QUEUE_SECTORS][SECTOR_SIZE];
++static unsigned xa_queue_head, xa_queue_count;
+ 
+ static struct {
+     short decoded[XA_DECODED_MAX_FRAMES * 2];
+@@ -485,12 +485,15 @@ static struct {
+     int hist_r_old, hist_r_older;
+     // Hermite ring: index [0]=oldest .. [3]=newest per channel
+     short rh_l[4], rh_r[4];
++    unsigned int step;
+     unsigned int phase; // 16.16 fractional position into the input stream
+     int cur_abs_sector; // absolute last sector used, for CdlGetlocL
+-    int stream_ended;   // filtered file/channel ran out, emit silence
++    int stream_ended;   // sector reader ended; drain queued samples first
+ } xa;
+ 
+ static void xa_reset_stream(void) {
++    xa_queue_head = 0;
++    xa_queue_count = 0;
+     xa.decoded_count = 0;
+     xa.decoded_pos = 0;
+     xa.hist_l_old = xa.hist_l_older = 0;
+@@ -498,6 +501,7 @@ static void xa_reset_stream(void) {
+     memset(xa.rh_l, 0, sizeof(xa.rh_l));
+     memset(xa.rh_r, 0, sizeof(xa.rh_r));
+     xa.phase = 0;
++    xa.step = XA_STEP_Q16;
+     xa.stream_ended = 0;
+ }
+ 
+@@ -525,7 +529,7 @@ static void xa_decode_28(const unsigned char* blk, int sub, int nibble,
+     for (int j = 0; j < 28; j++) {
+         const unsigned char byte = blk[16 + sub + j * 4];
+         const int t = s4((byte >> (nibble * 4)) & 0x0F);
+-        const int s = (t << shift) + (((*prev) * f0 + (*prev2) * f1 + 32) / 64);
++        const int s = (t * (1 << shift)) + (((*prev) * f0 + (*prev2) * f1 + 32) / 64);
+         dst[j * stride] = clamp16(s);
+         *prev2 = *prev;
+         *prev = s;
+@@ -573,49 +577,43 @@ static int xa_decode_user_mono_4bit(const unsigned char* user) {
+ }
+ 
+ static int xa_read_and_decode_sector(void) {
+-    unsigned char sector[SECTOR_SIZE];
+-    int gap = 0;
+-    while (!xa.stream_ended) {
+-        const size_t n = fread(sector, 1, SECTOR_SIZE, track_file);
+-        if (n != SECTOR_SIZE) {
+-            return 0; // EOF or short read
+-        }
+-        xa.cur_abs_sector++;
+-        const unsigned char file = sector[0x10];
+-        const unsigned char channel = sector[0x11];
+-        const unsigned char submode = sector[0x12];
+-        const unsigned char ci = sector[0x13];
+-        if ((submode & 0x44) != 0x44 || !xa_sector_matches(file, channel)) {
+-            // data sector or filtered out, skip from XA stream
+-            if (++gap >= XA_MAX_SECTOR_GAP) {
+-                xa.stream_ended = 1;
+-            }
+-            continue;
+-        }
+-        const unsigned char* user = &sector[0x18];
+-        int stereo = (ci & 0x03) == 1;
+-        int rate18900 = (ci & 0x04) != 0;
+-        int bits8 = (ci & 0x30) != 0;
+-        if (rate18900 || bits8) {
+-            LOG_ONCE(
+-                "XA: 18900Hz or 8-bit not supported, decoding as 4bit/37800");
+-        }
+-        if (stereo) {
+-            xa.decoded_count = xa_decode_user_stereo_4bit(user);
+-        } else {
+-            xa.decoded_count = xa_decode_user_mono_4bit(user);
+-        }
+-        xa.decoded_pos = 0;
+-        return 1;
+-    }
+-    memset(xa.decoded, 0, sizeof(xa.decoded));
+-    xa.decoded_count = XA_DECODED_MAX_FRAMES / 2;
++    if (!xa_queue_count)
++        return 0;
++    const unsigned char *sector = xa_queue[xa_queue_head];
++    const unsigned char ci = sector[0x13];
++    const unsigned char *user = sector + 0x18;
++    if ((ci & 0x30) != 0) {
++        ERRORF("Unsupported XA coding information 0x%02x", ci);
++        exit(EXIT_FAILURE);
++    }
++    if ((ci & 3) == 1)
++        xa.decoded_count = xa_decode_user_stereo_4bit(user);
++    else
++        xa.decoded_count = xa_decode_user_mono_4bit(user);
+     xa.decoded_pos = 0;
++    xa.step = (((ci & 4) ? 18900u : 37800u) << 16) / 44100u;
++    xa_queue_head = (xa_queue_head + 1) % XA_QUEUE_SECTORS;
++    --xa_queue_count;
+     return 1;
+ }
+ 
+-// Pull next 37800 Hz stereo input frame into the Hermite ring buffers.
+-// Returns 1 on success, 0 if stream ended.
++static void xa_queue_sector(const unsigned char *sector) {
++    Psyz_AudioLock();
++    if (xa_sector_matches(sector[0x10], sector[0x11])) {
++        if (xa_queue_count == XA_QUEUE_SECTORS) {
++            ERRORF("XA audio queue overflow");
++            exit(EXIT_FAILURE);
++        }
++        unsigned tail = (xa_queue_head + xa_queue_count) % XA_QUEUE_SECTORS;
++        memcpy(xa_queue[tail], sector, SECTOR_SIZE);
++        ++xa_queue_count;
++    }
++    xa.cur_abs_sector = data_sector_number - 1;
++    Psyz_AudioUnlock();
++}
++
++// Pull the next decoded stereo frame into the Hermite ring buffers.
++// Returns 0 while the sector queue is empty or after the reader ends.
+ static int xa_advance_input(void) {
+     if (xa.decoded_pos >= xa.decoded_count) {
+         if (!xa_read_and_decode_sector()) {
+@@ -658,14 +656,14 @@ static size_t xa_pull_samples(short* buf, size_t max_frames) {
+     size_t written = 0;
+     int hit_eof = 0;
+     Psyz_AudioLock();
+-    if (!is_playing || !track_file || !xa.active) {
++    if (!is_playing || !xa.active) {
+         goto end;
+     }
+     // Prime Hermite ring on first call so we have y0..y2 valid.
+     while (xa.rh_l[3] == 0 && xa.rh_l[2] == 0 && xa.rh_l[1] == 0 &&
+            xa.decoded_pos == 0 && xa.decoded_count == 0) {
+         if (!xa_advance_input()) {
+-            hit_eof = 1;
++            hit_eof = xa.stream_ended;
+             goto end;
+         }
+         if (xa.decoded_count > 0)
+@@ -675,7 +673,7 @@ static size_t xa_pull_samples(short* buf, size_t max_frames) {
+         // Advance input as many times as needed to get phase < 1.0.
+         while (xa.phase >= 0x10000) {
+             if (!xa_advance_input()) {
+-                hit_eof = 1;
++                hit_eof = xa.stream_ended;
+                 goto end;
+             }
+             xa.phase -= 0x10000;
+@@ -689,7 +687,7 @@ static size_t xa_pull_samples(short* buf, size_t max_frames) {
+             buf[written * 2 + 1] = hermite4(
+                 xa.rh_r[0], xa.rh_r[1], xa.rh_r[2], xa.rh_r[3], xa.phase);
+         }
+-        xa.phase += XA_STEP_Q16;
++        xa.phase += xa.step;
+         written++;
+     }
+ end:
+@@ -838,20 +836,16 @@ static void psyz_play() {
+ 
+ // Begin XA streaming at CD_pos (CdlReadN / CdlReadS).
+ static void psyz_xa_read(void) {
+-    if (!(CD_mode & CdlModeRT)) {
+-        LOG_ONCE("CdlReadN/ReadS without CdlModeRT not implemented");
+-        return;
+-    }
+-    data_read_active = 0;
+-    data_sector_valid = 0;
+-    if (open_track_at_cd_pos()) {
+-        return;
+-    }
+     Psyz_AudioLock();
+     xa_reset_stream();
+     xa.cur_abs_sector = CdPosToInt(&CD_pos) - 1;
+     xa.active = 1;
+     is_playing = 1;
++    data_sector_number = CdPosToInt(&CD_pos);
++    data_sector_valid = 0;
++    data_frame_accumulator = 0;
++    data_read_active = 1;
++    CD_status = (CD_status & ~CdlStatError) | CdlStatRead;
+     Psyz_AudioUnlock();
+ }
+ 
+@@ -1016,22 +1010,31 @@ int CD_ready(int mode, u_char* result) {
+ void Psyz_CdVBlank(void) {
+     unsigned int frame_scale = GetVideoMode() == MODE_PAL ? 1000 : 1001;
+     unsigned int frame_rate = GetVideoMode() == MODE_PAL ? 50000 : 60000;
+-    if (!data_read_active || !CD_cbready) {
++    if (!data_read_active || (!CD_cbready && !(CD_mode & CdlModeRT))) {
+         data_frame_accumulator = 0;
+         return;
+     }
+     data_frame_accumulator += (CD_mode & CdlModeSpeed ? 150 : 75) * frame_scale;
+-    while (data_frame_accumulator >= frame_rate && data_read_active && CD_cbready) {
++    while (data_frame_accumulator >= frame_rate && data_read_active) {
+         u_char result[8] = {0};
+         data_frame_accumulator -= frame_rate;
+         data_sector_valid = 0;
+         int status = CD_ready(1, result);
+         if (status == CdlDiskError) {
+             data_read_active = 0;
++            Psyz_AudioLock();
++            xa.stream_ended = 1;
++            Psyz_AudioUnlock();
+             CD_status = (CD_status & ~CdlStatRead) | CdlStatError;
+             result[0] = (u_char)CD_status;
+         }
+-        CD_cbready((u_char)status, result);
++        if (status == CdlDataReady && (CD_mode & CdlModeRT) &&
++            (data_sector[0x12] & 0x44) == 0x44) {
++            xa_queue_sector(data_sector);
++            data_sector_valid = 0;
++        } else if (CD_cbready) {
++            CD_cbready((u_char)status, result);
++        }
+     }
+ }
+ static int CD_command(u_char com, u_char* param, u_char* result, s32 arg3);
+@@ -1306,4 +1309,70 @@ int CdReadSync(int mode, u_char* result) {
+     return 0;
+ }
+ 
+-void StCdInterrupt(void) { NOT_IMPLEMENTED; }
++static int ReserveStreamFrame(const StHEADER *header)
++{
++    unsigned count = header->nSectors;
++    if (!count || count >= (unsigned)StRingSize ||
++        header->frameSize > count * 2016u) {
++        ERRORF("STR frame %u exceeds ring capacity", header->frameCount);
++        exit(EXIT_FAILURE);
++    }
++    unsigned start = (unsigned)StRingIdx1;
++    int wrap = start + count >= (unsigned)StRingSize;
++    if (wrap)
++        start = 0;
++    for (unsigned i = 0; i < count; ++i) {
++        if (StRingAddr[start + i].id != 0)
++            return 0;
++    }
++    if (wrap) {
++        if (StRingAddr[StRingIdx1].id != 0)
++            return 0;
++        StRingAddr[StRingIdx1].id = 1;
++    }
++    for (unsigned i = 0; i < count; ++i)
++        StRingAddr[start + i].id = 3;
++    StRingAddr[start] = *header;
++    StRingAddr[start].id = 3;
++    CdIntToPos(data_sector_number - 1, &StRingAddr[start].loc);
++    StRingIdx2 = (int)start;
++    StRingIdx1 = (int)(start + count);
++    Stframe_no = (int)header->frameCount;
++    Stsector_offset = 0;
++    StCdIntrFlag = 1;
++    return 1;
++}
++
++void StCdInterrupt(void)
++{
++    StHEADER header;
++    if (!data_sector_valid || !StRingAddr || StRingSize <= 1)
++        return;
++    unsigned offset = data_sector[15] == 2 ? 24 : 16;
++    memcpy(&header, data_sector + offset, sizeof(header));
++    if (header.id != 0x160 || header.frameCount < (unsigned)StStartFrame ||
++        header.frameCount > (unsigned)StEndFrame)
++        return;
++    if (StCdIntrFlag && (header.frameCount != (unsigned)Stframe_no ||
++        header.secCount != (unsigned)Stsector_offset ||
++        header.nSectors != StRingAddr[StRingIdx2].nSectors)) {
++        ERRORF("STR frame %u has missing or reordered sectors", header.frameCount);
++        exit(EXIT_FAILURE);
++    }
++    if (header.secCount == 0 && !ReserveStreamFrame(&header))
++        return;
++    if (!StCdIntrFlag || header.frameCount != (unsigned)Stframe_no ||
++        header.secCount != (unsigned)Stsector_offset ||
++        header.nSectors != StRingAddr[StRingIdx2].nSectors)
++        return;
++    unsigned char *destination = (unsigned char *)&StRingAddr[StRingSize] +
++                                ((unsigned)StRingIdx2 + header.secCount) * 2016u;
++    memcpy(destination, data_sector + offset + sizeof(header), 2016);
++    data_sector_valid = 0;
++    ++Stsector_offset;
++    if (Stsector_offset == header.nSectors) {
++        StCdIntrFlag = 0;
++        StFinalSector = 1;
++        Psyz_DmaComplete(DMA_CHANNEL_CD);
++    }
++}
+diff --git a/psyz/src/psyz/libpress.c b/psyz/src/psyz/libpress.c
+index 7cc0e0d..95310ef 100644
+--- a/psyz/src/psyz/libpress.c
++++ b/psyz/src/psyz/libpress.c
+@@ -1,25 +1,163 @@
+ #include <psyz.h>
+ #include <libpress.h>
+-#include <psyz/log.h>
++#include <stdlib.h>
++#include <string.h>
+ #include "../../../decomp/src/libpress/libpress_private.h"
++#include "mdec_decode.h"
++#include "vlc.h"
+ 
+-void MDEC_reset(int mode) { NOT_IMPLEMENTED; }
+-void MDEC_in(u_long* buf, int size) { NOT_IMPLEMENTED; }
+-void MDEC_out(u_long* buf, int size) { NOT_IMPLEMENTED; }
+-int MDEC_in_sync(void) {
+-    NOT_IMPLEMENTED;
+-    return 0;
++_Static_assert(sizeof(DECDCTTAB) >= sizeof(PsyzVlcTable), "public VLC table capacity");
++
++static DECDCTENV environment;
++static unsigned char *decoded;
++static size_t decoded_capacity, decoded_size, decoded_position;
++static u_long *output_destination;
++static size_t output_bytes;
++static int servicing_output;
++static int input_busy;
++
++static void DecoderError(const char *message)
++{
++    ERRORF("MDEC: %s", message);
++    exit(EXIT_FAILURE);
++}
++
++static void ServiceOutput(void)
++{
++    if (servicing_output)
++        return;
++    servicing_output = 1;
++    while (output_destination && decoded_position < decoded_size) {
++        if (output_bytes > decoded_size - decoded_position)
++            DecoderError("output DMA request exceeds decoded image");
++        memcpy(output_destination, decoded + decoded_position, output_bytes);
++        decoded_position += output_bytes;
++        output_destination = NULL;
++        output_bytes = 0;
++        Psyz_DmaComplete(DMA_CHANNEL_MDEC_OUT);
++    }
++    servicing_output = 0;
++}
++
++void MDEC_reset(int mode)
++{
++    decoded_size = 0;
++    decoded_position = 0;
++    output_destination = NULL;
++    output_bytes = 0;
++    input_busy = 0;
++    if (mode == 0)
++        DecDCTGetEnv(&environment);
++}
++
++static void DecodeImage(const u_long *buffer, int words)
++{
++    unsigned command = buffer[0];
++    unsigned depth = (command >> 27) & 3;
++    size_t macroblock_size = depth == 3 ? 512 : 768;
++    if (depth < 2 || words <= 0 || words > 32768 || decoded_position < decoded_size)
++        DecoderError("invalid or overlapping image input");
++    size_t capacity = ((size_t)words / 6 + 1) * macroblock_size;
++    if (capacity > decoded_capacity) {
++        unsigned char *replacement = realloc(decoded, capacity);
++        if (!replacement)
++            DecoderError("cannot allocate decoded image");
++        decoded = replacement;
++        decoded_capacity = capacity;
++    }
++    PsyzMdecInput input = {(const uint16_t *)(buffer + 1),
++                          (const uint16_t *)(buffer + 1 + words)};
++    decoded_position = 0;
++    decoded_size = 0;
++    for (;;) {
++        int result = Psyz_MdecDecodeMacroblock(&input, &environment, command,
++                          decoded + decoded_size, decoded_capacity - decoded_size);
++        if (result < 0)
++            DecoderError("truncated run-level input");
++        if (!result)
++            break;
++        decoded_size += macroblock_size;
++    }
++    if (!decoded_size)
++        DecoderError("image contains no macroblocks");
++}
++
++void MDEC_in(u_long *buffer, int words)
++{
++    if (!buffer || words < 0)
++        DecoderError("invalid DMA input");
++    input_busy = 1;
++    switch (buffer[0] >> 29) {
++    case 1:
++        if ((buffer[0] & 0xffff) != (unsigned)words)
++            DecoderError("run-level size disagrees with command");
++        DecodeImage(buffer, words);
++        break;
++    case 2:
++        if (words != ((buffer[0] & 1) ? 32 : 16))
++            DecoderError("invalid quantization table size");
++        memcpy(environment.iq_y, buffer + 1, 64);
++        if (buffer[0] & 1)
++            memcpy(environment.iq_c, buffer + 17, 64);
++        break;
++    case 3:
++        if (words != 32)
++            DecoderError("invalid transform table size");
++        memcpy(environment.dct, buffer + 1, 128);
++        break;
++    default:
++        DecoderError("unsupported command");
++    }
++    input_busy = 0;
++    Psyz_DmaComplete(DMA_CHANNEL_MDEC_IN);
++    ServiceOutput();
+ }
+-int MDEC_out_sync(void) {
+-    NOT_IMPLEMENTED;
+-    return 0;
++
++void MDEC_out(u_long *buffer, int words)
++{
++    if (!buffer || words <= 0 || words > 0x100000 || output_destination)
++        DecoderError("invalid or overlapping output DMA");
++    output_destination = buffer;
++    output_bytes = (size_t)words * sizeof(*buffer);
++    ServiceOutput();
+ }
+-u_long MDEC_status(void) {
+-    NOT_IMPLEMENTED;
+-    return 0;
++
++int MDEC_in_sync(void) { return input_busy; }
++int MDEC_out_sync(void) { return output_destination != NULL; }
++u_long MDEC_status(void)
++{
++    return (input_busy ? 1u << 29 : 0) | (output_destination ? 1u << 24 : 0);
++}
++
++int Psyz_DecDCTvlcBounded(const void *bs, unsigned input_bytes, u_long *buffer,
++                         unsigned output_words, void *table)
++{
++    return Psyz_VlcDecode(bs, input_bytes, (uint32_t *)buffer, output_words,
++                          (const PsyzVlcTable *)table);
++}
++
++int DecDCTvlc2(u_long *bs, u_long *buffer, DECDCTTAB table)
++{
++    if (!bs || !buffer || !table)
++        return -1;
++    return Psyz_DecDCTvlcBounded(bs, 0x20000, buffer,
++                                (bs[0] & 0xffff) + 1, table);
++}
++
++void DecDCTvlcBuild(u_short *table)
++{
++    if (!table)
++        DecoderError("missing VLC table storage");
++    Psyz_VlcBuild((PsyzVlcTable *)table);
+ }
+ 
+-int DecDCTvlc(u_long* bs, u_long* buf) {
+-    NOT_IMPLEMENTED;
+-    return 0;
++int DecDCTvlc(u_long *bs, u_long *buffer)
++{
++    static PsyzVlcTable table;
++    static int initialized;
++    if (!initialized) {
++        Psyz_VlcBuild(&table);
++        initialized = 1;
++    }
++    return DecDCTvlc2(bs, buffer, (u_short *)&table);
+ }
+diff --git a/psyz/src/psyz/mdec_decode.c b/psyz/src/psyz/mdec_decode.c
+new file mode 100644
+index 0000000..431cbfb
+--- /dev/null
++++ b/psyz/src/psyz/mdec_decode.c
+@@ -0,0 +1,132 @@
++/*
++ * Run-level, IDCT and color conversion adapted from allkern/psxe mdec.c,
++ * commit 8459c63ed78c703f46e3c51daa65a2fdf96d02e6.
++ * Copyright (c) 2024 Allkern (Lisandro AlarcÛn), MIT license.
++ * See ../../LICENSE-psxe.txt. Native adaptation bounds every input/output access.
++ */
++#include "mdec_decode.h"
++#include <string.h>
++
++static const unsigned char zigzag[64] = {
++     0,  1,  8, 16,  9,  2,  3, 10, 17, 24, 32, 25, 18, 11,  4,  5,
++    12, 19, 26, 33, 40, 48, 41, 34, 27, 20, 13,  6,  7, 14, 21, 28,
++    35, 42, 49, 56, 57, 50, 43, 36, 29, 22, 15, 23, 30, 37, 44, 51,
++    58, 59, 52, 45, 38, 31, 39, 46, 53, 60, 61, 54, 47, 55, 62, 63
++};
++
++static int Clamp(int value, int minimum, int maximum)
++{
++    return value < minimum ? minimum : (value > maximum ? maximum : value);
++}
++
++static int Signed10(unsigned value)
++{
++    value &= 0x3ff;
++    return value & 0x200 ? (int)value - 1024 : (int)value;
++}
++
++static void InverseDct(int16_t block[64], const short scale[64])
++{
++    int16_t temporary[64];
++    int16_t *source = block;
++    int16_t *destination = temporary;
++    for (unsigned pass = 0; pass < 2; ++pass) {
++        for (unsigned x = 0; x < 8; ++x) {
++            for (unsigned y = 0; y < 8; ++y) {
++                int64_t sum = 0;
++                for (unsigned z = 0; z < 8; ++z)
++                    sum += (int64_t)source[y + z * 8] * (scale[x + z * 8] >> 3);
++                destination[x + y * 8] = (int16_t)((sum + 0xfff) >> 13);
++            }
++        }
++        int16_t *swap = source;
++        source = destination;
++        destination = swap;
++    }
++}
++
++static int DecodeBlock(PsyzMdecInput *input, const unsigned char quant[64],
++                       const short scale[64], int16_t block[64])
++{
++    memset(block, 0, 64 * sizeof(*block));
++    while (input->next != input->end && *input->next == 0xfe00)
++        ++input->next;
++    if (input->next == input->end)
++        return 0;
++    unsigned code = *input->next++;
++    unsigned quant_scale = code >> 10;
++    unsigned position = 0;
++    int value = Signed10(code) * quant[0];
++    for (;;) {
++        if (!quant_scale)
++            value = Signed10(code) * 2;
++        block[quant_scale ? zigzag[position] : position] = (int16_t)Clamp(value, -1024, 1023);
++        if (input->next == input->end)
++            return 0;
++        code = *input->next++;
++        position += (code >> 10) + 1;
++        if (position >= 64)
++            break;
++        value = (Signed10(code) * quant[position] * (int)quant_scale + 4) >> 3;
++    }
++    InverseDct(block, scale);
++    return 1;
++}
++
++static void ConvertColor(const int16_t blocks[6][64], unsigned command,
++                         unsigned char *output)
++{
++    unsigned depth = (command >> 27) & 3;
++    unsigned is_signed = command & (1u << 26);
++    unsigned bit15 = (command & (1u << 25)) ? 0x8000 : 0;
++    for (unsigned y = 0; y < 16; ++y) {
++        for (unsigned x = 0; x < 16; ++x) {
++            unsigned chroma = (x / 2) + (y / 2) * 8;
++            unsigned block = 2 + (x / 8) + (y / 8) * 2;
++            int luma = blocks[block][(x % 8) + (y % 8) * 8];
++            int red = blocks[0][chroma];
++            int blue = blocks[1][chroma];
++            int green = (int)(-0.3437f * blue - 0.7143f * red);
++            red = (int)(1.402f * red);
++            blue = (int)(1.772f * blue);
++            unsigned r = (unsigned char)Clamp(luma + red, -128, 127);
++            unsigned g = (unsigned char)Clamp(luma + green, -128, 127);
++            unsigned b = (unsigned char)Clamp(luma + blue, -128, 127);
++            if (!is_signed) {
++                r ^= 0x80;
++                g ^= 0x80;
++                b ^= 0x80;
++            }
++            unsigned pixel = x + y * 16;
++            if (depth == 3) {
++                unsigned color = (r >> 3) | ((g >> 3) << 5) | ((b >> 3) << 10) | bit15;
++                output[pixel * 2] = (unsigned char)color;
++                output[pixel * 2 + 1] = (unsigned char)(color >> 8);
++            } else {
++                output[pixel * 3] = (unsigned char)r;
++                output[pixel * 3 + 1] = (unsigned char)g;
++                output[pixel * 3 + 2] = (unsigned char)b;
++            }
++        }
++    }
++}
++
++int Psyz_MdecDecodeMacroblock(PsyzMdecInput *input, const DECDCTENV *env,
++                              unsigned command, void *output, size_t output_bytes)
++{
++    unsigned depth = (command >> 27) & 3;
++    int16_t blocks[6][64];
++    size_t size = depth == 3 ? 512 : 768;
++    if (!input || !env || !output || input->next > input->end || depth < 2 || output_bytes < size)
++        return -1;
++    while (input->next != input->end && *input->next == 0xfe00)
++        ++input->next;
++    if (input->next == input->end)
++        return 0;
++    for (unsigned i = 0; i < 6; ++i) {
++        if (!DecodeBlock(input, i < 2 ? env->iq_c : env->iq_y, env->dct, blocks[i]))
++            return -1;
++    }
++    ConvertColor(blocks, command, output);
++    return 1;
++}
+diff --git a/psyz/src/psyz/mdec_decode.h b/psyz/src/psyz/mdec_decode.h
+new file mode 100644
+index 0000000..dfa1844
+--- /dev/null
++++ b/psyz/src/psyz/mdec_decode.h
+@@ -0,0 +1,15 @@
++#ifndef PSYZ_MDEC_DECODE_H
++#define PSYZ_MDEC_DECODE_H
++#include <stddef.h>
++#include <stdint.h>
++#include <libpress.h>
++
++typedef struct {
++    const uint16_t *next;
++    const uint16_t *end;
++} PsyzMdecInput;
++
++/* Returns one macroblock, zero at padding/end, or -1 for truncated input. */
++int Psyz_MdecDecodeMacroblock(PsyzMdecInput *input, const DECDCTENV *env,
++                              unsigned command, void *output, size_t output_bytes);
++#endif
+diff --git a/psyz/src/psyz/vlc.c b/psyz/src/psyz/vlc.c
+new file mode 100644
+index 0000000..3955021
+--- /dev/null
++++ b/psyz/src/psyz/vlc.c
+@@ -0,0 +1,148 @@
++/*
++ * Huffman table and v2 decoding rules adapted from PSn00bSDK vlc2.c.
++ * (C) 2022 spicyjpeg - Mozilla Public License 2.0.
++ * Source: Lameguy64/PSn00bSDK, commit 5d9aa2d3dfc7d6e51c2eb942ab4cdbae5571a40a.
++ * Native adaptation uses explicit input/output bounds and avoids shift-by-32.
++ * This Source Code Form is subject to the terms of the Mozilla Public License,
++ * v. 2.0. If a copy of the MPL was not distributed with this file, You can obtain
++ * one at https://mozilla.org/MPL/2.0/.
++ */
++#include "vlc.h"
++#include <string.h>
++
++#define TABLE_LENGTH 226
++
++static const uint32_t _compressed_table[TABLE_LENGTH] = {
++	0x03e00000, 0x000d000b, 0x000d03f5, 0x000d2002, 0x000d23fe, 0x000d1003,
++	0x000d13fd, 0x000d000a, 0x000d03f6, 0x000d0804, 0x000d0bfc, 0x000d1c02,
++	0x000d1ffe, 0x000d5402, 0x000d57fe, 0x000d5001, 0x000d53ff, 0x000d0009,
++	0x000d03f7, 0x000d4c01, 0x000d4fff, 0x000d4801, 0x000d4bff, 0x000d0405,
++	0x000d07fb, 0x000d0c03, 0x000d0ffd, 0x000d0008, 0x000d03f8, 0x000d1802,
++	0x000d1bfe, 0x000d4401, 0x000d47ff, 0x006b4001, 0x006b43ff, 0x006b1402,
++	0x006b17fe, 0x006b0007, 0x006b03f9, 0x006b0803, 0x006b0bfd, 0x006b0404,
++	0x006b07fc, 0x006b3c01, 0x006b3fff, 0x006b3801, 0x006b3bff, 0x006b1002,
++	0x006b13fe, 0x0fe00000, 0x03e80802, 0x03e80bfe, 0x03e82401, 0x03e827ff,
++	0x03e80004, 0x03e803fc, 0x03e82001, 0x03e823ff, 0x07e71c01, 0x07e71fff,
++	0x07e71801, 0x07e71bff, 0x07e70402, 0x07e707fe, 0x07e71401, 0x07e717ff,
++	0x01e93401, 0x01e937ff, 0x01e90006, 0x01e903fa, 0x01e93001, 0x01e933ff,
++	0x01e92c01, 0x01e92fff, 0x01e90c02, 0x01e90ffe, 0x01e90403, 0x01e907fd,
++	0x01e90005, 0x01e903fb, 0x01e92801, 0x01e92bff, 0x0fe60003, 0x0fe603fd,
++	0x0fe61001, 0x0fe613ff, 0x0fe60c01, 0x0fe60fff, 0x1fe50002, 0x1fe503fe,
++	0x1fe50801, 0x1fe50bff, 0x3fe40401, 0x3fe407ff, 0xffe2fe00, 0x7fe30001,
++	0x7fe303ff, 0x03e00000, 0x00110412, 0x001107ee, 0x00110411, 0x001107ef,
++	0x00110410, 0x001107f0, 0x0011040f, 0x001107f1, 0x00111803, 0x00111bfd,
++	0x00114002, 0x001143fe, 0x00113c02, 0x00113ffe, 0x00113802, 0x00113bfe,
++	0x00113402, 0x001137fe, 0x00113002, 0x001133fe, 0x00112c02, 0x00112ffe,
++	0x00117c01, 0x00117fff, 0x00117801, 0x00117bff, 0x00117401, 0x001177ff,
++	0x00117001, 0x001173ff, 0x00116c01, 0x00116fff, 0x00300028, 0x003003d8,
++	0x00300027, 0x003003d9, 0x00300026, 0x003003da, 0x00300025, 0x003003db,
++	0x00300024, 0x003003dc, 0x00300023, 0x003003dd, 0x00300022, 0x003003de,
++	0x00300021, 0x003003df, 0x00300020, 0x003003e0, 0x0030040e, 0x003007f2,
++	0x0030040d, 0x003007f3, 0x0030040c, 0x003007f4, 0x0030040b, 0x003007f5,
++	0x0030040a, 0x003007f6, 0x00300409, 0x003007f7, 0x00300408, 0x003007f8,
++	0x006f001f, 0x006f03e1, 0x006f001e, 0x006f03e2, 0x006f001d, 0x006f03e3,
++	0x006f001c, 0x006f03e4, 0x006f001b, 0x006f03e5, 0x006f001a, 0x006f03e6,
++	0x006f0019, 0x006f03e7, 0x006f0018, 0x006f03e8, 0x006f0017, 0x006f03e9,
++	0x006f0016, 0x006f03ea, 0x006f0015, 0x006f03eb, 0x006f0014, 0x006f03ec,
++	0x006f0013, 0x006f03ed, 0x006f0012, 0x006f03ee, 0x006f0011, 0x006f03ef,
++	0x006f0010, 0x006f03f0, 0x00ee2802, 0x00ee2bfe, 0x00ee2402, 0x00ee27fe,
++	0x00ee1403, 0x00ee17fd, 0x00ee0c04, 0x00ee0ffc, 0x00ee0805, 0x00ee0bfb,
++	0x00ee0407, 0x00ee07f9, 0x00ee0406, 0x00ee07fa, 0x00ee000f, 0x00ee03f1,
++	0x00ee000e, 0x00ee03f2, 0x00ee000d, 0x00ee03f3, 0x00ee000c, 0x00ee03f4,
++	0x00ee6801, 0x00ee6bff, 0x00ee6401, 0x00ee67ff, 0x00ee6001, 0x00ee63ff,
++	0x00ee5c01, 0x00ee5fff, 0x00ee5801, 0x00ee5bff
++};
++
++typedef struct {
++    const unsigned char *data;
++    size_t bytes;
++    size_t bit;
++} BitReader;
++
++static unsigned Peek(const BitReader *reader, unsigned count)
++{
++    unsigned value = 0;
++    for (unsigned i = 0; i < count; ++i) {
++        size_t bit = reader->bit + i;
++        size_t byte = ((bit / 16) * 2) + ((bit % 16 < 8) ? 1 : 0);
++        value <<= 1;
++        if (byte < reader->bytes)
++            value |= (reader->data[byte] >> (7 - bit % 8)) & 1;
++    }
++    return value;
++}
++
++static int Consume(BitReader *reader, unsigned count)
++{
++    if (count > reader->bytes * 8 - reader->bit)
++        return 0;
++    reader->bit += count;
++    return 1;
++}
++
++void Psyz_VlcBuild(PsyzVlcTable *table)
++{
++    uint32_t *output = (uint32_t *)table;
++    for (unsigned i = 0; i < TABLE_LENGTH; ++i) {
++        uint32_t value = _compressed_table[i] & 0x001fffff;
++        for (unsigned j = (_compressed_table[i] >> 21) + 1; j > 0; --j)
++            *output++ = value;
++    }
++}
++
++static int DecodeAc(BitReader *reader, const PsyzVlcTable *table, uint16_t *value)
++{
++    unsigned bits;
++    if (Peek(reader, 2) == 2) {
++        *value = 0xfe00;
++        bits = 2;
++    } else if (Peek(reader, 6) == 1) {
++        *value = (uint16_t)Peek(reader, 22);
++        bits = 22;
++    } else {
++        uint32_t entry = Peek(reader, 8) ? table->ac[Peek(reader, 13)]
++                                       : table->ac00[Peek(reader, 17)];
++        *value = (uint16_t)entry;
++        bits = entry >> 16;
++        if (!bits || bits > 17)
++            return 0;
++    }
++    return Consume(reader, bits);
++}
++
++int Psyz_VlcDecode(const void *input, size_t input_bytes, uint32_t *output,
++                   size_t output_words, const PsyzVlcTable *table)
++{
++    uint16_t header[4];
++    if (!input || !output || !table || input_bytes < 8 || input_bytes > 0x20000)
++        return -1;
++    memcpy(header, input, sizeof(header));
++    if (header[1] != 0x3800 || header[3] > 2 || !header[3] ||
++        header[2] > 63 || !header[0] || output_words <= header[0])
++        return -1;
++    BitReader reader = {(const unsigned char *)input + 8, input_bytes - 8, 0};
++    uint16_t *decoded = (uint16_t *)(output + 1);
++    unsigned remaining = header[0] * 2u;
++    unsigned dc = 1;
++    output[0] = 0x38000000u | header[0];
++    while (remaining) {
++        uint16_t value;
++        if (dc) {
++            unsigned coefficient = Peek(&reader, 10);
++            if (!Consume(&reader, 10))
++                return -1;
++            if (coefficient == 0x1ff) {
++                while (remaining--)
++                    *decoded++ = 0xfe00;
++                return 0;
++            }
++            value = (uint16_t)(coefficient | (header[2] << 10));
++        } else if (!DecodeAc(&reader, table, &value)) {
++            return -1;
++        }
++        dc = value == 0xfe00;
++        *decoded++ = value;
++        --remaining;
++    }
++    return 0;
++}
+diff --git a/psyz/src/psyz/vlc.h b/psyz/src/psyz/vlc.h
+new file mode 100644
+index 0000000..bd8b342
+--- /dev/null
++++ b/psyz/src/psyz/vlc.h
+@@ -0,0 +1,14 @@
++#ifndef PSYZ_VLC_H
++#define PSYZ_VLC_H
++#include <stddef.h>
++#include <stdint.h>
++
++typedef struct {
++    uint32_t ac[8192];
++    uint32_t ac00[512];
++} PsyzVlcTable;
++
++void Psyz_VlcBuild(PsyzVlcTable *table);
++int Psyz_VlcDecode(const void *input, size_t input_bytes, uint32_t *output,
++                   size_t output_words, const PsyzVlcTable *table);
++#endif

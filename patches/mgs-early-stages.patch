@@ -1,0 +1,411 @@
+diff --git a/source/anime/effect/rcm2.c b/source/anime/effect/rcm2.c
+index 7fabcc630..02da79f20 100644
+--- a/source/anime/effect/rcm2.c
++++ b/source/anime/effect/rcm2.c
+@@ -70,7 +70,7 @@ void s08c_800C4194(MATRIX *pos)
+     pre.s_anim = 0;
+ 
+     anm_800C32F0.pre_script = &pre;
+-    NewAnime(NULL, NULL, &anm_800C32F0);
++    NewAnime(NULL, 0, &anm_800C32F0);
+ }
+ 
+ void s08c_800C4220(MATRIX *pos)
+@@ -101,7 +101,7 @@ void s08c_800C4220(MATRIX *pos)
+     pre.s_anim = 0;
+ 
+     anm_800C32F0.pre_script = &pre;
+-    NewAnime(NULL, NULL, &anm_800C32F0);
++    NewAnime(NULL, 0, &anm_800C32F0);
+ }
+ 
+ void s08c_800C42B0(SVECTOR *pos)
+@@ -128,5 +128,5 @@ void s08c_800C42B0(SVECTOR *pos)
+     pre.s_anim = 0;
+ 
+     anm_800C330C.pre_script = &pre;
+-    NewAnime(NULL, NULL, &anm_800C330C);
++    NewAnime(NULL, 0, &anm_800C330C);
+ }
+diff --git a/source/anime/effect/smoke2.c b/source/anime/effect/smoke2.c
+index 146445a44..deb8a3fb9 100644
+--- a/source/anime/effect/smoke2.c
++++ b/source/anime/effect/smoke2.c
+@@ -72,7 +72,7 @@ void AN_Unknown_800CCA40(SVECTOR *pos)
+ 
+     anime = &s03c_dword_800C33DC;
+     anime->pre_script = &pre;
+-    NewAnime(NULL, NULL, anime);
++    NewAnime(NULL, 0, anime);
+ 
+     if (!(GV_Time & 3))
+     {
+@@ -89,7 +89,7 @@ void AN_Unknown_800CCA40(SVECTOR *pos)
+ 
+         anime = &s03c_dword_800C33F8;
+         anime->pre_script = &pre;
+-        NewAnime(NULL, NULL, anime);
++        NewAnime(NULL, 0, anime);
+     }
+ }
+ 
+@@ -113,5 +113,5 @@ void AN_Unknown_800CCB84(SVECTOR *pos)
+ 
+     s03c_dword_800C33F8.pre_script = &pre;
+ 
+-    NewAnime(NULL, NULL, &s03c_dword_800C33F8);
++    NewAnime(NULL, 0, &s03c_dword_800C33F8);
+ }
+diff --git a/source/chara/torture/bed.c b/source/chara/torture/bed.c
+index 11993db62..081043718 100644
+--- a/source/chara/torture/bed.c
++++ b/source/chara/torture/bed.c
+@@ -91,7 +91,11 @@ int BedGetResources_800C6FD8(Work *work, int name, int map)
+         return -1;
+     }
+ 
+-    GM_ConfigControlString(control, GCL_GetOption('p'), GCL_GetOption('d'));
++    {
++        char *position = GCL_GetOption('p');
++        char *direction = GCL_GetOption('d');
++        GM_ConfigControlString(control, position, direction);
++    }
+     GM_ConfigControlHazard(control, 0, -2, -2);
+ 
+     body = &work->body;
+diff --git a/source/chara/torture/jfamas.c b/source/chara/torture/jfamas.c
+index 987d6ebef..21f225b52 100644
+--- a/source/chara/torture/jfamas.c
++++ b/source/chara/torture/jfamas.c
+@@ -21,7 +21,7 @@ typedef struct _Work
+ #define BODY_MODEL  GV_StrCode("famas")
+ #define BODY_FLAG   ( DG_FLAG_TEXT | DG_FLAG_TRANS | DG_FLAG_SHADE | DG_FLAG_GBOUND | DG_FLAG_ONEPIECE )
+ 
+-SVECTOR famas_pos = {5, 65036, 80};
++SVECTOR famas_pos = {5, -500, 80};
+ 
+ static void Act(Work *work)
+ {
+diff --git a/source/chara/torture/johnny.c b/source/chara/torture/johnny.c
+index 91c9bdabd..398ffbe0f 100644
+--- a/source/chara/torture/johnny.c
++++ b/source/chara/torture/johnny.c
+@@ -98,7 +98,7 @@ int s03c_dword_800C32C8 = 0x00000000;
+ 
+ SVECTOR s03c_dword_800C32CC = {0, 0, 7000};
+ SVECTOR s03c_dword_800C32D4 = {0, 0, 100};
+-SVECTOR s03c_dword_800C32DC = {64512, 0, 0};
++SVECTOR s03c_dword_800C32DC = {-1024, 0, 0};
+ SVECTOR s03c_dword_800C32E4 = {0, 0, 3500, 0};
+ SVECTOR s03c_dword_800C32EC = {0, 0, 300};
+ SVECTOR target_size = {300, 750, 300};
+@@ -3783,7 +3783,11 @@ static int GetResources(Work *work, int name, int where)
+     control = &work->control;
+     if (GM_InitControl(control, name, where) >= 0)
+     {
+-        GM_ConfigControlString(control, GCL_GetOption('p'), GCL_GetOption('d'));
++        {
++            char *position = GCL_GetOption('p');
++            char *direction = GCL_GetOption('d');
++            GM_ConfigControlString(control, position, direction);
++        }
+         GM_ConfigControlHazard(control, control->mov.vy, 450, 450);
+         control->seg_flag = 2;
+         GM_ConfigControlAttribute(control, 5);
+diff --git a/source/chara/torture/ninja.c b/source/chara/torture/ninja.c
+index f1ecafef6..e2c10665f 100644
+--- a/source/chara/torture/ninja.c
++++ b/source/chara/torture/ninja.c
+@@ -325,7 +325,11 @@ static int GetResources(Work *work, int name, int where)
+         return -1;
+     }
+ 
+-    GM_ConfigControlString(control, GCL_GetOption('p'), GCL_GetOption('d'));
++    {
++        char *position = GCL_GetOption('p');
++        char *direction = GCL_GetOption('d');
++        GM_ConfigControlString(control, position, direction);
++    }
+ 
+     GM_ConfigControlHazard(control, 1000, -1, -1);
+ 
+diff --git a/source/chara/torture/otacom.c b/source/chara/torture/otacom.c
+index 556aba198..5b9cf6f03 100644
+--- a/source/chara/torture/otacom.c
++++ b/source/chara/torture/otacom.c
+@@ -449,7 +449,11 @@ int OtacomGetResources_800CBDB4(Work *work, int arg1, int arg2)
+         return -1;
+     }
+ 
+-    GM_ConfigControlString(control, GCL_GetOption('p'), GCL_GetOption('d'));
++    {
++        char *position = GCL_GetOption('p');
++        char *direction = GCL_GetOption('d');
++        GM_ConfigControlString(control, position, direction);
++    }
+     GM_ConfigControlHazard(control, 1000, -1, -1);
+ 
+     if (GCL_GetOption('m'))
+diff --git a/source/chara/torture/revolver.c b/source/chara/torture/revolver.c
+index 789a76886..21f22aaff 100644
+--- a/source/chara/torture/revolver.c
++++ b/source/chara/torture/revolver.c
+@@ -845,7 +845,7 @@ void s03b_revolver_800C81EC(Work *work, int arg1)
+ {
+     if (arg1 == 0)
+     {
+-        work->field_964 = s03b_dword_800C32E4;
++        work->field_964 = (short *)s03b_dword_800C32E4;
+         work->field_95C = 3;
+         work->field_960 = 0;
+         GM_GameStatus |= STATE_PADRELEASE;
+@@ -1446,7 +1446,11 @@ int RevolverGetResources_800C8FD4(Work *work, int arg1, int arg2)
+         return -1;
+     }
+ 
+-    GM_ConfigControlString(control, GCL_GetOption('p'), GCL_GetOption('d'));
++    {
++        char *position = GCL_GetOption('p');
++        char *direction = GCL_GetOption('d');
++        GM_ConfigControlString(control, position, direction);
++    }
+     GM_ConfigControlHazard(control, control->mov.vy, -1, -1);
+     control->seg_flag = 2;
+     GM_ConfigControlAttribute(control, 1);
+diff --git a/source/chara/torture/sne_03c.c b/source/chara/torture/sne_03c.c
+index 77ad2f593..740ae668c 100644
+--- a/source/chara/torture/sne_03c.c
++++ b/source/chara/torture/sne_03c.c
+@@ -172,7 +172,11 @@ int Snake03c1GetResources_800CD98C(Snake03c1Work *work, int arg1, int arg2)
+         return -1;
+     }
+ 
+-    GM_ConfigControlString(control, GCL_GetOption('p'), GCL_GetOption('d'));
++    {
++        char *position = GCL_GetOption('p');
++        char *direction = GCL_GetOption('d');
++        GM_ConfigControlString(control, position, direction);
++    }
+     GM_ConfigControlHazard(control, control->mov.vy, -2, -2);
+ 
+     model = GCL_StrToInt(GCL_GetOption('m'));
+diff --git a/source/chara/torture/torture.c b/source/chara/torture/torture.c
+index 6e04d0bbb..44c03f3ae 100644
+--- a/source/chara/torture/torture.c
++++ b/source/chara/torture/torture.c
+@@ -80,7 +80,7 @@ int s03b_dword_800C3290 = 0x027F0200;
+ int s03b_dword_800C3294 = 0x00000000;
+ int s03b_dword_800C3298 = 0x00000E46;
+ 
+-char s03b_dword_800C329C[] =
++unsigned char s03b_dword_800C329C[] =
+ {
+     0x00, 0x02,
+     0x7F, 0x06,
+@@ -91,7 +91,7 @@ char s03b_dword_800C329C[] =
+     0x00, 0x00
+ };
+ 
+-char s03b_dword_800C32AC[] =
++unsigned char s03b_dword_800C32AC[] =
+ {
+     0x5A, 0x0E,
+     0x28, 0x0C,
+@@ -101,7 +101,7 @@ char s03b_dword_800C32AC[] =
+     0x00, 0x00
+ };
+ 
+-char s03b_dword_800C32B8[] =
++unsigned char s03b_dword_800C32B8[] =
+ {
+     0x00, 0x01,
+     0x7F, 0x01,
+@@ -110,7 +110,7 @@ char s03b_dword_800C32B8[] =
+     0x00, 0x00,
+ };
+ 
+-char s03b_dword_800C32C4[] =
++unsigned char s03b_dword_800C32C4[] =
+ {
+     0x55, 0x04,
+     0x32, 0x0A,
+@@ -119,7 +119,7 @@ char s03b_dword_800C32C4[] =
+     0x00, 0x00,
+ };
+ 
+-char s03b_dword_800C32D0[] =
++unsigned char s03b_dword_800C32D0[] =
+ {
+     0x7F, 0x07,
+     0x00, 0x32,
+@@ -127,7 +127,7 @@ char s03b_dword_800C32D0[] =
+     0x00, 0x00
+ };
+ 
+-char s03b_dword_800C32D8[] =
++unsigned char s03b_dword_800C32D8[] =
+ {
+     0xFF, 0x04,
+     0x3C, 0x0A,
+@@ -196,7 +196,7 @@ void s03b_torture_800C3EF8(Work *work)
+ 
+ int s03b_torture_800C3F7C(GV_PAD *pad)
+ {
+-    char *analog;
++    unsigned char *analog;
+     int   i;
+     char  adjust;
+ 
+@@ -227,7 +227,7 @@ int s03b_torture_800C3F7C(GV_PAD *pad)
+ 
+ void s03b_torture_800C3FE4(Work *work)
+ {
+-    short         status;
++    unsigned short status;
+     unsigned char ldy;
+     GV_PAD       *pad;
+ 
+diff --git a/source/onoda/s04b/at.c b/source/onoda/s04b/at.c
+index 95b5352dd..cb74f28e4 100644
+--- a/source/onoda/s04b/at.c
++++ b/source/onoda/s04b/at.c
+@@ -236,7 +236,11 @@ static int GetResources(Work *work, int name, int map)
+ 
+     work->map = map;
+ 
+-    GM_ConfigControlString(control, GCL_GetOption('p'), GCL_GetOption('d'));
++    {
++        char *position = GCL_GetOption('p');
++        char *direction = GCL_GetOption('d');
++        GM_ConfigControlString(control, position, direction);
++    }
+     GM_ConfigControlHazard(control, control->mov.vy, -2, -2);
+ 
+     body = &work->body;
+diff --git a/source/onoda/s04b/revolver.c b/source/onoda/s04b/revolver.c
+index 845cb9da9..74f8d8076 100644
+--- a/source/onoda/s04b/revolver.c
++++ b/source/onoda/s04b/revolver.c
+@@ -765,7 +765,11 @@ int s04c_revolver_800D02C8(Work *work, short *arg1, short *arg2)
+     int side1;
+     int side2;
+     int index;
++#ifdef MGS_NATIVE
++    int temp_v1;
++#else
+     register int temp_v1 asm("v1");
++#endif
+ 
+     side1 = s04c_revolver_800CFBE0(work->control.mov.vx, work->control.mov.vz);
+     side2 = s04c_revolver_800CFBE0(GM_PlayerPosition.vx, GM_PlayerPosition.vz);
+@@ -1781,7 +1785,11 @@ static int GetResources(Work *work, int name, int where)
+         return -1;
+     }
+ 
+-    GM_ConfigControlString(control, GCL_GetOption('p'), GCL_GetOption('d'));
++    {
++        char *position = GCL_GetOption('p');
++        char *direction = GCL_GetOption('d');
++        GM_ConfigControlString(control, position, direction);
++    }
+ 
+     GM_ConfigControlHazard(control, work->control.mov.vy, -1, -1);
+     GM_ConfigControlAttribute(control, 1);
+diff --git a/source/onoda/s04b/wire.c b/source/onoda/s04b/wire.c
+index df411a51e..e8c6ed1be 100644
+--- a/source/onoda/s04b/wire.c
++++ b/source/onoda/s04b/wire.c
+@@ -58,7 +58,7 @@ typedef struct _Work
+ extern BLAST_DATA blast_data_8009F4B8[8];
+ 
+ unsigned short s04c_dword_800C35E8[] = {HASH_KILL};
+-char           s04c_dword_800C35EC[] = {0x7F, 0x03, 0x00, 0x00};
++unsigned char  s04c_dword_800C35EC[] = {0x7F, 0x03, 0x00, 0x00};
+ SVECTOR        s04c_dword_800C35F0 = {2000, 2000, 2000, 0};
+ SVECTOR        s04c_dword_800C35F8 = {2500, 10000, 2500, 0};
+ 
+diff --git a/source/takabe/dummy_fl.c b/source/takabe/dummy_fl.c
+index c2656d9e8..6e4880c37 100644
+--- a/source/takabe/dummy_fl.c
++++ b/source/takabe/dummy_fl.c
+@@ -28,8 +28,8 @@ typedef struct
+     SVECTOR vec;
+ } SCRPAD_DATA;
+ 
+-char dummy_floor_800C3610[] = {0x7F, 0x01, 0x00, 0x00};
+-char dummy_floor_800C3614[] = {0x50, 0x04, 0x00, 0x00};
++unsigned char dummy_floor_800C3610[] = {0x7F, 0x01, 0x00, 0x00};
++unsigned char dummy_floor_800C3614[] = {0x50, 0x04, 0x00, 0x00};
+ 
+ typedef struct _FLOOR_OBJ
+ {
+@@ -187,9 +187,18 @@ static void Act(Work *work)
+                 iter = tenage_ctrls_800BDD30;
+                 for (count = 16; count > 0; count--)
+                 {
++#ifdef MGS_NATIVE
++                    /* The original clears this slot and reads RAM0; use the live grenade. */
++                    if (*iter == NULL)
++                    {
++                        iter++;
++                        continue;
++                    }
++                    scratch->vec = (*iter)->mov;
++#else
+                     *iter = NULL;
+-
+                     scratch->vec = *(SVECTOR *)0x00000000;
++#endif
+                     scratch->vec.vx -= scratch->mat.t[0];
+                     scratch->vec.vy -= scratch->mat.t[1];
+                     scratch->vec.vz -= scratch->mat.t[2];
+diff --git a/source/takabe/findtrap.c b/source/takabe/findtrap.c
+index e38d5b824..c219d2a30 100644
+--- a/source/takabe/findtrap.c
++++ b/source/takabe/findtrap.c
+@@ -32,7 +32,7 @@ typedef struct _Work
+ 
+ /*---------------------------------------------------------------------------*/
+ 
+-static short msg_list[4] = {HASH_ENTER, HASH_LEAVE, 0x42DC, HASH_KILL};
++static unsigned short msg_list[4] = {HASH_ENTER, HASH_LEAVE, 0x42DC, HASH_KILL};
+ 
+ SVECTOR       SECTION(".bss") s12c_dword_800DAA50;
+ int           SECTION(".bss") s12c_dword_800DAA58;
+@@ -84,7 +84,11 @@ static void Act(Work *work)
+                 MATRIX   eye_inv;
+                 SVECTOR  sxy;
+                 SVECTOR  svec;
++#ifdef MGS_NATIVE
++                int      throwaway;
++#else
+                 long     throwaway;
++#endif
+                 SVECTOR *size;
+                 int      wait;
+ 
+@@ -92,7 +96,11 @@ static void Act(Work *work)
+ 
+                 DG_AdjustOverscan(&eye_inv);
+                 DG_SetPos(&eye_inv);
++#ifdef MGS_NATIVE
++                RotTransPers(&work->pos, (int *)&sxy, &throwaway, &throwaway);
++#else
+                 RotTransPers(&work->pos, (long *)&sxy, &throwaway, &throwaway);
++#endif
+ 
+                 size = &work->size;
+                 if (sxy.vx < size->vx && -size->vx < sxy.vx && sxy.vy < size->vy && -size->vy < sxy.vy)
+diff --git a/source/takabe/voicesys.c b/source/takabe/voicesys.c
+index 662b1c1ae..e3e28696e 100644
+--- a/source/takabe/voicesys.c
++++ b/source/takabe/voicesys.c
+@@ -287,7 +287,7 @@ static int GetResources(Work *work, int name, int where)
+ {
+     int    *arr;
+     int     i;
+-    u_char *param;
++    char *param;
+ 
+     if (GCL_GetOption('v'))
+     {

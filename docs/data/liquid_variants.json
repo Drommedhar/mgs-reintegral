@@ -1,0 +1,107 @@
+{
+  "stages": [
+    "s18a",
+    "s18ar"
+  ],
+  "overlay_size": 135620,
+  "sha256": [
+    "4f605b802aef5c69ce4cc875165d41139acde9af1e9fdf419d0e4cee2bc7087e",
+    "17d33d059f09a7470b2e6f44efc2469f52f7ff74093542ffb4cdf52a5aa6c79d"
+  ],
+  "identical_identified_function_ranges": 581,
+  "different_bytes": 33,
+  "differences": [
+    {
+      "address": "800c368e",
+      "bytes": 2,
+      "classification": "motion table alignment after 15 signed-short entries"
+    },
+    {
+      "address": "800e2bbd",
+      "bytes": 3,
+      "classification": "string alignment after NUL terminator"
+    },
+    {
+      "address": "800e2bc7",
+      "bytes": 1,
+      "classification": "string alignment after NUL terminator"
+    },
+    {
+      "address": "800e2bf3",
+      "bytes": 1,
+      "classification": "string alignment after NUL terminator"
+    },
+    {
+      "address": "800e334a",
+      "bytes": 2,
+      "classification": "string alignment after NUL terminator"
+    },
+    {
+      "address": "800e38b3",
+      "bytes": 1,
+      "classification": "string alignment after NUL terminator"
+    },
+    {
+      "address": "800e38de",
+      "bytes": 2,
+      "classification": "script alignment after opcode 0x0f"
+    },
+    {
+      "address": "800e38f6",
+      "bytes": 2,
+      "classification": "string alignment after NUL terminator"
+    },
+    {
+      "address": "800e3a13",
+      "bytes": 1,
+      "classification": "string alignment after NUL terminator"
+    },
+    {
+      "address": "800e3a25",
+      "bytes": 3,
+      "classification": "string alignment after NUL terminator"
+    },
+    {
+      "address": "800e3a32",
+      "bytes": 2,
+      "classification": "string alignment after NUL terminator"
+    },
+    {
+      "address": "800e3ab6",
+      "bytes": 2,
+      "classification": "script alignment after opcode 0x0f"
+    },
+    {
+      "address": "800e3d3e",
+      "bytes": 2,
+      "classification": "string alignment after NUL terminator"
+    },
+    {
+      "address": "800e3d4a",
+      "bytes": 2,
+      "classification": "string alignment after NUL terminator"
+    },
+    {
+      "address": "800e3ea2",
+      "bytes": 2,
+      "classification": "script alignment after opcode 0x0f"
+    },
+    {
+      "address": "800e3eab",
+      "bytes": 1,
+      "classification": "string alignment after NUL terminator"
+    },
+    {
+      "address": "800e3eb6",
+      "bytes": 1,
+      "classification": "string alignment after NUL terminator"
+    },
+    {
+      "address": "800e3ec1",
+      "bytes": 3,
+      "classification": "string alignment after NUL terminator"
+    }
+  ],
+  "native_selection": "Both select stage/s18a.c and the same source modules. Their original assets and scripts are loaded separately.",
+  "validation": "All identified code ranges and meaningful data unchanged. Runtime evidence for s18a is separate from s18ar."
+}

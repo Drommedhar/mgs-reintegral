@@ -1,0 +1,6 @@
+.lines -e
+bu /1 mgs_integral_native!MgsNativeReloadOverlay "ew mgs_integral_native!var_buf+2 800; ew mgs_integral_native!var_buf+4 0; ew mgs_integral_native!linkvarbuf+10 fc94 3fe 5910; .printf \"FIXTURE original entry pose(-876,1022,22800), heading2048, stance0: s12a sub_61DC to s12b / s11c sub_65DC to s12c\n\"; gc"
+bu /1 mgs_integral_native!NewFog ".printf \"FIXTURE observed original fog constructor\n\"; gc"
+sxe -c "r;kv;q" av
+g
+q

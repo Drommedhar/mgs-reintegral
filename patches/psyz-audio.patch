@@ -1,0 +1,371 @@
+diff --git a/decomp/src/libspu/s_itc.c b/decomp/src/libspu/s_itc.c
+index a18c73e..a4c0186 100644
+--- a/decomp/src/libspu/s_itc.c
++++ b/decomp/src/libspu/s_itc.c
+@@ -2,12 +2,6 @@
+ #include "libapi.h"
+ 
+ long SpuIsTransferCompleted(long immediateFlag) {
+-#ifdef __psyz // HACK the TestEvent must work
+-    if (immediateFlag == 0) {
+-        return 1;
+-    }
+-    return 0;
+-#endif
+     s32 in_transfer;
+ 
+     if (_spu_trans_mode == 1 || _spu_inTransfer == 1) {
+@@ -16,7 +10,9 @@ long SpuIsTransferCompleted(long immediateFlag) {
+     in_transfer = TestEvent(_spu_EVdma);
+     if (immediateFlag == 1) {
+         if (in_transfer == 0) {
+-#ifndef __psyz // HACK the TestEvent must work
++#ifdef __psyz
++            WaitEvent(_spu_EVdma);
++#else
+             do {
+             } while (TestEvent(_spu_EVdma) == 0);
+ #endif
+diff --git a/decomp/src/libspu/spu.c b/decomp/src/libspu/spu.c
+index a633041..a8cce90 100644
+--- a/decomp/src/libspu/spu.c
++++ b/decomp/src/libspu/spu.c
+@@ -181,11 +181,8 @@ void _spu_FiDMA(void) {
+ INCLUDE_ASM("asm/nonmatchings/libspu/spu", _spu_Fr_);
+ 
+ #ifdef __psyz
+-void Psyz_KernelRaise(unsigned int desc, unsigned int spec);
+ void _spu_DmaDone(void) {
+-    if (!_spu_transferCallback) {
+-        Psyz_KernelRaise(HwSPU, EvSpCOMP);
+-    }
++    Psyz_DmaComplete(DMA_CHANNEL_SPU);
+ }
+ #endif
+ 
+diff --git a/psyz/include/psyz/dma.h b/psyz/include/psyz/dma.h
+index 1f139c5..377e68c 100644
+--- a/psyz/include/psyz/dma.h
++++ b/psyz/include/psyz/dma.h
+@@ -37,6 +37,9 @@ typedef enum {
+  */
+ void Psyz_DmaWrite(PsyzDmaChannel ch, unsigned offset, u_long value);
+ 
++/** Complete a real host transfer and signal its DMA channel interrupt. */
++void Psyz_DmaComplete(PsyzDmaChannel ch);
++
+ #ifdef __cplusplus
+ }
+ #endif
+diff --git a/psyz/src/internal.h b/psyz/src/internal.h
+index 7bc9f53..ba70af2 100644
+--- a/psyz/src/internal.h
++++ b/psyz/src/internal.h
+@@ -44,4 +44,7 @@ void Psyz_CdVBlank(void);
+ // Services due timers when the host has no thread to run them.
+ void Psyz_KernelPoll(void);
+ 
++// Latches a hardware interrupt for delivery under the kernel interrupt mask.
++void Psyz_KernelInterrupt(unsigned int irq);
++
+ #endif
+diff --git a/psyz/src/psyz/dma.c b/psyz/src/psyz/dma.c
+index 7de1831..fee7351 100644
+--- a/psyz/src/psyz/dma.c
++++ b/psyz/src/psyz/dma.c
+@@ -16,8 +16,8 @@ static void DmaSpu(unsigned offset, u_long value) {
+     case 2: // chcr
+         memAddr = _addr;
+         spuAddr = (unsigned)Psyz_SpuRead(0x1A6) << 3;
+-        if (!(value & 0x300) != 0x200) {
+-            WARNF("SyncMode %d is invalid for SPU", (value >> 9) & 3);
++        if ((value & 0x600) != 0x200) {
++            WARNF("SyncMode %lu is invalid for SPU", (value >> 9) & 3);
+             return;
+         }
+         if (value & 2) { // simulate backward direction
+@@ -29,7 +29,7 @@ static void DmaSpu(unsigned offset, u_long value) {
+             Psyz_SpuMemRead(spuAddr, (void*)memAddr, _len);
+         }
+         if (value & 0x01000000) {
+-            // DMA transfer is always synchronous on PC
++            Psyz_DmaComplete(DMA_CHANNEL_SPU);
+         }
+         break;
+     }
+diff --git a/psyz/src/psyz/kernel.c b/psyz/src/psyz/kernel.c
+index acb6a1d..3acf222 100644
+--- a/psyz/src/psyz/kernel.c
++++ b/psyz/src/psyz/kernel.c
+@@ -121,6 +121,8 @@ static int posted_len;
+ static void (*vsync_callbacks[8])(void);
+ static void VSyncDispatch(void);
+ static void (*irq_callbacks[IRQ_COUNT])(void) = {VSyncDispatch};
++static void (*dma_callbacks[7])(void);
++static unsigned dma_pending;
+ 
+ static void KernelInit(void) {
+     if (kernel_lock) {
+@@ -252,6 +254,48 @@ static void LatchLine(int line) {
+     KernelUnlock();
+ }
+ 
++void Psyz_KernelInterrupt(unsigned int irq) {
++    if (irq < IRQ_COUNT) {
++        LatchLine((int)irq);
++    }
++}
++
++static void DispatchDma(void) {
++    unsigned completed = dma_pending;
++    dma_pending = 0;
++    for (unsigned channel = 0; channel < LEN(dma_callbacks); ++channel) {
++        if ((completed & (1u << channel)) && dma_callbacks[channel]) {
++            dma_callbacks[channel]();
++        }
++    }
++}
++
++void* DMACallback(int dma, void (*func)()) {
++    void (*previous)(void);
++    if (dma < 0 || dma >= LEN(dma_callbacks)) {
++        return NULL;
++    }
++    KernelLock();
++    previous = dma_callbacks[dma];
++    dma_callbacks[dma] = func;
++    irq_callbacks[IRQ_DMA] = DispatchDma;
++    irq_mask |= 1u << IRQ_DMA;
++    ServicePending();
++    KernelUnlock();
++    return (void*)previous;
++}
++
++void Psyz_DmaComplete(PsyzDmaChannel channel) {
++    if ((unsigned)channel >= LENU(dma_callbacks)) {
++        return;
++    }
++    KernelLock();
++    dma_pending |= 1u << channel;
++    irq_latched |= 1u << IRQ_DMA;
++    ServicePending();
++    KernelUnlock();
++}
++
+ void Psyz_KernelRaise(unsigned int desc, unsigned int spec) {
+     KernelLock();
+     if (pending_len < LEN(pending)) {
+@@ -276,6 +320,7 @@ void Psyz_KernelPost(void (*fn)(void)) {
+     }
+     Psyz_OsUnlock(post_lock);
+     StartIrqThread();
++    AtomicStore(&poll_deadline_us, (long)Psyz_OsNowUs());
+     Psyz_OsBellRing(bell_irq);
+ }
+ 
+@@ -689,6 +734,8 @@ int ResetCallback(void) {
+         return 0;
+     }
+     memset(irq_callbacks, 0, sizeof(irq_callbacks));
++    memset(dma_callbacks, 0, sizeof(dma_callbacks));
++    dma_pending = 0;
+     memset(vsync_callbacks, 0, sizeof(vsync_callbacks));
+     irq_callbacks[IRQ_VBLANK] = VSyncDispatch;
+     irq_mask = 1u << IRQ_VBLANK;
+diff --git a/psyz/src/psyz/libetc.c b/psyz/src/psyz/libetc.c
+index 1f5ce2a..8eb0489 100644
+--- a/psyz/src/psyz/libetc.c
++++ b/psyz/src/psyz/libetc.c
+@@ -56,11 +56,6 @@ long SetVideoMode(long mode) {
+     return prev;
+ }
+ 
+-void* DMACallback(int dma, void (*func)()) {
+-    NOT_IMPLEMENTED;
+-    return NULL;
+-}
+-
+ int InitTAP(char* bufA, long lenA, char* bufB, long lenB) {
+     LOG_ONCE("forwarding to InitPAD");
+     return InitPAD(bufA, lenA, bufB, lenB);
+diff --git a/psyz/src/psyz/psyz_spu.c b/psyz/src/psyz/psyz_spu.c
+index 74927f1..8262c04 100644
+--- a/psyz/src/psyz/psyz_spu.c
++++ b/psyz/src/psyz/psyz_spu.c
+@@ -2,7 +2,9 @@
+ #include <psyz/log.h>
+ #include <assert.h>
+ #include <string.h>
++#include <stdatomic.h>
+ #include "spu_voice.h"
++#include "../internal.h"
+ 
+ #if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L
+ _Static_assert(sizeof(SPU_RXX) == 0x200, "SPU_RXX must be 0x200 bytes");
+@@ -40,6 +42,23 @@ static struct {
+     u8 initialized;
+ } spu;
+ 
++static atomic_uint spu_irq_latched;
++
++static void deliver_spu_irq(void) {
++    if (atomic_load(&spu_irq_latched)) {
++        Psyz_KernelInterrupt(9);
++    }
++}
++
++static void check_spu_irq(unsigned int offset, unsigned int size) {
++    unsigned int irq_address = (unsigned int)_spu_RXX->rxx.irq_addr << 3;
++    unsigned int distance = (irq_address - offset) & (PSYZ_SPU_RAM_SIZE - 1);
++    if ((_spu_RXX->rxx.spucnt & 0x40) && distance < size &&
++        !atomic_exchange(&spu_irq_latched, 1)) {
++        Psyz_KernelPost(deliver_spu_irq);
++    }
++}
++
+ u8* Psyz_SpuGetRam(void) { return spu.ram; }
+ 
+ void Psyz_SpuInit(void) {
+@@ -51,6 +70,7 @@ void Psyz_SpuInit(void) {
+ }
+ 
+ static void spu_reset(void) {
++    atomic_store(&spu_irq_latched, 0);
+     _spu_RXX->rxx.spustat = 0;
+     for (int v = 0; v < PSYZ_SPU_NUM_VOICES; v++) {
+         _spu_RXX->rxx.voice[v].volumex = 0;
+@@ -81,6 +101,7 @@ void Psyz_SpuSetTransferAddr(unsigned int addr) {
+ unsigned int Psyz_SpuGetTransferAddr(void) { return spu.transfer_addr; }
+ 
+ void Psyz_SpuFifoWrite(unsigned short word) {
++    check_spu_irq(spu.transfer_addr, sizeof(word));
+ #ifdef PLATFORM_LE
+     *(unsigned short*)&spu.ram[spu.transfer_addr] = word;
+ #else
+@@ -96,6 +117,8 @@ void Psyz_SpuFifoWriteBulk(const unsigned char* src, unsigned int size) {
+ }
+ 
+ void Psyz_SpuMemRead(unsigned int offset, void* dst, unsigned int size) {
++    Psyz_AudioLock();
++    check_spu_irq(offset, size);
+     unsigned int start = offset & (PSYZ_SPU_RAM_SIZE - 1);
+     unsigned int head = PSYZ_SPU_RAM_SIZE - start;
+     if (size <= head) {
+@@ -104,9 +127,12 @@ void Psyz_SpuMemRead(unsigned int offset, void* dst, unsigned int size) {
+         memcpy(dst, &spu.ram[start], head);
+         memcpy((unsigned char*)dst + head, &spu.ram[0], size - head);
+     }
++    Psyz_AudioUnlock();
+ }
+ 
+ void Psyz_SpuMemWrite(unsigned int offset, const void* src, unsigned int size) {
++    Psyz_AudioLock();
++    check_spu_irq(offset, size);
+     unsigned int start = offset & (PSYZ_SPU_RAM_SIZE - 1);
+     unsigned int head = PSYZ_SPU_RAM_SIZE - start;
+     if (size <= head) {
+@@ -115,13 +141,15 @@ void Psyz_SpuMemWrite(unsigned int offset, const void* src, unsigned int size) {
+         memcpy(&spu.ram[start], src, head);
+         memcpy(&spu.ram[0], (const unsigned char*)src + head, size - head);
+     }
++    Psyz_AudioUnlock();
+ }
+ 
+ static void spu_key_on_voice(int v) {
++    spu.voice[v].ram_access = check_spu_irq;
+     spu_voice_key_on(&spu.voice[v], &_spu_RXX->rxx.voice[v]);
+ }
+ 
+-void Psyz_SpuWrite(unsigned int reg_offset, unsigned short value) {
++static void write_spu_register(unsigned int reg_offset, unsigned short value) {
+     if (reg_offset >= sizeof(SPU_RXX) || (reg_offset & 1)) {
+         WARNF("Psyz_SpuWrite: bad offset 0x%X", reg_offset);
+         return;
+@@ -132,7 +160,9 @@ void Psyz_SpuWrite(unsigned int reg_offset, unsigned short value) {
+     _spu_RXX->raw[reg_offset >> 1] = value;
+     // MSVC's C-mode offsetof is not an integer constant expression, so it
+     // cannot appear in a case label. Use an if-chain instead.
+-    if (reg_offset == offsetof(SPU_RXX, key_on[0])) { // voices 0..15
++    if (reg_offset == offsetof(SPU_RXX, spucnt) && !(value & 0x40)) {
++        atomic_store(&spu_irq_latched, 0);
++    } else if (reg_offset == offsetof(SPU_RXX, key_on[0])) { // voices 0..15
+         for (int v = 0; v < 16; v++) {
+             if (value & (1u << v))
+                 spu_key_on_voice(v);
+@@ -161,7 +191,13 @@ void Psyz_SpuWrite(unsigned int reg_offset, unsigned short value) {
+     }
+ }
+ 
+-unsigned short Psyz_SpuRead(unsigned int reg_offset) {
++void Psyz_SpuWrite(unsigned int reg_offset, unsigned short value) {
++    Psyz_AudioLock();
++    write_spu_register(reg_offset, value);
++    Psyz_AudioUnlock();
++}
++
++static unsigned short read_spu_register(unsigned int reg_offset) {
+     if (reg_offset >= sizeof(SPU_RXX) || (reg_offset & 1)) {
+         WARNF("Psyz_SpuRead: bad offset 0x%X", reg_offset);
+         return 0;
+@@ -174,13 +210,23 @@ unsigned short Psyz_SpuRead(unsigned int reg_offset) {
+         // lower 6 bits mirror SPUCNT's low bits
+         // bit 11, capture-buffer half-pointer, flipped by spu_tick.
+         return (_spu_RXX->rxx.spucnt & 0x3F) |
++               (atomic_load(&spu_irq_latched) << 6) |
+                (_spu_RXX->rxx.spustat & (1u << 11));
+     }
+     return _spu_RXX->raw[reg_offset >> 1];
+ }
+ 
++unsigned short Psyz_SpuRead(unsigned int reg_offset) {
++    unsigned short value;
++    Psyz_AudioLock();
++    value = read_spu_register(reg_offset);
++    Psyz_AudioUnlock();
++    return value;
++}
++
+ static void write_capture(unsigned int idx, short val) {
+     unsigned int addr = (idx * 0x400) | spu.capture_pos;
++    check_spu_irq(addr, sizeof(val));
+     if (addr < PSYZ_SPU_RAM_SIZE) {
+         *(short*)&spu.ram[addr] = val;
+     }
+@@ -208,6 +254,7 @@ static unsigned reverb_address(u16 raw_offset, int extra_bytes) {
+ 
+ static short reverb_read(u16 offset, int extra_bytes) {
+     unsigned addr = reverb_address(offset, extra_bytes);
++    check_spu_irq(addr, sizeof(short));
+     return (short)(spu.ram[addr] | (spu.ram[(addr + 1) & 0x7FFFF] << 8));
+ }
+ 
+@@ -217,6 +264,7 @@ static void reverb_write(u16 offset, int value) {
+     if (!(_spu_RXX->rxx.spucnt & SPU_CTRL_MASK_REVERB_MASTER_ENABLE))
+         return;
+     addr = reverb_address(offset, 0);
++    check_spu_irq(addr, sizeof(short));
+     sample = clamp16(value);
+     spu.ram[addr] = (u8)sample;
+     spu.ram[(addr + 1) & 0x7FFFF] = (u8)((u16)sample >> 8);
+diff --git a/psyz/src/psyz/spu_voice.h b/psyz/src/psyz/spu_voice.h
+index f4e18bc..db4d25c 100644
+--- a/psyz/src/psyz/spu_voice.h
++++ b/psyz/src/psyz/spu_voice.h
+@@ -94,6 +94,7 @@ typedef struct {
+     u8 delay_ticks;       // key-on -> envelope-start pipeline latency
+     u16 adsr_lo;          // mirrors SPU_VOICE_REG::adsr[0]
+     u16 adsr_hi;          // mirrors SPU_VOICE_REG::adsr[1]
++    void (*ram_access)(unsigned int offset, unsigned int size);
+ } VoiceState;
+ 
+ static inline void spu_voice_key_on(
+@@ -146,6 +147,9 @@ static inline int spu_voice_decode_one_sample(VoiceState* vs, const u8* ram) {
+         vs->sample_idx = 0;
+     }
+     if (vs->needs_decode) {
++        if (vs->ram_access) {
++            vs->ram_access(vs->cur_addr, ADPCM_BLOCK_BYTES);
++        }
+         const u8* block = &ram[vs->cur_addr];
+         u8 wrapped[ADPCM_BLOCK_BYTES];
+         if (vs->cur_addr > PSYZ_SPU_RAM_SIZE - ADPCM_BLOCK_BYTES) {

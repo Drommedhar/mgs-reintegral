@@ -1,0 +1,107 @@
+{
+  "stages": [
+    "s19b",
+    "s19br"
+  ],
+  "scope": "fourteen pre-existing complete C translation units",
+  "audited": [
+    "source/overlays/s19b/anime/effect/janime2.c",
+    "source/overlays/s19b/takabe/jeep/jblast.c",
+    "source/overlays/s19b/takabe/jeep/jblood.c",
+    "source/overlays/s19b/takabe/jeep/jbullet.c",
+    "source/overlays/s19b/takabe/jeep/jdrum.c",
+    "source/overlays/s19b/takabe/jeep/jdrumsmk.c",
+    "source/overlays/s19b/takabe/jeep/jeep_gls.c",
+    "source/overlays/s19b/takabe/jeep/jeep_gte.c",
+    "source/overlays/s19b/takabe/jeep/jlamp.c",
+    "source/overlays/s19b/takabe/jeep/jlamp2.c",
+    "source/overlays/s19b/takabe/jeep/jspark.c",
+    "source/overlays/s19b/takabe/jeep/spark2_m.c",
+    "source/overlays/s19b/takabe/jeep_emy/jeep_emy.c",
+    "source/overlays/s19b/takabe/jeep_emy/jeep_emy2.c"
+  ],
+  "modified": [
+    "source/overlays/s19b/takabe/jeep/jblast.c",
+    "source/overlays/s19b/takabe/jeep/jbullet.c",
+    "source/overlays/s19b/takabe/jeep/jdrum.c",
+    "source/overlays/s19b/takabe/jeep/jeep_gte.c",
+    "source/overlays/s19b/takabe/jeep/jlamp.c",
+    "source/overlays/s19b/takabe/jeep/jlamp2.c",
+    "source/overlays/s19b/takabe/jeep/jspark.c",
+    "source/overlays/s19b/takabe/jeep/spark2_m.c",
+    "source/overlays/s19b/takabe/jeep_emy/jeep_emy.c"
+  ],
+  "changes": [
+    "native jeep spark initializer sets full packet length and command",
+    "explicit zero vector padding matches prior C zero initialization",
+    "unused original ABI parameters marked intentionally unused",
+    "unused local removed"
+  ],
+  "validation": {
+    "wall_wextra": "fourteen translation units, zero warnings",
+    "regression_target": "mgs_jeep_packets_test",
+    "packet_counts": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "assertions": [
+      "full native length9",
+      "FT4 semitransparent command",
+      "texture coordinates, page and palette",
+      "shade preserves command",
+      "coordinates preserved",
+      "before/after allocation sentinels"
+    ],
+    "original_initializer": "exit1, invalid length2779096485 (0xa5a5a5a5)",
+    "native_initializer": "pass",
+    "countercheck": "isolated executable with original initializer branch; live vendor code unchanged"
+  },
+  "aislop": {
+    "errors": 0,
+    "fixable_warnings": 0,
+    "nonfixable_warnings": [
+      {
+        "file": "source/overlays/s19b/takabe/jeep/jblood.c",
+        "detail": "InitVerts \u00c2\u00b7 96 lines"
+      },
+      {
+        "file": "source/overlays/s19b/takabe/jeep/jbullet.c",
+        "detail": "FindIntersection \u00c2\u00b7 102 lines"
+      },
+      {
+        "file": "source/overlays/s19b/takabe/jeep/jdrum.c",
+        "detail": "Act \u00c2\u00b7 89 lines"
+      },
+      {
+        "file": "source/overlays/s19b/takabe/jeep/jeep_gte.c",
+        "detail": "Act \u00c2\u00b7 126 lines"
+      },
+      {
+        "file": "source/overlays/s19b/takabe/jeep_emy/jeep_emy.c",
+        "detail": "Act \u00c2\u00b7 102 lines"
+      },
+      {
+        "file": "source/overlays/s19b/takabe/jeep_emy/jeep_emy.c",
+        "detail": "s19b_jbullet_800C5010 \u00c2\u00b7 91 lines"
+      },
+      {
+        "file": "source/overlays/s19b/takabe/jeep_emy/jeep_emy.c",
+        "detail": "s19b_jbullet_800C598C \u00c2\u00b7 93 lines"
+      }
+    ],
+    "test_findings": 0
+  },
+  "limitations": [
+    "partial actors and stage data recovery are separate",
+    "stage has not been linked or run by this portability check"
+  ],
+  "patch": "patches/mgs-escape-portability.patch",
+  "replayed_on_locked_patches": 47
+}

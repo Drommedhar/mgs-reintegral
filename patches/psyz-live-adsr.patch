@@ -1,0 +1,15 @@
+diff --git a/psyz/src/psyz/psyz_spu.c b/psyz/src/psyz/psyz_spu.c
+index e3f2bcf..9e538e0 100644
+--- a/psyz/src/psyz/psyz_spu.c
++++ b/psyz/src/psyz/psyz_spu.c
+@@ -175,6 +175,10 @@ static void write_spu_register(unsigned int reg_offset, unsigned short value) {
+     _spu_RXX->raw[reg_offset >> 1] = value;
+     if (reg_offset < 0x180 && (reg_offset & 15) < 4) {
+         spu.voice_volume[reg_offset >> 4][(reg_offset >> 1) & 1].counter = 0;
++    } else if (reg_offset < 0x180 && (reg_offset & 15) == 8) {
++        spu.voice[reg_offset >> 4].adsr_lo = value;
++    } else if (reg_offset < 0x180 && (reg_offset & 15) == 10) {
++        spu.voice[reg_offset >> 4].adsr_hi = value;
+     } else if (reg_offset == 0x180 || reg_offset == 0x182) {
+         spu.main_volume[(reg_offset >> 1) & 1].counter = 0;
+     } else if (reg_offset == 0x1B8 || reg_offset == 0x1BA) {

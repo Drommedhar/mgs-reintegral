@@ -1,0 +1,35 @@
+diff --git a/source/animal/zako14/zako14com.c b/source/animal/zako14/zako14com.c
+index b7212d4d8..2d2d6e9ee 100644
+--- a/source/animal/zako14/zako14com.c
++++ b/source/animal/zako14/zako14com.c
+@@ -1,5 +1,8 @@
+ #include "zako.h"
+ 
++#ifdef MGS_NATIVE
++#include <limits.h>
++#endif
+ #include "mts/mts.h" // for fprintf
+ #include "libgcl/libgcl.h"
+ 
+@@ -331,7 +334,11 @@ static void ChangePrio( COMMANDER *com )
+     for ( i = 0; i < com->n_watchers; i++ )
+     {
+         work = com->watchers[ ZAKO14Command.prio[ i ] ].work;
++#ifdef MGS_NATIVE
++        dis[i] = work ? work->sn_dis : INT_MAX;
++#else
+         dis[ i ] = work->sn_dis;
++#endif
+     }
+ 
+     for ( iter = com->n_watchers - 1; iter >= 0; iter = next )
+@@ -357,6 +364,9 @@ static void ChangePrio( COMMANDER *com )
+     for ( i = 0; i < com->n_watchers; i++ )
+     {
+         work = com->watchers[ ZAKO14Command.prio[ i ] ].work;
++#ifdef MGS_NATIVE
++        if (!work) continue;
++#endif
+         work->chase_dis = ChaseDis[ ZAKO14Command.prio[ i ] ];
+     }
+ }

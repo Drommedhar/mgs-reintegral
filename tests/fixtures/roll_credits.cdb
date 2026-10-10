@@ -1,0 +1,8 @@
+.lines -e
+bu /1 mgs_integral_native!MgsNativeReloadOverlay "eb mgs_integral_native!var_buf+3d7 1; .printf \"FIXTURE roll phase1 selects original credits actor\\n\"; gc"
+bu /1 mgs_integral_native!Ending2GetResources_800C77F8 ".printf \"OBSERVE original credits resources constructor\\n\"; gc"
+bu /1 mgs_integral_native!Ending2Movie_800C6070 ".printf \"OBSERVE native credits movie task\\n\"; gc"
+sxe -c "r;kv;q" av
+sxe -c "r;kv;q" dz
+g
+q

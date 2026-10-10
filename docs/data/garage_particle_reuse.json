@@ -1,0 +1,250 @@
+{
+  "checked_words": 947,
+  "ranges": {
+    "rex": [
+      "800d2500",
+      "800d33cc"
+    ],
+    "garage": [
+      "800de19c",
+      "800df068"
+    ]
+  },
+  "changes": [
+    {
+      "address": "0x800d2580",
+      "rex_word": "0xc034a65",
+      "garage_word": "0xc03798c",
+      "reason": "local call relocation"
+    },
+    {
+      "address": "0x800d2588",
+      "rex_word": "0x803496f",
+      "garage_word": "0x8037896",
+      "reason": "local call relocation"
+    },
+    {
+      "address": "0x800d2590",
+      "rex_word": "0xc034a65",
+      "garage_word": "0xc03798c",
+      "reason": "local call relocation"
+    },
+    {
+      "address": "0x800d25b0",
+      "rex_word": "0x8034973",
+      "garage_word": "0x803789a",
+      "reason": "local call relocation"
+    },
+    {
+      "address": "0x800d267c",
+      "rex_word": "0xc034a34",
+      "garage_word": "0xc03795b",
+      "reason": "local call relocation"
+    },
+    {
+      "address": "0x800d26dc",
+      "rex_word": "0x3c05800d",
+      "garage_word": "0x3c05800e",
+      "reason": "paired actor callback address relocation"
+    },
+    {
+      "address": "0x800d26e0",
+      "rex_word": "0x24a52500",
+      "garage_word": "0x24a5e19c",
+      "reason": "paired actor callback address relocation"
+    },
+    {
+      "address": "0x800d26e4",
+      "rex_word": "0x3c06800d",
+      "garage_word": "0x3c06800e",
+      "reason": "paired actor callback address relocation"
+    },
+    {
+      "address": "0x800d26e8",
+      "rex_word": "0x24c625dc",
+      "garage_word": "0x24c6e278",
+      "reason": "paired actor callback address relocation"
+    },
+    {
+      "address": "0x800d26f4",
+      "rex_word": "0x24e75a34",
+      "garage_word": "0x24e70410",
+      "reason": "identical source-filename string relocation"
+    },
+    {
+      "address": "0x800d2704",
+      "rex_word": "0xc034986",
+      "garage_word": "0xc0378ad",
+      "reason": "local call relocation"
+    },
+    {
+      "address": "0x800d271c",
+      "rex_word": "0x80349ca",
+      "garage_word": "0x80378f1",
+      "reason": "local call relocation"
+    },
+    {
+      "address": "0x800d2788",
+      "rex_word": "0x3c05800d",
+      "garage_word": "0x3c05800e",
+      "reason": "paired actor callback address relocation"
+    },
+    {
+      "address": "0x800d278c",
+      "rex_word": "0x24a52500",
+      "garage_word": "0x24a5e19c",
+      "reason": "paired actor callback address relocation"
+    },
+    {
+      "address": "0x800d2790",
+      "rex_word": "0x3c06800d",
+      "garage_word": "0x3c06800e",
+      "reason": "paired actor callback address relocation"
+    },
+    {
+      "address": "0x800d2794",
+      "rex_word": "0x24c625dc",
+      "garage_word": "0x24c6e278",
+      "reason": "paired actor callback address relocation"
+    },
+    {
+      "address": "0x800d27a0",
+      "rex_word": "0x24e75a34",
+      "garage_word": "0x24e70410",
+      "reason": "identical source-filename string relocation"
+    },
+    {
+      "address": "0x800d27b0",
+      "rex_word": "0xc034986",
+      "garage_word": "0xc0378ad",
+      "reason": "local call relocation"
+    },
+    {
+      "address": "0x800d27c8",
+      "rex_word": "0x80349fd",
+      "garage_word": "0x8037924",
+      "reason": "local call relocation"
+    },
+    {
+      "address": "0x800d2914",
+      "rex_word": "0xc034a05",
+      "garage_word": "0xc03792c",
+      "reason": "local call relocation"
+    },
+    {
+      "address": "0x800d2924",
+      "rex_word": "0xc034a05",
+      "garage_word": "0xc03792c",
+      "reason": "local call relocation"
+    },
+    {
+      "address": "0x800d2ab4",
+      "rex_word": "0x8034ab0",
+      "garage_word": "0x80379d7",
+      "reason": "local call relocation"
+    },
+    {
+      "address": "0x800d2c6c",
+      "rex_word": "0x8034b21",
+      "garage_word": "0x8037a48",
+      "reason": "local call relocation"
+    },
+    {
+      "address": "0x800d2d48",
+      "rex_word": "0xc034c22",
+      "garage_word": "0xc037b49",
+      "reason": "local call relocation"
+    },
+    {
+      "address": "0x800d2d50",
+      "rex_word": "0x8034b61",
+      "garage_word": "0x8037a88",
+      "reason": "local call relocation"
+    },
+    {
+      "address": "0x800d2d58",
+      "rex_word": "0xc034c22",
+      "garage_word": "0xc037b49",
+      "reason": "local call relocation"
+    },
+    {
+      "address": "0x800d2d78",
+      "rex_word": "0x8034b65",
+      "garage_word": "0x8037a8c",
+      "reason": "local call relocation"
+    },
+    {
+      "address": "0x800d2e44",
+      "rex_word": "0xc034bf1",
+      "garage_word": "0xc037b18",
+      "reason": "local call relocation"
+    },
+    {
+      "address": "0x800d2ea4",
+      "rex_word": "0x3c05800d",
+      "garage_word": "0x3c05800e",
+      "reason": "paired actor callback address relocation"
+    },
+    {
+      "address": "0x800d2ea8",
+      "rex_word": "0x24a52cc8",
+      "garage_word": "0x24a5e964",
+      "reason": "paired actor callback address relocation"
+    },
+    {
+      "address": "0x800d2eac",
+      "rex_word": "0x3c06800d",
+      "garage_word": "0x3c06800e",
+      "reason": "paired actor callback address relocation"
+    },
+    {
+      "address": "0x800d2eb0",
+      "rex_word": "0x24c62da4",
+      "garage_word": "0x24c6ea40",
+      "reason": "paired actor callback address relocation"
+    },
+    {
+      "address": "0x800d2ebc",
+      "rex_word": "0x24e75a40",
+      "garage_word": "0x24e7041c",
+      "reason": "identical source-filename string relocation"
+    },
+    {
+      "address": "0x800d2ecc",
+      "rex_word": "0xc034b78",
+      "garage_word": "0xc037a9f",
+      "reason": "local call relocation"
+    },
+    {
+      "address": "0x800d2ee4",
+      "rex_word": "0x8034bbc",
+      "garage_word": "0x8037ae3",
+      "reason": "local call relocation"
+    },
+    {
+      "address": "0x800d3008",
+      "rex_word": "0xc034bc3",
+      "garage_word": "0xc037aea",
+      "reason": "local call relocation"
+    },
+    {
+      "address": "0x800d3018",
+      "rex_word": "0xc034bc3",
+      "garage_word": "0xc037aea",
+      "reason": "local call relocation"
+    },
+    {
+      "address": "0x800d3184",
+      "rex_word": "0x8034c64",
+      "garage_word": "0x8037b8b",
+      "reason": "local call relocation"
+    },
+    {
+      "address": "0x800d3388",
+      "rex_word": "0x8034ce8",
+      "garage_word": "0x8037c0f",
+      "reason": "local call relocation"
+    }
+  ],
+  "result": "All instruction words equal except verified callback/call and identical source-filename relocations. No stage-specific particle data references differ."
+}

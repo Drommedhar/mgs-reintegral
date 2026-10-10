@@ -1,0 +1,6 @@
+.lines -e
+bu /1 mgs_integral_native!MgsNativeReloadOverlay "ew mgs_integral_native!var_buf+a 6f; .printf \"FIXTURE original story variable $w:00000A=111 before s07a scenario; no player flags changed\\n\"; gc"
+bu /1 mgs_integral_native!NewEnemyMeryl_800D63A4 ".printf \"FIXTURE observed original Meryl constructor\\n\"; gc"
+sxe -c "r;kv;q" av
+g
+q

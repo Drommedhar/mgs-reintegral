@@ -1,0 +1,141 @@
+diff --git a/source/animal/meryl72/action.c b/source/animal/meryl72/action.c
+index 94cee489d..9bf93819c 100644
+--- a/source/animal/meryl72/action.c
++++ b/source/animal/meryl72/action.c
+@@ -1393,7 +1393,7 @@ void s07c_meryl72_unk1_800CAA48( Meryl72Work *work, int time )
+     }
+ }
+ 
+-void s07a_meryl_unk_800D9508( Meryl72Work *work )
++static void Meryl72AdjustLight( Meryl72Work *work )
+ {
+     work->light[0].t[0] += ( work->fC0E * 5 ) ;
+ }
+@@ -1466,7 +1466,7 @@ void s07c_meryl72_unk1_800CABA0( Meryl72Work *work )
+ 
+     s07c_meryl72_unk1_800CAB68( work );
+     s07c_meryl72_unk1_800C80B4( work );
+-    s07a_meryl_unk_800D9508( work );
++    Meryl72AdjustLight( work );
+ 
+     if ( GM_AlertMode == ALERT_ACTIVE && work->target->class & TARGET_POWER )
+     {
+diff --git a/source/animal/meryl72/meryl72.c b/source/animal/meryl72/meryl72.c
+index 83d5cb65b..3cab68420 100644
+--- a/source/animal/meryl72/meryl72.c
++++ b/source/animal/meryl72/meryl72.c
+@@ -346,7 +346,7 @@ int s07c_meryl72_800C73CC( Meryl72Work *work )
+     return 0;
+ }
+ 
+-int s07c_meryl72_800C74E0( char *opt, char *roots )
++int s07c_meryl72_800C74E0( char *opt, signed char *roots )
+ {
+     int   count;
+     char *param;
+diff --git a/source/anime/effect/smoke4.c b/source/anime/effect/smoke4.c
+index 34ec8d1b6..7d76fb001 100644
+--- a/source/anime/effect/smoke4.c
++++ b/source/anime/effect/smoke4.c
+@@ -44,5 +44,5 @@ void AN_PanelSmoke(SVECTOR *pos)
+     anm_panelsmoke_form.pre_script = &pre;
+     pre.scr_num = 0;
+ 
+-    NewAnime(NULL, NULL, &anm_panelsmoke_form);
++    NewAnime(NULL, 0, &anm_panelsmoke_form);
+ }
+diff --git a/source/okajima/dog/dog.c b/source/okajima/dog/dog.c
+index 0ee9d5c54..f2cee72cd 100644
+--- a/source/okajima/dog/dog.c
++++ b/source/okajima/dog/dog.c
+@@ -127,7 +127,7 @@ SVECTOR s12c_dword_800C3430[2] = {{500, 0, 1000}, {-500, 0, 1000}};
+ SVECTOR s12c_dword_800C3440[2] = {{250, 0, 500}, {-250, 0, 500}};
+ 
+ SVECTOR s12c_dword_800C3450 = {0, 0, 100};
+-SVECTOR s12c_dword_800C3458 = {64512, 0, 0};
++SVECTOR s12c_dword_800C3458 = {-1024, 0, 0};
+ 
+ extern SVECTOR KORE_GuestPosition;
+ extern int     KORE_GuestFlag;
+diff --git a/source/takabe/elc_damg.c b/source/takabe/elc_damg.c
+index 9cc06b8a0..6c0a8104a 100644
+--- a/source/takabe/elc_damg.c
++++ b/source/takabe/elc_damg.c
+@@ -27,7 +27,7 @@ unsigned short s08a_dword_800C36E0[2] = {HASH_ON2, HASH_OFF2};
+ void ElcDamgExecProc_800D4AAC(int proc, int value)
+ {
+     GCL_ARGS args;
+-    u_long   data;
++    long     data;
+ 
+     data = value;
+     if (proc != 0)
+diff --git a/source/takabe/elc_flr.c b/source/takabe/elc_flr.c
+index 9c3eff978..9956c77ea 100644
+--- a/source/takabe/elc_flr.c
++++ b/source/takabe/elc_flr.c
+@@ -22,11 +22,13 @@ unsigned short elc_flr_800C36DC[] = {HASH_ON2, HASH_OFF2};
+ 
+ void ElcFlrAct_800D47CC(Work *work)
+ {
++#ifdef MGS_NATIVE
++    int    *t;
++#else
+     long   *t;
++#endif
+     int     ang;
+-    u_long *iter;
+     int     i, j;
+-    long   *iter2;
+ 
+     GM_CurrentMap = work->map;
+ 
+@@ -57,26 +59,22 @@ void ElcFlrAct_800D47CC(Work *work)
+ 
+         if (work->f150 & 1)
+         {
+-            iter = t;
+-            for (i = 3; i > 0; i--)
++            for (i = 0; i < 3; i++)
+             {
+-                *iter++ = (*iter * 3) / 4;
++                t[i] = ((unsigned int)t[i] * 3u) / 4u;
+             }
+         }
+     }
+     else
+     {
+-        iter2 = t;
+-        for (j = 3; j > 0; j--)
++        for (j = 0; j < 3; j++)
+         {
+-            *iter2 = GV_NearExp4(*iter2, 1);
++            t[j] = GV_NearExp4(t[j], 1);
+ 
+-            if (*iter2 < 5)
++            if (t[j] < 5)
+             {
+-                *iter2 = 1;
++                t[j] = 1;
+             }
+-
+-            iter2++;
+         }
+     }
+ }
+diff --git a/source/takabe/glass.c b/source/takabe/glass.c
+index 040c5cad2..82cb7fc99 100644
+--- a/source/takabe/glass.c
++++ b/source/takabe/glass.c
+@@ -106,7 +106,11 @@ void GlassAct_800D302C(Work *work)
+                 GM_SeSet(&work->pos, SE_GLASS_SHATTER);
+ 
+                 DG_TransposeMatrix(&work->world, &world);
++#ifdef MGS_NATIVE
++                ApplyMatrixSV(&world, &target->force, &sp30);
++#else
+                 gte_ApplyMatrixSV(&world, &target->force, &sp30);
++#endif
+ 
+                 if (sp30.vz > 0)
+                 {

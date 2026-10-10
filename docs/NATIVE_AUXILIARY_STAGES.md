@@ -1,0 +1,11 @@
+# Auxiliary stages and shared variant code
+
+The native build now selects `demosel`, `select`, `select1`, `select2`, `select3`, `select4`, `selectd`, `sound`, and `s03dr`. The theater, stage selectors, sound test, and vibration editor reuse the vendor's complete C implementations. Their source was adapted for typed CD arguments, bounded menu text, and native file I/O; they were not recreated as replacement menus.
+
+The vibration editor's Psy-Q `PC*` calls now use a real host file backend. It supports binary reads/writes, the three original access modes, seeking, closing, and initialization. Errors propagate to the editor; incomplete settings files leave its initialized settings intact. The 32-handle limit is checked before creating a file, so an exhausted table cannot truncate it. The API behavior follows the [original Psy-Q development-tools reference, chapter 12](https://psx.arthus.net/sdk/Psy-Q/DOCS/Devrefs/sdevtc.pdf). `host_files` tests round trips, EOF, access restrictions, invalid arguments, handle exhaustion, reset, and preservation of an existing file when allocation fails.
+
+`s03dr` reuses `s03d` code after comparing all 468 original functions and 28 constructor entries. Every compared instruction and constructor matches. The six differing bytes in the initial data section are alignment padding after three typed arrays. Other file-tail differences are not claimed equivalent; native code uses typed constants and separately reset BSS. See [the comparison ledger](data/s03dr_reuse.json).
+
+The 662-game-translation-unit build succeeds and all 70 tests in that build pass. Direct theater entry ran for 900 VSyncs and `select1` for 600 without an access violation. Their captured screens show the theater background/title and the default selector's title entry. These are bounded startup checks with default progress data, not a claim that every menu option or unlocked movie was exercised. Additional runtime evidence is recorded in the project progress log.
+
+The auxiliary MGS scan has no errors or fixable warnings. Nine nonfixable size/complexity warnings remain in the inherited sound-test, theater, and vibration-editor functions. The new host backend and its test scan cleanly. Original developer-menu behavior remains intentionally separate from campaign completion evidence.

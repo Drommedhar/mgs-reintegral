@@ -1,0 +1,57 @@
+diff --git a/psyz/src/psyz/kernel.c b/psyz/src/psyz/kernel.c
+index 2d02cd6..acb6a1d 100644
+--- a/psyz/src/psyz/kernel.c
++++ b/psyz/src/psyz/kernel.c
+@@ -517,7 +517,11 @@ static void StartIrqThread(void) {
+         return;
+     }
+     KernelInit();
++#ifdef PSYZ_POLL_IRQ_ONLY
++    irq_thread_state = -1;
++#else
+     irq_thread_state = Psyz_OsThreadStart(IrqThread, "psyz_irq") ? -1 : 1;
++#endif
+ }
+ 
+ void Psyz_KernelPoll(void) {
+diff --git a/psyz/src/psyz/libgte.c b/psyz/src/psyz/libgte.c
+index da4e4d8..47069b5 100644
+--- a/psyz/src/psyz/libgte.c
++++ b/psyz/src/psyz/libgte.c
+@@ -57,6 +57,7 @@
+     R(unsigned int, rgb1) /* cop1 21 */                                        \
+     R(unsigned int, rgb2) /* cop1 22 */                                        \
+     R(unsigned int, res1) /* cop1 23 (reserved) */                             \
++    R(unsigned int, lzcs) /* cop1 30 leading-sign-bit input */                 \
+     R(MATRIX, m)          /* cop2 0-7, rotation 3x3 + translation */           \
+     R(MATRIX, l1)         /* cop2 8-15 light source 3x3 + bg color */          \
+     R(MATRIX, l2)         /* cop2 16-23 light source 3x3 + bg color */         \
+@@ -2931,6 +2932,18 @@ unsigned int Psyz_GteDataRead(unsigned idx) {
+         return (unsigned int)MAC2;
+     case 27:
+         return (unsigned int)MAC3;
++    case 30:
++        return GTE(lzcs);
++    case 31: {
++        unsigned int bits = GTE(lzcs);
++        unsigned int count = 0;
++        if (bits & 0x80000000u) bits = ~bits;
++        while (count < 32 && !(bits & 0x80000000u)) {
++            ++count;
++            bits <<= 1;
++        }
++        return count;
++    }
+     default:
+         return 0;
+     }
+@@ -3025,6 +3038,9 @@ void Psyz_GteDataWrite(unsigned idx, unsigned int v) {
+     case 27:
+         MAC3 = (int)v;
+         break;
++    case 30:
++        GTE(lzcs) = v;
++        break;
+     default:
+         break;
+     }

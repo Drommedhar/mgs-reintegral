@@ -1,0 +1,2 @@
+# Bootstrap applies these patches to Git index entries with LF line endings.
+patches/*.patch text eol=lf

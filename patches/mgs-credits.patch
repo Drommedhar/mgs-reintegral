@@ -1,0 +1,59 @@
+diff --git a/source/takabe/ending2.c b/source/takabe/ending2.c
+index 3f8bba1f2..550e866c7 100644
+--- a/source/takabe/ending2.c
++++ b/source/takabe/ending2.c
+@@ -94,32 +94,9 @@ RECT moviework_rects_800C3254[3] = {{0, 320, 320, 160}, {320, 320, 320, 160}, {6
+ Work2 moviework_800C326C = {0};
+ 
+ int roll_dword_800C32B8 = 0x00000140;
+-int roll_dword_800C32BC[1] = {0x00000267}; // unknown how large
+-int roll_dword_800C32C0 = 0x00000633;
+-int roll_dword_800C32C4 = 0x000008DB;
+-int roll_dword_800C32C8 = 0x00000E1A;
+-int roll_dword_800C32CC = 0x00001278;
+-int roll_dword_800C32D0 = 0x0000158D;
+-int roll_dword_800C32D4 = 0x00001AD2;
+-int roll_dword_800C32D8 = 0x00001D50;
+-int roll_dword_800C32DC = 0x00002331;
+-int roll_dword_800C32E0 = 0x000026B4;
+-int roll_dword_800C32E4 = 0x00002A8C;
+-int roll_dword_800C32E8 = 0x00002CB9;
+-int roll_dword_800C32EC = 0x00002F35;
+-int roll_dword_800C32F0 = 0x00003174;
+-int roll_dword_800C32F4 = 0x00003360;
+-int roll_dword_800C32F8 = 0x000037F4;
+-int roll_dword_800C32FC = 0x00003B9A;
+-int roll_dword_800C3300 = 0x00003D6B;
+-int roll_dword_800C3304 = 0x00003EFB;
+-int roll_dword_800C3308 = 0x00004104;
+-int roll_dword_800C330C = 0x000045CE;
+-int roll_dword_800C3310 = 0x000048BC;
+-int roll_dword_800C3314 = 0x00004A2D;
+-int roll_dword_800C3318 = 0x00004BA6;
+-int roll_dword_800C331C = 0x00004D11;
+-int roll_dword_800C3320 = 0xFFFFFFFF;
++int roll_dword_800C32BC[26] = {615,   1587,  2267,  3610,  4728,  5517,  6866,  7504,  9009,
++                               9908,  10892, 11449, 12085, 12660, 13152, 14324, 15258, 15723,
++                               16123, 16644, 17870, 18620, 18989, 19366, 19729, -1};
+ 
+ int SECTION(".bss") start_800C9EC0;
+ 
+@@ -376,6 +353,9 @@ void Ending2Movie_800C6240(void)
+         else
+         {
+             status = 1;
++#ifdef MGS_NATIVE
++            mts_wait_vbl(1);
++#endif
+         }
+ 
+         if (status == 0 || moviework->field_20 != 0)
+@@ -891,7 +871,7 @@ void Ending2Act_800C71D8(Work *work)
+                         work->field_54 = roll_ending2_800C6814(scratch1, work->field_54, *work->field_50 / 2);
+                     }
+ 
+-                    var_s1 = work->field_54 = work->field_54; // ???
++                    var_s1 = work->field_54;
+                     var_s6 = var_s6 | *var_s1;
+                     work->field_54 = roll_ending2_800C6814(scratch1 + 0x100, var_s1, *work->field_50 / 2);
+                     if (!(var_s6 & 0xC0))

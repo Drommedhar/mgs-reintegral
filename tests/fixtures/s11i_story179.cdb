@@ -1,0 +1,6 @@
+.lines -e
+bu /1 mgs_integral_native!MgsNativeReloadOverlay "ew mgs_integral_native!var_buf+a b3; ew mgs_integral_native!var_buf+2 800; ew mgs_integral_native!var_buf+4 0; ew mgs_integral_native!linkvarbuf+10 dcd8 c3dc b7bc; .printf \"FIXTURE story179; original s11c sub_FDDB entry heading2048 pose(-9000,-15396,-18500) stance0\n\"; gc"
+bu /1 mgs_integral_native!NewZako11FCommander ".printf \"FIXTURE observed original Zako11F commander constructor\n\"; gc"
+sxe -c "r;kv;q" av
+g
+q

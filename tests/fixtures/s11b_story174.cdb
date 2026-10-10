@@ -1,0 +1,9 @@
+.lines -e
+bu /1 mgs_integral_native!MgsNativeReloadOverlay "ew mgs_integral_native!var_buf+a ae; ew mgs_integral_native!linkvarbuf+10 ec78 0 5dc0; ew mgs_integral_native!var_buf+2 0 0; .printf \"FIXTURE: story174, original s11a sub_E1CB incoming pose(-5000,0,24000), heading0.\\n\"; gc"
+bu /1 mgs_integral_native!NewStage11BDemo ".printf \"OBSERVE: original script constructs recovered 11b cinematic.\\n\"; gc"
+bu /1 mgs_integral_native!Stage11BMoveDebris ".printf \"OBSERVE: recovered cinematic debris moves.\\n\"; gc"
+bu /1 mgs_integral_native!NewCrashSmoke ".printf \"OBSERVE: recovered crash smoke constructed.\\n\"; gc"
+sxe -c "r;kv;q" av
+sxe -c "r;kv;q" dz
+g
+q

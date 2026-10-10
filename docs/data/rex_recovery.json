@@ -1,0 +1,150 @@
+{
+  "source_commit": "f54dbb2a58adfc2755403296c9ebb653fbec277b",
+  "stages": [
+    "s17a",
+    "s17ar"
+  ],
+  "overlay_load_address": "0x800c3208",
+  "assets": [
+    {
+      "stage": "s17a",
+      "identity": "4b7b.b",
+      "offset": 50864128,
+      "size": 142496,
+      "sha256": "a6b691ff0be4af526fb856847be0549dbe015b31b7fb137a1fbbe6027125d4d1"
+    },
+    {
+      "stage": "s17a",
+      "identity": "ea54.g",
+      "offset": 51814964,
+      "size": 11652,
+      "sha256": "7b5f06163eff649bcc53318dd8d0734b67f1a362a28b9d2745dd7cbbfa8ef518"
+    },
+    {
+      "stage": "s17a",
+      "identity": "a242.g",
+      "offset": 51826616,
+      "size": 11016,
+      "sha256": "13083c6de772da3f424b0a21134747cfe802c6bc41240cc520c7e05d8c2b36e4"
+    },
+    {
+      "stage": "s17ar",
+      "identity": "6fdb.b",
+      "offset": 65622016,
+      "size": 142496,
+      "sha256": "a6b691ff0be4af526fb856847be0549dbe015b31b7fb137a1fbbe6027125d4d1"
+    },
+    {
+      "stage": "s17ar",
+      "identity": "ea54.g",
+      "offset": 66567916,
+      "size": 11652,
+      "sha256": "7b5f06163eff649bcc53318dd8d0734b67f1a362a28b9d2745dd7cbbfa8ef518"
+    },
+    {
+      "stage": "s17ar",
+      "identity": "a242.g",
+      "offset": 66579568,
+      "size": 11016,
+      "sha256": "13083c6de772da3f424b0a21134747cfe802c6bc41240cc520c7e05d8c2b36e4"
+    }
+  ],
+  "recovered_actor_sources": [
+    "source/kojo/mgrex.c",
+    "source/kojo/ninjalzr.c",
+    "source/kojo/drum2.c",
+    "source/kojo/spark2l.c",
+    "source/kojo/bloodhzd.c",
+    "source/kojo/mg_laser.c",
+    "source/kojo/rex_anime.c",
+    "source/kojo/rex_particles.c",
+    "source/kojo/hmissile.c",
+    "source/kojo/mgrexlzr.c",
+    "source/kojo/mg_hatch.c",
+    "source/takabe/mg_demo1.c",
+    "source/overlays/s17a/rex_data.c",
+    "source/overlays/s17a/rex_effects.h",
+    "source/overlays/s17a/rex_native.h",
+    "source/overlays/s17a/rex_particles.h"
+  ],
+  "actor_patch": {
+    "path": "patches/mgs-rex.patch",
+    "sha256": "6719d5289b66b2186f24ce460f5e06c57143c8867be90a8c9f49b751af780e74"
+  },
+  "validation": {
+    "native_compile": "13 C translation units, 0 errors, 0 warnings",
+    "native_reference_comparisons": {
+      "core": 984,
+      "particles": 576,
+      "laser_clip": 135,
+      "hatch_motion": 128
+    },
+    "runtime": {
+      "stage": "s17a",
+      "configuration": "RelWithDebInfo",
+      "frames": [
+        900,
+        1800
+      ],
+      "observed_constructors": [
+        "NewRex",
+        "RexNewDrum"
+      ],
+      "movement_horizontal_units": 3112,
+      "input_frames": 57,
+      "movement_ticks": 27,
+      "native_faults": 0,
+      "visual_observations": [
+        "REX and hangar rendered at 900 VSyncs",
+        "Active REX laser and player hurt/knockdown state at 1800 VSyncs"
+      ],
+      "boss_victory": false,
+      "log": "build/s17a-story255-debug.log",
+      "capture": "build/s17a-story255.bmp"
+    },
+    "human_playtest": false
+  },
+  "shared_code_proofs": [
+    {
+      "name": "InverseLight",
+      "original_range": [
+        "0x800d33cc",
+        "0x800d3ad8"
+      ],
+      "reference_stage": "s11h",
+      "reference_range": [
+        "0x800ccfa4",
+        "0x800cd6b0"
+      ],
+      "difference": "4 relocated jumps and 4 callback/string address relocations; remaining instructions identical"
+    },
+    {
+      "name": "PutHzd",
+      "original_range": [
+        "0x800d1f60",
+        "0x800d2500"
+      ],
+      "reference_stage": "s11h",
+      "reference_range": [
+        "0x800cca04",
+        "0x800ccfa4"
+      ],
+      "difference": "6 relocated jumps and 6 message/callback/string/helper address relocations"
+    }
+  ],
+  "fixture": {
+    "path": "tests/fixtures/s17a_story255.cdb",
+    "story": 255,
+    "phase": 0,
+    "position": [
+      378,
+      1104,
+      279
+    ],
+    "heading": 2048,
+    "stance": 0,
+    "position_source": "Original d16e sub_E2B2",
+    "condition_source": "Original s17a main: story >=255, phase==0",
+    "classification": "Explicit automated test setup, not an original save or campaign progress"
+  }
+}

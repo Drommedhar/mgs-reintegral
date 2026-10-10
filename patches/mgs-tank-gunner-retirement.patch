@@ -1,0 +1,44 @@
+diff --git a/source/overlays/s05a/kojo/m1e1sold.c b/source/overlays/s05a/kojo/m1e1sold.c
+index eceaa7621..b742167bd 100644
+--- a/source/overlays/s05a/kojo/m1e1sold.c
++++ b/source/overlays/s05a/kojo/m1e1sold.c
+@@ -795,7 +795,8 @@ int s05a_800DF834(int arg0, SVECTOR *vec, u_short *arg3)
+     {
+         return 0;
+     }
+-    if (s05a_dword_800C362C->field_EB0 == NULL)
++    if (s05a_dword_800C362C->field_EB0 == NULL ||
++        s05a_dword_800C362C->field_EB0->field_1C0 == NULL)
+     {
+         return 0;
+     }
+@@ -833,7 +834,8 @@ int s05a_800DF9C8(TARGET *t, int flags)
+ 
+     if (s05a_dword_800C362C->field_ED0 != 0)
+     {
+-        if (s05a_dword_800C362C->field_EB0 != 0)
++        if (s05a_dword_800C362C->field_EB0 != 0 &&
++            s05a_dword_800C362C->field_EB0->field_1C0 != NULL)
+         {
+             s05a_dword_800C362C->field_EB0->field_1C0->vital = 0x2710;
+             s05a_dword_800C362C->field_EB0->field_1C0->damage = 0;
+@@ -848,7 +850,8 @@ int s05a_800DF9C8(TARGET *t, int flags)
+         return 1;
+     }
+ 
+-    if (s05a_dword_800C362C->field_EB0 != 0)
++    if (s05a_dword_800C362C->field_EB0 != 0 &&
++        s05a_dword_800C362C->field_EB0->field_1C0 != NULL)
+     {
+         delta = s05a_dword_800C362C->field_EB0->field_1C0->center;
+         dx = delta.vx - t->center.vx;
+@@ -1044,7 +1047,8 @@ int s05a_800E00EC(GV_ACT *actor)
+     GM_uTenageMotion = -1;
+     if (HZD_LevelHazardCheckOne(&s05a_dword_800C362C->hzd[0].flr[0], &work->control.mov) == 0 && !(GM_PlayerStatus & 0x1340))
+     {
+-        if (s05a_dword_800C362C->field_EB0 != NULL)
++        if (s05a_dword_800C362C->field_EB0 != NULL &&
++            s05a_dword_800C362C->field_EB0->field_1C0 != NULL)
+         {
+             pos = s05a_dword_800C362C->field_EB0->field_1C0->center;
+         }

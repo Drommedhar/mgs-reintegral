@@ -1,0 +1,433 @@
+{
+  "schema": 1,
+  "stage": "s03d",
+  "upstream_commit": "f54dbb2a58adfc2755403296c9ebb653fbec277b",
+  "provenance": {
+    "stage": "s03d",
+    "disc": "SLPM_862.47",
+    "resource": "46fe.b",
+    "offset": 18118656,
+    "size": 103160,
+    "sha256": "f9fa0f39352d3305b5cb2bd6c292297d4f351387b0038a27ccec29f42150d903",
+    "load_address": "0x800c3208",
+    "resident_sha256": "4b8252b65953a02021486406cfcdca1c7670d1d1a8f3cf6e750ef6e360dc3a2f",
+    "original_table_verified_entries": 28,
+    "analysis_image": "resident code plus original overlay with zero gap; analysis only"
+  },
+  "method": "Original overlay and resident MIPS disassembly with Hex-Rays pseudocode; segment write permissions corrected for mutable globals. Typed C uses existing engine APIs and original actor layouts.",
+  "native_functions": [
+    {
+      "original_address": "0x800cce3c",
+      "native_symbol": "s03d_800CCE3C",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "assembly": "asm/overlays/s03d/s03d_800CCE3C.s"
+    },
+    {
+      "original_address": "0x800cd1c4",
+      "native_symbol": "s03d_800CD1C4",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "assembly": "asm/overlays/s03d/s03d_800CD1C4.s"
+    },
+    {
+      "original_address": "0x800cd5a0",
+      "native_symbol": "NewS03dZako",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "assembly": "asm/overlays/s03d/s03d_800CD1C4.s"
+    },
+    {
+      "original_address": "0x800cd75c",
+      "native_symbol": "s03d_800CD75C",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "assembly": "asm/overlays/s03d/s03d_800CD75C.s"
+    },
+    {
+      "original_address": "0x800cdb5c",
+      "native_symbol": "s03d_800CDB5C",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "assembly": "asm/overlays/s03d/s03d_800CDB5C.s"
+    },
+    {
+      "original_address": "0x800cdf94",
+      "native_symbol": "s03d_800CDF94",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "assembly": "asm/overlays/s03d/s03d_800CDF94.s"
+    },
+    {
+      "original_address": "0x800ce12c",
+      "native_symbol": "s03d_800CE12C",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "assembly": "asm/overlays/s03d/s03d_800CE12C.s"
+    },
+    {
+      "original_address": "0x800ce318",
+      "native_symbol": "s03d_800CE318",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "assembly": "asm/overlays/s03d/s03d_800CE318.s"
+    },
+    {
+      "original_address": "0x800ce720",
+      "native_symbol": "s03d_800CE720",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "assembly": "asm/overlays/s03d/s03d_800CE720.s"
+    },
+    {
+      "original_address": "0x800ceb38",
+      "native_symbol": "s03d_800CEB38",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "assembly": "asm/overlays/s03d/s03d_800CEB38.s"
+    },
+    {
+      "original_address": "0x800cee3c",
+      "native_symbol": "s03d_800CEE3C",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "assembly": "asm/overlays/s03d/s03d_800CEE3C.s"
+    },
+    {
+      "original_address": "0x800cf194",
+      "native_symbol": "s03d_800CF194",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "assembly": "asm/overlays/s03d/s03d_800CF194.s"
+    },
+    {
+      "original_address": "0x800cf68c",
+      "native_symbol": "s03d_800CF68C",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "assembly": "asm/overlays/s03d/s03d_800CF68C.s"
+    },
+    {
+      "original_address": "0x800cfb04",
+      "native_symbol": "s03d_800CFB04",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "assembly": "asm/overlays/s03d/s03d_800CFB04.s"
+    },
+    {
+      "original_address": "0x800d041c",
+      "native_symbol": "s03d_800D041C",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "assembly": "asm/overlays/s03d/s03d_800D041C.s"
+    },
+    {
+      "original_address": "0x800d09d8",
+      "native_symbol": "s03d_800D09D8",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "assembly": "asm/overlays/s03d/s03d_800D09D8.s"
+    },
+    {
+      "original_address": "0x800d0c90",
+      "native_symbol": "s03d_800D0C90",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "assembly": "asm/overlays/s03d/s03d_800D0C90.s"
+    },
+    {
+      "original_address": "0x800d0cd4",
+      "native_symbol": "s03d_800D0CD4",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "assembly": "asm/overlays/s03d/s03d_800D0C90.s"
+    },
+    {
+      "original_address": "0x800d0d6c",
+      "native_symbol": "s03d_800D0D6C",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "assembly": "asm/overlays/s03d/s03d_800D0C90.s"
+    },
+    {
+      "original_address": "0x800d0df0",
+      "native_symbol": "s03d_800D0DF0",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "assembly": "asm/overlays/s03d/s03d_800D0C90.s"
+    },
+    {
+      "original_address": "0x800d0e2c",
+      "native_symbol": "s03d_800D0E2C",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "assembly": "asm/overlays/s03d/s03d_800D0C90.s"
+    },
+    {
+      "original_address": "0x800d1054",
+      "native_symbol": "s03d_800D1054",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "assembly": "asm/overlays/s03d/s03d_800D1054.s"
+    },
+    {
+      "original_address": "0x800d10b4",
+      "native_symbol": "s03d_800D10B4",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "assembly": "asm/overlays/s03d/s03d_800D1054.s"
+    },
+    {
+      "original_address": "0x800d123c",
+      "native_symbol": "s03d_800D123C",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "assembly": "asm/overlays/s03d/s03d_800D1054.s"
+    },
+    {
+      "original_address": "0x800d1324",
+      "native_symbol": "s03d_800D1324",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "assembly": "asm/overlays/s03d/s03d_800D1054.s"
+    },
+    {
+      "original_address": "0x800d14ac",
+      "native_symbol": "s03d_800D14AC",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "assembly": "asm/overlays/s03d/s03d_800D14AC.s"
+    },
+    {
+      "original_address": "0x800d46f8",
+      "native_symbol": "s03d_800D46F8",
+      "source": "source/overlays/s03d/animal/zako/zakocom.c",
+      "assembly": "asm/overlays/s03d/s03d_800D46F8.s"
+    },
+    {
+      "original_address": "0x800d4eac",
+      "native_symbol": "s03d_800D4EAC",
+      "source": "source/overlays/s03d/animal/zako/zakocom.c",
+      "assembly": "asm/overlays/s03d/s03d_800D4EAC.s"
+    },
+    {
+      "original_address": "0x800d53ec",
+      "native_symbol": "s03d_800D53EC",
+      "source": "source/overlays/s03d/animal/zako/zakocom.c",
+      "assembly": "asm/overlays/s03d/s03d_800D4EAC.s"
+    },
+    {
+      "original_address": "0x800d5458",
+      "native_symbol": "s03d_800D5458",
+      "source": "source/overlays/s03d/animal/zako/zakocom.c",
+      "assembly": "asm/overlays/s03d/s03d_800D4EAC.s"
+    },
+    {
+      "original_address": "0x800d55c8",
+      "native_symbol": "s03d_800D55C8",
+      "source": "source/overlays/s03d/animal/zako/zakocom.c",
+      "assembly": "asm/overlays/s03d/s03d_800D55C8.s"
+    },
+    {
+      "original_address": "0x800d580c",
+      "native_symbol": "NewS03dZakoCommander",
+      "source": "source/overlays/s03d/animal/zako/zakocom.c",
+      "assembly": "asm/overlays/s03d/s03d_800D55C8.s"
+    }
+  ],
+  "assembly_blocks": [
+    {
+      "assembly": "asm/overlays/s03d/s03d_800CCE3C.s",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "start": "0x800cce3c",
+      "end_exclusive": "0x800cd054",
+      "verified_instruction_words": 134
+    },
+    {
+      "assembly": "asm/overlays/s03d/s03d_800CD1C4.s",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "start": "0x800cd1c4",
+      "end_exclusive": "0x800cd61c",
+      "verified_instruction_words": 278
+    },
+    {
+      "assembly": "asm/overlays/s03d/s03d_800CD75C.s",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "start": "0x800cd75c",
+      "end_exclusive": "0x800cd984",
+      "verified_instruction_words": 138
+    },
+    {
+      "assembly": "asm/overlays/s03d/s03d_800CDB5C.s",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "start": "0x800cdb5c",
+      "end_exclusive": "0x800cdd40",
+      "verified_instruction_words": 121
+    },
+    {
+      "assembly": "asm/overlays/s03d/s03d_800CDF94.s",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "start": "0x800cdf94",
+      "end_exclusive": "0x800ce12c",
+      "verified_instruction_words": 102
+    },
+    {
+      "assembly": "asm/overlays/s03d/s03d_800CE12C.s",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "start": "0x800ce12c",
+      "end_exclusive": "0x800ce2c0",
+      "verified_instruction_words": 101
+    },
+    {
+      "assembly": "asm/overlays/s03d/s03d_800CE318.s",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "start": "0x800ce318",
+      "end_exclusive": "0x800ce5b4",
+      "verified_instruction_words": 167
+    },
+    {
+      "assembly": "asm/overlays/s03d/s03d_800CE720.s",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "start": "0x800ce720",
+      "end_exclusive": "0x800ce8f4",
+      "verified_instruction_words": 117
+    },
+    {
+      "assembly": "asm/overlays/s03d/s03d_800CEB38.s",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "start": "0x800ceb38",
+      "end_exclusive": "0x800cecbc",
+      "verified_instruction_words": 97
+    },
+    {
+      "assembly": "asm/overlays/s03d/s03d_800CEE3C.s",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "start": "0x800cee3c",
+      "end_exclusive": "0x800cf114",
+      "verified_instruction_words": 182
+    },
+    {
+      "assembly": "asm/overlays/s03d/s03d_800CF194.s",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "start": "0x800cf194",
+      "end_exclusive": "0x800cf4d4",
+      "verified_instruction_words": 208
+    },
+    {
+      "assembly": "asm/overlays/s03d/s03d_800CF68C.s",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "start": "0x800cf68c",
+      "end_exclusive": "0x800cf844",
+      "verified_instruction_words": 110
+    },
+    {
+      "assembly": "asm/overlays/s03d/s03d_800CFB04.s",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "start": "0x800cfb04",
+      "end_exclusive": "0x800cfff0",
+      "verified_instruction_words": 315
+    },
+    {
+      "assembly": "asm/overlays/s03d/s03d_800D041C.s",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "start": "0x800d041c",
+      "end_exclusive": "0x800d05dc",
+      "verified_instruction_words": 112
+    },
+    {
+      "assembly": "asm/overlays/s03d/s03d_800D09D8.s",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "start": "0x800d09d8",
+      "end_exclusive": "0x800d0b18",
+      "verified_instruction_words": 80
+    },
+    {
+      "assembly": "asm/overlays/s03d/s03d_800D0C90.s",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "start": "0x800d0c90",
+      "end_exclusive": "0x800d0ef0",
+      "verified_instruction_words": 152
+    },
+    {
+      "assembly": "asm/overlays/s03d/s03d_800D1054.s",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "start": "0x800d1054",
+      "end_exclusive": "0x800d13e8",
+      "verified_instruction_words": 229
+    },
+    {
+      "assembly": "asm/overlays/s03d/s03d_800D14AC.s",
+      "source": "source/overlays/s03d/animal/zako/zako.c",
+      "start": "0x800d14ac",
+      "end_exclusive": "0x800d153c",
+      "verified_instruction_words": 36
+    },
+    {
+      "assembly": "asm/overlays/s03d/s03d_800D46F8.s",
+      "source": "source/overlays/s03d/animal/zako/zakocom.c",
+      "start": "0x800d46f8",
+      "end_exclusive": "0x800d47bc",
+      "verified_instruction_words": 49
+    },
+    {
+      "assembly": "asm/overlays/s03d/s03d_800D4EAC.s",
+      "source": "source/overlays/s03d/animal/zako/zakocom.c",
+      "start": "0x800d4eac",
+      "end_exclusive": "0x800d5484",
+      "verified_instruction_words": 374
+    },
+    {
+      "assembly": "asm/overlays/s03d/s03d_800D55C8.s",
+      "source": "source/overlays/s03d/animal/zako/zakocom.c",
+      "start": "0x800d55c8",
+      "end_exclusive": "0x800d5888",
+      "verified_instruction_words": 176
+    }
+  ],
+  "data_checks": {
+    "vectors": [
+      "0x800c39b0",
+      "0x800c39b8",
+      "0x800c39c0",
+      "0x800c39c8",
+      "0x800c3a5c",
+      "0x800c3a64",
+      "0x800c3a6c",
+      "0x800c3a74",
+      "0x800c3a7c",
+      "0x800db548",
+      "0x800db550",
+      "0x800db558"
+    ],
+    "motion_table": {
+      "address": "0x800c39e0",
+      "short_count": 48
+    },
+    "original_instruction_words_match": true
+  },
+  "native_adaptations": [
+    "Named native constructors replace all 28 original stage-table pointers.",
+    "Guard allocation and field offsets retain original 0xBA4-byte layout; commander state is a single 0x148-byte object, without cross-global pointer arithmetic.",
+    "Callback arrays and item messages use host pointers; motion tables and vectors retain original values.",
+    "Original assembly remains behind non-native preprocessor branches; the native table/constructor additions have not been validated for the original PS1 matching build."
+  ],
+  "validation": {
+    "standalone_windows_x86_syntax": "pass; all nine new s03d translation units; Clang 19.1.5, C17, MGS_NATIVE, -Werror=unknown-pragmas; critical sizes/offsets asserted in header",
+    "full_native_link": true,
+    "native_runtime_validated": true,
+    "behavioral_equivalence_proven": false,
+    "scope": "Automated integration fixture; not human playtesting, encounter completion, or normal campaign progression.",
+    "configuration": "RelWithDebInfo; 348 native game translation units; 18 CTest suites passed before fixture run.",
+    "fixture": {
+      "debugger_script": "tests/fixtures/s03d_story27.cdb",
+      "writes": [
+        {
+          "symbol": "var_buf",
+          "byte_offset": "0xA",
+          "type": "signed 16-bit",
+          "value": 27,
+          "gcl_variable": "$w:00000A",
+          "reason": "Original scenario branch27 <= story <28 sets story28, entry position/heading, starts the original intro, then restarts into the guard encounter."
+        }
+      ],
+      "timing": "One-shot breakpoint at first MgsNativeReloadOverlay before the s03d scenario",
+      "other_game_state_writes": false,
+      "input": "SDL virtual controller, stage probe; original Start/Cross input handles intro/Codec; movement uses original pad path."
+    },
+    "runs": [
+      {
+        "log": "build/s03d-fixture27.log",
+        "vsyncs": 2400,
+        "movement_delta": 1690,
+        "pad_frames": 57,
+        "movement_ticks": 25,
+        "result": "automated movement pass; no access violation; Snake subsequently killed while idle; original Game Over captured",
+        "capture": "build/s03d-fixture27.bmp"
+      },
+      {
+        "log": "build/s03d-room.log",
+        "vsyncs": 900,
+        "movement_delta": 1737,
+        "pad_frames": 57,
+        "movement_ticks": 24,
+        "result": "automated movement pass; room capture inspected by agent",
+        "capture": "build/s03d-room.bmp"
+      }
+    ],
+    "unconfigured_entry_failure": "Direct s03d entry with initial story0 selects shared scenario branch<19 and requests absent c3b6.o motion, causing NewDemoDoll failure; this is not a supported campaign state."
+  }
+}

@@ -1,0 +1,11 @@
+$$ Use Disc 2, --stage ending or endingr, --stage-map 0x7df9 and --probe ending.
+$$ Set @$t10=1 before this file for the Otacon branch; default zero is Meryl.
+.lines -e
+bu /1 mgs_integral_native!MgsNativeReloadOverlay "ew mgs_integral_native!var_buf+a 124; ew mgs_integral_native!linkvarbuf+2 1; eb mgs_integral_native!var_buf+5c (@$t10 << 3); .printf \"FIXTURE story292 Normal difficulty companion=%d\\n\", @$t10; gc"
+bu mgs_integral_native!MgsNativeReloadOverlay ".printf \"OBSERVE reload story=%d roll_phase=%d completions=%d unlock=%d vsync=%d\\n\", wo(mgs_integral_native!var_buf+a), by(mgs_integral_native!var_buf+3d7), wo(mgs_integral_native!linkvarbuf), wo(mgs_integral_native!linkvarbuf+6), poi(mgs_integral_native!frames); gc"
+bu mgs_integral_native!Ending2Die_800C76BC ".echo OBSERVE original credits actor completed; gc"
+bu mgs_integral_native!NewRanking ".printf \"OBSERVE ranking constructor story=%d roll_phase=%d completions=%d unlock=%d vsync=%d\\n\", wo(mgs_integral_native!var_buf+a), by(mgs_integral_native!var_buf+3d7), wo(mgs_integral_native!linkvarbuf), wo(mgs_integral_native!linkvarbuf+6), poi(mgs_integral_native!frames); gc"
+sxe -c "r;kv;q" av
+sxe -c "r;kv;q" dz
+g
+q

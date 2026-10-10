@@ -1,0 +1,297 @@
+{
+  "stage": "brf",
+  "original_overlay": {
+    "file": "brf-96a7.b",
+    "base": "0x800C3208",
+    "bytes": 127702,
+    "sha256": "95f948d72f4b2dd523c3f60b3e036db2971c5f00b3f69d7dc9b4744c48996286"
+  },
+  "missing_blocks": 43,
+  "missing_functions": 61,
+  "instruction_words_verified": 21122,
+  "mismatched_instruction_words": 0,
+  "actors": {
+    "selector": {
+      "constructor": "0x800CAB58",
+      "original_size": 4072,
+      "blocks": 10,
+      "words": 4038
+    },
+    "graph": {
+      "constructor": "0x800DFD9C",
+      "original_size": 44488,
+      "blocks": 33,
+      "words": 17084
+    }
+  },
+  "native_layout": [
+    "Original POLY_FT4 is 40bytes; native 44bytepackets use typed arrays and full packet copies.",
+    "Texture/resources/scene/keyframe/text tables are typed native pointers, reconstructed from original data.",
+    "Original cache 8018E800 maps to native PACK_ADDR0+50 KiB; maximum 840 native FT4 packets occupy 36,960 bytes.",
+    "Constructor rejects out-of-range scene IDs and releases partial primitive allocations through existing actor teardown."
+  ],
+  "proof": [
+    {
+      "target": "mgs_brf_draw_test,mgs_brf_state_test,mgs_brf_decode_test,mgs_brf_init_test",
+      "cases": 28495,
+      "coverage": "selector decoder, menu packets, constructor, state machine"
+    },
+    {
+      "target": "mgs_brf_late_test",
+      "cases": 14364,
+      "coverage": "late graph scenes and biography/animation timelines"
+    },
+    {
+      "target": "mgs_brf_graph_final_test",
+      "cases": 13143,
+      "coverage": "final ten graph functions including DVECTOR path indices and texture wrapping"
+    },
+    {
+      "target": "mgs_brf_graph_early_test",
+      "cases": 17286,
+      "coverage": "remaining early graph scene states, sound cues and glyph timelines"
+    },
+    {
+      "target": "mgs_brf_core_test",
+      "cases": 9404,
+      "coverage": "fog phases, expression textures, camera measurement digits and geometric scaling"
+    },
+    {
+      "target": "mgs_brf_camera_test",
+      "cases": 24704,
+      "coverage": "38 camera/control/motion helpers including corrected parameter forwarding"
+    },
+    {
+      "target": "mgs_brf_render_test",
+      "cases": 1952,
+      "coverage": "All 19 scene layouts; five primitive groups; cache, noise, stop and fade; both packet buffers. Normalized packet address/length and complete payload, with ordered boundary call traces.",
+      "native_allocation_failure_cases": 5
+    }
+  ],
+  "reference_execution": "Offline original-MIPS testgeneration only; runtime actor code is native C.",
+  "quality": {
+    "blocking_findings": 0,
+    "nonfixable_warnings": {
+      "original_function_complexity": 22,
+      "parameter_count": 15
+    },
+    "test_findings": 0
+  },
+  "blocks": [
+    {
+      "name": "brf_800C56C0",
+      "source": "b_select",
+      "words": 234
+    },
+    {
+      "name": "brf_800C5A68",
+      "source": "b_select",
+      "words": 223
+    },
+    {
+      "name": "brf_800C62B0",
+      "source": "b_select",
+      "words": 198
+    },
+    {
+      "name": "brf_800C6E88",
+      "source": "b_select",
+      "words": 293
+    },
+    {
+      "name": "brf_800C731C",
+      "source": "b_select",
+      "words": 91
+    },
+    {
+      "name": "brf_800C7488",
+      "source": "b_select",
+      "words": 90
+    },
+    {
+      "name": "brf_800C75F0",
+      "source": "b_select",
+      "words": 334
+    },
+    {
+      "name": "brf_800C7B94",
+      "source": "b_select",
+      "words": 227
+    },
+    {
+      "name": "brf_800C829C",
+      "source": "b_select",
+      "words": 1222
+    },
+    {
+      "name": "brf_800C99C0",
+      "source": "b_select",
+      "words": 1126
+    },
+    {
+      "name": "brf_800CAE84",
+      "source": "b_graph",
+      "words": 238
+    },
+    {
+      "name": "brf_800CB23C",
+      "source": "b_graph",
+      "words": 238
+    },
+    {
+      "name": "brf_800CB5F4",
+      "source": "b_graph",
+      "words": 292
+    },
+    {
+      "name": "brf_800CBE34",
+      "source": "b_graph",
+      "words": 69
+    },
+    {
+      "name": "brf_800CC5E4",
+      "source": "b_graph",
+      "words": 380
+    },
+    {
+      "name": "brf_800CCBD4",
+      "source": "b_graph",
+      "words": 356
+    },
+    {
+      "name": "brf_800CD164",
+      "source": "b_graph",
+      "words": 372
+    },
+    {
+      "name": "brf_800CDAEC",
+      "source": "b_graph",
+      "words": 104
+    },
+    {
+      "name": "brf_800CDF34",
+      "source": "b_graph",
+      "words": 44
+    },
+    {
+      "name": "brf_800CDFE4",
+      "source": "b_graph",
+      "words": 120
+    },
+    {
+      "name": "brf_800CEC68",
+      "source": "b_graph",
+      "words": 31
+    },
+    {
+      "name": "brf_800CECE4",
+      "source": "b_graph",
+      "words": 338
+    },
+    {
+      "name": "brf_800CF4E0",
+      "source": "b_graph",
+      "words": 50
+    },
+    {
+      "name": "brf_800CF5A8",
+      "source": "b_graph",
+      "words": 803
+    },
+    {
+      "name": "brf_800D0234",
+      "source": "b_graph",
+      "words": 1356
+    },
+    {
+      "name": "brf_800D1BDC",
+      "source": "b_graph",
+      "words": 1189
+    },
+    {
+      "name": "brf_800D30A0",
+      "source": "b_graph",
+      "words": 596
+    },
+    {
+      "name": "brf_800D3D8C",
+      "source": "b_graph",
+      "words": 526
+    },
+    {
+      "name": "brf_800D4664",
+      "source": "b_graph",
+      "words": 130
+    },
+    {
+      "name": "brf_800D49B8",
+      "source": "b_graph",
+      "words": 1219
+    },
+    {
+      "name": "brf_800D5E54",
+      "source": "b_graph",
+      "words": 671
+    },
+    {
+      "name": "brf_800D693C",
+      "source": "b_graph",
+      "words": 407
+    },
+    {
+      "name": "brf_800D6F98",
+      "source": "b_graph",
+      "words": 406
+    },
+    {
+      "name": "brf_800D75F0",
+      "source": "b_graph",
+      "words": 801
+    },
+    {
+      "name": "brf_800D8A24",
+      "source": "b_graph",
+      "words": 1418
+    },
+    {
+      "name": "brf_800DA04C",
+      "source": "b_graph",
+      "words": 215
+    },
+    {
+      "name": "brf_800DA4E8",
+      "source": "b_graph",
+      "words": 84
+    },
+    {
+      "name": "brf_800DA700",
+      "source": "b_graph",
+      "words": 2282
+    },
+    {
+      "name": "brf_800DCB44",
+      "source": "b_graph",
+      "words": 139
+    },
+    {
+      "name": "brf_800DCED4",
+      "source": "b_graph",
+      "words": 514
+    },
+    {
+      "name": "brf_800DDC40",
+      "source": "b_graph",
+      "words": 26
+    },
+    {
+      "name": "brf_800DE2E0",
+      "source": "b_graph",
+      "words": 646
+    },
+    {
+      "name": "brf_800DECF8",
+      "source": "b_graph",
+      "words": 1024
+    }
+  ]
+}

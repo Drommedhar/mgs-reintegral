@@ -1,0 +1,32 @@
+diff --git a/build/linker_command_file.txt b/build/linker_command_file.txt
+index 1ba2ce27c..20700ad8e 100644
+--- a/build/linker_command_file.txt
++++ b/build/linker_command_file.txt
+@@ -2175,9 +2175,25 @@ overlay_bss group   file("{{OBJ_DIR}}\{{OVERLAY}}_{{OVERLAY_SUFFIX}}_bss.bin")
+     include "{{OBJ_DIR}}\anime\effect\breath.obj", overlay
+     include "{{OBJ_DIR}}\animal\doll\demodoll.obj", overlay
+ 
+-    include "{{OBJ_DIR}}\overlays\{{OVERLAY}}\overlay2.obj", overlay
+ 
+-    include "{{OBJ_DIR}}\overlays\d18a\animal\snake18\snake18.obj", overlay
++    include "{{OBJ_DIR}}\overlays\d18a\animal\snake18\native_00.obj", overlay
++    include "{{OBJ_DIR}}\overlays\d18a\animal\snake18\native_01.obj", overlay
++    include "{{OBJ_DIR}}\overlays\d18a\animal\snake18\native_02.obj", overlay
++    include "{{OBJ_DIR}}\overlays\d18a\animal\snake18\native_03.obj", overlay
++    include "{{OBJ_DIR}}\overlays\d18a\animal\snake18\native_04.obj", overlay
++    include "{{OBJ_DIR}}\overlays\d18a\animal\snake18\native_05.obj", overlay
++    include "{{OBJ_DIR}}\overlays\d18a\animal\snake18\native_06.obj", overlay
++    include "{{OBJ_DIR}}\overlays\d18a\animal\snake18\native_07.obj", overlay
++    include "{{OBJ_DIR}}\overlays\d18a\animal\snake18\native_08.obj", overlay
++    include "{{OBJ_DIR}}\overlays\d18a\animal\snake18\native_09.obj", overlay
++    include "{{OBJ_DIR}}\overlays\d18a\animal\snake18\native_10.obj", overlay
++    include "{{OBJ_DIR}}\overlays\d18a\animal\snake18\native_11.obj", overlay
++    include "{{OBJ_DIR}}\overlays\d18a\animal\snake18\native_12.obj", overlay
++    include "{{OBJ_DIR}}\overlays\d18a\animal\snake18\native_13.obj", overlay
++    include "{{OBJ_DIR}}\overlays\d18a\animal\snake18\native_14.obj", overlay
++    include "{{OBJ_DIR}}\overlays\d18a\animal\snake18\native_15.obj", overlay
++    include "{{OBJ_DIR}}\overlays\d18a\animal\snake18\native_data.obj", overlay
++    include "{{OBJ_DIR}}\overlays\d18a\animal\snake18\native_target.obj", overlay
+     include "{{OBJ_DIR}}\okajima\smktrgt.obj", overlay
+     include "{{OBJ_DIR}}\anime\effect\smoke3.obj", overlay
+     include "{{OBJ_DIR}}\okajima\blur.obj", overlay

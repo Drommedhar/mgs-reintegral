@@ -1,0 +1,9 @@
+.lines -e
+bu /1 mgs_integral_native!MgsNativeReloadOverlay "ew mgs_integral_native!var_buf+a d3; ew mgs_integral_native!linkvarbuf+10 b7a 464 e997; ew mgs_integral_native!var_buf+2 0 0; .printf \"FIXTURE: isolated story211 Raven fight branch with known warehouse pose from sub_13CE; not campaign traversal.\\n\"; gc"
+bu /1 mgs_integral_native!NewValcan_800D9864 ".printf \"OBSERVE: original scenario creates native Raven.\\n\"; gc"
+bu /1 mgs_integral_native!Valcan_800DA21C ".printf \"OBSERVE: Raven gunfire function.\\n\"; gc"
+bu /1 mgs_integral_native!s15c_dyncon_800D6528 ".printf \"OBSERVE: native container mode=%d.\\n\", poi(poi(@esp+4)+4050); gc"
+sxe -c "r;kv;q" av
+sxe -c "r;kv;q" dz
+g
+q

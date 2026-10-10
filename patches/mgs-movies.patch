@@ -1,0 +1,34 @@
+diff --git a/source/game/movie.c b/source/game/movie.c
+index 46c4f9e63..463f48f4e 100644
+--- a/source/game/movie.c
++++ b/source/game/movie.c
+@@ -100,6 +100,9 @@ static int Movie_800C45F4(Work *work)
+         {
+             return 0;
+         }
++#ifdef MGS_NATIVE
++        mts_wait_vbl(1);
++#endif
+     }
+ 
+     type = header->type;
+@@ -117,7 +120,19 @@ static int Movie_800C45F4(Work *work)
+ 
+                 work->dctin_index = 1 - work->dctin_index;
+ 
++#ifdef MGS_NATIVE
++                if (header->frameSize > (unsigned)header->nSectors * 2016 ||
++                    Psyz_DecDCTvlcBounded(addr, header->frameSize,
++                        work->dctin[work->dctin_index], 0x17800 / sizeof(u_long),
++                        work->vlc) != 0)
++                {
++                    fprintf(2, "[native] Invalid movie bitstream at frame %u\n",
++                            header->frameCount);
++                    exit(EXIT_FAILURE);
++                }
++#else
+                 DecDCTvlc2(addr, work->dctin[work->dctin_index], work->vlc);
++#endif
+                 ret = 1;
+                 goto free;
+             }

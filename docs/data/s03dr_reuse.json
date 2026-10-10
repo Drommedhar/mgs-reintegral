@@ -1,0 +1,37 @@
+{
+  "stages": [
+    "s03d",
+    "s03dr"
+  ],
+  "overlay_sha256": [
+    "f9fa0f39352d3305b5cb2bd6c292297d4f351387b0038a27ccec29f42150d903",
+    "fa785a857655809ccf984d8c8ada626addbadfd11db31b34ef496ddce225ade1"
+  ],
+  "functions_compared": 468,
+  "different_functions": 0,
+  "constructor_entries": 28,
+  "initial_data_difference_bytes": 6,
+  "initial_data_padding": [
+    {
+      "address": "0x800c3866",
+      "reason": "alignment after tobcnt_logo_data: 1 + 166 * 4 halfwords"
+    },
+    {
+      "address": "0x800c38a6",
+      "reason": "alignment after 15 demo-doll animation halfwords"
+    },
+    {
+      "address": "0x800c3c12",
+      "reason": "alignment after cat_in.c single HASH_KILL halfword"
+    }
+  ],
+  "remaining_file_differences": "Tail data is not asserted byte-identical; native C uses typed constants and independently reset BSS, not copied original file tail.",
+  "runtime": {
+    "story_fixture": 27,
+    "frames": 1800,
+    "input_horizontal_delta": 2589,
+    "movement_ticks": 25,
+    "result": "PASS automated SDL input; original encounter later reaches Game Over after attacks. Not campaign-entry or encounter-completion evidence.",
+    "log": "build/cinematic-audit/s03dr1800.log"
+  }
+}

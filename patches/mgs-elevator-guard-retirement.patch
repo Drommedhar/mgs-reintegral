@@ -1,0 +1,36 @@
+diff --git a/source/animal/zako11e/zk11ecom.c b/source/animal/zako11e/zk11ecom.c
+index c012b64a0..fd05dc6cf 100644
+--- a/source/animal/zako11e/zk11ecom.c
++++ b/source/animal/zako11e/zk11ecom.c
+@@ -1,6 +1,9 @@
+ #include "enemy/enemy.h"
+ 
+ #include <stdio.h>
++#ifdef MGS_NATIVE
++#include <limits.h>
++#endif
+ #include "mgstype.h"
+ #include "mts/mts.h" // for fprintf
+ #include "libgv/libgv.h"
+@@ -320,7 +323,11 @@ void s11e_zk11ecom_800DA16C( ZAKO_COMMAND* command )
+     for ( i = 0 ; i < command->field_0x08 ; i ++ )
+     {
+         work = ( ZakoWork * )command->field_0x8C[ ZakoCommand_800DF280.field_0x40[ i ] ].watcher;
++#ifdef MGS_NATIVE
++        dists[i] = work ? work->sn_dis : INT_MAX;
++#else
+         dists[i] = work->sn_dis;
++#endif
+     }
+ 
+     for ( t3 = command->field_0x08 - 1 ; t3 > -1 ; t3 = t4  )
+@@ -355,6 +362,9 @@ void s11e_zk11ecom_800DA16C( ZAKO_COMMAND* command )
+     for ( i = 0 ; i < command->field_0x08 ; i++ )
+     {
+         work = ( ZakoWork * )command->field_0x8C[ ZakoCommand_800DF280.field_0x40[ i ] ].watcher;
++#ifdef MGS_NATIVE
++        if (!work) continue;
++#endif
+         work->field_BFC = s11e_dword_800C3908[ ZakoCommand_800DF280.field_0x40[ i ] ];
+     }
+ }

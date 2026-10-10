@@ -1,0 +1,130 @@
+{
+  "stage": "s15c",
+  "disc": 2,
+  "size": 131720,
+  "offset": 46100480,
+  "load_address": "0x800c3208",
+  "sha256": "7a6d398f600f359a04b8d9fcb7c006fdc888f4fcbdffd761e09ef4a932195483",
+  "assembly_blocks": 26,
+  "instruction_words": 5997,
+  "constructors": [
+    {
+      "hash": "51c6",
+      "constructor": "NewCutInCameraSet",
+      "original_address": "800e1828"
+    },
+    {
+      "hash": "ec77",
+      "constructor": "NewWallGcl",
+      "original_address": "800d2fa4"
+    },
+    {
+      "hash": "92bc",
+      "constructor": "NewAsiotoKun",
+      "original_address": "800d3694"
+    },
+    {
+      "hash": "4170",
+      "constructor": "NewSnakeBreath",
+      "original_address": "800c416c"
+    },
+    {
+      "hash": "a12e",
+      "constructor": "NewFadeInOutSet",
+      "original_address": "800e072c"
+    },
+    {
+      "hash": "cc45",
+      "constructor": "s15c_dyncon_800D8C9C",
+      "original_address": "800d8c9c"
+    },
+    {
+      "hash": "5a50",
+      "constructor": "NewGasEffectSet",
+      "original_address": "800df2c4"
+    },
+    {
+      "hash": "8e60",
+      "constructor": "NewCrow",
+      "original_address": "800ded08"
+    },
+    {
+      "hash": "7a05",
+      "constructor": "NewCinemaScreenSet",
+      "original_address": "800e121c"
+    },
+    {
+      "hash": "1ad3",
+      "constructor": "NewTextureLamp",
+      "original_address": "800c3efc"
+    },
+    {
+      "hash": "711f",
+      "constructor": "NewLifeUp",
+      "original_address": "800e0a54"
+    },
+    {
+      "hash": "b103",
+      "constructor": "NewDynamicWallSet",
+      "original_address": "800e144c"
+    },
+    {
+      "hash": "af6c",
+      "constructor": "NewDynamicFloorSet",
+      "original_address": "800e1c70"
+    },
+    {
+      "hash": "c6d7",
+      "constructor": "NewCommander",
+      "original_address": "800d0d78"
+    },
+    {
+      "hash": "6e9a",
+      "constructor": "NewSnakeWatcher",
+      "original_address": "800c54a4"
+    },
+    {
+      "hash": "4e95",
+      "constructor": "NewBloodCl",
+      "original_address": "800d3e38"
+    }
+  ],
+  "native_tests": {
+    "geometry_original_mips": 8,
+    "state_original_mips": 133,
+    "valcan_original_mips": 352,
+    "optimized_ctest_suites": 35
+  },
+  "runtime": {
+    "stage": "s15c",
+    "story": 242,
+    "fixture": "tests/fixtures/s15c_story242.cdb",
+    "frames": 900,
+    "horizontal_delta": 2996,
+    "movement_ticks": 24,
+    "mode": 3,
+    "human_verified": false,
+    "connected_campaign": false,
+    "failed_scenarios": [
+      "story0: no player at1800VSyncs",
+      "story219: absent d1cd.k in revisit resources, wall constructor access violation"
+    ],
+    "collapsed_save_fixture": {
+      "fixture": "tests/fixtures/s15c_collapsed.cdb",
+      "serialized_values": 40,
+      "damage_per_value": 5,
+      "frames": 900,
+      "horizontal_delta": 2996,
+      "movement_ticks": 24,
+      "result": "PASS automated movement; no access violation",
+      "capture": "build/s15c-audit/collapsed.bmp",
+      "human_verified": false,
+      "connected_campaign": false
+    }
+  },
+  "patches": {
+    "mgs-container-geometry.patch": "df471387b3c810754e7a7fd9e1c934a9fbff42fdda19683ab4c3d14fb74f3865",
+    "mgs-container.patch": "e6a19fa5516cfd7a1384b7c9c06739eb0ce2c24db6f6f3d70d02c213e1030545",
+    "mgs-valcan.patch": "9a4580abcf27a305fbdf6f15722f60db5d1ecf1a4c931f5cd058e2cbbd97603a"
+  }
+}

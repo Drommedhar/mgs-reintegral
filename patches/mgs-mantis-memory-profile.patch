@@ -1,0 +1,93 @@
+diff --git a/source/chara/psyco/mempsy.c b/source/chara/psyco/mempsy.c
+index bffef72af..7c04e0dca 100644
+--- a/source/chara/psyco/mempsy.c
++++ b/source/chara/psyco/mempsy.c
+@@ -13,6 +13,9 @@
+ #include "chara/snake/shadow.h"         // for NewShadow
+ #include "okajima/blurpure.h"           // for NewBlurPure
+ #include "takabe/cineutil.h"            // for OpenCinemaScreen, etc.
++#ifdef MGS_NATIVE
++#include "mgs_mantis_memory.h"
++#endif
+ 
+ /*---------------------------------------------------------------------------*/
+ 
+@@ -942,7 +945,7 @@ static void s07b_800D8338( char *name, char *arg1, char *arg2 )
+         save++;
+     }
+ 
+-    if ( i != 110 && arg2[ i ] == 0 )
++    if ( i != COUNTOF( s07b_dword_800C3788 ) && arg2[ i ] == 0 )
+     {
+         arg1[ 15 ]++;
+         arg2[ i ] = 1;
+@@ -959,7 +962,7 @@ static void s07b_800D8338( char *name, char *arg1, char *arg2 )
+ static int s07b_800D8410( MEMCARD **cards )
+ {
+     char sp10[ 16 ];
+-    char sp20[ 110 ];
++    char sp20[ COUNTOF( s07b_dword_800C3788 ) ];
+     short mask;
+     int i, j;
+     MEMCARD *card;
+@@ -996,10 +999,44 @@ static int s07b_800D8410( MEMCARD **cards )
+     return mask;
+ }
+ 
++#ifdef MGS_NATIVE
++static void NativeMemoryProfile( MEMCARD *card, unsigned int seed )
++{
++    int candidates[ COUNTOF( s07b_dword_800C3788 ) ];
++    int count = 0;
++    int i, slot, selected;
++    unsigned int state = seed;
++
++    memset( card, 0, sizeof(*card) );
++    for ( i = 0; i < COUNTOF( s07b_dword_800C3788 ); i++ )
++    {
++        if ( s07b_dword_800C3788[ i ].mask != 0 ) candidates[ count++ ] = i;
++    }
++    card->file_count = 3 + seed % 4;
++    if ( card->file_count > count ) card->file_count = count;
++    printf( "[mantis] Synthetic memory profile seed=%u:\n", seed );
++    for ( i = 0; i < card->file_count; i++ )
++    {
++        state = state * 1664525u + 1013904223u;
++        slot = i + (state >> 8) % (count - i);
++        selected = candidates[ slot ];
++        candidates[ slot ] = candidates[ i ];
++        snprintf( card->files[ i ].name, sizeof(card->files[ i ].name),
++                  "BI%s", s07b_dword_800C3788[ selected ].name );
++        card->files[ i ].size = MEMCARD_BLOCK_SIZE;
++        printf( "[mantis]   %s\n", card->files[ i ].name );
++    }
++}
++#endif
++
+ static void s07b_800D8564( Work *work, int time )
+ {
+     MEMCARD *cards[ 2 ];
+     int i;
++#ifdef MGS_NATIVE
++    MEMCARD profile;
++    unsigned int seed = MgsMantisMemorySeed();
++#endif
+ 
+     if ( time == 0 )
+     {
+@@ -1015,6 +1052,15 @@ static void s07b_800D8564( Work *work, int time )
+             cards[ 1 ] = memcard_files( 1 );
+         }
+ 
++#ifdef MGS_NATIVE
++        if ( seed != 0 )
++        {
++            NativeMemoryProfile( &profile, seed );
++            cards[ 0 ] = &profile;
++            cards[ 1 ] = NULL;
++        }
++#endif
++
+         if ( cards[ 0 ] == NULL && cards[ 1 ] == NULL )
+         {
+             SetMode( work, s07b_800D88E4 );

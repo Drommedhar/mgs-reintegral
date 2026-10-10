@@ -1,0 +1,10 @@
+.lines -e
+bu /1 mgs_integral_native!MgsNativeReloadOverlay "ew mgs_integral_native!var_buf+a 95; eb mgs_integral_native!var_buf+167 80; ew mgs_integral_native!var_buf+2 0; ew mgs_integral_native!linkvarbuf+10 dac 8ec4 57e4; .echo FIXTURE original story149, Meryl health128 from story147, incoming pose from story148; gc"
+bu /1 mgs_integral_native!NewBloodyMeryl ".echo OBSERVED original script created Bloody Meryl; gc"
+bu /1 mgs_integral_native!NewWolf2 ".echo OBSERVED original script created Wolf; gc"
+bu /1 mgs_integral_native!NewZako10Commander ".echo OBSERVED original script created Zako10 commander; gc"
+bu mgs_integral_native!NewZako10 ".echo OBSERVED original script created Zako10 guard; gc"
+bu /1 mgs_integral_native!NewStage10Demo ".echo OBSERVED original script created Stage10 camera; gc"
+sxe -c "r;kv;q" av
+g
+q

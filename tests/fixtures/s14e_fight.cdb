@@ -1,0 +1,8 @@
+.lines -e
+bu /1 mgs_integral_native!MgsNativeReloadOverlay "ew mgs_integral_native!var_buf+8 2e90 ce; .echo FIXTURE original cargo-elevator fight branch 2e90 and story206, original GCL supplies map and player pose; gc"
+bu /1 mgs_integral_native!NewZako14Commander ".echo OBSERVED original script created Zako14 commander; gc"
+bu mgs_integral_native!NewZako14 ".echo OBSERVED original script created Zako14 guard; gc"
+bu /1 mgs_integral_native!GM_GameOver ".echo OBSERVED original game-over path; gc"
+sxe -c "r;kv;q" av
+g
+q

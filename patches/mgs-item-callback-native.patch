@@ -1,0 +1,19 @@
+diff --git a/source/game/item.c b/source/game/item.c
+index 09b781246..71489eee8 100644
+--- a/source/game/item.c
++++ b/source/game/item.c
+@@ -547,9 +547,13 @@ static void Die(Work *work)
+ 
+     if (work->state == 2 && work->end_proc != 0)
+     {
++#ifdef MGS_NATIVE
++        if ((unsigned int)work->end_proc > 0xffffu)
++#else
+         if (work->end_proc < 0)
++#endif
+         {
+-            GCL_ExecBlock((u_char *)work->end_proc, NULL);
++            GCL_ExecBlock((char *)work->end_proc, NULL);
+         }
+         else
+         {

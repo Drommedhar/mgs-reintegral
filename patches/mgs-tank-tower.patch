@@ -1,0 +1,186 @@
+diff --git a/source/animal/zako11a/zako11a.c b/source/animal/zako11a/zako11a.c
+index d8342edfb..a30dcf8d0 100644
+--- a/source/animal/zako11a/zako11a.c
++++ b/source/animal/zako11a/zako11a.c
+@@ -235,7 +235,11 @@ static int InitState( Work *work, int name, int where )
+     control = &work->control;
+     if ( GM_InitControl( control, name, where ) < 0 ) return -1;
+ 
+-    GM_ConfigControlString( control, GCL_GetOption( 'p' ), GCL_GetOption( 'd' ) );
++    {
++        char *position = GCL_GetOption('p');
++        char *direction = GCL_GetOption('d');
++        GM_ConfigControlString(control, position, direction);
++    }
+     GM_ConfigControlAttribute( control, RADAR_VISIBLE | RADAR_SIGHT | RADAR_ALL_MAP );
+     GM_ConfigControlInterp( control, 4 );
+     control->seg_flag = HZD_SEG_NO_NAVIGATE;
+diff --git a/source/enemy/camera2.c b/source/enemy/camera2.c
+index f697307f7..4fbbb7f83 100644
+--- a/source/enemy/camera2.c
++++ b/source/enemy/camera2.c
+@@ -746,7 +746,11 @@ static int GetResources( Work *work, int name, int where )
+ 
+     ctrl = &work->control;
+     if ( GM_InitControl( ctrl, name, where ) < 0 ) return -1;
+-    GM_ConfigControlString( ctrl, GCL_GetOption( 'p' ), GCL_GetOption( 'd' ) );
++    {
++        char *position = GCL_GetOption('p');
++        char *direction = GCL_GetOption('d');
++        GM_ConfigControlString(ctrl, position, direction);
++    }
+     GM_ConfigControlAttribute( ctrl, 0xD );
+     GM_ConfigControlHazard( ctrl, -1, -2, -1 );
+     work->control.step = DG_ZeroVector;
+diff --git a/source/kojo/sstorm.c b/source/kojo/sstorm.c
+index 45e9e489e..07137d419 100644
+--- a/source/kojo/sstorm.c
++++ b/source/kojo/sstorm.c
+@@ -365,7 +365,7 @@ static void Act(LPSNOWSTORM lpAct)
+         lpAct->anime.tex = GV_StrCode("snow_ex3");
+         break;
+     }
+-    NewAnime(NULL, NULL, &lpAct->anime);
++    NewAnime(NULL, 0, &lpAct->anime);
+ }
+ 
+ static void Die(LPSNOWSTORM lpAct)
+diff --git a/source/overlays/s05a/kojo/m1e1.c b/source/overlays/s05a/kojo/m1e1.c
+index f7b72ec1e..74a34f570 100644
+--- a/source/overlays/s05a/kojo/m1e1.c
++++ b/source/overlays/s05a/kojo/m1e1.c
+@@ -4,12 +4,14 @@
+ 
+ typedef struct _M1E1Work M1E1Work;
+ 
++#ifndef MGS_NATIVE
+ typedef struct
+ {
+     int         field_0;
+     short       field_4;
+     signed char field_6;
+ } GunnerTpl;
++#endif
+ 
+ struct _M1E1Work
+ {
+@@ -146,7 +148,11 @@ extern const char s05a_dword_800E3434[]; /* "m1e1cr1" */
+ extern const char s05a_dword_800E343C[]; /* "m1e1cr2" */
+ extern const char s05a_dword_800E3444[]; /* "m1e1cr3" */
+ extern const char s05a_dword_800E344C[]; /* "throw" */
++#ifdef MGS_NATIVE
++extern const char s05a_dword_800E3454[];
++#else
+ extern const GunnerTpl s05a_dword_800E3454; /* "GUNNER\0" @ 0x800E3454 */
++#endif
+ 
+ extern M1E1Work *s05a_dword_800C362C;
+ extern MATRIX   DG_ZeroMatrix;
+diff --git a/source/overlays/s05a/kojo/m1e1act.c b/source/overlays/s05a/kojo/m1e1act.c
+index bea3f58bf..86037266d 100644
+--- a/source/overlays/s05a/kojo/m1e1act.c
++++ b/source/overlays/s05a/kojo/m1e1act.c
+@@ -5,7 +5,7 @@
+ #include "libdg/libdg.h"
+ #include "okajima/bullet.h"
+ 
+-extern int rand(void);
++#include <rand.h>
+ extern void *NewFadeInOut(int mode, int shade);
+ extern void *NewSmokeLn_800CDFA4(int a0, int a1, int a2, SVECTOR *p, SVECTOR *q,
+                                  SVECTOR *r, char b, char c, char d);
+diff --git a/source/overlays/s05a/overlay2.c b/source/overlays/s05a/overlay2.c
+index 5952972f5..d896573d2 100644
+--- a/source/overlays/s05a/overlay2.c
++++ b/source/overlays/s05a/overlay2.c
+@@ -1,10 +1,28 @@
+ #include "game/game.h"
+ 
++#ifdef MGS_NATIVE
++struct _M1E1Work *s05a_dword_800C362C;
++#else
+ int s05a_dword_800C362C = 0x00000000;
++#endif
+ int s05a_dword_800C3630 = 0x00000000;
+ int s05a_dword_800C3634 = 0x00000000;
+ int s05a_dword_800C3638 = 0x00000000;
+ 
++#ifdef MGS_NATIVE
++const char s05a_dword_800E340C[] = "m1e1.c";
++const char s05a_dword_800E3414[] = "m1e1";
++const char s05a_dword_800E341C[] = "m1e1cl1";
++const char s05a_dword_800E3424[] = "m1e1cl2";
++const char s05a_dword_800E342C[] = "m1e1cl3";
++const char s05a_dword_800E3434[] = "m1e1cr1";
++const char s05a_dword_800E343C[] = "m1e1cr2";
++const char s05a_dword_800E3444[] = "m1e1cr3";
++const char s05a_dword_800E344C[] = "throw";
++const char s05a_dword_800E3454[] = "GUNNER";
++const char s05a_dword_800E345C[] = "m1throw.c";
++CONTROL s05a_dword_800E3800;
++#else
+ const char s05a_dword_800E340C[] = {'m', '1', 'e', '1'};
+ const char s05a_dword_800E3410[] = {'.', 'c', 0x0, 0x0};
+ const char s05a_dword_800E3414[] = {'m', '1', 'e', '1'};
+@@ -60,3 +78,4 @@ int SECTION(".bss") s05a_dword_800E386C;
+ int SECTION(".bss") s05a_dword_800E3870;
+ int SECTION(".bss") s05a_dword_800E3874;
+ int SECTION(".bss") s05a_dword_800E3878;
++#endif
+diff --git a/source/overlays/s05a/overlay3.c b/source/overlays/s05a/overlay3.c
+index aa6c645b2..f74d88842 100644
+--- a/source/overlays/s05a/overlay3.c
++++ b/source/overlays/s05a/overlay3.c
+@@ -162,4 +162,8 @@ int s05a_dword_800C38BC = 0x800C3760;
+ int s05a_dword_800C38C0 = 0x800C3778;
+ int s05a_dword_800C38C4 = 0x800C378C;
+ int s05a_dword_800C38C8 = 0x000003D4;
++#ifdef MGS_NATIVE
++void *s05a_dword_800C38CC;
++#else
+ int s05a_dword_800C38CC = 0x00000000;
++#endif
+diff --git a/source/takabe/rasen.c b/source/takabe/rasen.c
+index 82462c238..12912feaa 100644
+--- a/source/takabe/rasen.c
++++ b/source/takabe/rasen.c
+@@ -45,7 +45,7 @@ int rasen_800C340C = 0;
+ int s11c_dword_800C3410 = 0x00000000;
+ int s11c_dword_800C3414 = 0x00000000;
+ 
+-SVECTOR rasen_800C3418 = {35536, 35536, 35536};
++SVECTOR rasen_800C3418 = {-30000, -30000, -30000};
+ SVECTOR rasen_800C3420 = {30000, 30000, 30000};
+ 
+ Rasen2Work *SECTION(".bss") s11c_dword_800D2C74;
+@@ -397,7 +397,7 @@ int Rasen2GetResources_800CAC64(Rasen2Work *work, int name, int where)
+     int            i;
+     int            j;
+     unsigned short map_index_bit;
+-    unsigned char *param;
++    char *param;
+ 
+     map = where;
+     if (!GCL_GetOption('n'))
+@@ -560,7 +560,7 @@ void Rasen2_800CB150(Rasen2Work *work)
+         }
+         else
+         {
+-            DG_MakePreshade(objs, NULL, NULL);
++            DG_MakePreshade(objs, NULL, 0);
+         }
+         DG_InvisibleObjs(item->objs);
+     }
+diff --git a/source/thing/sphere2.c b/source/thing/sphere2.c
+index f97ce3ad3..8615abd09 100644
+--- a/source/thing/sphere2.c
++++ b/source/thing/sphere2.c
+@@ -56,7 +56,7 @@ static void Act(Work *work)
+     int            x0, y0, x1, y1;
+     short          u0, v0;
+     short          xoff, yoff, tpage, clut;
+-    char          *tilemap;
++    u_char        *tilemap;
+     DG_IMG_ATTRIB *attribs, *attrib;
+     DG_TEX       **tex;
+     unsigned short u1, v1;

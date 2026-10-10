@@ -1,0 +1,201 @@
+{
+  "schema": 1,
+  "stages": [
+    "s11c",
+    "s11e",
+    "s11i",
+    "s12a",
+    "s12b",
+    "s12c"
+  ],
+  "upstream_commit": "f54dbb2a58adfc2755403296c9ebb653fbec277b",
+  "constructor_tables": "Already named in upstream recovered C; unchanged.",
+  "additional_translation_units": 33,
+  "binary_provenance": [
+    {
+      "stage": "s11e",
+      "resource": "4abf.b",
+      "offset": 36290560,
+      "size": 115136,
+      "sha256": "8400e639567b380f28320ccfc5d624b6aa16f8dafa80fdc212976ab386014a9a",
+      "load_address": "0x800c3208"
+    },
+    {
+      "stage": "s11i",
+      "resource": "4ac3.b",
+      "offset": 38881280,
+      "size": 76376,
+      "sha256": "706e9fa4b2b2288b6967cc0e519a109f0d2fd6da01dc190996f331b28e3f57e9",
+      "load_address": "0x800c3208"
+    },
+    {
+      "stage": "s12c",
+      "resource": "4add.b",
+      "offset": 41805824,
+      "size": 96400,
+      "sha256": "3e22cf0791fffbef348149ba97e65b9d147488cb45992a1dd84e343414948cf1",
+      "load_address": "0x800c3208"
+    }
+  ],
+  "changes": [
+    "Fog pipeline links use native OT_TYPE/getaddr/getlen/addPrim rather than PS1 24-bit addresses.",
+    "Original fog color register loads/stores retain their offsets relative to the enlarged native P_TAG header; synchronous PsyZ GTE commands replace MIPS assembly and delay slots.",
+    "Original s12c callback at 0x800D4B5C loads a color pointer from the first packet color field before dereferencing it, as reflected by the recovered C; this behavior was checked in the original code.",
+    "s11e initialized data is defined with array/vector types; every recovered initialized word was checked against the original overlay before conversion.",
+    "s11e and s11i commanders use their recovered structure types with original 0x124/0x144 size assertions, preserving state as one object.",
+    "s11e callback table uses the original-address-confirmed sound, breath, sight and bullet functions; the unused breath argument is removed to match the one-argument call contract.",
+    "s11e and s11i item-message tables reference verified native strings instead of original PS1 addresses.",
+    "GCL string and argv types, pad-vibration byte arrays, native RotTransPers parameters, and signed 16-bit literal representation match declared interfaces."
+  ],
+  "s11e_bindings": {
+    "table": "0x800c3690",
+    "messages": {
+      "0x800dec0c": "s11e_dword_800DEC0C",
+      "0x800debf8": "s11e_aSocombullet_800DEBF8",
+      "0x800debe4": "s11e_aFamasbullet_800DEBE4"
+    },
+    "callbacks": {
+      "0x800d7cac": "ZAKO11E_PutSound_800D7CAC",
+      "0x800d7d44": "ZAKO11E_PutBreath_800D7D44",
+      "0x800d7e8c": "s11e_zk11ecom_800D7E8C",
+      "0x800d7ec8": "ZAKO11E_PutBulletEx_800D7EC8"
+    },
+    "verification": "Original table words and strings match; callback disassembly matches action frame/sound 160+2*(id%4), breath state/timing, vision 2 sight with color 143, and bullet creation plus smoke/flash/self-unregister."
+  },
+  "s11i_bindings": {
+    "table": "0x800c33d4",
+    "messages": {
+      "0x800d5260": "s11i_dword_800D5260",
+      "0x800d524c": "s11i_aSocombullet_800D524C",
+      "0x800d5238": "s11i_aFamasbullet_800D5238"
+    }
+  },
+  "patch": {
+    "path": "patches/mgs-tower-stages.patch",
+    "size": 18854,
+    "sha256": "8cfdf39d258ad97c60694be473a70ed29a00e8b1cbec7e2518bc97284dfebe74",
+    "files": [
+      "source/animal/zako11e/zako11e.c",
+      "source/animal/zako11e/zk11eaction.c",
+      "source/animal/zako11e/zk11ecom.c",
+      "source/animal/zako11f/action.c",
+      "source/animal/zako11f/zako11f.c",
+      "source/okajima/wolf/action.c",
+      "source/okajima/wolf/unknown.c",
+      "source/okajima/wolf/wolf2.c",
+      "source/overlays/s11e/overlay2.c",
+      "source/overlays/s11e/overlay4.c",
+      "source/overlays/s11i/overlay4.c",
+      "source/takabe/libdg2.c",
+      "source/takabe/rasen_el.c"
+    ]
+  },
+  "host_files": [
+    "include/mgs_fog_gte.h",
+    "tests/mgs_fog_test.c"
+  ],
+  "validation": {
+    "standalone_syntax": "All 33 additional TUs compile without errors/warnings on Windows x86 C17.",
+    "native_link": true,
+    "ctest": "26/26 pass in RelWithDebInfo, including fog and retail sight packet conversion.",
+    "human_playtesting": false,
+    "native_runtime_validated": true,
+    "runs": [
+      {
+        "stage": "s11c",
+        "log": "build/s11c-entry.log",
+        "capture": "build/s11c-room.bmp",
+        "vsyncs": 900,
+        "stage_map": "0xf1f0",
+        "setup": "Explicit development entry; original stage script requires a current map among f1f0/f1f1/f1f2 for the staircase actor.",
+        "result": "Automated controller movement passed 1616 units across 58 pad frames and 24 movement ticks; no access violation.",
+        "scope": "Agent capture inspection sees Snake, wall edge and jammed radar; development spawn/camera does not establish normal staircase traversal."
+      },
+      {
+        "stage": "s11e",
+        "log": "build/s11e-entry.log",
+        "capture": "build/s11e-room.bmp",
+        "vsyncs": 1800,
+        "setup": "Explicit development entry with initial story state; the original script advances story to 194, plays Codec, reloads, and creates four guards.",
+        "movement_delta": 1723,
+        "pad_frames": 57,
+        "movement_ticks": 21,
+        "collision_ticks": 1,
+        "result": "Automated movement passed and no access violation; agent inspected capture of elevator, Snake, guard gunfire and alert radar.",
+        "scope": "Not encounter completion or human playtesting."
+      },
+      {
+        "stage": "s11i",
+        "log": "build/s11i-guards.log",
+        "capture": "build/s11i-guards.bmp",
+        "vsyncs": 1200,
+        "fixture": "tests/fixtures/s11i_story179.cdb",
+        "setup": "Story179 selects original 179 <= story < 180 commander branch. Original s11c sub_FDDB incoming heading2048, stance0, position(-9000,-15396,-18500); map7df9.",
+        "movement_delta": 3112,
+        "pad_frames": 57,
+        "movement_ticks": 27,
+        "collision_ticks": 0,
+        "result": "Automated debugger fixture and controller movement passed; frame limit reached without an access violation; capture inspected by agent.",
+        "scope": "Bounded entry check, not human playtesting, encounter completion or continuous campaign progression.",
+        "observations": "Zako11F commander constructor observed. Capture shows Snake inside the building with geometry/radar; does not establish guard encounter completion."
+      },
+      {
+        "stage": "s12a",
+        "log": "build/s12a-combat.log",
+        "capture": "build/s12a-combat-900.bmp",
+        "vsyncs": 1200,
+        "fixture": "tests/fixtures/s12a_story197.cdb",
+        "setup": "Story197 selects original 197 <= story < 198 combat branch. Original s11c sub_5DDC incoming heading2048, stance0, position(-876,1022,22800); map7df9.",
+        "movement_delta": 3112,
+        "pad_frames": 58,
+        "movement_ticks": 27,
+        "collision_ticks": 0,
+        "result": "Automated debugger fixture and controller movement passed; frame limit reached without an access violation; capture inspected by agent.",
+        "scope": "Bounded entry check, not human playtesting, encounter completion or continuous campaign progression.",
+        "observations": "Wolf2 constructor observed. Idle Snake is eventually killed by enemy fire and original Game Over appears. Separate 900-VSync repeat captures snowfield, Snake, WOLF health bar and radar; movement passed again. Retail sight conversion fixes prior corrupt GPU packet stream. Plain initial-story run survives1200 VSyncs into Codec but does not return control before frame limit."
+      },
+      {
+        "stage": "s12b",
+        "log": "build/s12b-entry.log",
+        "capture": "build/s12b-room.bmp",
+        "vsyncs": 900,
+        "fixture": "tests/fixtures/s12bc_entry.cdb",
+        "setup": "Original s12a sub_61DC incoming heading2048, stance0, position(-876,1022,22800); map7df9. No story write; original scenario relocates Snake during setup.",
+        "movement_delta": 2571,
+        "pad_frames": 57,
+        "movement_ticks": 25,
+        "collision_ticks": 0,
+        "result": "Automated debugger fixture and controller movement passed; frame limit reached without an access violation; capture inspected by agent.",
+        "scope": "Bounded entry check, not human playtesting, encounter completion or continuous campaign progression.",
+        "observations": "Original Fog constructor observed; native fog callbacks run and snowy geometry/Snake/radar render."
+      },
+      {
+        "stage": "s12c",
+        "log": "build/s12c-entry.log",
+        "capture": "build/s12c-room.bmp",
+        "vsyncs": 900,
+        "fixture": "tests/fixtures/s12bc_entry.cdb",
+        "setup": "Original s11c sub_65DC incoming heading2048, stance0, position(-876,1022,22800); map7df9. No story write.",
+        "movement_delta": 3112,
+        "pad_frames": 57,
+        "movement_ticks": 27,
+        "collision_ticks": 0,
+        "result": "Automated debugger fixture and controller movement passed; frame limit reached without an access violation; capture inspected by agent.",
+        "scope": "Bounded entry check, not human playtesting, encounter completion or continuous campaign progression.",
+        "observations": "Original Fog constructor observed; native fog callbacks run and snowy geometry/Snake/radar render."
+      }
+    ],
+    "aislop": {
+      "host_score": 100,
+      "vendor_score": 66,
+      "errors": 0,
+      "fixable_warnings": 0,
+      "nonfixable_complexity_warnings": 30,
+      "unavailable_engines": [
+        "clang-format",
+        "cppcheck"
+      ]
+    },
+    "runtime_scope": "All six stages have a bounded movement check; scenario setup is explicit and fixture-based where recorded. No campaign or boss completion claim."
+  }
+}

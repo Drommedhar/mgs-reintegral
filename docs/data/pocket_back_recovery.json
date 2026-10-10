@@ -1,0 +1,133 @@
+{
+  "stage": "rank",
+  "actor": "PocketStation background",
+  "original_constructor": "0x800D0DA0",
+  "original_actor_size": 108,
+  "missing_blocks": 28,
+  "instruction_words_verified": 1961,
+  "mismatched_instruction_words": 0,
+  "functions": [
+    {
+      "name": "rank_800CEE0C",
+      "words": 33
+    },
+    {
+      "name": "rank_800CEE90",
+      "words": 38
+    },
+    {
+      "name": "rank_800CEF5C",
+      "words": 112
+    },
+    {
+      "name": "rank_800CF11C",
+      "words": 17
+    },
+    {
+      "name": "rank_800CF1F4",
+      "words": 37
+    },
+    {
+      "name": "rank_800CF288",
+      "words": 26
+    },
+    {
+      "name": "rank_800CF2F0",
+      "words": 14
+    },
+    {
+      "name": "rank_800CF3FC",
+      "words": 335
+    },
+    {
+      "name": "rank_800CF938",
+      "words": 168
+    },
+    {
+      "name": "rank_800CFBD8",
+      "words": 74
+    },
+    {
+      "name": "rank_800CFD00",
+      "words": 135
+    },
+    {
+      "name": "rank_800CFF1C",
+      "words": 88
+    },
+    {
+      "name": "rank_800D007C",
+      "words": 119
+    },
+    {
+      "name": "rank_800D0258",
+      "words": 100
+    },
+    {
+      "name": "rank_800D03E8",
+      "words": 48
+    },
+    {
+      "name": "rank_800D04A8",
+      "words": 104
+    },
+    {
+      "name": "rank_800D0648",
+      "words": 118
+    },
+    {
+      "name": "rank_800D0820",
+      "words": 59
+    },
+    {
+      "name": "rank_800D090C",
+      "words": 40
+    },
+    {
+      "name": "rank_800D09AC",
+      "words": 30
+    },
+    {
+      "name": "rank_800D0A24",
+      "words": 19
+    },
+    {
+      "name": "rank_800D0A70",
+      "words": 19
+    },
+    {
+      "name": "rank_800D0ABC",
+      "words": 19
+    },
+    {
+      "name": "rank_800D0B08",
+      "words": 19
+    },
+    {
+      "name": "rank_800D0B54",
+      "words": 27
+    },
+    {
+      "name": "rank_800D0BC0",
+      "words": 89
+    },
+    {
+      "name": "rank_800D0D24",
+      "words": 31
+    },
+    {
+      "name": "rank_800D0DA0",
+      "words": 43
+    }
+  ],
+  "reference_cases": {
+    "animation": 510,
+    "crop_and_zoom": 512,
+    "state_queue": 264,
+    "rgb_fade": 512,
+    "packet_copy": 512,
+    "texture_initialization": 512
+  },
+  "reference_method": "Original Integral Disc 2 rank overlay executed in Unicorn MIPS32; synthetic actor/packet inputs and named boundary-call traces compared with the live native implementations.",
+  "runtime_validation": "Pending parent rank-stage integration; helper proof does not establish the full PocketStation menu flow."
+}

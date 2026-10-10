@@ -1,0 +1,6747 @@
+diff --git a/source/overlays/s19a/guard/action.c b/source/overlays/s19a/guard/action.c
+new file mode 100644
+--- /dev/null
++++ b/source/overlays/s19a/guard/action.c
+@@ -0,0 +1,617 @@
++#include "native.h"
++
++void s19a_800CE34C(S19Work *work)
++{
++    short v2;
++    int   v3;
++
++    v2 = ratan2(work->sn_dis, GM_PlayerBody->objs->objs[6].world.t[1] - work->body.objs->objs[6].world.t[1]);
++    v3 = GV_NearExp8(work->adjust[2].vx, (v2 & 0xFFF) - 1024);
++    work->adjust[2].vx = v3;
++    work->adjust[6].vx = v3;
++    if (v3 >= 0)
++        v3 = 3 * v3 / 2;
++    else
++        (*(unsigned short *)&v3) = 3 * v3;
++    work->adjust[7].vx = v3;
++}
++
++int s19a_800CE3D4(S19Work *work)
++{
++    TARGET *p_punch;
++    SVECTOR to;
++    SVECTOR v5;
++    SVECTOR from;
++    SVECTOR size;
++
++    p_punch = &work->punch;
++    v5 = S19PunchPosition;
++    from = S19MeleeOffset;
++    size = S19MeleeSize;
++    GM_SetTarget(&work->punch, 4, 2, &size);
++    DG_SetPos2(&work->control.mov, &work->control.rot);
++    DG_RotVector(&from, &to, 1);
++    GM_SetPowerTarget(p_punch, 0, 2, 32, 1, &to);
++    DG_PutVector(&v5, &work->punch.center, 1);
++    return GM_PowerTarget(p_punch);
++}
++
++void s19a_800CE4E4(S19Work *work)
++{
++    TARGET *p_attack;
++
++    p_attack = &work->attack;
++    GM_SetPowerTarget(&work->attack, 7, 5, 0, 3, &S19_AttackForce);
++    GM_MoveTarget(p_attack, &work->control.mov);
++    GM_PowerTarget(p_attack);
++}
++
++int s19a_800CE54C(S19Work *work)
++{
++    int       press;
++    S19ACTION action2;
++    void (*v4)(struct _S19Work *, int);
++    OBJECT *v5;
++    OBJECT *p_body;
++    void (*v8)(struct _S19Work *, int);
++
++    press = work->pad.press;
++    if ((press & 1) != 0)
++    {
++        action2 = work->action2;
++        v4 = s19a_800D0AB8;
++    }
++    else if ((press & 2) != 0)
++    {
++        action2 = work->action2;
++        v4 = s19a_800D0B84;
++    }
++    else if ((press & 4) != 0)
++    {
++        action2 = work->action2;
++        v4 = s19a_800D0C50;
++    }
++    else if ((press & 0x2000) != 0)
++    {
++        action2 = work->action2;
++        v4 = s19a_800D0CE8;
++    }
++    else if ((press & 0x40) != 0)
++    {
++        action2 = work->action2;
++        v4 = s19a_800D0D80;
++    }
++    else if ((press & 0x80) != 0)
++    {
++        action2 = work->action2;
++        v4 = s19a_800D0E34;
++    }
++    else if ((press & 0x400) != 0)
++    {
++        action2 = work->action2;
++        v4 = s19a_800D0EFC;
++    }
++    else if ((press & 0x800) != 0)
++    {
++        action2 = work->action2;
++        v4 = s19a_800D0FA0;
++    }
++    else if ((press & 0x200) != 0)
++    {
++        action2 = work->action2;
++        v4 = s19a_800D1068;
++    }
++    else if ((press & 0x800000) != 0)
++    {
++        action2 = work->action2;
++        v4 = s19a_800D1280;
++    }
++    else
++    {
++        if ((press & 0x1000000) == 0)
++        {
++            p_body = &work->body;
++            if ((press & 0x100) != 0)
++            {
++                v8 = s19a_800CEB90;
++            }
++            else if ((press & 0x20) != 0)
++            {
++                v8 = s19a_800CEC20;
++            }
++            else
++            {
++                p_body = &work->body;
++                if ((press & 0x400000) == 0)
++                {
++                    if ((press & 0x30000) == 0)
++                        return 0;
++                    work->action = s19a_800CED10;
++                    work->time = 0;
++                    work->control.turn.vz = 0;
++                    work->control.turn.vx = 0;
++                    GM_ConfigMotionAdjust(p_body, NULL);
++                    work->adjust[2].vx = 0;
++                    return 1;
++                }
++                v8 = s19a_800CED08;
++            }
++            work->action = v8;
++            work->time = 0;
++            work->control.turn.vz = 0;
++            work->control.turn.vx = 0;
++            GM_ConfigMotionAdjust(p_body, NULL);
++            return 1;
++        }
++        action2 = work->action2;
++        v4 = s19a_800D13C8;
++    }
++    v5 = &work->body;
++    if (action2 == NULL)
++    {
++        work->action2 = v4;
++        work->time2 = 0;
++    }
++    work->control.turn.vz = 0;
++    work->control.turn.vx = 0;
++    GM_ConfigMotionAdjust(v5, NULL);
++    return 0;
++}
++
++void s19a_800CE750(S19Work *work, int time)
++{
++    int     v3;
++    OBJECT *p_body;
++    int     v5;
++    int     dir;
++    int     v7;
++
++    work->target->class |= 0x9Fu;
++    work->act_status |= 1u;
++    if (S19_Command.alert_mode == 0)
++        work->target->class |= 0x40u;
++    work->vision.length = S19EyeLength;
++    if (time == 0)
++    {
++        work->act.motion1 = 0;
++        GM_ConfigObjectAction(&work->body, S19ActionTable[0], 0, 4);
++    }
++    v3 = s19a_800CDF9C(work);
++    p_body = &work->body;
++    if (v3 != 0 || (v5 = s19a_800CE54C(work), p_body = &work->body, v5 != 0))
++    {
++        work->act.motion2 = 0;
++        GM_ConfigObjectOverride(p_body, S19ActionTable[0], 0, 4, 0);
++        work->action2 = NULL;
++        work->time2 = 0;
++        work->act.motion2 = 0;
++        work->control.turn.vz = 0;
++        work->control.turn.vx = 0;
++    }
++    else
++    {
++        dir = work->pad.dir;
++        if (dir >= 0)
++        {
++            if (GV_DiffDirAbs(work->control.rot.vy, dir) >= 256)
++            {
++                work->control.turn.vy = work->pad.dir;
++            }
++            else
++            {
++                if ((work->pad.field_4 & 1) != 0)
++                {
++                    work->act.motion1 = 2;
++                    v7 = S19ActionTable[2];
++                }
++                else
++                {
++                    work->act.motion1 = 1;
++                    v7 = S19ActionTable[1];
++                }
++                GM_ConfigObjectAction(&work->body, v7, 0, 4);
++                work->action = s19a_800CE8F8;
++                work->time = 0;
++                work->control.turn.vz = 0;
++                work->control.turn.vx = 0;
++                GM_ConfigMotionAdjust(&work->body, NULL);
++            }
++        }
++        work->vision.facedir = work->control.rot.vy;
++    }
++}
++
++void s19a_800CE8F8(S19Work *work, int time)
++{
++    int     v3;
++    OBJECT *p_body;
++    int     v5;
++    int     v6;
++    int     dir;
++    int     motion1;
++    int     n_touches;
++    int     v10;
++    int     v11;
++    int     v12;
++    short   v13;
++    int     v14;
++
++    work->target->class |= 0x9Fu;
++    if (S19_Command.alert_mode == 0)
++        work->target->class |= 0x40u;
++    work->vision.length = S19EyeLength;
++    v3 = s19a_800CDF9C(work);
++    p_body = &work->body;
++    if (v3 != 0)
++        goto LABEL_15;
++    v5 = s19a_800CE54C(work);
++    p_body = &work->body;
++    if (v5 != 0)
++        goto LABEL_15;
++    v6 = -1;
++    dir = work->pad.dir;
++    motion1 = work->act.motion1;
++    if ((work->pad.field_4 & 1) != 0 && motion1 != 2)
++    {
++        work->act.motion1 = 2;
++        GM_ConfigObjectAction(p_body, S19ActionTable[2], 0, 4);
++    }
++    if (dir < 0)
++    {
++        work->action = s19a_800CE750;
++        work->time = 0;
++        work->control.turn.vz = 0;
++        work->control.turn.vx = 0;
++        GM_ConfigMotionAdjust(&work->body, NULL);
++        p_body = &work->body;
++    LABEL_15:
++        work->act.motion2 = 0;
++        GM_ConfigObjectOverride(p_body, S19ActionTable[0], 0, 4, 0);
++        work->action2 = NULL;
++        work->time2 = 0;
++        work->act.motion2 = 0;
++        work->control.turn.vz = 0;
++        work->control.turn.vx = 0;
++        return;
++    }
++    n_touches = work->control.n_touches;
++    if (n_touches > 0)
++    {
++        v6 = GV_VecDir2(work->control.vecs);
++        if (n_touches >= 2)
++        {
++            v10 = GV_VecDir2(&work->control.vecs[1]);
++            v11 = GV_DiffDirAbs(dir, v10);
++            if (v11 < GV_DiffDirAbs(dir, v6))
++                v6 = v10;
++        }
++    }
++    v12 = s19a_800CE2F8(dir, v6);
++    if (v12 == 1)
++    {
++        v13 = v6 - 1024;
++    }
++    else
++    {
++        v13 = v6 + 1024;
++        if (v12 != 2)
++            goto LABEL_21;
++    }
++    dir = v13 & 0xFFF;
++LABEL_21:
++    if (work->body.objs->bound_mode == 0)
++        work->control.rot.vy = dir;
++    work->control.turn.vy = dir;
++    v14 = 0;
++    if (motion1 == 1)
++    {
++        v14 = 50;
++    }
++    else if (motion1 == 2)
++    {
++        v14 = 100;
++    }
++    work->control.step.vx = v14 * rsin(dir) / 4096;
++    work->control.step.vz = v14 * rcos(dir) / 4096;
++    work->vision.facedir = work->control.rot.vy;
++}
++
++void s19a_800CEB90(S19Work *work, int time)
++{
++    if (time == 0)
++    {
++        work->act.field_14 = 3;
++        work->act.motion1 = 35;
++        GM_ConfigObjectAction(&work->body, S19ActionTable[35], 0, 4);
++    }
++    if (s19a_800CDF9C(work) == 0 && work->body.is_end != 0)
++    {
++        work->pad.field_8 = 0;
++        work->action = s19a_800CFBF0;
++        work->time = 0;
++        work->control.turn.vz = 0;
++        work->control.turn.vx = 0;
++        GM_ConfigMotionAdjust(&work->body, NULL);
++    }
++}
++
++void s19a_800CEC20(S19Work *work, int time)
++{
++    short v3;
++    short sn_dir;
++
++    v3 = S19EyeLength;
++    work->target->class |= 0x9Fu;
++    work->vision.length = v3;
++    if (time == 0)
++    {
++        work->act.motion1 = 16;
++        GM_ConfigObjectAction(&work->body, S19ActionTable[16], 0, 4);
++    }
++    if (s19a_800CDF9C(work) == 0)
++    {
++        if (work->body.is_end == 0 && (work->pad.press & 0x20) != 0)
++        {
++            sn_dir = work->sn_dir;
++            work->control.step.vx = 0;
++            work->control.step.vz = 0;
++            work->control.turn.vy = sn_dir;
++            work->vision.facedir = work->control.rot.vy;
++        }
++        else
++        {
++            work->action = s19a_800CE750;
++            work->time = 0;
++            work->control.turn.vz = 0;
++            work->control.turn.vx = 0;
++            GM_ConfigMotionAdjust(&work->body, NULL);
++        }
++    }
++}
++
++void s19a_800CED08(S19Work *work, int time)
++{
++    ;
++}
++
++void s19a_800CED10(S19Work *work, int time)
++{
++    short   v3;
++    int     press;
++    OBJECT *p_body;
++    int     v6;
++    OBJECT *v7;
++    void (*v8)(struct _S19Work *, int);
++    void (*v9)(struct _S19Work *, int);
++    short vy;
++
++    v3 = S19EyeLength;
++    work->target->class |= 0x9Fu;
++    press = work->pad.press;
++    work->vision.length = v3;
++    if (time == 0)
++    {
++        p_body = &work->body;
++        if ((press & 0x10000) != 0)
++        {
++            work->act.motion1 = 3;
++            v6 = S19ActionTable[3];
++        }
++        else
++        {
++            work->act.motion1 = 5;
++            v6 = S19ActionTable[5];
++        }
++        GM_ConfigObjectAction(p_body, v6, 0, 4);
++        GM_ConfigMotionAdjust(&work->body, work->adjust);
++    }
++    s19a_800CE34C(work);
++    if (s19a_800CDF9C(work) == 0)
++    {
++        v7 = &work->body;
++        if ((press & 0x30000) == 0)
++        {
++            v8 = s19a_800CE750;
++        LABEL_13:
++            work->action = v8;
++            work->time = 0;
++            work->control.turn.vz = 0;
++            work->control.turn.vx = 0;
++            GM_ConfigMotionAdjust(v7, NULL);
++            return;
++        }
++        if ((press & 0x40000) != 0)
++        {
++            v9 = s19a_800CEE84;
++        LABEL_18:
++            work->action = v9;
++            work->time = 0;
++            work->control.turn.vz = 0;
++            work->control.turn.vx = 0;
++            return;
++        }
++        v7 = &work->body;
++        if ((press & 0x80000) != 0)
++        {
++            v8 = s19a_800CEF34;
++            goto LABEL_13;
++        }
++        if ((press & 0x100000) != 0)
++        {
++            v9 = s19a_800CF068;
++            goto LABEL_18;
++        }
++        if ((press & 0x200000) != 0)
++        {
++            v9 = s19a_800CF1C0;
++            goto LABEL_18;
++        }
++        vy = work->control.rot.vy;
++        work->control.turn.vy = work->pad.dir;
++        work->vision.facedir = vy;
++    }
++}
++
++void s19a_800CEE84(S19Work *work, int time)
++{
++    short v3;
++
++    v3 = S19EyeLength;
++    work->target->class |= 0x9Fu;
++    work->vision.length = v3;
++    if (time == 0)
++    {
++        work->act.motion1 = 4;
++        GM_ConfigObjectAction(&work->body, S19ActionTable[4], 0, 0);
++        s19a_800D1BA8(work, 3);
++        GM_ConfigMotionAdjust(&work->body, work->adjust);
++    }
++    s19a_800CE34C(work);
++    if (s19a_800CDF9C(work) == 0)
++    {
++        work->action = s19a_800CED10;
++        work->time = 0;
++        work->control.turn.vz = 0;
++        work->control.turn.vx = 0;
++    }
++}
++
++void s19a_800CEF34(S19Work *work, int time)
++{
++    short v4;
++    short v5;
++    int   v6;
++    int   v7;
++    int   v8;
++
++    v4 = S19EyeLength;
++    work->target->class |= 0x9Fu;
++    work->vision.length = v4;
++    if (time == 0)
++    {
++        work->act.motion1 = 5;
++        GM_ConfigObjectAction(&work->body, S19ActionTable[5], 0, 4);
++        work->control.turn.vy = work->pad.dir;
++    }
++    if (s19a_800CDF9C(work) == 0 && time >= 16)
++    {
++        if (time >= 31)
++        {
++            if (time < 61)
++            {
++                v5 = work->control.rot.vy + 32;
++            LABEL_10:
++                work->control.rot.vy = v5 & 0xFFF;
++                v6 = time & 1;
++                goto LABEL_11;
++            }
++            v6 = time & 1;
++            if (time >= 76)
++            {
++            LABEL_11:
++                v7 = v6 != 0;
++                v8 = time < 77;
++                if (!v7)
++                {
++                    GM_SeSet(&work->control.mov, 46);
++                    s19a_800D1BA8(work, 3);
++                    v8 = time < 77;
++                }
++                if (!v8)
++                {
++                    work->action = s19a_800CED10;
++                    work->time = 0;
++                    work->control.turn.vz = 0;
++                    work->control.turn.vx = 0;
++                    GM_ConfigMotionAdjust(&work->body, NULL);
++                }
++                work->control.turn.vy = work->control.rot.vy;
++                return;
++            }
++        }
++        v5 = work->control.rot.vy - 32;
++        goto LABEL_10;
++    }
++}
++
++void s19a_800CF068(S19Work *work, int time)
++{
++    short v4;
++
++    v4 = S19EyeLength;
++    work->target->class |= 0x9Fu;
++    work->vision.length = v4;
++    if (time == 0)
++    {
++        work->act.motion1 = 7;
++        GM_ConfigObjectAction(&work->body, S19ActionTable[7], 0, 4);
++        work->subweapon = NewGrenadeEnemy(&work->control, &work->body, 9, &work->trigger, &GM_PlayerPosition, 2);
++    }
++    if (time >= 5)
++        work->trigger |= 1u;
++    if (time == 17)
++        GM_SeSet(&work->control.mov, 44);
++    if (time == 45)
++        work->trigger |= 4u;
++    if (s19a_800CDF9C(work) != 0)
++    {
++        GV_DestroyActor(work->subweapon);
++    }
++    else if (work->body.is_end != 0)
++    {
++        GV_DestroyActor(work->subweapon);
++        work->action = s19a_800CED10;
++        work->time = 0;
++        work->control.turn.vz = 0;
++        work->control.turn.vx = 0;
++        GM_ConfigMotionAdjust(&work->body, NULL);
++    }
++}
++
++void s19a_800CF1C0(S19Work *work, int time)
++{
++    short v4;
++
++    v4 = S19EyeLength;
++    work->target->class |= 0x9Fu;
++    work->vision.length = v4;
++    if (time == 0)
++    {
++        work->act.motion1 = 8;
++        GM_ConfigObjectAction(&work->body, S19ActionTable[8], 0, 0);
++    }
++    if (time == 3 && s19a_800CE3D4(work) != 0)
++        GM_SeSet(&work->control.mov, 37);
++    work->control.turn.vy = work->sn_dir;
++    if (s19a_800CDF9C(work) == 0 && work->body.is_end != 0)
++    {
++        work->action = s19a_800CED10;
++        work->time = 0;
++        work->control.turn.vz = 0;
++        work->control.turn.vx = 0;
++        GM_ConfigMotionAdjust(&work->body, NULL);
++    }
++}
++
++void s19a_800CF298(S19Work *work, int time)
++{
++    work->vision.length = 0;
++    if (time == 0)
++    {
++        work->act.motion1 = 21;
++        GM_ConfigObjectAction(&work->body, S19ActionTable[21], 0, 4);
++    }
++    if (s19a_800CDF9C(work) == 0)
++    {
++        work->target->class |= 0x9Fu;
++        if (work->body.is_end != 0)
++        {
++            work->field_8FC = 1;
++            work->action = s19a_800CE750;
++            work->time = 0;
++            work->control.turn.vz = 0;
++            work->control.turn.vx = 0;
++            GM_ConfigMotionAdjust(&work->body, NULL);
++        }
++    }
++}
+diff --git a/source/overlays/s19a/guard/commander.c b/source/overlays/s19a/guard/commander.c
+new file mode 100644
+--- /dev/null
++++ b/source/overlays/s19a/guard/commander.c
+@@ -0,0 +1,799 @@
++#include "native.h"
++
++int s19a_800D6558(S19Work *work)
++{
++    int           v1;
++    S19COMMANDER *v2;
++    int           result;
++
++    v1 = 0;
++    v2 = &S19_Command;
++    do
++    {
++        result = v1;
++        if (v2->watchers[0].work == NULL)
++        {
++            v2->watchers[0].work = work;
++            v2->watchers[0].field_4 = 2;
++            return result;
++        }
++        ++v1;
++        v2 = (S19COMMANDER *)((char *)v2 + 16);
++    } while (v1 < 8);
++    return -1;
++}
++
++void s19a_800D659C(int index)
++{
++    char *v1;
++
++    v1 = (char *)&S19_Command + 16 * index;
++    *((unsigned int *)v1 + 39) = 0;
++    *((unsigned int *)v1 + 37) = 1;
++}
++
++int s19a_800D65BC(int a1)
++{
++    S19Unknown = a1;
++    return -2146566144;
++}
++
++int s19a_800D65D4()
++{
++    S19_Command.target_addr = S19_PlayerAddress;
++    S19_Command.target_pos = S19_PlayerPosition;
++    S19_Command.target_map = S19_PlayerMap;
++    return -2146566144;
++}
++
++int s19a_800D6620()
++{
++    int result;
++
++    result = HZD_GetAddress(GM_WhereList[0]->map->hzd, &GM_NoisePosition, -1);
++    S19_Command.target_addr = result;
++    S19_Command.target_pos = GM_NoisePosition;
++    S19_Command.target_map = GM_PlayerMap;
++    return result;
++}
++
++int s19a_800D6698(int a1, int a2)
++{
++    int       v2;
++    S19JDATA *i;
++
++    if (S19_Command.jdata.map != a1)
++        return 0;
++    v2 = 0;
++    if (S19_Command.jdata.count == 0)
++        return -1;
++    for (i = &S19_Command.jdata;; i = (S19JDATA *)((char *)i + 4))
++    {
++        ++v2;
++        if (i->data[0][0] == a2)
++            break;
++        if (v2 >= S19_Command.jdata.count)
++            return -1;
++    }
++    return i->data[0][1];
++}
++
++int s19a_800D670C(int a1, int a2)
++{
++    int   v2;
++    char *Str;
++    char *v5;
++    int   v6;
++    int   result;
++
++    v2 = 0;
++    do
++    {
++        ++v2;
++        Str = GCL_NextStr();
++        *(unsigned short *)(a2 + 4) = GCL_StrToInt(Str);
++        v5 = GCL_NextStr();
++        *(unsigned short *)(a2 + 6) = GCL_StrToInt(v5);
++        a2 += 4;
++        v6 = GCL_NextStr() != NULL;
++        result = v2;
++    } while (v6);
++    return result;
++}
++
++int s19a_800D676C(int a1, unsigned short *a2)
++{
++    int   i;
++    char *Str;
++
++    for (i = 0;; ++i)
++    {
++        Str = GCL_NextStr();
++        if (Str == NULL)
++            break;
++        *a2++ = GCL_StrToInt(Str);
++    }
++    return i;
++}
++
++int s19a_800D67C4()
++{
++    int           v0;
++    int           v1;
++    short         v2;
++    S19COMMANDER *v3;
++    HZD_ZON      *v4;
++    short         x;
++    int           v6;
++    SVECTOR       vec1;
++
++    v0 = 0;
++    v1 = 0;
++    v2 = 0;
++    if (S19_Command.n_zones > 0)
++    {
++        v3 = &S19_Command;
++        do
++        {
++            v4 = &S19_Command.map->hzd->def->zones[v3->zones[0]];
++            x = v4->x;
++            vec1.vy = GM_PlayerPosition.vy;
++            vec1.vx = x;
++            vec1.vz = v4->z;
++            v6 = GV_DiffVec3(&vec1, &GM_PlayerPosition);
++            if (v0 < v6)
++            {
++                v0 = v6;
++                v2 = v1;
++            }
++            ++v1;
++            v3 = (S19COMMANDER *)((char *)v3 + 2);
++        } while (v1 < S19_Command.n_zones);
++    }
++    S19_Command.far_zone = v2;
++    return -2146566144;
++}
++
++int s19a_800D68B4(int modulus)
++{
++    return S19_Command.time % modulus;
++}
++
++int s19a_800D68F4(int *a1)
++{
++    int v2;
++    int v3;
++    int v4;
++    int result;
++
++    v2 = s19a_800D68B4(2);
++    v3 = v2;
++    v4 = v2 == 0;
++    result = 1;
++    if (v4 || v3 == 1)
++    {
++        fprintf(1, "dareda!!\n");
++        *a1 = 128;
++        return 128;
++    }
++    return result;
++}
++
++int s19a_800D6948(int *a1)
++{
++    int v2;
++    int v3;
++    int v4;
++    int result;
++
++    v2 = s19a_800D68B4(2);
++    v3 = v2;
++    v4 = v2 == 0;
++    result = 1;
++    if (v4 || v3 == 1)
++    {
++        fprintf(1, "nanno otoda!!\n");
++        *a1 = 135;
++        return 135;
++    }
++    return result;
++}
++
++int s19a_800D699C(int *a1)
++{
++    int v2;
++    int v3;
++    int v4;
++    int result;
++
++    v2 = s19a_800D68B4(2);
++    v3 = v2;
++    v4 = v2 == 0;
++    result = 1;
++    if (v4 || v3 == 1)
++    {
++        fprintf(1, "tadano hakoka\n");
++        *a1 = 139;
++        return 139;
++    }
++    return result;
++}
++
++int s19a_800D69F0(int *a1)
++{
++    int v2;
++    int v3;
++    int v4;
++    int result;
++
++    v2 = s19a_800D68B4(2);
++    v3 = v2;
++    v4 = v2 == 0;
++    result = 1;
++    if (v4 || v3 == 1)
++    {
++        fprintf(1, "kono asiatoha??\n");
++        *a1 = 138;
++        return 138;
++    }
++    return result;
++}
++
++int s19a_800D6A44(int *a1)
++{
++    int v2;
++    int v3;
++    int v4;
++    int result;
++
++    v2 = s19a_800D68B4(2);
++    v3 = v2;
++    v4 = v2 == 0;
++    result = 1;
++    if (v4 || v3 == 1)
++    {
++        fprintf(1, "kinoseika !!\n");
++        *a1 = 134;
++        return 134;
++    }
++    return result;
++}
++
++int s19a_800D6A98(int *a1)
++{
++    int v2;
++    int v3;
++    int v4;
++    int result;
++
++    v2 = s19a_800D68B4(3);
++    v3 = v2;
++    v4 = v2 == 1;
++    result = v2 < 2;
++    if (!v4)
++    {
++        if (result != 0)
++        {
++            if (v3 != 0)
++                return result;
++            fprintf(1, "itazo \n");
++            result = 130;
++        LABEL_9:
++            *a1 = (unsigned int)result;
++            return result;
++        }
++        result = 2;
++        if (v3 != 2)
++            return result;
++    }
++    fprintf(1, "kottida!!\n");
++    result = 129;
++    goto LABEL_9;
++}
++
++int s19a_800D6B28(int *a1)
++{
++    int v2;
++    int v3;
++    int v4;
++    int result;
++
++    v2 = s19a_800D68B4(2);
++    v3 = v2;
++    v4 = v2 == 0;
++    result = 1;
++    if (v4 || v3 == 1)
++    {
++        fprintf(1, "haitini modoruzo!!\n");
++        *a1 = 133;
++        return 133;
++    }
++    return result;
++}
++
++int s19a_800D6B7C(int *a1)
++{
++    int v2;
++    int v3;
++    int v4;
++    int result;
++
++    v2 = s19a_800D68B4(2);
++    v3 = v2;
++    v4 = v2 == 0;
++    result = 1;
++    if (v4)
++    {
++        fprintf(1, "kottida !!\n");
++        *a1 = 129;
++        return 129;
++    }
++    else if (v3 == 1)
++    {
++        *a1 = 0;
++    }
++    return result;
++}
++
++int s19a_800D6BE0(int a1)
++{
++    int v2;
++
++    v2 = a1;
++    switch (a1)
++    {
++    case 240:
++        s19a_800D68F4(&v2);
++        break;
++    case 241:
++        s19a_800D6948(&v2);
++        break;
++    case 242:
++        s19a_800D699C(&v2);
++        break;
++    case 243:
++        s19a_800D69F0(&v2);
++        break;
++    case 244:
++        s19a_800D6A44(&v2);
++        break;
++    case 245:
++        s19a_800D6B28(&v2);
++        break;
++    case 246:
++        s19a_800D6A98(&v2);
++        break;
++    case 247:
++        s19a_800D6B7C(&v2);
++        break;
++    default:
++        return v2;
++    }
++    return v2;
++}
++
++int s19a_800D6CA4(int address)
++{
++    S19COMMANDER *command = (S19COMMANDER *)address;
++    int           distances[8];
++    int           i, limit, last, swap;
++    for (i = 0; i < command->n_watchers; ++i)
++        distances[i] = command->watchers[S19_Command.field_40[i]].work->sn_dis;
++    limit = command->n_watchers - 1;
++    while (limit >= 0)
++    {
++        last = -1;
++        for (i = 0; i < limit; ++i)
++        {
++            if (distances[i + 1] < distances[i])
++            {
++                swap = distances[i];
++                distances[i] = distances[i + 1];
++                distances[i + 1] = swap;
++                swap = S19_Command.field_40[i];
++                S19_Command.field_40[i] = S19_Command.field_40[i + 1];
++                S19_Command.field_40[i + 1] = swap;
++                last = i;
++            }
++        }
++        limit = last;
++    }
++    for (i = 0; i < command->n_watchers; ++i)
++        command->watchers[S19_Command.field_40[i]].work->chase_dis = dword_800C3798[S19_Command.field_40[i]];
++    return 0;
++}
++
++void s19a_800D6DF4(int a1)
++{
++    int v2;
++    int v3;
++    int v4;
++    int v5;
++    int v6;
++    int v7;
++    int v8;
++
++    if (--dword_800C37B8 < 0)
++        dword_800C37B8 = 0;
++    if (dword_800C37B8 <= 0)
++    {
++        v2 = 100000;
++        v3 = 0;
++        v4 = *(unsigned int *)(a1 + 12);
++        v5 = 0;
++        if (v4 > 0)
++        {
++            v6 = a1;
++            do
++            {
++                if (*(unsigned int *)(v6 + 148) == 2)
++                {
++                    v7 = *(unsigned int *)(v6 + 156);
++                    if (*(unsigned short *)(v7 + 2890) != 0 && *(unsigned int *)(v7 + 3112) < v2)
++                    {
++                        v5 = *(short *)(v7 + 2890);
++                        v2 = *(unsigned int *)(v7 + 3112);
++                    }
++                    *(unsigned short *)(v7 + 2890) = 0;
++                }
++                ++v3;
++                v6 += 16;
++            } while (v3 < *(unsigned int *)(a1 + 12));
++        }
++        if (v5 != 0)
++        {
++            dword_800C37B8 = 30;
++            v8 = s19a_800D6BE0(v5);
++            GM_SeSet2(0, 48, v8);
++        }
++    }
++}
++
++void s19a_800D6ED8(S19WATCHER *watcher)
++{
++    switch (watcher->field_8)
++    {
++    case 1:
++        if (--watcher->field_0 <= 0)
++        {
++            watcher->field_8 = 2;
++            watcher->field_0 = 0;
++        }
++        break;
++    case 2:
++        if ((S19_Command.alert_mode == 0 && (S19_Command.field_10C & 1)) ||
++            (S19_Command.alert_mode == 1 && S19_Command.field_60 < 255))
++        {
++            s19a_800D67C4();
++            watcher->field_4 = 2;
++            watcher->field_8 = 0;
++        }
++        break;
++    case 0:
++        if (watcher->field_4 == 1)
++        {
++            watcher->field_8 = 1;
++            watcher->field_0 = 1;
++            ++S19_Command.field_60;
++        }
++        break;
++    }
++}
++
++int s19a_800D6FE4(int a1, int a2)
++{
++    if (a1 < a2)
++        return a2;
++    return a1;
++}
++
++int s19a_800D6FFC(int a1, int a2)
++{
++    int v2;
++
++    v2 = *(unsigned int *)(a2 + 28);
++    if (v2 - a1 < 5)
++        *(unsigned int *)(a2 + 28) = a1;
++    else
++        *(unsigned int *)(a2 + 28) = v2 - 4;
++    if (*(unsigned int *)(a2 + 28) < S19Unknown)
++        *(unsigned int *)(a2 + 28) = S19Unknown;
++    return s19a_800D65BC(0);
++}
++
++int s19a_800D7060(unsigned int *a1)
++{
++    int v2;
++    int v3;
++    int v4;
++    int v5;
++
++    v2 = a1[8];
++    if (v2 == 1)
++    {
++        if ((int)a1[7] <= 0)
++        {
++            GM_AlertModeSet(2);
++            a1[8] = 2;
++            a1[6] = 300;
++        }
++        v3 = a1[7];
++        v4 = v3 < 257;
++    }
++    else
++    {
++        if (v2 < 2)
++        {
++            if (v2 == 0 && (int)a1[7] >= 255)
++            {
++                a1[7] = 255;
++                GM_AlertModeSet(3);
++                a1[8] = 1;
++                GM_SeSet2(0, 63, 42);
++                S19_Command.field_60 = 0;
++            }
++            goto LABEL_21;
++        }
++        if (v2 != 2)
++            goto LABEL_21;
++        v5 = a1[6] - 1;
++        a1[6] = v5;
++        if (v5 <= 0)
++        {
++            GM_AlertModeSet(0);
++            a1[8] = 0;
++            a1[6] = 0;
++        }
++        if ((int)a1[7] >= 255)
++        {
++            a1[7] = 255;
++            GM_AlertModeSet(3);
++            a1[8] = 1;
++            S19_Command.field_60 = 0;
++        }
++        v3 = a1[6];
++        v4 = v3 < 257;
++    }
++    if (!v4)
++        v3 = 256;
++    if (GM_AlertMax < v3)
++        GM_AlertMax = v3;
++LABEL_21:
++    S19_Command.start_proc2 = a1[8];
++    return -2146566144;
++}
++
++void s19a_800D71C0()
++{
++    ;
++}
++
++int s19a_800D71C8()
++{
++    return 0;
++}
++
++int s19a_800D71D0()
++{
++    int           v0;
++    int           v1;
++    S19WATCHER   *watchers;
++    S19COMMANDER *v3;
++    int           v4;
++    int           result;
++
++    s19a_800D71C0();
++    v0 = 0;
++    s19a_800D71C8();
++    v1 = 0;
++    if (S19_Command.n_watchers > 0)
++    {
++        watchers = S19_Command.watchers;
++        v3 = &S19_Command;
++        do
++        {
++            v4 = v3->watchers[0].field_4;
++            if (v4 == 2)
++            {
++                v1 = s19a_800D6FE4(v1, v3->watchers[0].work->alert_level);
++            }
++            else if (v4 == 1)
++            {
++                s19a_800D6ED8(watchers);
++            }
++            ++watchers;
++            ++v0;
++            v3 = (S19COMMANDER *)((char *)v3 + 16);
++        } while (v0 < S19_Command.n_watchers);
++    }
++    s19a_800D6FFC(v1, (int)&S19_Command);
++    s19a_800D7060((unsigned int *)&S19_Command);
++    result = s19a_800D6CA4((int)&S19_Command);
++    S19_Command.field_10C = 0;
++    return result;
++}
++
++int s19a_800D72C4()
++{
++    int result;
++
++    result = 255;
++    if ((unsigned char)GM_PlayerAddress == (*((unsigned char *)&GM_PlayerAddress + 1)))
++    {
++        result = -2146566144;
++        if ((unsigned char)GM_PlayerAddress != 255)
++        {
++            S19_PlayerAddress = GM_PlayerAddress;
++            S19_PlayerPosition = GM_PlayerPosition;
++            S19_PlayerMap = GM_PlayerMap;
++            return -2146566144;
++        }
++    }
++    return result;
++}
++
++int s19a_800D7338(char *a1)
++{
++    char *Str;
++    int   i;
++    int   v3;
++
++    Str = a1;
++    for (i = 0; Str != NULL; ++i)
++    {
++        v3 = GCL_StrToInt(Str);
++        Str = GCL_NextStr();
++        GCL_ExecProc(v3, NULL);
++    }
++    return i;
++}
++
++int s19a_800D739C()
++{
++    int     v0;
++    int     result;
++    GV_MSG *msg_ptr;
++
++    v0 = GV_ReceiveMessage(S19_Command.field_0, &msg_ptr) <= 0;
++    result = -1;
++    if (!v0)
++        return msg_ptr->message[0];
++    return result;
++}
++
++int s19a_800D73D8()
++{
++    if (S19Activated == 0 && s19a_800D739C() == 1)
++    {
++        S19Activated = 1;
++        ++GM_EnemyWatchCount;
++    }
++    return ++S19_Command.time2;
++}
++
++int s19a_800D7464()
++{
++    s19a_800D73D8();
++    s19a_800D72C4();
++    s19a_800D71D0();
++    return ++S19_Command.time;
++}
++
++void s19a_800D74B0()
++{
++    ;
++}
++
++char *s19a_800D74FC(int a1, int a2, short a3)
++{
++    int           v4;
++    S19COMMANDER *v5;
++    int           v6;
++    int          *p_alert_level;
++    char         *Option;
++    int           v9;
++    S19COMMANDER *v10;
++    int           v11;
++    char         *v12;
++    char         *v17;
++    char         *v18;
++    char         *v19;
++    char         *result;
++
++    v4 = 0;
++    v5 = &S19_Command;
++    S19Activated = 0;
++    S19_Command.field_20 = 0;
++    S19_Command.alert_level = 0;
++    S19_Command.field_0 = a2;
++    do
++    {
++        v5->watchers[0].field_0 = 0;
++        v5->watchers[0].field_4 = 0;
++        v5->watchers[0].field_8 = 0;
++        v5->watchers[0].work = NULL;
++        ++v4;
++        v5 = (S19COMMANDER *)((char *)v5 + 16);
++    } while (v4 < 8);
++    v6 = 7;
++    p_alert_level = &S19_Command.alert_level;
++    do
++    {
++        p_alert_level[17] = v6--;
++        --p_alert_level;
++    } while (v6 >= 0);
++    S19_Command.time = 0;
++    S19_Command.alert_mode = 0;
++    S19_Command.start_proc2 = 0;
++    S19Unknown = 0;
++    S19_Command.map = GM_GetMap(a3);
++    Option = GCL_GetOption(118);
++    if (Option != NULL)
++    {
++        S19_Command.n_zones = s19a_800D676C((int)Option, (unsigned short *)S19_Command.zones);
++    }
++    else
++    {
++        S19_Command.n_zones = 1;
++        S19_Command.zones[0] = 0;
++    }
++    v9 = 0;
++    if (S19_Command.n_zones > 0)
++    {
++        v10 = &S19_Command;
++        do
++        {
++            v11 = v10->zones[0];
++            v10 = (S19COMMANDER *)((char *)v10 + 2);
++            fprintf(1, "zone=%d ", v11);
++            ++v9;
++        } while (v9 < S19_Command.n_zones);
++    }
++    S19_Command.far_zone = 0;
++    v12 = GCL_GetOption(102);
++    if (v12 != NULL)
++        GCL_StrToInt(v12);
++    S19GameFlag = 1;
++    NewAsiato(0, 0, 0, NULL);
++    v17 = GCL_GetOption(106);
++    if (v17 != NULL)
++    {
++        S19_Command.jdata.count = s19a_800D670C((int)v17, (int)&S19_Command.jdata);
++    }
++    else
++    {
++        S19_Command.jdata.count = 1;
++        *(unsigned int *)&S19_Command.jdata.data[0][0] = 0;
++    }
++    S19_Command.jdata.map = a3;
++    S19_Command.n_watchers = 0;
++    v18 = GCL_GetOption(110);
++    if (v18 != NULL)
++        S19_Command.n_watchers = s19a_800D7338(v18);
++    S19_Command.field_4 = 0;
++    v19 = GCL_GetOption(99);
++    if (v19 != NULL)
++        S19_Command.field_4 = s19a_800D7338(v19);
++    S19_Command.field_8 = 0;
++    result = GCL_GetOption(115);
++    if (result != NULL)
++    {
++        result = (char *)s19a_800D7338(result);
++        S19_Command.field_8 = (int)result;
++    }
++    S19_Command.field_110 = 0;
++    return result;
++}
++
++void *s19a_800D7724(int a1, short a2)
++{
++    void *v4;
++
++    v4 = GV_NewActor(4, 36);
++    if (v4 != NULL)
++    {
++        GV_SetNamedActor(v4, s19a_800D7464, s19a_800D74B0, "zk19com.c");
++        s19a_800D74FC((int)v4, a1, a2);
++    }
++    return v4;
++}
+diff --git a/source/overlays/s19a/guard/core.c b/source/overlays/s19a/guard/core.c
+new file mode 100644
+--- /dev/null
++++ b/source/overlays/s19a/guard/core.c
+@@ -0,0 +1,560 @@
++#include "native.h"
++
++int s19a_800CCD5C(S19Work *work)
++{
++    CONTROL    *p_control;
++    signed char v3;
++    int         v4;
++    GV_MSG     *msg;
++    short      *i;
++    SVECTOR     pos;
++
++    p_control = &work->control;
++    v3 = GV_ReceiveMessage(work->control.name, &work->control.msg);
++    v4 = v3;
++    msg = p_control->msg;
++    p_control->n_msg = v3;
++    if (v3 <= 0)
++        return 0;
++    for (i = (short *)&msg->message[4]; *(i - 4) != 17167; i += 10)
++    {
++        if (--v4 <= 0)
++            return 0;
++    }
++    work->param.c_root = *((unsigned char *)i - 6);
++    pos.vx = *(i - 2);
++    pos.vy = *(i - 1);
++    pos.vz = *i;
++    if (pos.vy >= 30000)
++        work->param.next = -1;
++    else
++        work->param.next = HZD_GetAddress(work->control.map->hzd, &pos, -1);
++    return 1;
++}
++
++int s19a_800CCE34(S19Work *work)
++{
++    CONTROL *p_control;
++
++    if (work->field_C34 != 0)
++    {
++        p_control = &work->control;
++        if (S19Activated > 0)
++        {
++            work->field_9E4 = 1;
++            GM_ConfigControlAttribute(p_control, 13);
++            work->field_C34 = 0;
++            work->act_status = 0;
++        }
++    }
++    return s19a_800CCD5C(work);
++}
++
++int s19a_800CCE94(DG_OBJS *objs, DG_DEF *def)
++{
++    int i;
++    DG_FreeObjsPacket(objs, 0);
++    DG_FreeObjsPacket(objs, 1);
++    objs->def = def;
++    for (i = 0; i < 16; ++i)
++    {
++        objs->objs[i].model = &def->models[i];
++        objs->objs[i].n_packs = def->models[i].n_faces;
++    }
++    return 0;
++}
++
++int s19a_800CCF10(S19Work *work)
++{
++    DG_OBJS *objs;
++    DG_DEF  *v3;
++    int      result;
++
++    if (work->field_9E4 != 0)
++    {
++        if (work->param.low_poly == 1)
++        {
++            if ((GM_GameStatus & 0x50) != 0 || GM_Camera.first_person != 0)
++            {
++                if (work->lod != 1)
++                {
++                    objs = work->body.objs;
++                    v3 = work->lod_models[1];
++                    work->lod = 1;
++                LABEL_9:
++                    s19a_800CCE94(objs, v3);
++                }
++            }
++            else if (work->lod != 0)
++            {
++                objs = work->body.objs;
++                v3 = work->lod_models[0];
++                work->lod = 0;
++                goto LABEL_9;
++            }
++        }
++        work->body.objs->flag &= ~0x80u;
++        work->weapon.objs->flag &= ~0x80u;
++        *work->shadow_enable = 1;
++        result = (int)work->glight_enable;
++        *(unsigned int *)result = 1;
++        return result;
++    }
++    work->body.objs->flag |= 0x80u;
++    work->weapon.objs->flag |= 0x80u;
++    *work->shadow_enable = 0;
++    result = (int)work->glight_enable;
++    *(unsigned int *)result = 0;
++    return result;
++}
++
++void s19a_800CD048(S19Work *work)
++{
++    CONTROL *p_control;
++
++    TARGET *target;
++    u_short damaged;
++    VECTOR  scale;
++
++    p_control = &work->control;
++    if (GM_CheckMessage(work, work->control.name, 12835) != NULL)
++    {
++        GV_DestroyActor(work);
++    }
++    else
++    {
++        s19a_800CCE34(work);
++        if (work->field_C34 == 0)
++        {
++            s19a_800D2440(work);
++            GM_ActControl(p_control);
++            GM_ActObject2(&work->body);
++            GM_ActObject2(&work->weapon);
++            DG_GetLightMatrix2(&p_control->mov, work->light);
++            s19a_800D23D4(work);
++            target = work->target;
++            GM_MoveTarget(target, &p_control->mov);
++            GM_PushTarget(target);
++            if ((target->class & 0x80) != 0 && (work->touch.class & 0x80) != 0)
++            {
++                damaged = work->touch.damaged;
++                if ((damaged & 0x80) != 0)
++                    work->touch.damaged = damaged & 0xFF7F;
++                GM_MoveTarget(&work->touch, &p_control->mov);
++                GM_TouchTarget(&work->touch);
++            }
++            scale.vz = work->scale;
++            scale.vy = scale.vz;
++            scale.vx = scale.vz;
++            ScaleMatrix(&work->body.objs->world, &scale);
++        }
++        s19a_800CCF10(work);
++    }
++    return;
++}
++
++void s19a_800CD180(S19Work *work)
++{
++    TARGET *target;
++    int     life;
++    int     faint;
++
++    target = work->target;
++    life = work->param.life;
++    faint = work->param.faint;
++    GM_SetTarget(target, 159, 2, &S19_TargetSize);
++    GM_SetPowerTarget(target, 1, -1, life, faint, &S19_TargetForce);
++    GM_SetCaptureTarget(target, -1, faint, NULL, NULL);
++    GM_SetC4Target(target, &work->body.objs->objs[1].world);
++    GM_SetTarget(&work->attack, 4, 1, &S19_AttackSize);
++    GM_SetPowerTarget(&work->attack, 7, 5, 0, 3, &S19_AttackForce);
++    GM_SetTarget(&work->touch, 128, 2, &S19_TouchSize);
++    GM_SetPowerTarget(&work->touch, 7, 5, 0, 0, &S19_TouchForce);
++    return;
++}
++
++int s19a_800CD2AC(S19Work *work)
++{
++    S19ACT *p_act;
++
++    p_act = &work->act;
++    GV_ZeroMemory(&work->act, 36);
++    work->act.field_00 = 0;
++    p_act->field_1C = 450;
++    p_act->field_1E = 1;
++    work->action = NULL;
++    work->action2 = NULL;
++    work->time = 0;
++    work->time2 = 0;
++    return 1;
++}
++
++int s19a_800CD308(S19Work *work, int a2, int a3)
++{
++    CONTROL *control;
++    int      v5;
++    int      result;
++    char    *v7;
++    char    *Option;
++    char    *v9;
++    DG_OBJS *objs;
++    int      v11;
++    DG_DEF  *Cache;
++    DG_OBJS *v13;
++
++    control = &work->control;
++    v5 = GM_InitControl(&work->control, a2, a3) < 0;
++    result = -1;
++    if (!v5)
++    {
++        Option = GCL_GetOption(112);
++        v7 = GCL_GetOption(100);
++        GM_ConfigControlString(control, Option, v7);
++        GM_ConfigControlAttribute(control, 13);
++        GM_ConfigControlInterp(control, 4);
++        control->seg_flag = 2;
++        GM_ConfigControlTrapCheck(control);
++        GM_InitObject(&work->body, 38582, 813, 43169);
++        GM_ConfigObjectJoint(&work->body);
++        GM_ConfigMotionControl(&work->body, &work->m_ctrl, 43169, work->m_segs1, work->m_segs2, control, work->rots);
++        GM_ConfigObjectLight(&work->body, work->light);
++        work->param.low_poly = 0;
++        v9 = GCL_GetOption(121);
++        if (v9 != NULL)
++            work->param.low_poly = GCL_StrToInt(v9);
++        objs = work->body.objs;
++        work->param.low_poly = 1;
++        work->lod_models[1] = objs->def;
++        v11 = GV_CacheID(55267, 107);
++        Cache = (DG_DEF *)GV_GetCache(v11);
++        v13 = work->body.objs;
++        work->lod_models[0] = Cache;
++        work->lod = 1;
++        work->hom = GM_SetHomingTarget(&v13->objs[6].world, control);
++        GM_InitObject(&work->weapon, 18213, 109, 0);
++        GM_ConfigObjectLight(&work->weapon, work->light);
++        GM_ConfigObjectRoot(&work->weapon, &work->body, 4);
++        work->shadow = (void *)NewShadow2(control, &work->body, (SVECTOR){0, 6, 12, 15}, &work->shadow_enable);
++        work->glight = NewGunLight(&work->body.objs->objs[4].world, &work->glight_enable);
++        s19a_800D1BA8(work, 0);
++        s19a_800CD2AC(work);
++        return 0;
++    }
++    return result;
++}
++
++void s19a_800CD51C(S19Work *work)
++{
++
++    s19a_800D659C(work->param.index);
++    GM_FreeControl(&work->control);
++    GM_FreeObject(&work->body);
++    GM_FreeObject(&work->weapon);
++    GM_FreeTarget(work->target);
++    GV_DestroyActor(work->glight);
++    GV_DestroyActor(work->shadow);
++    GM_ResetHomingTarget(work->hom);
++    return;
++}
++
++void s19a_800CD590(S19Work *work)
++{
++    s19a_800CD51C(work);
++}
++
++int s19a_800CD5B0(S19Work *work)
++{
++    HZD_PAT *v1;
++    int      n_points;
++    HZD_PTP *points;
++    int      v5;
++    S19Work *v6;
++    short   *p_command;
++    short    v8;
++
++    v1 = &work->control.map->hzd->def->routes[work->param.root];
++    n_points = v1->n_points;
++    work->n_nodes = n_points;
++    if (n_points <= 0)
++        return -1;
++    points = v1->points;
++    v5 = 0;
++    v6 = work;
++    p_command = &points->command;
++    do
++    {
++        v6->nodes[0].vx = points->x;
++        ++points;
++        v6->nodes[0].vy = *(p_command - 1);
++        ++v5;
++        v6->nodes[0].vz = *(p_command - 2);
++        v8 = *p_command;
++        p_command += 4;
++        v6->nodes[0].pad = v8;
++        v6 = (S19Work *)((char *)v6 + 8);
++    } while (v5 < work->n_nodes);
++    return 0;
++}
++
++int s19a_800CD64C(char *parameter, short *output)
++{
++    int   i;
++    char *Str;
++
++    for (i = 0;; ++i)
++    {
++        Str = GCL_NextStr();
++        if (Str == NULL)
++            break;
++        *output++ = GCL_StrToInt(Str);
++    }
++    return i;
++}
++
++int s19a_800CD6A4(char *parameter, int *output)
++{
++    int   i;
++    char *Str;
++
++    for (i = 0;; ++i)
++    {
++        Str = GCL_NextStr();
++        if (Str == NULL)
++            break;
++        *output++ = GCL_StrToInt(Str);
++    }
++    return i;
++}
++
++int s19a_800CD6FC(S19Work *work)
++{
++    S19Work        *v1;
++    int             v2;
++    unsigned short *v3;
++    int             v4;
++    char           *Option;
++    int             v6;
++    int             v7;
++    int             v8;
++    char           *v9;
++    char           *v10;
++    int             v11;
++    int             result;
++
++    v1 = work;
++    v2 = 0;
++    v3 = S19Times;
++    do
++    {
++        v4 = *v3++;
++        ++v2;
++        work->acttime[0] = v4;
++        work = (S19Work *)((char *)work + 4);
++    } while (v2 < 8);
++    Option = GCL_GetOption(116);
++    if (Option != NULL)
++    {
++        v6 = s19a_800CD6A4(Option, &v1->acttime[1]);
++        v7 = 3;
++        if (v6 >= 5)
++        {
++            printf("Err Err Err  Set time Over\n");
++            return -1;
++        }
++    }
++    else
++    {
++        v7 = 3;
++    }
++    v8 = 3072;
++    v9 = (char *)&v1->actor.next + 2;
++    do
++    {
++        *((unsigned short *)v9 + 1510) = v8;
++        v8 -= 1024;
++        --v7;
++        v9 -= 2;
++    } while (v7 >= 0);
++    v10 = GCL_GetOption(105);
++    if (v10 != NULL)
++    {
++        v11 = s19a_800CD64C(v10, v1->dir) < 5;
++        result = 0;
++        if (v11)
++            return result;
++        printf("Err Err Err  Set Dir Over\n");
++        return -1;
++    }
++    return 0;
++}
++
++int s19a_800CD7D4(S19Work *work, int a2, int a3)
++{
++    signed char v4;
++    char       *Option;
++    char       *v6;
++    char       *v7;
++    char       *v8;
++    char       *v9;
++    char       *v10;
++    int         v11;
++    int         index;
++    char       *v13;
++    char       *v14;
++    char       *v15;
++    TARGET     *v16;
++    int         v17;
++    int         Address;
++    int         v19;
++    int         v20;
++    short       v21;
++    int         v22;
++    char       *v23;
++    int         v24;
++    int         v25;
++    MAP        *map;
++    int         v27;
++    int         v28;
++    TARGET     *target;
++
++    s19a_800CD308(work, a2, a3);
++    v4 = s19a_800D6558(work);
++    work->param.index = v4;
++    if (v4 < 0)
++        printf("Err not enough work !!\n");
++    s19a_800CD6FC(work);
++    work->param.root = 0;
++    Option = GCL_GetOption(114);
++    if (Option != NULL)
++        work->param.root = GCL_StrToInt(Option);
++    work->param.life = 192;
++    v6 = GCL_GetOption(108);
++    if (v6 != NULL)
++        work->param.life = GCL_StrToInt(v6);
++    work->param.faint = 7;
++    v7 = GCL_GetOption(102);
++    if (v7 != NULL)
++        work->param.faint = GCL_StrToInt(v7);
++    work->param.damage = 40;
++    v8 = GCL_GetOption(122);
++    if (v8 != NULL)
++        work->param.damage = GCL_StrToInt(v8);
++    work->param.blood = 65;
++    v9 = GCL_GetOption(98);
++    if (v9 != NULL)
++        work->param.blood = GCL_StrToInt(v9);
++    printf(" low[pory=%d\n", work->param.low_poly);
++    work->param.g_flag = -1;
++    v10 = GCL_GetOption(103);
++    if (v10 != NULL)
++        work->param.g_flag = GCL_StrToInt(v10);
++    if (work->param.blood == 90)
++        work->param.g_flag = 0;
++    v11 = S19Distances[work->param.index];
++    index = work->param.index;
++    work->param.next = -1;
++    work->chase_index = index;
++    work->chase_dis = v11;
++    v13 = GCL_GetOption(110);
++    if (v13 != NULL)
++        work->param.next = GCL_StrToInt(v13);
++    work->param.area = 65;
++    v14 = GCL_GetOption(97);
++    if (v14 != NULL)
++        work->param.area = GCL_StrToInt(v14);
++    if (work->param.area == 83)
++        s19a_800D1BA8(work, 1);
++    work->scale = 4096;
++    v15 = GCL_GetOption(115);
++    if (v15 != NULL)
++        work->scale += GCL_StrToInt(v15);
++    work->param.item = 1;
++    if (s19a_800CD5B0(work) < 0)
++        fprintf(1, "watchar.c : action point Err\n");
++    v16 = GM_AllocTarget();
++    work->target = v16;
++    if (v16 != NULL)
++        s19a_800CD180(work);
++    work->think1 = 0;
++    work->think2 = 0;
++    work->think3 = 0;
++    work->think4 = 0;
++    work->count3 = 0;
++    work->l_count = 0;
++    work->t_count = 0;
++    work->mark_time = 0;
++    work->next_node = 0;
++    work->search_flag = 0;
++    work->act_status = 0;
++    v17 = *(unsigned int *)&work->nodes[0].vz;
++    *(unsigned int *)&work->target_pos.vx = *(unsigned int *)&work->nodes[0].vx;
++    *(unsigned int *)&work->target_pos.vz = v17;
++    Address = HZD_GetAddress(work->control.map->hzd, &work->target_pos, -1);
++    v19 = 7;
++    work->target_addr = Address;
++    work->field_9E4 = 1;
++    v20 = GM_CurrentMap;
++    v21 = S19EyeLength;
++    work->vision.range = 512;
++    work->alert_level = 0;
++    work->vision.facedir = 0;
++    work->field_B90 = 0;
++    work->pad.sound = 0;
++    work->pad.time = 0;
++    work->target_map = v20;
++    work->vision.length = v21;
++    work->player_pos = S19NoPoint;
++    work->subweapon = NULL;
++    v22 = *(unsigned int *)&work->nodes[0].vz;
++    *(unsigned int *)&work->control.mov.vx = *(unsigned int *)&work->nodes[0].vx;
++    *(unsigned int *)&work->control.mov.vz = v22;
++    (*(unsigned char *)&Address) = work->param.next;
++    v23 = (char *)&work->actor.next + 3;
++    work->field_C44 = 0;
++    work->param.c_root = 0;
++    work->param.c_next = Address;
++    do
++    {
++        v23[2968] = 0;
++        --v19;
++        --v23;
++    } while (v19 >= 0);
++    work->modetime[4] = -1;
++    work->modetime[7] = 0;
++    GM_ConfigControlRadarparam(&work->control, 0, 0x200u, S19EyeLength, 0);
++    v24 = GM_CurrentMap;
++    v25 = *(unsigned int *)&work->nodes[0].vz;
++    *(unsigned int *)&work->start_pos.vx = *(unsigned int *)&work->nodes[0].vx;
++    *(unsigned int *)&work->start_pos.vz = v25;
++    map = work->control.map;
++    work->start_map = v24;
++    v27 = HZD_GetAddress(map->hzd, &work->control.mov, -1);
++    work->field_BE8 = v27;
++    work->next_addr = v27;
++    work->last_addr = v27;
++    v28 = *(unsigned int *)&work->start_pos.vz;
++    *(unsigned int *)&work->next_pos.vx = *(unsigned int *)&work->start_pos.vx;
++    *(unsigned int *)&work->next_pos.vz = v28;
++    work->hom->flag = 0;
++    work->alert_level = 0;
++    GM_ConfigControlAttribute(&work->control, 0);
++    target = work->target;
++    work->field_9E4 = 0;
++    target->class = 1;
++    work->field_C34 = 1;
++    work->act_status = 0x10000000;
++    return 0x10000000;
++}
++
++S19Work *s19a_800CDBF4(int a1, int a2)
++{
++    S19Work *v4;
++
++    v4 = (S19Work *)GV_NewActor(4, 3136);
++    if (v4 != NULL)
++    {
++        GV_SetNamedActor(v4, s19a_800CD048, s19a_800CD590, "zako19.c");
++        s19a_800CD7D4(v4, a1, a2);
++    }
++    return v4;
++}
+diff --git a/source/overlays/s19a/guard/damage.c b/source/overlays/s19a/guard/damage.c
+new file mode 100644
+--- /dev/null
++++ b/source/overlays/s19a/guard/damage.c
+@@ -0,0 +1,272 @@
++#include "native.h"
++
++int s19a_800CDC70(S19Work *work)
++{
++    TARGET *target;
++    OBJECT *p_body;
++    void (*v4)(struct _S19Work *, int);
++
++    target = work->target;
++    if ((target->damaged & 2) == 0)
++        return 0;
++    p_body = &work->body;
++    if (target->a_mode == 36)
++        v4 = s19a_800CF340;
++    else
++        v4 = s19a_800CF6B8;
++    work->action = v4;
++    work->time = 0;
++    work->control.turn.vz = 0;
++    work->control.turn.vx = 0;
++    GM_ConfigMotionAdjust(p_body, NULL);
++    target->damaged = 0;
++    return 1;
++}
++
++int s19a_800CDCFC(S19Work *work)
++{
++    return (work->target->damaged & 0x20) != 0;
++}
++
++int s19a_800CDD18(SVECTOR *vec)
++{
++    int vx;
++    int vy;
++    int vz;
++    int v4;
++
++    vx = vec->vx;
++    vy = vec->vy;
++    vz = vec->vz;
++    if (vx < 0)
++        vx = -vx;
++    if (vy < 0)
++        vy = -vy;
++    v4 = vx + vy;
++    if (vz < 0)
++        vz = -vz;
++    return v4 + vz;
++}
++
++int s19a_800CDD54(S19Work *work)
++{
++    TARGET *target;
++    int     result;
++    OBJECT *p_body;
++    void (*v5)(struct _S19Work *, int);
++    int v6;
++
++    target = work->target;
++    result = 0;
++    if ((target->damaged & 4) != 0)
++    {
++        switch (target->a_mode)
++        {
++        case 1:
++            target->force = DG_ZeroVector;
++            p_body = &work->body;
++            if (target->vital > 0)
++            {
++                v5 = s19a_800CFF34;
++            }
++            else
++            {
++                work->act.field_14 = 1;
++                v5 = s19a_800D0048;
++            }
++            goto LABEL_17;
++        case 2:
++            if (s19a_800CDD18(&target->force) >= 100)
++                v6 = 2;
++            else
++                v6 = 3;
++            work->act.field_14 = v6;
++            p_body = &work->body;
++            v5 = s19a_800D0048;
++            goto LABEL_17;
++        case 3:
++            target->force = DG_ZeroVector;
++            p_body = &work->body;
++            if (target->faint > 0)
++            {
++                v5 = s19a_800CFF34;
++            }
++            else
++            {
++                work->act.field_14 = 1;
++                v5 = s19a_800D0048;
++            }
++            goto LABEL_17;
++        case 4:
++            p_body = &work->body;
++            v5 = s19a_800D0048;
++            work->act.field_14 = 0;
++            goto LABEL_17;
++        case 5:
++            p_body = &work->body;
++            work->act.field_14 = 3;
++            v5 = s19a_800D0048;
++            goto LABEL_17;
++        case 8:
++            p_body = &work->body;
++            v5 = s19a_800CFA2C;
++            goto LABEL_17;
++        case 9:
++            p_body = &work->body;
++            v5 = s19a_800CFAA0;
++        LABEL_17:
++            work->action = v5;
++            work->time = 0;
++            work->control.turn.vz = 0;
++            work->control.turn.vx = 0;
++            GM_ConfigMotionAdjust(p_body, NULL);
++            break;
++        default:
++            break;
++        }
++        target->damage = 0;
++        target->damaged = 0;
++        return 1;
++    }
++    return result;
++}
++
++int s19a_800CDF44(S19Work *work)
++{
++    if ((GM_GameStatus & 2) == 0)
++        return 0;
++    work->action = s19a_800CFAA0;
++    work->time = 0;
++    work->control.turn.vz = 0;
++    work->control.turn.vx = 0;
++    GM_ConfigMotionAdjust(&work->body, NULL);
++    return 1;
++}
++
++int s19a_800CDF9C(S19Work *work)
++{
++    int v2;
++    int v3;
++    int v4;
++    int result;
++
++    v2 = s19a_800CDC70(work);
++    v3 = s19a_800CDD54(work);
++    v4 = v2 | v3 | s19a_800CDF44(work);
++    result = 0;
++    if (v4 != 0)
++    {
++        work->target->class = 1;
++        return 1;
++    }
++    return result;
++}
++
++void s19a_800CE008(S19Work *work)
++{
++    TARGET *target;
++    int     life;
++    int     faint;
++
++    target = work->target;
++    life = work->param.life;
++    faint = work->param.faint;
++    GM_SetTarget(target, 159, 2, &S19_TargetSize);
++    GM_SetPowerTarget(target, 1, -1, life, faint, &S19_TargetForce);
++    GM_SetCaptureTarget(target, -1, faint, NULL, NULL);
++    GM_SetC4Target(target, &work->body.objs->objs[1].world);
++    GM_SetTarget(&work->attack, 4, 1, &S19_AttackSize);
++    GM_SetPowerTarget(&work->attack, 7, 5, 0, 3, &S19_AttackForce);
++    GM_SetTarget(&work->touch, 128, 2, &S19_TouchSize);
++    GM_SetPowerTarget(&work->touch, 7, 5, 0, 0, &S19_TouchForce);
++}
++
++int s19a_800CE134(S19Work *work)
++{
++    CONTROL *p_control;
++    short   *p_x;
++    int      n_nodes;
++    int      field_BE8;
++    int      v6;
++    int      start_map;
++    int      v8;
++    int      g_flag;
++    int      v10;
++    int      result;
++
++    p_control = &work->control;
++    work->field_9E4 = 1;
++    GM_ConfigControlAttribute(&work->control, 13);
++    s19a_800CE008(work);
++    p_x = &p_control->map->hzd->def
++               ->zones[HZD_BoundOutZone(S19_Command.map->hzd, (unsigned char)S19_PlayerAddress,
++                                        S19_Command.zones[S19_Command.far_zone], 200)]
++               .x;
++    work->control.mov.vx = *p_x;
++    p_control->mov.vy = p_x[2] + 1000;
++    p_control->mov.vz = p_x[1];
++    p_control->levels[0] = p_x[2];
++    p_control->map = GM_GetMap(work->start_map);
++    n_nodes = work->n_nodes;
++    field_BE8 = work->field_BE8;
++    work->param.item = 1;
++    work->think1 = 0;
++    work->think2 = 0;
++    work->think3 = 0;
++    work->think4 = 0;
++    work->count3 = 0;
++    work->next_node = n_nodes - 1;
++    work->target_addr = field_BE8;
++    v6 = *(unsigned int *)&work->start_pos.vz;
++    *(unsigned int *)&work->target_pos.vx = *(unsigned int *)&work->start_pos.vx;
++    *(unsigned int *)&work->target_pos.vz = v6;
++    start_map = work->start_map;
++    (*(unsigned short *)&field_BE8) = S19EyeLength;
++    work->alert_level = 0;
++    work->vision.facedir = 0;
++    work->vision.range = 512;
++    work->pad.sound = 0;
++    work->pad.field_4 = 1;
++    work->field_C44 = 0;
++    work->vision.length = field_BE8;
++    work->target_map = start_map;
++    v8 = *(unsigned int *)&work->start_pos.vz;
++    *(unsigned int *)&work->next_pos.vx = *(unsigned int *)&work->start_pos.vx;
++    *(unsigned int *)&work->next_pos.vz = v8;
++    g_flag = (unsigned char)work->param.g_flag;
++    v10 = work->field_BE8;
++    work->next_addr = v10;
++    work->last_addr = v10;
++    result = 255;
++    if (g_flag != 255)
++    {
++        result = g_flag - 1;
++        if (g_flag != 0)
++            work->param.g_flag = result;
++        else
++            return printf(" Err Err Enemy Reset Num Err CALL KOREKADOOOOOOOOOO!!\n");
++    }
++    return result;
++}
++
++int s19a_800CE2F8(int from, int to)
++{
++    int result;
++    int v3;
++
++    if (to < 0)
++        return 0;
++    result = 0;
++    if (from >= 0)
++    {
++        v3 = GV_DiffDirS(from, to);
++        result = 0;
++        if ((unsigned int)(v3 + 896) < 0x701)
++        {
++            result = 1;
++            if (v3 < 0)
++                return 2;
++        }
++    }
++    return result;
++}
+diff --git a/source/overlays/s19a/guard/data.c b/source/overlays/s19a/guard/data.c
+new file mode 100644
+--- /dev/null
++++ b/source/overlays/s19a/guard/data.c
+@@ -0,0 +1,41 @@
++#include "native.h"
++
++int            S19Distances[8] = {3000, 4000, 7000, 8000, 8000, 8000, 8000, 8000};
++unsigned short S19Times[8] = {300, 15, 30, 60, 90, 0, 32001, 30000};
++short          S19ActionTable[53] = {19, 20, 10, 22, 9,  34, 35, 36, 45, 13, 12, 26, 15, 14, 16, 27, 8, 46,
++                                     19, 21, 30, 31, 32, 33, 37, 19, 19, 25, 5,  2,  42, 4,  39, 40, 6, 7,
++                                     38, 3,  41, 17, 18, 43, 23, 24, 28, 29, 0,  1,  51, 17, 18, 43, 22};
++unsigned char  S19Vibration1[4] = {1, 4, 0, 0};
++unsigned char  S19Vibration2[4] = {255, 4, 0, 0};
++SVECTOR        S19CaptureOffset = {-150, 0, 300, 0};
++SVECTOR        S19BreathPosition = {0, -700, 900, 0};
++SVECTOR        S19BloodPosition = {0, 0, 100, 0};
++SVECTOR        S19BloodRotation = {-1024, 0, 0, 0};
++SVECTOR        S19FogPosition = {0, 0, 100, 0};
++SVECTOR        S19FogRotation = {-1024, 0, 0, 0};
++char          *S19ItemMessages[3] = {"RATION", "SOCOM/BULLET * 12", "FA-MAS/BULLET * 25"};
++S19PUTFUNC     S19PutFunctions[4] = {s19a_800D1850, s19a_800D18E8, s19a_800D1A30, s19a_800D1A6C};
++SVECTOR        S19BulletPosition = {5, -500, 80, 0};
++unsigned short S19AttackChance[4] = {100, 50, 25, 10};
++unsigned short S19AttackDelay[8] = {300, 15, 30, 60, 90, 0, 0, 30000};
++int            S19AttackFlags[32] = {0, 1, 2, 4, 4, 64, 128, 512, 1024, 2048, 256, 65536, 0, 0, 0, 0,
++                                     0, 1, 2, 4, 4, 64, 128, 512, 1024, 2048, 0,   0,     0, 0, 0, 0};
++SVECTOR        S19NoPoint = {30000, 30000, 30000, 0};
++int            S19EyeLength = 4000;
++SVECTOR        S19PunchPosition = {-200, 1000, 600, 0};
++SVECTOR        S19MeleeOffset = {5, 0, 100, 0};
++SVECTOR        S19MeleeSize = {400, 1000, 400, 0};
++int            S19Unknown;
++int            S19GameFlag;
++int            S19Activated;
++SVECTOR        S19_TargetSize = {300, 1500, 300, 0};
++SVECTOR        S19_TargetForce = {0, 0, 0, 0};
++SVECTOR        S19_AttackSize = {800, 500, 800, 0};
++SVECTOR        S19_AttackForce = {100, 0, 0, 0};
++SVECTOR        S19_TouchSize = {300, 800, 300, 0};
++SVECTOR        S19_TouchForce = {0, 0, 0, 0};
++int            dword_800C3798[8] = {3000, 4000, 7000, 8000, 8000, 8000, 8000, 8000};
++int            dword_800C37B8 = 0;
++S19COMMANDER   S19_Command;
++int            S19_PlayerAddress, S19_PlayerMap;
++SVECTOR        S19_PlayerPosition;
+diff --git a/source/overlays/s19a/guard/effects.c b/source/overlays/s19a/guard/effects.c
+new file mode 100644
+--- /dev/null
++++ b/source/overlays/s19a/guard/effects.c
+@@ -0,0 +1,294 @@
++#include "native.h"
++
++void s19a_800D1564(S19Work *work, int unit, int count)
++{
++    MATRIX matrix;
++
++    DG_SetPos(&work->body.objs->objs[unit].world);
++    DG_MovePos(&S19BloodPosition);
++    DG_RotatePos(&S19BloodRotation);
++    ReadRotMatrix(&matrix);
++    NewBlood(&matrix, count);
++}
++
++void s19a_800D15D4(S19Work *work)
++{
++    MATRIX  matrix;
++    SVECTOR pos;
++
++    DG_SetPos(&work->body.objs->objs[1].world);
++    DG_MovePos(&S19FogPosition);
++    DG_RotatePos(&S19FogRotation);
++    ReadRotMatrix(&matrix);
++    pos.vx = matrix.t[0];
++    pos.vy = matrix.t[1];
++    pos.vz = matrix.t[2];
++    AN_Fog(&pos);
++}
++
++void s19a_800D1638(S19Work *work)
++{
++    SVECTOR   step = work->act.field_0C;
++    ITEM_INFO info;
++    int       type;
++    step.vx += GV_RandU(10);
++    step.vy += 100;
++    step.vz += GV_RandU(10);
++    type = GV_RandU(4);
++    if (type == 2 && GM_SocomFlag >= 0)
++    {
++        info.message = S19ItemMessages[1];
++        info.type = 2;
++        info.id = 0;
++        info.num = 12;
++    }
++    else if (type == 3 && GM_FamasFlag >= 0)
++    {
++        info.message = S19ItemMessages[2];
++        info.type = 2;
++        info.id = 1;
++        info.num = 25;
++    }
++    else
++    {
++        info.message = S19ItemMessages[0];
++        info.type = 4;
++        info.id = 13;
++        info.num = 1;
++    }
++    info.time = 900;
++    NewItemPut(&work->control.mov, &step, &info);
++}
++
++void s19a_800D17B4(S19Work *work, int mark)
++{
++    DG_OBJ *v4;
++    MATRIX *p_world;
++
++    if ((work->control.map->index & GM_PlayerMap) != 0)
++    {
++        v4 = &work->body.objs->objs[6];
++        if (mark == 0)
++            GM_SeSet(&work->control.mov, 83);
++        p_world = &v4->world;
++        if (work->mark_time != 0)
++        {
++            GV_DestroyActor(work->mark);
++            p_world = &v4->world;
++        }
++        work->mark = AN_HeadMark(p_world, mark);
++        work->mark_time = 30;
++    }
++}
++
++void s19a_800D1850(S19Work *work)
++{
++    int      motion1;
++    int      frame;
++    int      v3;
++    int      v4;
++    int      v5;
++    int      result;
++    CONTROL *p_control;
++
++    motion1 = work->act.motion1;
++    frame = work->m_ctrl.info1.frame;
++    v3 = (work->param.index % 4) << 24 >> 23;
++    v4 = v3 + 160;
++    v5 = v3 + 161;
++    if (motion1 == 1)
++    {
++        result = 11;
++        if (frame == 22)
++        {
++            p_control = &work->control;
++            goto LABEL_9;
++        }
++    }
++    else
++    {
++        result = 16;
++        if (motion1 != 2)
++            return;
++        result = 8;
++        if (frame == 16)
++        {
++            p_control = &work->control;
++            goto LABEL_9;
++        }
++    }
++    p_control = &work->control;
++    if (frame != result)
++        return;
++    v5 = v4;
++LABEL_9:
++    GM_SeSet(&p_control->mov, v5);
++    return;
++}
++
++void s19a_800D18E8(S19Work *work)
++{
++    int motion2;
++    int frame;
++    int v3;
++
++    if (S19_Command.alert_mode != 1 && (work->control.map->index & GM_PlayerMap) != 0)
++    {
++        motion2 = work->act.motion2;
++        switch (motion2)
++        {
++        case 20:
++            frame = work->m_ctrl.info2.frame;
++            v3 = 31;
++            goto LABEL_25;
++        case 22:
++            frame = work->m_ctrl.info2.frame;
++            if (frame != 15 && frame != 35 && frame != 50 && frame != 60 && frame != 70)
++            {
++                v3 = 78;
++                if (frame != 74)
++                    goto LABEL_25;
++            }
++            break;
++        case 19:
++            frame = work->m_ctrl.info2.frame;
++            if (frame != 30 && frame != 40 && frame != 50 && frame != 60 && frame != 70 && frame != 80 && frame != 90 &&
++                frame != 95)
++            {
++                v3 = 105;
++                if (frame != 100)
++                {
++                LABEL_25:
++                    if (frame != v3)
++                        return;
++                }
++            }
++            break;
++        default:
++            frame = GV_Time % 64;
++            v3 = 16 * work->param.index;
++            goto LABEL_25;
++        }
++        AN_Breath(&work->body.objs->objs[6].world);
++    }
++}
++
++void s19a_800D1A30(S19Work *work)
++{
++    if (work->vision.pad == 2)
++        NewLSight(&GM_PlayerPosition, &work->control.mov, 143);
++}
++
++void s19a_800D1A6C(S19Work *work)
++{
++    DG_OBJ *v2;
++    int     v3;
++    SVECTOR rot;
++    MATRIX  matrix;
++
++    *(unsigned int *)&rot.vx = *(unsigned int *)&DG_ZeroVector.vx;
++    rot.pad = DG_ZeroVector.pad;
++    rot.vz = GV_RandU(128);
++    v2 = &work->body.objs->objs[4];
++    DG_SetPos(&v2->world);
++    DG_MovePos(&S19BulletPosition);
++    DG_RotatePos(&rot);
++    rot.vx = GV_RandS(16) + 1024;
++    rot.vz = 0;
++    DG_RotatePos(&rot);
++    ReadRotMatrix(&matrix);
++    v3 = 4352;
++    if ((GV_Time & 3) != 0)
++        v3 = 256;
++    NewBulletEx(v3, &matrix, 2, 1, 0, 10, work->param.damage, 10000, 750);
++    GM_SeSetMode(&work->control.mov, 45, 1);
++    AN_BulletSmoke(&v2->world, 0);
++    AN_FamasFlash(&matrix);
++    s19a_800D1BF0(work, s19a_800D1A6C);
++}
++
++int s19a_800D1BA8(S19Work *work, int index)
++{
++    int v2;
++    int v3;
++
++    v2 = 0;
++    v3 = index;
++    do
++    {
++        ++v2;
++        if (work->putchar[0] == NULL)
++        {
++            work->putchar[0] = S19PutFunctions[v3];
++            return 1;
++        }
++        work = (S19Work *)((char *)work + 4);
++    } while (v2 < 8);
++    return 0;
++}
++
++int s19a_800D1BF0(S19Work *work, void *func)
++{
++    int i;
++
++    for (i = 0; i < 8; ++i)
++    {
++        if (work->putchar[0] == func)
++        {
++            work->putchar[0] = NULL;
++            return 1;
++        }
++        work = (S19Work *)((char *)work + 4);
++    }
++    return 0;
++}
++
++void s19a_800D1C24(S19Work *work)
++{
++    int      v2;
++    S19Work *v3;
++    void (*v4)(S19Work *);
++
++    v2 = 0;
++    v3 = work;
++    do
++    {
++        v4 = v3->putchar[0];
++        if (v4 != NULL)
++            v4(work);
++        ++v2;
++        v3 = (S19Work *)((char *)v3 + 4);
++    } while (v2 < 8);
++}
++
++void s19a_800D1C84(S19Work *work)
++{
++    S19VISION         *p_vision;
++    short              length;
++    RADAR_SIGHT_PARAM *p_radar_param;
++    short              range;
++
++    p_vision = &work->vision;
++    work->control.radar_param.dir = work->vision.facedir;
++    length = work->vision.length;
++    p_radar_param = &work->control.radar_param;
++    p_radar_param->dis = length;
++    range = p_vision->range;
++    p_radar_param->r = 0;
++    p_radar_param->range = 2 * range;
++}
++
++void s19a_800D1CB0(S19Work *work)
++{
++    if ((work->modetime[7] & 4) != 0)
++    {
++        if ((work->target->damaged & 6) != 0)
++        {
++            work->modetime[6] |= 4u;
++        }
++        else if ((work->touch.damaged & 0x80) != 0 && (GM_PlayerStatus & 0x1010) != 0x1000)
++        {
++            work->modetime[6] |= 0xCu;
++        }
++    }
++}
+diff --git a/source/overlays/s19a/guard/native.h b/source/overlays/s19a/guard/native.h
+new file mode 100644
+--- /dev/null
++++ b/source/overlays/s19a/guard/native.h
+@@ -0,0 +1,475 @@
++#ifndef MGS_S19_GUARD_NATIVE_H
++#define MGS_S19_GUARD_NATIVE_H
++#include "mgstype.h"
++#include "game/game.h"
++#include "game/camera.h"
++#include "game/vibrate.h"
++#include "libgcl/libgcl.h"
++#include "chara/snake/shadow.h"
++#include "okajima/blood.h"
++#include "anime/animconv/anime.h"
++#include "enemy/enemy.h"
++#include "enemy/asiato.h"
++#include "enemy/glight.h"
++#include "enemy/l_sight.h"
++#include "enemy/grnad_e.h"
++#include <stddef.h>
++#include <stdlib.h>
++#include "okajima/bullet.h"
++#include "game/item.h"
++typedef struct _S19ACT
++{
++    int     field_00;
++    short   field_04;
++    short   field_06;
++    int     field_08;
++    SVECTOR field_0C;
++    int     field_14;
++    short   motion1;
++    short   motion2;
++    short   field_1C;
++    short   field_1E;
++    short   field_20;
++    short   field_22;
++} S19ACT;
++
++typedef struct _S19PARAM
++{
++    signed char index;
++    signed char blood;
++    signed char area;
++    signed char low_poly;
++    char        next;
++    signed char root;
++    char        c_root;
++    char        c_next;
++    signed char item;
++    char        g_flag;
++    short       life;
++    short       faint;
++    short       damage;
++} S19PARAM;
++
++typedef struct _S19VISION
++{
++    short facedir;
++    short range;
++    short length;
++    short pad;
++} S19VISION;
++
++typedef struct _S19PAD
++{
++    int   press;
++    int   field_4;
++    int   field_8;
++    int   time;
++    short dir;
++    short sound;
++} S19PAD;
++
++struct _S19Work;
++
++typedef void (*S19ACTION)(struct _S19Work *, int);
++typedef void (*S19PUTFUNC)(struct _S19Work *);
++
++typedef struct _S19Work
++{
++    GV_ACT         actor;
++    CONTROL        control;
++    OBJECT         body;
++    int            lod;
++    DG_DEF        *lod_models[2];
++    MOTION_CONTROL m_ctrl;
++    MOTION_SEGMENT m_segs1[17];
++    MOTION_SEGMENT m_segs2[17];
++    SVECTOR        rots[16];
++    SVECTOR        adjust[16];
++    OBJECT         weapon;
++    MATRIX         light[2];
++    S19ACT         act;
++    S19ACTION      action;
++    S19ACTION      action2;
++    int            time;
++    int            time2;
++    int            field_8FC;
++    TARGET        *target;
++    TARGET         attack;
++    TARGET         touch;
++    TARGET         punch;
++    HOMING        *hom;
++    int            scale;
++    int            field_9E4;
++    int            n_nodes;
++    SVECTOR        nodes[32];
++    int            search_flag;
++    void          *shadow;
++    int           *shadow_enable;
++    void          *glight;
++    int           *glight_enable;
++    S19PUTFUNC     putchar[8];
++    short          think1;
++    short          think2;
++    short          think3;
++    short          think4;
++    int            count3;
++    int            t_count;
++    int            l_count;
++    int            next_node;
++    S19PAD         pad;
++    char           padB4C[0x4];
++    u_long         trigger;
++    void          *subweapon;
++    short          field_B58;
++    short          field_B5A;
++    short          field_B5C;
++    char           padB5E[0x2];
++    void          *mark;
++    char           padB64[0x4];
++    int            mark_time;
++    int            act_status;
++    char           padB70[0x4];
++    S19PARAM       param;
++    char           padB84[0x4];
++    S19VISION      vision;
++    short          field_B90;
++    int            alert_level;
++    signed char    modetime[8];
++    SVECTOR        player_pos;
++    int            player_dir;
++    int            acttime[8];
++    short          dir[4];
++
++    SVECTOR start_pos;
++    SVECTOR target_pos;
++    int     field_BE8;
++    int     start_map;
++    int     last_addr;
++    int     target_addr;
++    int     target_map;
++    int     chase_dis;
++    int     chase_index;
++    SVECTOR field_C04;
++    int     current_addr;
++    int     next_addr;
++    char    padC14[0x8];
++    SVECTOR next_pos;
++    char    padC24[0x8];
++    int     sn_dis;
++    int     sn_dir;
++    int     field_C34;
++    int     field_C38;
++    int     field_C3C;
++
++    short field_C44;
++} S19Work;
++
++typedef struct _S19JDATA
++{
++    u_short map;
++    u_short count;
++    u_short data[8][2];
++} S19JDATA;
++
++typedef struct _S19WATCHER
++{
++    int      field_0;
++    int      field_4;
++    int      field_8;
++    S19Work *work;
++} S19WATCHER;
++
++typedef struct _S19COMMANDER
++{
++    int        field_0;
++    int        field_4;
++    int        field_8;
++    int        n_watchers;
++    int        time;
++    int        time2;
++    int        alert_time;
++    int        alert_level;
++    int        alert_mode;
++    int        field_20;
++    int        target_addr;
++    int        target_map;
++    SVECTOR    target_pos;
++    short      n_zones;
++    short      far_zone;
++    short      zones[4];
++    int        field_40[8];
++    int        field_60;
++    MAP       *map;
++    S19JDATA   jdata;
++    S19WATCHER watchers[8];
++    int        field_10C;
++    int        field_110;
++    int        end_proc;
++    int        start_proc;
++    int        start_proc2;
++} S19COMMANDER;
++
++typedef struct _S19TOP
++{
++    int mode;
++    int alert;
++} S19TOP;
++
++typedef struct _S19CommanderWork
++{
++    GV_ACT actor;
++    char   pad20[0x4];
++} S19CommanderWork;
++
++typedef struct _S19PATTERN
++{
++    short field_0;
++    short set;
++    short field_4;
++    short reset;
++} S19PATTERN;
++
++_Static_assert(sizeof(S19Work) == 3136, "S19 guard original layout");
++int        s19a_800CCD5C(S19Work *work);
++int        s19a_800CCE34(S19Work *work);
++int        s19a_800CCE94(DG_OBJS *a1, DG_DEF *a2);
++int        s19a_800CCF10(S19Work *work);
++void       s19a_800CD048(S19Work *work);
++void       s19a_800CD180(S19Work *work);
++int        s19a_800CD2AC(S19Work *work);
++int        s19a_800CD308(S19Work *work, int a2, int a3);
++void       s19a_800CD51C(S19Work *work);
++void       s19a_800CD590(S19Work *work);
++int        s19a_800CD5B0(S19Work *work);
++int        s19a_800CD64C(char *parameter, short *output);
++int        s19a_800CD6A4(char *parameter, int *output);
++int        s19a_800CD6FC(S19Work *work);
++int        s19a_800CD7D4(S19Work *work, int a2, int a3);
++S19Work   *s19a_800CDBF4(int a1, int a2);
++int        s19a_800CDC70(S19Work *work);
++int        s19a_800CDCFC(S19Work *work);
++int        s19a_800CDD18(SVECTOR *vec);
++int        s19a_800CDD54(S19Work *work);
++int        s19a_800CDF44(S19Work *work);
++int        s19a_800CDF9C(S19Work *work);
++void       s19a_800CE008(S19Work *work);
++int        s19a_800CE134(S19Work *work);
++int        s19a_800CE2F8(int from, int to);
++void       s19a_800CE34C(S19Work *work);
++int        s19a_800CE3D4(S19Work *work);
++void       s19a_800CE4E4(S19Work *work);
++int        s19a_800CE54C(S19Work *work);
++void       s19a_800CE750(S19Work *work, int time);
++void       s19a_800CE8F8(S19Work *work, int time);
++void       s19a_800CEB90(S19Work *work, int time);
++void       s19a_800CEC20(S19Work *work, int time);
++void       s19a_800CED08(S19Work *work, int time);
++void       s19a_800CED10(S19Work *work, int time);
++void       s19a_800CEE84(S19Work *work, int time);
++void       s19a_800CEF34(S19Work *work, int time);
++void       s19a_800CF068(S19Work *work, int time);
++void       s19a_800CF1C0(S19Work *work, int time);
++void       s19a_800CF298(S19Work *work, int time);
++void       s19a_800CF340(S19Work *work, int time);
++void       s19a_800CF638(S19Work *work);
++void       s19a_800CF6B8(S19Work *work, int time);
++void       s19a_800CFA2C(S19Work *work, int time);
++void       s19a_800CFAA0(S19Work *work, int time);
++void       s19a_800CFBF0(S19Work *work, int time);
++void       s19a_800CFD68(S19Work *work, int time);
++void       s19a_800CFE30(S19Work *work, int time);
++void       s19a_800CFF34(S19Work *work, int time);
++void       s19a_800D0048(S19Work *work, int time);
++void       s19a_800D055C(S19Work *work, int time);
++void       s19a_800D073C(S19Work *work, int time);
++void       s19a_800D0838(S19Work *work, int time);
++void       s19a_800D092C(S19Work *work);
++void       s19a_800D0AB8(S19Work *work, int time);
++void       s19a_800D0B84(S19Work *work, int time);
++void       s19a_800D0C50(S19Work *work, int time);
++void       s19a_800D0CE8(S19Work *work, int time);
++void       s19a_800D0D80(S19Work *work, int time);
++void       s19a_800D0E34(S19Work *work, int time);
++void       s19a_800D0EFC(S19Work *work, int time);
++void       s19a_800D0FA0(S19Work *work, int time);
++void       s19a_800D1068(S19Work *work, int time);
++void       s19a_800D1240(S19Work *work);
++void       s19a_800D1280(S19Work *work, int time);
++void       s19a_800D13C8(S19Work *work, int time);
++void       s19a_800D1564(S19Work *work, int unit, int count);
++void       s19a_800D15D4(S19Work *work);
++void       s19a_800D1638(S19Work *work);
++void       s19a_800D17B4(S19Work *work, int mark);
++void       s19a_800D1850(S19Work *work);
++void       s19a_800D18E8(S19Work *work);
++void       s19a_800D1A30(S19Work *work);
++void       s19a_800D1A6C(S19Work *work);
++int        s19a_800D1BA8(S19Work *work, int index);
++int        s19a_800D1BF0(S19Work *work, void *func);
++void       s19a_800D1C24(S19Work *work);
++void       s19a_800D1C84(S19Work *work);
++void       s19a_800D1CB0(S19Work *work);
++int        s19a_800D1D34(HZD_HDL *a1, SVECTOR *a2, SVECTOR *a3);
++void       s19a_800D1D94(S19Work *work);
++void       s19a_800D1F14(S19Work *work);
++void       s19a_800D203C(S19Work *work);
++void       s19a_800D20E8(S19Work *work);
++void       s19a_800D213C(S19Work *work);
++int        s19a_800D220C(S19Work *work);
++void       s19a_800D23D4(S19Work *work);
++void       s19a_800D2440(S19Work *work);
++int        s19a_800D3A4C(S19Work *work);
++int        s19a_800D3A84(S19Work *work);
++int        s19a_800D3ACC(S19Work *work);
++int        s19a_800D3B48(S19Work *work);
++void       s19a_800D3B88(S19Work *work);
++int        s19a_800D3BE4(S19Work *work);
++int        s19a_800D3C6C(S19Work *work);
++int        s19a_800D3CCC(S19Work *work);
++int        s19a_800D3CE4(S19Work *work);
++int        s19a_800D3CFC(S19Work *work);
++int        s19a_800D3D6C(S19Work *work);
++int        s19a_800D3DD8(S19Work *work);
++int        s19a_800D3E9C(S19Work *work);
++int        s19a_800D3EB4(S19Work *work);
++int        s19a_800D3F70(S19Work *work);
++int        s19a_800D3F88(S19Work *work);
++int        s19a_800D3FC0(S19Work *work);
++int        s19a_800D4060(S19Work *work);
++int        s19a_800D40CC(S19Work *work);
++int        s19a_800D40E8(S19Work *work);
++int        s19a_800D4124(S19Work *work);
++int        s19a_800D43E4(S19Work *work);
++int        s19a_800D4438(S19Work *work);
++int        s19a_800D4530(S19Work *work);
++int        s19a_800D4580(S19Work *work);
++int        s19a_800D46B8(S19Work *work);
++int        s19a_800D4728(S19Work *work);
++int        s19a_800D479C(S19Work *work);
++int        s19a_800D480C(S19Work *work);
++int        s19a_800D4854(S19Work *work);
++int        s19a_800D48D0();
++int        s19a_800D48E0();
++int        s19a_800D48F0(S19Work *work);
++int        s19a_800D4960(S19Work *work, int r);
++int        s19a_800D49E8(short *a1, short *a2, int a3);
++int        s19a_800D4A3C(S19Work *work);
++int        s19a_800D4A88(S19Work *work);
++int        s19a_800D4AF8(S19Work *work);
++int        s19a_800D4B4C(S19Work *work);
++int        s19a_800D4BE0(S19Work *work);
++int        s19a_800D4C7C(S19Work *work);
++int        s19a_800D4CD8(S19Work *work);
++int        s19a_800D4D3C(S19Work *work);
++int        s19a_800D4D98(S19Work *work);
++int        s19a_800D4E04(S19Work *work);
++int        s19a_800D4F38(S19Work *work);
++int        s19a_800D4FB4(S19Work *work);
++int        s19a_800D5030(S19Work *work);
++int        s19a_800D50B0(S19Work *work);
++int        s19a_800D51A4(S19Work *work);
++int        s19a_800D5210(S19Work *work);
++void       s19a_800D53B8();
++int        s19a_800D53C0(S19Work *work);
++int        s19a_800D5484(S19Work *work);
++int        s19a_800D5624(S19Work *work);
++int        s19a_800D57F4(S19Work *work);
++int        s19a_800D59B8(S19Work *work);
++int        s19a_800D5AB0(S19Work *work);
++int        s19a_800D5CB4(S19Work *work);
++int        s19a_800D5DAC(S19Work *work);
++int        s19a_800D5E58(S19Work *work);
++int        s19a_800D5F50(S19Work *work);
++int        s19a_800D607C(S19Work *work);
++int        s19a_800D61A4(S19Work *work);
++int        s19a_800D62D0(S19Work *work);
++int        s19a_800D6388(S19Work *work);
++int        s19a_800D649C(S19Work *work);
++int        s19a_800D6558(S19Work *work);
++void       s19a_800D659C(int index);
++int        s19a_800D65BC(int a1);
++int        s19a_800D65D4();
++int        s19a_800D6620();
++int        s19a_800D6698(int a1, int a2);
++int        s19a_800D670C(int a1, int a2);
++int        s19a_800D676C(int a1, unsigned short *a2);
++int        s19a_800D67C4();
++int        s19a_800D68B4(int modulus);
++int        s19a_800D68F4(int *a1);
++int        s19a_800D6948(int *a1);
++int        s19a_800D699C(int *a1);
++int        s19a_800D69F0(int *a1);
++int        s19a_800D6A44(int *a1);
++int        s19a_800D6A98(int *a1);
++int        s19a_800D6B28(int *a1);
++int        s19a_800D6B7C(int *a1);
++int        s19a_800D6BE0(int a1);
++int        s19a_800D6CA4(int a1);
++void       s19a_800D6DF4(int a1);
++void       s19a_800D6ED8(S19WATCHER *watcher);
++int        s19a_800D6FE4(int a1, int a2);
++int        s19a_800D6FFC(int a1, int a2);
++int        s19a_800D7060(unsigned int *a1);
++void       s19a_800D71C0();
++int        s19a_800D71C8();
++int        s19a_800D71D0();
++int        s19a_800D72C4();
++int        s19a_800D7338(char *a1);
++int        s19a_800D739C();
++int        s19a_800D73D8();
++int        s19a_800D7464();
++void       s19a_800D74B0();
++char      *s19a_800D74FC(int a1, int a2, short a3);
++void      *s19a_800D7724(int a1, short a2);
++void      *AN_HeadMark(MATRIX *world, int mark);
++void      *NewGunLight(MATRIX *world, int **visible);
++void       AN_Breath(MATRIX *world);
++void       AN_Unknown_800C3B7C(MATRIX *world);
++void       AN_Fog(SVECTOR *pos);
++void       AN_Sleep(SVECTOR *pos);
++void       AsiatoPos(int idx, SVECTOR *out);
++int        NextAsiato(HZD_HDL *hdl, int idx, SVECTOR *pos);
++void       CleanAsiato(void);
++int        NearAsiato(void);
++int        SearchNearAsiato(HZD_HDL *hzd, SVECTOR *pos, int dir, int range, int length);
++int        AsiatoCheck(HZD_HDL *hzd, SVECTOR *pos);
++void      *NewAsiato(int name, int where, int argc, char **argv);
++void      *NewLSight(SVECTOR *from, SVECTOR *to, int color);
++void      *NewGrenadeEnemy(CONTROL *control, OBJECT *parent, int bone, unsigned long *flags, SVECTOR *pos, int side);
++extern int S19Distances[8];
++extern unsigned short S19Times[8];
++extern short          S19ActionTable[53];
++extern unsigned char  S19Vibration1[4];
++extern unsigned char  S19Vibration2[4];
++extern SVECTOR        S19CaptureOffset;
++extern SVECTOR        S19BreathPosition;
++extern SVECTOR        S19BloodPosition;
++extern SVECTOR        S19BloodRotation;
++extern SVECTOR        S19FogPosition;
++extern SVECTOR        S19FogRotation;
++extern char          *S19ItemMessages[3];
++extern S19PUTFUNC     S19PutFunctions[4];
++extern SVECTOR        S19BulletPosition;
++extern unsigned short S19AttackChance[4];
++extern unsigned short S19AttackDelay[8];
++extern int            S19AttackFlags[32];
++extern SVECTOR        S19NoPoint;
++extern int            S19EyeLength;
++extern SVECTOR        S19PunchPosition;
++extern SVECTOR        S19MeleeOffset;
++extern SVECTOR        S19MeleeSize;
++extern int            S19Unknown;
++extern int            S19GameFlag;
++extern int            S19Activated;
++extern SVECTOR        S19_TargetSize;
++extern SVECTOR        S19_TargetForce;
++extern SVECTOR        S19_AttackSize;
++extern SVECTOR        S19_AttackForce;
++extern SVECTOR        S19_TouchSize;
++extern SVECTOR        S19_TouchForce;
++extern int            dword_800C3798[8];
++extern int            dword_800C37B8;
++extern S19COMMANDER   S19_Command;
++extern int            S19_PlayerAddress, S19_PlayerMap;
++extern SVECTOR        S19_PlayerPosition;
++#endif
+diff --git a/source/overlays/s19a/guard/navigation.c b/source/overlays/s19a/guard/navigation.c
+new file mode 100644
+--- /dev/null
++++ b/source/overlays/s19a/guard/navigation.c
+@@ -0,0 +1,786 @@
++#include "native.h"
++
++int s19a_800D3A4C(S19Work *work)
++{
++    int v1;
++    int result;
++
++    work->target_addr = work->field_BE8;
++    v1 = *(unsigned int *)&work->start_pos.vz;
++    *(unsigned int *)&work->target_pos.vx = *(unsigned int *)&work->start_pos.vx;
++    *(unsigned int *)&work->target_pos.vz = v1;
++    result = work->start_map;
++    work->target_map = result;
++    return result;
++}
++
++int s19a_800D3A84(S19Work *work)
++{
++    int v1;
++
++    work->target_addr = S19_PlayerAddress;
++    v1 = S19_PlayerMap;
++    work->target_pos = S19_PlayerPosition;
++    work->target_map = v1;
++    return -2146566144;
++}
++
++int s19a_800D3ACC(S19Work *work)
++{
++    int result;
++    int v3;
++
++    result = HZD_GetAddress(GM_WhereList[0]->map->hzd, &GM_NoisePosition, -1);
++    v3 = S19_PlayerMap;
++    work->target_addr = result;
++    work->target_pos = GM_NoisePosition;
++    work->target_map = v3;
++    return result;
++}
++
++int s19a_800D3B48(S19Work *work)
++{
++    int result;
++
++    work->target_addr = S19_Command.target_addr;
++    work->target_pos = S19_Command.target_pos;
++    result = S19_Command.target_map;
++    work->target_map = S19_Command.target_map;
++    return result;
++}
++
++void s19a_800D3B88(S19Work *work)
++{
++    int      next;
++    HZD_ZON *zones;
++    short   *p_x;
++    short    v4;
++
++    next = (unsigned char)work->param.next;
++    zones = work->control.map->hzd->def->zones;
++    work->target_addr = next | (next << 8);
++    p_x = &zones[next].x;
++    work->target_pos.vx = *p_x;
++    work->target_pos.vy = p_x[2];
++    v4 = p_x[1];
++    work->target_map = work->start_map;
++    work->target_pos.vz = v4;
++}
++
++int s19a_800D3BE4(S19Work *work)
++{
++    int   v2;
++    int   v3;
++    char *v4;
++    int   v5;
++    int   result;
++    int   start_map;
++
++    v2 = work->next_node + 1;
++    v3 = 8 * v2;
++    if (v2 >= work->n_nodes)
++    {
++        v2 = 0;
++        v3 = 0;
++    }
++    v4 = (char *)work + v3;
++    work->next_node = v2;
++    v5 = *((unsigned int *)v4 + 636);
++    *(unsigned int *)&work->target_pos.vx = *((unsigned int *)v4 + 635);
++    *(unsigned int *)&work->target_pos.vz = v5;
++    result = HZD_GetAddress(work->control.map->hzd, &work->target_pos, -1);
++    start_map = work->start_map;
++    work->target_addr = result;
++    work->target_map = start_map;
++    return result;
++}
++
++int s19a_800D3C6C(S19Work *work)
++{
++    SVECTOR *p_target_pos;
++    int      Address;
++    MAP     *map;
++    int      result;
++
++    p_target_pos = &work->target_pos;
++    AsiatoPos(work->modetime[4], &work->target_pos);
++    Address = HZD_GetAddress(work->control.map->hzd, p_target_pos, -1);
++    map = work->control.map;
++    work->target_addr = Address;
++    result = map->index;
++    work->target_map = map->index;
++    return result;
++}
++
++int s19a_800D3CCC(S19Work *work)
++{
++
++    work->think1 = 0;
++    work->think2 = 0;
++    work->think3 = 0;
++    work->count3 = 0;
++    *(unsigned short *)work->padB4C = 0;
++    return 0;
++}
++
++int s19a_800D3CE4(S19Work *work)
++{
++    work->think2 = 7;
++    work->think3 = 11;
++    work->count3 = 0;
++    return 11;
++}
++
++int s19a_800D3CFC(S19Work *work)
++{
++    if ((unsigned char)work->param.next == 255)
++    {
++        work->think1 = 1;
++        work->think2 = 8;
++        work->think3 = 14;
++    }
++    else
++    {
++        work->think1 = 1;
++        work->think2 = 10;
++        work->think3 = 23;
++        s19a_800D3B88(work);
++    }
++    work->count3 = 0;
++    work->pad.field_4 = 1;
++    return 1;
++}
++
++int s19a_800D3D6C(S19Work *work)
++{
++    if ((unsigned char)work->param.next == 255)
++        s19a_800D3B48(work);
++    else
++        s19a_800D3B88(work);
++    work->think1 = 1;
++    work->think2 = 10;
++    work->think3 = 23;
++    work->count3 = 0;
++    work->pad.field_4 = 1;
++    return 1;
++}
++
++int s19a_800D3DD8(S19Work *work)
++{
++    short v2;
++
++    if ((unsigned char)work->param.next == 255)
++    {
++        if (work->chase_dis < 7000)
++        {
++            s19a_800D3B48(work);
++            work->think1 = 2;
++            v2 = 12;
++            goto LABEL_7;
++        }
++    LABEL_5:
++        work->think2 = 13;
++        work->think1 = 2;
++        work->think3 = 24;
++        work->think4 = 2;
++        work->count3 = 0;
++        work->pad.field_4 = 0;
++        return 2;
++    }
++    if (HZD_InsideZone(work->control.map->hzd, &work->control.mov, (unsigned char)work->param.next) != 0)
++        goto LABEL_5;
++    s19a_800D3B88(work);
++    work->think1 = 2;
++    v2 = 11;
++LABEL_7:
++    work->think2 = v2;
++    work->count3 = 0;
++    work->pad.field_4 = 1;
++    return 1;
++}
++
++int s19a_800D3E9C(S19Work *work)
++{
++    work->think2 = 4;
++    work->think3 = 4;
++    work->count3 = 0;
++    work->modetime[2] = 0;
++    return 4;
++}
++
++int s19a_800D3EB4(S19Work *work)
++{
++    int result;
++
++    if (GM_NoisePower == 100)
++        goto LABEL_10;
++    if (GM_NoisePower >= 101)
++    {
++        if (GM_NoisePower != 200 && GM_NoisePower != 255)
++            goto LABEL_10;
++        s19a_800D3ACC(work);
++        s19a_800D6620();
++        work->think2 = 7;
++        result = 12;
++        work->think3 = 12;
++    }
++    else
++    {
++        if (GM_NoisePower != 5)
++        {
++        LABEL_10:
++            s19a_800D3ACC(work);
++            work->think2 = 1;
++            result = 5;
++            work->think3 = 5;
++            work->modetime[0] = 0;
++            goto LABEL_11;
++        }
++        work->think2 = 1;
++        result = 7;
++        work->think3 = 7;
++    }
++LABEL_11:
++    work->count3 = 0;
++    return result;
++}
++
++int s19a_800D3F70(S19Work *work)
++{
++    work->think2 = 2;
++    work->think3 = 5;
++    work->count3 = 0;
++    return 5;
++}
++
++int s19a_800D3F88(S19Work *work)
++{
++    int result;
++
++    work->think2 = 5;
++    work->think3 = 5;
++    result = NearAsiato();
++    work->modetime[4] = result;
++    work->count3 = 0;
++    return result;
++}
++
++int s19a_800D3FC0(S19Work *work)
++{
++    int count3;
++    int v2;
++    int v3;
++    int v4;
++    int v5;
++    int result;
++
++    count3 = work->count3;
++    v2 = count3 / 30 + work->param.index;
++    if (v2 == 1 || v2 == 4)
++    {
++        v3 = work->pad.press | 2;
++    }
++    else
++    {
++        if (v2 != 2)
++        {
++            v4 = count3 < 91;
++            if (v2 != 5)
++                goto LABEL_8;
++        }
++        v3 = work->pad.press | 1;
++    }
++    work->pad.press = v3;
++    v4 = count3 < 91;
++LABEL_8:
++    v5 = !v4;
++    result = 0;
++    if (v5)
++        return 1;
++    ++work->count3;
++    return result;
++}
++
++int s19a_800D4060(S19Work *work)
++{
++    int count3;
++    int result;
++
++    count3 = work->count3;
++    if ((count3 & 0x1F) != 0)
++    {
++        result = 0;
++        if (count3 >= 65)
++            return 1;
++    }
++    else
++    {
++        work->field_B58 = (unsigned short)GV_RandU(8) << 9;
++        result = 0;
++        count3 = work->count3;
++    }
++    work->pad.dir = work->field_B58;
++    work->count3 = count3 + 1;
++    return result;
++}
++
++int s19a_800D40CC(S19Work *work)
++{
++    short sn_dir;
++
++    sn_dir = work->sn_dir;
++    ++work->count3;
++    work->pad.dir = sn_dir;
++    return 0;
++}
++
++int s19a_800D40E8(S19Work *work)
++{
++    int count3;
++    int v2;
++    int v3;
++    int result;
++
++    count3 = work->count3;
++    v2 = count3 == 0;
++    v3 = count3 < 33;
++    if (v2)
++    {
++        work->pad.sound = 245;
++        goto LABEL_5;
++    }
++    v2 = v3;
++    result = 1;
++    if (v2)
++    {
++    LABEL_5:
++        ++work->count3;
++        return 0;
++    }
++    return result;
++}
++
++int s19a_800D4124(S19Work *work)
++{
++    MAP          *map;
++    HZD_HDL      *hzd;
++    int           target_addr;
++    HZD_HDL      *v5;
++    int           v6;
++    short        *p_x;
++    int           Address;
++    int           next_addr;
++    int           v10;
++    SVECTOR      *p_next_pos;
++    int           target_map;
++    int           v13;
++    MAP          *v15;
++    int           v16;
++    short        *v17;
++    int           v18;
++    unsigned char v19;
++    short        *v20;
++    short         v21;
++    short         v22;
++    SVECTOR       vec3;
++
++    map = work->control.map;
++    hzd = map->hzd;
++    if (work->target_map == map->index)
++    {
++        target_addr = work->target_addr;
++        v5 = map->hzd;
++    }
++    else
++    {
++        v6 = s19a_800D6698(map->index, work->target_map);
++        p_x = &hzd->def->zones[v6].x;
++        work->target_pos.vx = *p_x;
++        work->target_pos.vy = p_x[2];
++        target_addr = (v6 << 8) | v6;
++        work->target_pos.vz = p_x[1];
++        v5 = hzd;
++    }
++    Address = HZD_GetAddress(v5, &work->control.mov, work->current_addr);
++    next_addr = work->next_addr;
++    work->current_addr = Address;
++    v10 = HZD_ReachTo(hzd, Address, next_addr);
++    if (target_addr == work->last_addr)
++    {
++        p_next_pos = &work->next_pos;
++        if (v10 > 0)
++        {
++        LABEL_14:
++            GV_SubVec3(p_next_pos, &work->control.mov, &vec3);
++            return GV_VecDir2(&vec3);
++        }
++    }
++    work->last_addr = target_addr;
++    if (HZD_ReachTo(hzd, Address, target_addr) >= 2)
++    {
++        v18 = HZD_Navigate(hzd, Address, target_addr, &work->control.mov);
++        v19 = v18;
++        v20 = &hzd->def->zones[v18].x;
++        if (work->chase_dis == 4000)
++        {
++            work->next_pos.vx = *v20 + 250;
++            work->next_pos.vy = v20[2];
++            v21 = v20[1] + 250;
++        }
++        else
++        {
++            work->next_pos.vx = *v20;
++            work->next_pos.vy = v20[2];
++            v21 = v20[1];
++        }
++        work->next_pos.vz = v21;
++        work->next_pos.vx = *v20;
++        work->next_pos.vy = v20[2];
++        v22 = v20[1];
++        work->next_addr = v19 | (v19 << 8);
++        work->next_pos.vz = v22;
++        p_next_pos = &work->next_pos;
++        goto LABEL_14;
++    }
++    target_map = work->target_map;
++    if (target_map == work->control.map->index)
++    {
++        v13 = *(unsigned int *)&work->target_pos.vz;
++        *(unsigned int *)&work->next_pos.vx = *(unsigned int *)&work->target_pos.vx;
++        *(unsigned int *)&work->next_pos.vz = v13;
++        work->next_addr = target_addr;
++        GV_SubVec3(&work->next_pos, &work->control.mov, &vec3);
++        work->pad.dir = GV_VecDir2(&vec3);
++        return -1;
++    }
++    else
++    {
++        v16 = s19a_800D6698(target_map, work->control.map->index);
++        v15 = GM_GetMap(work->target_map);
++        work->control.map = v15;
++        v17 = &v15->hzd->def->zones[v16].x;
++        work->control.mov.vx = *v17;
++        work->control.mov.vy = v17[2];
++        work->control.mov.vz = v17[1];
++        work->current_addr = -1;
++        work->last_addr = -1;
++        return work->control.rot.vy;
++    }
++}
++
++int s19a_800D43E4(S19Work *work)
++{
++    int v1;
++
++    if (work->pad.time != 0)
++    {
++        v1 = work->pad.time - 1;
++        work->pad.press |= work->pad.field_8;
++        work->pad.time = v1;
++    }
++    return s19a_800D4960(work, 350) != 0;
++}
++
++int s19a_800D4438(S19Work *work)
++{
++    short pad;
++
++    pad = work->target_pos.pad;
++    if (GV_RandU(100) >= S19AttackChance[((pad & 0x1C00) >> 10) & 3] || *(unsigned short *)work->padB4C == 1)
++    {
++        work->pad.time = 0;
++        work->pad.field_8 = 0;
++        *(unsigned short *)work->padB4C = 0;
++        return 0;
++    }
++    else
++    {
++        if ((((pad & 0x1C00) >> 10) & 4) != 0)
++            *(unsigned short *)work->padB4C = 1;
++        work->pad.time = *(unsigned short *)((char *)S19AttackDelay + ((unsigned char)(pad & 0xE0) >> 4));
++        work->pad.field_8 = S19AttackFlags[pad & 0x1F];
++        if ((pad & 0x10) != 0)
++        {
++            return 0;
++        }
++        else
++        {
++            work->pad.dir = 4 * (pad & 0x300);
++            return 1;
++        }
++    }
++}
++
++int s19a_800D4530(S19Work *work)
++{
++    int v1;
++    int result;
++
++    if (work->pad.time != 0)
++    {
++        v1 = work->pad.time - 1;
++        work->pad.press |= work->pad.field_8;
++        work->pad.time = v1;
++    }
++    else
++    {
++        result = 1;
++        if (work->action2 == NULL)
++            return result;
++    }
++    return 0;
++}
++
++int s19a_800D4580(S19Work *work)
++{
++    int v2;
++    int result;
++
++    if (work->count3 != 0)
++    {
++        work->pad.dir = -1;
++    }
++    else
++    {
++        fprintf(1, " watch act time = %d \n ", work->modetime[0]);
++        if (work->modetime[0] < 2)
++            work->pad.sound = 136;
++        if (work->modetime[0] == 0)
++            s19a_800D17B4(work, 5);
++        work->pad.dir = work->sn_dir;
++    }
++    v2 = work->modetime[0];
++    if (v2 != 1)
++    {
++        if (v2 >= 2)
++        {
++            if (v2 == 2)
++            {
++                result = 1;
++                if (work->count3 >= 0x30u)
++                {
++                    work->pad.field_4 = 1;
++                    return result;
++                }
++            }
++            else if (v2 == 3)
++            {
++                work->alert_level = 255;
++                return 1;
++            }
++        }
++        else if (work->modetime[0] == 0 && work->count3 >= 0x10u)
++        {
++            work->pad.sound = 241;
++            return 1;
++        }
++        goto LABEL_22;
++    }
++    result = 1;
++    if (work->count3 < 0x30u)
++    {
++    LABEL_22:
++        ++work->count3;
++        return 0;
++    }
++    return result;
++}
++
++int s19a_800D46B8(S19Work *work)
++{
++    int     v2;
++    SVECTOR vec3;
++
++    GV_SubVec3(&GM_NoisePosition, &work->control.mov, &vec3);
++    work->pad.dir = GV_VecDir2(&vec3);
++    v2 = work->modetime[6] & 1;
++    work->pad.press |= 0x20u;
++    if (v2 == 0)
++        return 1;
++    ++work->count3;
++    return 0;
++}
++
++int s19a_800D4728(S19Work *work)
++{
++    unsigned int count3;
++
++    if (work->count3 != 0)
++    {
++        work->pad.dir = -1;
++    }
++    else
++    {
++        work->pad.sound = 136;
++        s19a_800D17B4(work, 5);
++        work->pad.dir = work->sn_dir;
++    }
++    count3 = work->count3;
++    if (count3 >= 0x10)
++        return 1;
++    work->count3 = count3 + 1;
++    return 0;
++}
++
++int s19a_800D479C(S19Work *work)
++{
++    signed char v1;
++    int         v2;
++    int         result;
++
++    if (work->act.motion1 != 0)
++    {
++        work->modetime[2] = 0;
++    LABEL_7:
++        ++work->count3;
++        return 0;
++    }
++    if (work->modetime[2] == 0)
++        work->pad.dir = work->sn_dir;
++    v1 = work->modetime[2] + 1;
++    work->modetime[2] = v1;
++    v2 = v1 < 31;
++    result = 1;
++    if (v2)
++        goto LABEL_7;
++    return result;
++}
++
++int s19a_800D480C(S19Work *work)
++{
++    if (work->count3 == 0)
++    {
++        work->pad.sound = 136;
++        s19a_800D17B4(work, 5);
++    }
++    return s19a_800D3FC0(work) != 0;
++}
++
++int s19a_800D4854(S19Work *work)
++{
++    unsigned int count3;
++
++    if (work->count3 != 0)
++    {
++        work->pad.dir = -1;
++    }
++    else
++    {
++        work->pad.sound = 136;
++        s19a_800D17B4(work, 4);
++        work->pad.dir = work->sn_dir;
++    }
++    count3 = work->count3;
++    if (count3 >= 0x10)
++    {
++        work->pad.sound = 243;
++        return 1;
++    }
++    else
++    {
++        work->count3 = count3 + 1;
++        return 0;
++    }
++}
++
++int s19a_800D48D0()
++{
++    return 1;
++}
++
++int s19a_800D48E0()
++{
++    return 1;
++}
++
++int s19a_800D48F0(S19Work *work)
++{
++    short v2;
++    int   v3;
++    int   result;
++
++    if ((work->count3 & 0x1F) == 0)
++    {
++        work->current_addr = -1;
++        work->last_addr = -1;
++        s19a_800D4124(work);
++    }
++    v2 = s19a_800D4124(work);
++    work->pad.dir = v2;
++    v3 = v2 < 0;
++    result = 0;
++    if (v3)
++        return 1;
++    ++work->count3;
++    return result;
++}
++
++int s19a_800D4960(S19Work *work, int r)
++{
++    int     v3;
++    int     v4;
++    int     result;
++    short   v6;
++    int     count3;
++    SVECTOR vec;
++
++    v3 = work->target_pos.vx - work->control.mov.vx;
++    vec.vx = v3;
++    v4 = work->target_pos.vz - work->control.mov.vz;
++    vec.vz = work->target_pos.vz - work->control.mov.vz;
++    if (-r >= v3 || v3 >= r || -r >= v4 || (result = 1, v4 >= r))
++    {
++        v6 = GV_VecDir2(&vec);
++        count3 = work->count3;
++        work->pad.dir = v6;
++        work->count3 = count3 + 1;
++        return 0;
++    }
++    return result;
++}
++
++int s19a_800D49E8(short *a1, short *a2, int a3)
++{
++    int v4;
++    int v5;
++
++    v4 = *a1 - *a2;
++    v5 = a1[2] - a2[2];
++    return -a3 >= v4 && v4 >= a3 && -a3 >= v5 && v5 >= a3;
++}
++
++int s19a_800D4A3C(S19Work *work)
++{
++    if (work->count3 == 20)
++    {
++        s19a_800D17B4(work, 5);
++        work->pad.sound = 244;
++    }
++    return s19a_800D3FC0(work) != 0;
++}
++
++int s19a_800D4A88(S19Work *work)
++{
++    int          count3;
++    unsigned int v3;
++
++    count3 = work->count3;
++    work->pad.press |= 4u;
++    if (count3 == 20)
++    {
++        s19a_800D17B4(work, 5);
++        work->pad.sound = 242;
++    }
++    v3 = work->count3;
++    if (v3 >= 0x79)
++        return 1;
++    work->count3 = v3 + 1;
++    return 0;
++}
++
++int s19a_800D4AF8(S19Work *work)
++{
++    int next = NextAsiato(work->control.map->hzd, work->modetime[4], &work->control.mov);
++    work->modetime[4] = next;
++    return next >= 0;
++}
+diff --git a/source/overlays/s19a/guard/override.c b/source/overlays/s19a/guard/override.c
+new file mode 100644
+--- /dev/null
++++ b/source/overlays/s19a/guard/override.c
+@@ -0,0 +1,354 @@
++#include "native.h"
++
++void s19a_800D0AB8(S19Work *work, int time)
++{
++    short v4;
++
++    if (time == 0)
++    {
++        work->act.motion2 = 9;
++        GM_ConfigObjectOverride(&work->body, S19ActionTable[9], 0, 4, 0x3FEu);
++    }
++    if ((work->pad.press & 1) != 0)
++    {
++        if (time >= 4)
++            v4 = work->control.rot.vy - 1024;
++        else
++            v4 = work->control.rot.vy - ((unsigned short)time << 8);
++        work->vision.facedir = v4 & 0xFFF;
++    }
++    else
++    {
++        work->act.motion2 = 0;
++        GM_ConfigObjectOverride(&work->body, S19ActionTable[0], 0, 4, 0);
++        work->action2 = NULL;
++        work->time2 = 0;
++        work->act.motion2 = 0;
++        work->control.turn.vz = 0;
++        work->control.turn.vx = 0;
++    }
++}
++
++void s19a_800D0B84(S19Work *work, int time)
++{
++    short v4;
++
++    if (time == 0)
++    {
++        work->act.motion2 = 10;
++        GM_ConfigObjectOverride(&work->body, S19ActionTable[10], 0, 4, 0x3FEu);
++    }
++    if ((work->pad.press & 2) != 0)
++    {
++        if (time >= 4)
++            v4 = work->control.rot.vy + 1024;
++        else
++            v4 = work->control.rot.vy + ((unsigned short)time << 8);
++        work->vision.facedir = v4 & 0xFFF;
++    }
++    else
++    {
++        work->act.motion2 = 0;
++        GM_ConfigObjectOverride(&work->body, S19ActionTable[0], 0, 4, 0);
++        work->action2 = NULL;
++        work->time2 = 0;
++        work->act.motion2 = 0;
++        work->control.turn.vz = 0;
++        work->control.turn.vx = 0;
++    }
++}
++
++void s19a_800D0C50(S19Work *work, int time)
++{
++    work->vision.length = 3000;
++    if (time == 0)
++    {
++        work->act.motion2 = 11;
++        GM_ConfigObjectOverride(&work->body, S19ActionTable[11], 0, 4, 0x3FEu);
++    }
++    if ((work->pad.press & 4) == 0)
++    {
++        work->act.motion2 = 0;
++        GM_ConfigObjectOverride(&work->body, S19ActionTable[0], 0, 4, 0);
++        work->action2 = NULL;
++        work->time2 = 0;
++        work->act.motion2 = 0;
++        work->control.turn.vz = 0;
++        work->control.turn.vx = 0;
++    }
++}
++
++void s19a_800D0CE8(S19Work *work, int time)
++{
++    work->vision.length = 3000;
++    if (time == 0)
++    {
++        work->act.motion2 = 14;
++        GM_ConfigObjectOverride(&work->body, S19ActionTable[14], 0, 4, 0x3FEu);
++    }
++    if ((work->pad.press & 0x2000) == 0)
++    {
++        work->act.motion2 = 0;
++        GM_ConfigObjectOverride(&work->body, S19ActionTable[0], 0, 4, 0);
++        work->action2 = NULL;
++        work->time2 = 0;
++        work->act.motion2 = 0;
++        work->control.turn.vz = 0;
++        work->control.turn.vx = 0;
++    }
++}
++
++void s19a_800D0D80(S19Work *work, int time)
++{
++    work->vision.length = 0;
++    if (time == 0)
++    {
++        work->act.motion2 = 24;
++        GM_ConfigObjectOverride(&work->body, S19ActionTable[24], 0, 4, 0x3FEu);
++        GM_SeSet(&work->control.mov, 148);
++    }
++    if (work->body.time2 != 0 || (work->pad.press & 0x40) == 0)
++    {
++        work->pad.time = 0;
++        work->act.motion2 = 0;
++        GM_ConfigObjectOverride(&work->body, S19ActionTable[0], 0, 4, 0);
++        work->action2 = NULL;
++        work->time2 = 0;
++        work->act.motion2 = 0;
++        work->control.turn.vz = 0;
++        work->control.turn.vx = 0;
++    }
++}
++
++void s19a_800D0E34(S19Work *work, int time)
++{
++    work->vision.length = 0;
++    if (time == 0)
++    {
++        work->act.motion2 = 22;
++        GM_ConfigObjectOverride(&work->body, S19ActionTable[22], 0, 4, 0x3FEu);
++    }
++    if (time == 60)
++        GM_SeSet(&work->control.mov, 146);
++    if (work->body.time2 != 0 || (work->pad.press & 0x80) == 0)
++    {
++        work->pad.time = 0;
++        work->act.motion2 = 0;
++        GM_ConfigObjectOverride(&work->body, S19ActionTable[0], 0, 4, 0);
++        work->action2 = NULL;
++        work->time2 = 0;
++        work->act.motion2 = 0;
++        work->control.turn.vz = 0;
++        work->control.turn.vx = 0;
++    }
++}
++
++void s19a_800D0EFC(S19Work *work, int time)
++{
++    if (time == 0)
++    {
++        work->act.motion2 = 23;
++        GM_ConfigObjectOverride(&work->body, S19ActionTable[23], 0, 4, 0x3FEu);
++    }
++    if (work->body.time2 != 0 || (work->pad.press & 0x400) == 0)
++    {
++        work->pad.time = 0;
++        work->act.motion2 = 0;
++        GM_ConfigObjectOverride(&work->body, S19ActionTable[0], 0, 4, 0);
++        work->action2 = NULL;
++        work->time2 = 0;
++        work->act.motion2 = 0;
++        work->control.turn.vz = 0;
++        work->control.turn.vx = 0;
++    }
++}
++
++void s19a_800D0FA0(S19Work *work, int time)
++{
++    work->vision.length = 0;
++    if (time == 0)
++    {
++        work->act.motion2 = 19;
++        GM_ConfigObjectOverride(&work->body, S19ActionTable[19], 0, 4, 0x3FEu);
++    }
++    if (time == 90)
++        GM_SeSet(&work->control.mov, 146);
++    if (work->body.time2 != 0 || (work->pad.press & 0x800) == 0)
++    {
++        work->pad.time = 0;
++        work->act.motion2 = 0;
++        GM_ConfigObjectOverride(&work->body, S19ActionTable[0], 0, 4, 0);
++        work->action2 = NULL;
++        work->time2 = 0;
++        work->act.motion2 = 0;
++        work->control.turn.vz = 0;
++        work->control.turn.vx = 0;
++    }
++}
++
++void s19a_800D1068(S19Work *work, int time)
++{
++    int     v4;
++    int     frame;
++    int     v6;
++    OBJECT *p_body;
++    SVECTOR pos;
++
++    work->vision.length = 0;
++    if (time == 0)
++    {
++        work->act.motion2 = 19;
++        GM_ConfigObjectOverride(&work->body, S19ActionTable[19], 0, 4, 0x3FEu);
++    }
++    if (time == 90)
++        GM_SeSet(&work->control.mov, 146);
++    v4 = time < 111;
++    if (time == 110)
++    {
++        work->act.motion2 = 20;
++        GM_ConfigObjectOverride(&work->body, S19ActionTable[20], 0, 4, 0x3FEu);
++        v4 = 1;
++    }
++    if (v4)
++        goto LABEL_15;
++    frame = work->m_ctrl.info2.frame;
++    work->act_status |= 0x10u;
++    if (frame == 30)
++    {
++        v6 = *(unsigned int *)&work->control.mov.vz;
++        *(unsigned int *)&pos.vx = *(unsigned int *)&work->control.mov.vx;
++        *(unsigned int *)&pos.vz = v6;
++        pos.vy += 500;
++        AN_Sleep(&pos);
++        GM_SeSet(&work->control.mov, 147);
++        if (work->sn_dis < 1000 && (GM_PlayerStatus & 1) != 0 && GV_RandU(12) >= 11)
++            work->pad.sound = 240;
++    }
++    if ((work->pad.press & 0x1000) == 0)
++    {
++    LABEL_15:
++        p_body = &work->body;
++        if ((work->pad.press & 0x200) != 0)
++            return;
++    }
++    else
++    {
++        work->action = s19a_800CF298;
++        work->time = 0;
++        work->control.turn.vz = 0;
++        work->control.turn.vx = 0;
++        GM_ConfigMotionAdjust(&work->body, NULL);
++        p_body = &work->body;
++    }
++    work->act.motion2 = 0;
++    GM_ConfigObjectOverride(p_body, S19ActionTable[0], 0, 4, 0);
++    work->action2 = NULL;
++    work->time2 = 0;
++    work->act.motion2 = 0;
++    work->control.turn.vz = 0;
++    work->control.turn.vx = 0;
++}
++
++void s19a_800D1240(S19Work *work)
++{
++    MATRIX matrix;
++
++    DG_SetPos(&work->body.objs->objs[6].world);
++    DG_MovePos(&S19BreathPosition);
++    ReadRotMatrix(&matrix);
++    AN_Unknown_800C3B7C(&matrix);
++}
++
++void s19a_800D1280(S19Work *work, int time)
++{
++    int act_status;
++
++    act_status = work->act_status;
++    work->vision.length = 3000;
++    work->act_status = act_status | 0x80;
++    if (time == 0)
++    {
++        work->act.motion2 = 25;
++        GM_ConfigObjectOverride(&work->body, S19ActionTable[25], 0, 4, 0x3FEu);
++    }
++    if ((unsigned int)(time - 1000) >= 0xD2)
++    {
++        if (time < 31)
++            goto LABEL_18;
++        if ((time & 1) == 0)
++            goto LABEL_18;
++        GM_SeSet(&work->control.mov, 30);
++        if (time < 46)
++            goto LABEL_18;
++    }
++    else
++    {
++        if (time != 1000 && time != 1004 && time != 1008 && time != 1012 && time != 1020 && time != 1028 &&
++            time != 1036 && time != 1048 && time != 1060)
++        {
++            goto LABEL_18;
++        }
++        GM_SeSet(&work->control.mov, 30);
++    }
++    s19a_800D1240(work);
++LABEL_18:
++    if ((work->pad.press & 0x800000) == 0)
++    {
++        work->act.motion2 = 0;
++        GM_ConfigObjectOverride(&work->body, S19ActionTable[0], 0, 4, 0);
++        work->action2 = NULL;
++        work->time2 = 0;
++        work->act.motion2 = 0;
++        work->control.turn.vz = 0;
++        work->control.turn.vx = 0;
++    }
++}
++
++void s19a_800D13C8(S19Work *work, int time)
++{
++    CONTROL *p_control;
++    int      v5;
++
++    work->vision.length = 3000;
++    if (time == 0)
++    {
++        work->act.motion2 = 25;
++        GM_ConfigObjectOverride(&work->body, S19ActionTable[25], 0, 4, 0x3FEu);
++    }
++    if (time == 186)
++    {
++        work->act.motion2 = 26;
++        GM_ConfigObjectOverride(&work->body, S19ActionTable[26], 0, 4, 0xFFFFu);
++    }
++    if (time == 0 || time == 4 || time == 8 || time == 12 || time == 20 || time == 28 || time == 36 || time == 48 ||
++        time == 60 || time == 120 || time == 122 || time == 124 || time == 126 || time == 180 || time == 182)
++    {
++    LABEL_22:
++        p_control = &work->control;
++        goto LABEL_23;
++    }
++    p_control = &work->control;
++    if (time != 184)
++    {
++        v5 = time < 187;
++        if (time != 186)
++            goto LABEL_24;
++        goto LABEL_22;
++    }
++LABEL_23:
++    GM_SeSet(&p_control->mov, 30);
++    s19a_800D1240(work);
++    v5 = time < 187;
++LABEL_24:
++    if ((!v5 && work->body.time2 != 0) || (work->pad.press & 0x1000000) == 0)
++    {
++        work->pad.time = 0;
++        work->act.motion2 = 0;
++        GM_ConfigObjectOverride(&work->body, S19ActionTable[0], 0, 4, 0);
++        work->action2 = NULL;
++        work->time2 = 0;
++        work->act.motion2 = 0;
++        work->control.turn.vz = 0;
++        work->control.turn.vx = 0;
++    }
++}
+diff --git a/source/overlays/s19a/guard/reaction.c b/source/overlays/s19a/guard/reaction.c
+new file mode 100644
+--- /dev/null
++++ b/source/overlays/s19a/guard/reaction.c
+@@ -0,0 +1,898 @@
++#include "native.h"
++
++void s19a_800CF340(S19Work *work, int time)
++{
++    int      act_status;
++    TARGET  *target;
++    CONTROL *p_control;
++    int      v7;
++    int      v8;
++    int      v9;
++    OBJECT  *p_body;
++    int      v11;
++    void (*v12)(struct _S19Work *, int);
++    int      v13;
++    int      v14;
++    SVECTOR *v15;
++    int      v16;
++
++    act_status = work->act_status;
++    target = work->target;
++    p_control = &work->control;
++    work->act.field_1E = 0;
++    work->act_status = act_status | 8;
++    if (time == 0)
++    {
++        work->act.field_14 = 6;
++        work->act.motion1 = 31;
++        GM_ConfigObjectAction(&work->body, S19ActionTable[31], 0, 4);
++    }
++    if ((unsigned int)(time - 8) < 0xC)
++        s19a_800CE4E4(work);
++    if (work->act.motion1 != 31)
++    {
++        if (p_control->grounded == 0)
++        {
++        LABEL_26:
++            v9 = time < 24;
++            goto LABEL_27;
++        }
++        GM_SeSetMode(&p_control->mov, 142, 1);
++        GM_SeSetMode(&p_control->mov, 51, 1);
++        if (GM_NoisePower <= 100 && (GM_NoisePower != 100 || GM_NoiseLength <= 4))
++        {
++            GM_NoiseLength = 4;
++            GM_NoisePower = 100;
++            v11 = *(unsigned int *)&work->control.mov.vz;
++            *(unsigned int *)&GM_NoisePosition.vx = *(unsigned int *)&work->control.mov.vx;
++            *(unsigned int *)&GM_NoisePosition.vz = v11;
++        }
++        s19a_800D1564(work, 6, 1);
++        p_body = &work->body;
++        if (work->target->vital <= 0)
++        {
++            v12 = s19a_800D073C;
++        LABEL_25:
++            work->action = v12;
++            work->time = 0;
++            work->control.turn.vz = 0;
++            work->control.turn.vx = 0;
++            GM_ConfigMotionAdjust(p_body, NULL);
++            goto LABEL_26;
++        }
++    LABEL_24:
++        v12 = s19a_800CFBF0;
++        goto LABEL_25;
++    }
++    if (time == 22)
++    {
++        v7 = p_control->mov.vy - p_control->levels[0];
++        if (v7 >= 2000)
++        {
++            if (v7 >= 3001)
++            {
++                work->target->vital = 0;
++                GM_SeSetMode(&p_control->mov, 142, 1);
++            }
++        }
++        else
++        {
++            GM_SeSetMode(&p_control->mov, 142, 1);
++            GM_SeSetMode(&p_control->mov, 51, 1);
++            s19a_800D1564(work, 6, 0);
++            if (GM_NoisePower <= 100 && (GM_NoisePower != 100 || GM_NoiseLength <= 4))
++            {
++                GM_NoiseLength = 4;
++                GM_NoisePower = 100;
++                v8 = *(unsigned int *)&work->control.mov.vz;
++                *(unsigned int *)&GM_NoisePosition.vx = *(unsigned int *)&work->control.mov.vx;
++                *(unsigned int *)&GM_NoisePosition.vz = v8;
++            }
++        }
++    }
++    v9 = time < 24;
++    if (work->body.is_end != 0)
++    {
++        p_body = &work->body;
++        if (p_control->grounded == 0)
++        {
++            work->act.motion1 = 40;
++            GM_ConfigObjectAction(p_body, S19ActionTable[40], 0, 4);
++            v9 = time < 24;
++            goto LABEL_27;
++        }
++        goto LABEL_24;
++    }
++LABEL_27:
++    v13 = !v9;
++    v14 = time < 22;
++    if (!v13)
++    {
++        v15 = target->field_1C;
++        v16 = *(unsigned int *)&v15->vz;
++        *(unsigned int *)&p_control->turn.vx = *(unsigned int *)&v15->vx;
++        *(unsigned int *)&p_control->turn.vz = v16;
++        v14 = time < 22;
++    }
++    if (v14)
++        work->control.hzd_height = -32767;
++}
++
++void s19a_800CF638(S19Work *work)
++{
++    CONTROL *v2;
++    int      v3;
++    SVECTOR  to;
++
++    v2 = GM_PlayerControl;
++    v3 = *(unsigned int *)&GM_PlayerControl->rot.vz;
++    *(unsigned int *)&work->control.turn.vx = *(unsigned int *)&GM_PlayerControl->rot.vx;
++    *(unsigned int *)&work->control.turn.vz = v3;
++    DG_SetPos2(&GM_PlayerPosition, &v2->rot);
++    DG_PutVector(&S19CaptureOffset, &to, 1);
++    GV_SubVec3(&to, &work->control.mov, &work->control.step);
++}
++
++void s19a_800CF6B8(S19Work *work, int time)
++{
++    int     act_status;
++    TARGET *target;
++    int     motion1;
++    int     vital;
++    OBJECT *p_body;
++    int     v8;
++    int     v9;
++
++    act_status = work->act_status;
++    target = work->target;
++    motion1 = work->act.motion1;
++    work->act.field_1E = 0;
++    work->act_status = act_status | 0xC;
++    if (time == 0)
++    {
++        work->field_B5A = target->faint;
++        GM_SeSet(&work->control.mov, 143);
++    }
++    if (work->field_B5A != target->faint)
++    {
++        GM_SeSet(&work->control.mov, 143);
++        work->field_B5A = target->faint;
++    }
++    if ((target->damaged & 4) != 0)
++    {
++        s19a_800D1564(work, 5, 0);
++        GM_SeSet(&work->control.mov, 143);
++        target->force = DG_ZeroVector;
++        vital = target->vital;
++        target->damage = 0;
++        target->damaged = 0;
++        if (vital <= 0)
++        {
++            if (target->a_mode == 1)
++                work->field_C44 = 1;
++            work->act.field_14 = 5;
++            target->side = 2;
++            work->action = s19a_800D0048;
++            work->time = 0;
++            work->control.turn.vz = 0;
++            work->control.turn.vx = 0;
++            GM_ConfigMotionAdjust(&work->body, NULL);
++            target->captured = 0;
++        }
++    }
++    if (GM_PlayerAction == 13)
++    {
++    LABEL_17:
++        if (motion1 != 27 && motion1 != 48)
++        {
++            target->side = 1;
++            work->act.motion1 = 27;
++            GM_ConfigObjectAction(&work->body, S19ActionTable[27], 0, 4);
++            work->field_B5C = 0;
++        }
++        if (work->field_B5C == 50 && target->faint > 0)
++        {
++            work->act.motion1 = 48;
++            GM_ConfigObjectAction(&work->body, S19ActionTable[48], 0, 4);
++        }
++        if (motion1 == 48 && (work->field_B5C & 7) == 0)
++        {
++            NewPadVibration(S19Vibration1, 1);
++            NewPadVibration(S19Vibration2, 2);
++        }
++        v8 = *(unsigned int *)&GM_PlayerControl->rot.vz;
++        *(unsigned int *)&work->control.turn.vx = *(unsigned int *)&GM_PlayerControl->rot.vx;
++        *(unsigned int *)&work->control.turn.vz = v8;
++        s19a_800CF638(work);
++        ++work->field_B5C;
++        goto LABEL_33;
++    }
++    if (GM_PlayerAction < 14)
++    {
++        p_body = &work->body;
++        if (GM_PlayerAction != 7)
++            goto LABEL_31;
++        goto LABEL_17;
++    }
++    if (GM_PlayerAction != 38)
++    {
++        p_body = &work->body;
++        if (GM_PlayerAction == 39)
++        {
++            work->act.field_14 = 4;
++            target->side = 2;
++            target->vital = 0;
++        LABEL_32:
++            work->action = s19a_800D0048;
++            work->time = 0;
++            work->control.turn.vz = 0;
++            work->control.turn.vx = 0;
++            GM_ConfigMotionAdjust(p_body, NULL);
++            return;
++        }
++    LABEL_31:
++        work->act.field_14 = 5;
++        target->side = 2;
++        goto LABEL_32;
++    }
++    if (motion1 != 28)
++    {
++        target->side = 1;
++        work->act.motion1 = 28;
++        GM_ConfigObjectAction(&work->body, S19ActionTable[28], 0, 4);
++    }
++    v9 = *(unsigned int *)&GM_PlayerControl->rot.vz;
++    *(unsigned int *)&work->control.turn.vx = *(unsigned int *)&GM_PlayerControl->rot.vx;
++    *(unsigned int *)&work->control.turn.vz = v9;
++    s19a_800CF638(work);
++LABEL_33:
++    if (work->sn_dis >= 801)
++        target->captured = 0;
++    work->target->class |= 0x14u;
++    work->vision.facedir = work->control.rot.vy;
++}
++
++void s19a_800CFA2C(S19Work *work, int time)
++{
++    if (time == 0)
++    {
++        work->act.motion1 = 38;
++        GM_ConfigObjectAction(&work->body, S19ActionTable[38], 0, 4);
++    }
++    if (work->body.is_end != 0)
++    {
++        work->action = s19a_800D073C;
++        work->time = 0;
++        work->control.turn.vz = 0;
++        work->control.turn.vx = 0;
++        GM_ConfigMotionAdjust(&work->body, NULL);
++    }
++}
++
++void s19a_800CFAA0(S19Work *work, int time)
++{
++    int      act_status;
++    CONTROL *p_control;
++
++    act_status = work->act_status;
++    p_control = &work->control;
++    work->act.field_1E = 0;
++    work->vision.length = 0;
++    work->act_status = act_status | 8;
++    if (time == 0)
++    {
++        work->act.motion1 = 32;
++        GM_ConfigObjectAction(&work->body, S19ActionTable[32], 0, 4);
++        work->target->faint = 0;
++    }
++    if (s19a_800CDF9C(work) == 0)
++    {
++        if (time == 10)
++        {
++            work->act.field_14 = 1;
++            work->act.motion1 = 37;
++            GM_ConfigObjectAction(&work->body, S19ActionTable[37], 0, 4);
++        }
++        else
++        {
++            work->target->class |= 0x9Fu;
++        }
++        if (time == 34)
++            GM_SeSet(&p_control->mov, 81);
++        if (time == 56)
++            GM_SeSet(&p_control->mov, 51);
++        if (time >= 60 && work->body.is_end != 0)
++        {
++            work->action = s19a_800CFBF0;
++            work->time = 0;
++            work->control.turn.vz = 0;
++            work->control.turn.vx = 0;
++            GM_ConfigMotionAdjust(&work->body, NULL);
++        }
++    }
++}
++
++void s19a_800CFBF0(S19Work *work, int time)
++{
++    int     v4;
++    OBJECT *p_body;
++    int     v6;
++    int     v7;
++    int     v8;
++    OBJECT *v9;
++    void (*v10)(struct _S19Work *, int);
++    TARGET *target;
++
++    work->act_status |= 0x20u;
++    if (time == 0)
++    {
++        v4 = work->act.field_14;
++        if (v4 >= 3)
++        {
++            p_body = &work->body;
++            work->act.motion1 = 40;
++            v6 = S19ActionTable[40];
++        }
++        else
++        {
++            p_body = &work->body;
++            if (v4 == 1)
++            {
++                work->act.motion1 = 41;
++                v6 = S19ActionTable[41];
++            }
++            else
++            {
++                work->act.motion1 = 39;
++                v6 = S19ActionTable[39];
++            }
++        }
++        GM_ConfigObjectAction(p_body, v6, 0, 4);
++        v7 = work->control.mov.vx % 30;
++        if (v7 < 0)
++            v7 = -v7;
++        work->field_B5A = v7 + 10;
++    }
++    v8 = s19a_800CDCFC(work);
++    v9 = &work->body;
++    if (v8 != 0)
++    {
++        v10 = s19a_800CFD68;
++    }
++    else
++    {
++        if (work->field_B5A >= time)
++            return;
++        target = work->target;
++        v9 = &work->body;
++        if (target->faint <= 0)
++            target->faint = work->param.faint;
++        v10 = s19a_800CFE30;
++    }
++    work->action = v10;
++    work->time = 0;
++    work->control.turn.vz = 0;
++    work->control.turn.vx = 0;
++    GM_ConfigMotionAdjust(v9, NULL);
++}
++
++void s19a_800CFD68(S19Work *work, int time)
++{
++    OBJECT *p_body;
++    int     v5;
++
++    if (time == 0)
++    {
++        p_body = &work->body;
++        if (work->act.field_14 >= 3)
++        {
++            work->act.motion1 = 47;
++            v5 = S19ActionTable[47];
++        }
++        else
++        {
++            work->act.motion1 = 46;
++            v5 = S19ActionTable[46];
++        }
++        GM_ConfigObjectAction(p_body, v5, 0, 4);
++        GM_SeSet(&work->control.mov, 54);
++    }
++    if (time == 4)
++        s19a_800D1638(work);
++    if (work->body.is_end != 0)
++    {
++        work->action = s19a_800D073C;
++        work->time = 0;
++        work->control.turn.vz = 0;
++        work->control.turn.vx = 0;
++        GM_ConfigMotionAdjust(&work->body, NULL);
++    }
++}
++
++void s19a_800CFE30(S19Work *work, int time)
++{
++    int     act_status;
++    OBJECT *p_body;
++    int     v5;
++
++    act_status = work->act_status;
++    work->act.field_1E = 0;
++    work->act_status = act_status | 8;
++    if (time == 0)
++    {
++        if (work->act.field_14 >= 3)
++        {
++            p_body = &work->body;
++            if (work->field_B5A < 150)
++            {
++                work->act.motion1 = 43;
++                v5 = S19ActionTable[43];
++            }
++            else
++            {
++                work->act.motion1 = 45;
++                v5 = S19ActionTable[45];
++            }
++        }
++        else
++        {
++            p_body = &work->body;
++            if (work->field_B5A < 150)
++            {
++                work->act.motion1 = 42;
++                v5 = S19ActionTable[42];
++            }
++            else
++            {
++                work->act.motion1 = 44;
++                v5 = S19ActionTable[44];
++            }
++        }
++        GM_ConfigObjectAction(p_body, v5, 0, 4);
++    }
++    if (work->body.is_end != 0)
++    {
++        work->action = s19a_800CE750;
++        work->time = 0;
++        work->control.turn.vz = 0;
++        work->control.turn.vx = 0;
++        GM_ConfigMotionAdjust(&work->body, NULL);
++    }
++}
++
++void s19a_800CFF34(S19Work *work, int time)
++{
++    TARGET *target;
++    int     v5;
++    TARGET *v6;
++
++    target = work->target;
++    work->act.field_1E = 0;
++    target->class |= 0x9Fu;
++    v5 = work->act_status | 8;
++    work->vision.length = S19EyeLength;
++    work->act_status = v5;
++    if (s19a_800CDF9C(work) == 0)
++    {
++        v6 = work->target;
++        if (time == 0)
++        {
++            work->act.motion1 = 15;
++            GM_ConfigObjectAction(&work->body, S19ActionTable[15], 0, 4);
++            GM_SeSetMode(&work->control.mov, 141, 1);
++            if (v6->a_mode == 3)
++            {
++                GM_SeSet(&work->control.mov, 52);
++                s19a_800D15D4(work);
++            }
++            else
++            {
++                s19a_800D1564(work, 5, 0);
++            }
++        }
++        if (work->body.is_end != 0)
++        {
++            work->action = s19a_800CE750;
++            work->time = 0;
++            work->control.turn.vz = 0;
++            work->control.turn.vx = 0;
++            GM_ConfigMotionAdjust(&work->body, NULL);
++        }
++    }
++}
++
++void s19a_800D0048(S19Work *work, int time)
++{
++    S19ACT      *p_act;
++    int          act_status;
++    TARGET      *target;
++    int          v7;
++    CONTROL     *p_control;
++    short        v9;
++    int          v10;
++    SVECTOR     *p_mov;
++    int          v12;
++    unsigned int v13;
++    int          v14;
++    int          v15;
++    int          v16;
++    int          v17;
++    int          v18;
++    int          v19;
++    OBJECT      *p_body;
++    void (*v21)(struct _S19Work *, int);
++    TARGET *v22;
++
++    p_act = &work->act;
++    act_status = work->act_status;
++    target = work->target;
++    work->act.field_1E = 0;
++    work->act_status = act_status | 8;
++    v7 = *(unsigned int *)&target->force.vz;
++    *(unsigned int *)&work->control.step.vx = *(unsigned int *)&target->force.vx;
++    *(unsigned int *)&work->control.step.vz = v7;
++    p_control = &work->control;
++    if (time == 0)
++    {
++        switch (work->act.field_14)
++        {
++        case 0:
++            GM_SeSet(&work->control.mov, 52);
++            work->act.motion1 = 34;
++            GM_ConfigObjectAction(&work->body, S19ActionTable[34], 0, 4);
++            GM_SeSetMode(&p_control->mov, 142, 1);
++            s19a_800D1564(work, 5, 0);
++            v9 = 17;
++            goto LABEL_14;
++        case 1:
++            work->act.motion1 = 37;
++            GM_ConfigObjectAction(&work->body, S19ActionTable[37], 0, 4);
++            if (work->target->vital > 0)
++            {
++                s19a_800D1564(work, 5, 0);
++                p_mov = &p_control->mov;
++                v12 = 142;
++            }
++            else
++            {
++                v10 = 2;
++                if (GM_Weapon != 9)
++                    v10 = 1;
++                s19a_800D1564(work, 6, v10);
++                p_mov = &p_control->mov;
++                v12 = 145;
++            }
++            GM_SeSetMode(p_mov, v12, 1);
++            v9 = 46;
++            goto LABEL_14;
++        case 2:
++            GM_SeSetMode(&work->control.mov, 142, 1);
++            work->act.motion1 = 36;
++            GM_ConfigObjectAction(&work->body, S19ActionTable[36], 0, 4);
++            s19a_800D1564(work, 5, 0);
++            v9 = 37;
++            goto LABEL_14;
++        case 3:
++            GM_SeSetMode(&work->control.mov, 142, 1);
++            work->act.motion1 = 35;
++            GM_ConfigObjectAction(&work->body, S19ActionTable[35], 0, 4);
++            s19a_800D1564(work, 5, 0);
++            v9 = 17;
++            goto LABEL_14;
++        case 4:
++            GM_SeSet(&work->control.mov, 144);
++            work->act.motion1 = 29;
++            GM_ConfigObjectAction(&work->body, S19ActionTable[29], 0, 4);
++            v9 = 67;
++            goto LABEL_14;
++        case 5:
++            work->act.motion1 = 30;
++            GM_ConfigObjectAction(&work->body, S19ActionTable[30], 0, 4);
++            v9 = 15;
++        LABEL_14:
++            work->field_B5A = v9;
++            break;
++        default:
++            goto LABEL_31;
++        }
++    }
++    switch (p_act->field_14)
++    {
++    case 0:
++        v13 = time - 7;
++        if (time < 12)
++        {
++            p_control->turn.vy += 170;
++            v13 = time - 7;
++        }
++        v14 = v13 >= 0x17;
++        v15 = time < 20;
++        if (!v14)
++        {
++            s19a_800CE4E4(work);
++            v15 = time < 20;
++        }
++        if (v15)
++            work->control.hzd_height = -32767;
++        break;
++    case 1:
++        v16 = time < 17;
++        if (time == 24)
++        {
++            GM_SeSet(&p_control->mov, 81);
++            v16 = 0;
++        }
++        goto LABEL_32;
++    case 2:
++        v17 = time < 20;
++        if ((unsigned int)(time - 7) < 0x17)
++        {
++            s19a_800CE4E4(work);
++            v17 = time < 20;
++        }
++        goto LABEL_28;
++    case 3:
++        v17 = time < 15;
++        if ((unsigned int)(time - 7) < 0x17)
++        {
++            s19a_800CE4E4(work);
++            v17 = time < 15;
++        }
++    LABEL_28:
++        if (v17)
++            p_control->hzd_height = -32767;
++        break;
++    case 4:
++    case 5:
++        work->act_status |= 4u;
++        break;
++    default:
++        break;
++    }
++LABEL_31:
++    v16 = time < 17;
++LABEL_32:
++    if (!v16 && p_control->grounded != 0)
++        p_control->step = DG_ZeroVector;
++    if (time == work->field_B5A)
++    {
++        v18 = p_control->mov.vy - p_control->levels[0];
++        if (v18 >= 2000)
++        {
++            p_body = &work->body;
++            if (v18 >= 3001)
++            {
++                work->target->vital = 0;
++                v21 = s19a_800D055C;
++                goto LABEL_48;
++            }
++        }
++        else
++        {
++            GM_SeSet(&p_control->mov, 51);
++            if (GM_NoisePower <= 100 && (GM_NoisePower != 100 || GM_NoiseLength <= 4))
++            {
++                GM_NoiseLength = 4;
++                GM_NoisePower = 100;
++                v19 = *(unsigned int *)&p_control->mov.vz;
++                *(unsigned int *)&GM_NoisePosition.vx = *(unsigned int *)&p_control->mov.vx;
++                *(unsigned int *)&GM_NoisePosition.vz = v19;
++            }
++            s19a_800D1564(work, 6, 0);
++        }
++    }
++    if (work->body.is_end == 0)
++        return;
++    v22 = work->target;
++    work->act.field_1E = 1;
++    v22->force = DG_ZeroVector;
++    p_body = &work->body;
++    if (work->target->vital > 0)
++        v21 = s19a_800CFBF0;
++    else
++        v21 = s19a_800D073C;
++LABEL_48:
++    work->action = v21;
++    work->time = 0;
++    work->control.turn.vz = 0;
++    work->control.turn.vx = 0;
++    GM_ConfigMotionAdjust(p_body, NULL);
++}
++
++void s19a_800D055C(S19Work *work, int time)
++{
++    int      act_status;
++    TARGET  *target;
++    int      v6;
++    CONTROL *p_control;
++    int      v8;
++    CONTROL *v9;
++    int      v10;
++    OBJECT  *p_body;
++    int      v12;
++    TARGET  *v13;
++
++    act_status = work->act_status;
++    target = work->target;
++    work->act.field_1E = 0;
++    work->act_status = act_status | 8;
++    v6 = *(unsigned int *)&target->force.vz;
++    *(unsigned int *)&work->control.step.vx = *(unsigned int *)&target->force.vx;
++    *(unsigned int *)&work->control.step.vz = v6;
++    p_control = &work->control;
++    if (time == 0)
++    {
++        v8 = work->act.field_14;
++        v9 = &work->control;
++        if (v8 != 2)
++            GM_SeSet(&v9->mov, 142);
++    }
++    if (time >= 17 && p_control->grounded != 0)
++        p_control->step = DG_ZeroVector;
++    if (work->act.motion1 >= 39)
++    {
++        if (p_control->grounded != 0)
++        {
++            v13 = work->target;
++            work->act.field_1E = 1;
++            v13->force = DG_ZeroVector;
++            GM_SeSet(&p_control->mov, 51);
++            s19a_800D1564(work, 6, 1);
++            work->action = s19a_800D073C;
++            work->time = 0;
++            work->control.turn.vz = 0;
++            work->control.turn.vx = 0;
++            GM_ConfigMotionAdjust(&work->body, NULL);
++        }
++    }
++    else if (work->body.is_end != 0)
++    {
++        v10 = work->act.field_14;
++        if (v10 >= 3)
++        {
++            p_body = &work->body;
++            work->act.motion1 = 40;
++            v12 = S19ActionTable[40];
++        }
++        else
++        {
++            p_body = &work->body;
++            if (v10 == 1)
++            {
++                work->act.motion1 = 41;
++                v12 = S19ActionTable[41];
++            }
++            else
++            {
++                work->act.motion1 = 39;
++                v12 = S19ActionTable[39];
++            }
++        }
++        GM_ConfigObjectAction(p_body, v12, 0, 4);
++    }
++}
++
++void s19a_800D073C(S19Work *work, int time)
++{
++    int     v4;
++    OBJECT *p_body;
++    int     v6;
++
++    work->act_status |= 0x40u;
++    if (time == 0)
++    {
++        v4 = work->act.field_14;
++        if (v4 >= 3)
++        {
++            p_body = &work->body;
++            work->act.motion1 = 50;
++            v6 = S19ActionTable[50];
++        }
++        else
++        {
++            p_body = &work->body;
++            if (v4 == 1)
++            {
++                work->act.motion1 = 51;
++                v6 = S19ActionTable[51];
++            }
++            else
++            {
++                work->act.motion1 = 49;
++                v6 = S19ActionTable[49];
++            }
++        }
++        GM_ConfigObjectAction(p_body, v6, 0, 4);
++        GM_ConfigControlAttribute(&work->control, 0);
++        work->alert_level = 0;
++    }
++    work->field_9E4 = (time & 2) == 0;
++    if (time >= 9)
++    {
++        work->action = s19a_800D0838;
++        work->time = 0;
++        work->control.turn.vz = 0;
++        work->control.turn.vx = 0;
++        GM_ConfigMotionAdjust(&work->body, NULL);
++    }
++}
++
++void s19a_800D0838(S19Work *work, int time)
++{
++    work->act_status |= 0x40u;
++    if (time == 0)
++    {
++        work->field_9E4 = 0;
++        work->control.mov = S19NoPoint;
++        S19_Command.watchers[work->param.index].field_4 = 1;
++        if (work->field_C44 == 0)
++            ++GM_EnemyKillCount;
++    }
++    if (S19_Command.watchers[work->param.index].field_4 == 2)
++    {
++        s19a_800CE134(work);
++        work->action = s19a_800CE750;
++        work->time = 0;
++        work->control.turn.vz = 0;
++        work->control.turn.vx = 0;
++        GM_ConfigMotionAdjust(&work->body, NULL);
++    }
++}
++
++void s19a_800D092C(S19Work *work)
++{
++    TARGET   *target;
++    int       v3;
++    S19ACT   *p_act;
++    S19ACTION action;
++    CONTROL  *p_control;
++    short     v7;
++    S19ACTION action2;
++    short     v9;
++    int       mark_time;
++    int       v11;
++    int       v12;
++
++    target = work->target;
++    work->trigger = 0;
++    work->vision.length = 0;
++    target->class = 1;
++    v3 = work->body.height * work->scale;
++    p_act = &work->act;
++    action = work->action;
++    p_control = &work->control;
++    work->field_8FC = 0;
++    work->act_status = 0;
++    work->field_C38 = 0;
++    v7 = work->control.levels[0];
++    work->control.height = v3 / 4096;
++    work->control.hzd_height = v7 + 750;
++    int time = work->time++;
++    if (action == NULL)
++    {
++        action = s19a_800CE750;
++        work->action = s19a_800CE750;
++    }
++    action(work, time);
++    action2 = work->action2;
++    if (action2 != NULL)
++    {
++        int time2 = work->time2++;
++        action2(work, time2);
++    }
++    if (p_act->field_1E != 0)
++        p_control->r_sphere = -1;
++    else
++        p_control->r_sphere = GV_NearExp2(p_control->r_sphere, p_act->field_1C);
++    work->hom->flag = (work->target->class & 4) != 0;
++    if (p_act->field_04 < 0 && p_control->grounded != 0)
++        p_act->field_04 = 0;
++    v9 = p_act->field_04 - 16;
++    p_act->field_04 = v9;
++    p_control->step.vy = v9;
++    mark_time = work->mark_time;
++    v11 = mark_time <= 0;
++    v12 = mark_time - 1;
++    if (!v11)
++        work->mark_time = v12;
++}
+diff --git a/source/overlays/s19a/guard/sensing.c b/source/overlays/s19a/guard/sensing.c
+new file mode 100644
+--- /dev/null
++++ b/source/overlays/s19a/guard/sensing.c
+@@ -0,0 +1,284 @@
++#include "native.h"
++
++int s19a_800D1D34(HZD_HDL *a1, SVECTOR *a2, SVECTOR *a3)
++{
++    unsigned char Address;
++    unsigned char v6;
++
++    Address = HZD_GetAddress(a1, a2, -1);
++    v6 = HZD_GetAddress(a1, a3, -1);
++    return HZD_ZoneDistance(a1, Address, v6);
++}
++
++void s19a_800D1D94(S19Work *work)
++{
++    if ((work->modetime[7] & 1) != 0 && (work->act_status & 0x68) == 0 &&
++        (work->control.map->index & GM_PlayerMap) != 0 && GM_NoisePower != 0)
++    {
++        if (GM_NoisePower == 100)
++        {
++            if (GV_DiffVec3(&GM_NoisePosition, &work->control.mov) < 8000 &&
++                s19a_800D1D34(work->control.map->hzd, &work->control.mov, &GM_NoisePosition) < 300)
++            {
++                work->modetime[6] |= 1u;
++                GM_NoiseLength = 0;
++                GM_NoisePower = 0;
++            }
++        }
++        else if (GM_NoisePower >= 101)
++        {
++            if (GM_NoisePower == 200)
++            {
++                if (GV_DiffVec3(&GM_NoisePosition, &work->control.mov) >= 8000)
++                    return;
++                goto LABEL_19;
++            }
++            if (GM_NoisePower == 255)
++            LABEL_19:
++                work->modetime[6] |= 1u;
++        }
++        else if (GM_NoisePower == 5 && GV_DiffVec3(&GM_NoisePosition, &work->control.mov) < 500)
++        {
++            goto LABEL_19;
++        }
++    }
++}
++
++void s19a_800D1F14(S19Work *work)
++{
++    SVECTOR    *p_player_pos;
++    int         vy;
++    signed char v4;
++
++    if ((work->modetime[7] & 2) != 0 && work->vision.pad == 2)
++    {
++        p_player_pos = &work->player_pos;
++        if ((GM_PlayerStatus & 0x1000) != 0)
++        {
++            if (GV_DiffVec3(p_player_pos, &GM_PlayerPosition) < 51 && work->player_dir == GM_WhereList[0]->rot.vy)
++            {
++                if (GV_DiffVec3(&work->control.mov, &GM_PlayerPosition) < 1500)
++                    work->modetime[6] |= 0x40u;
++            }
++            else
++            {
++                if (S19_Command.alert_mode == 1)
++                    return;
++                work->player_pos = GM_PlayerPosition;
++                vy = GM_WhereList[0]->rot.vy;
++                work->modetime[6] |= 2u;
++                work->player_dir = vy;
++            }
++            v4 = work->modetime[6];
++            work->vision.pad = 0;
++            work->modetime[6] = v4 | 0x80;
++        }
++    }
++}
++
++void s19a_800D203C(S19Work *work)
++{
++    HZD_HDL *hzd;
++
++    if ((work->modetime[7] & 0x10) != 0 && work->think2 != 5)
++    {
++        hzd = work->control.map->hzd;
++        if (AsiatoCheck(hzd, &work->control.mov) != 0 && SearchNearAsiato(hzd, &work->control.mov, work->vision.facedir,
++                                                                          work->vision.range, work->vision.length) >= 0)
++        {
++            work->modetime[6] |= 0x10u;
++        }
++    }
++}
++
++void s19a_800D20E8(S19Work *work)
++{
++    work->modetime[6] = 0;
++    s19a_800D1D94(work);
++    if (S19_Command.alert_mode != 1)
++    {
++        s19a_800D1CB0(work);
++        s19a_800D1F14(work);
++        s19a_800D203C(work);
++    }
++}
++
++void s19a_800D213C(S19Work *work)
++{
++    int pad;
++    int v2;
++    int v3;
++    int alert_level;
++    int v5;
++    int v6;
++    int v7;
++    int v8;
++
++    pad = work->vision.pad;
++    if (pad == 1)
++    {
++        alert_level = work->alert_level;
++        work->field_B90 = 1;
++        v3 = alert_level - 1;
++    LABEL_13:
++        work->alert_level = v3;
++        goto LABEL_14;
++    }
++    if (pad < 2)
++    {
++        if (work->vision.pad != 0 || (work->field_B90 == 2 && (GM_PlayerStatus & 2) != 0 && work->vision.length != 0))
++            goto LABEL_14;
++        v2 = work->alert_level;
++        work->field_B90 = 0;
++        v3 = v2 - 4;
++        goto LABEL_13;
++    }
++    if (pad == 2)
++    {
++        v5 = work->alert_level;
++        work->field_B90 = 2;
++        v3 = v5 + 1;
++        goto LABEL_13;
++    }
++LABEL_14:
++    v6 = work->alert_level;
++    v7 = v6 >= 0;
++    v8 = v6 < 256;
++    if (v7)
++    {
++        if (!v8)
++            work->alert_level = 255;
++    }
++    else
++    {
++        work->alert_level = 0;
++    }
++}
++
++int s19a_800D220C(S19Work *work)
++{
++    int     v2;
++    int     v3;
++    int     vy;
++    int     v5;
++    int     result;
++    MAP    *map;
++    SVECTOR vec3;
++
++    GV_SubVec3(&GM_PlayerPosition, &work->control.mov, &vec3);
++    v2 = GV_VecDir2(&vec3);
++    work->sn_dir = v2;
++    v3 = GV_VecLen3(&vec3);
++    work->sn_dis = v3;
++    vy = work->control.mov.vy;
++    v5 = GM_PlayerPosition.vy - vy;
++    if (v5 < 0)
++        v5 = vy - GM_PlayerPosition.vy;
++    result = -2146762752;
++    if ((work->control.map->index & GM_PlayerMap) == 0)
++        goto LABEL_20;
++    result = -2146566144;
++    if ((GM_PlayerStatus & 2) != 0)
++        goto LABEL_20;
++    result = -2146697216;
++    if (S19_Command.time % S19_Command.n_watchers == work->param.index)
++    {
++        result = v5 < 2001;
++        if (S19EyeLength + 2000 >= v3)
++        {
++            result = v3 < 500;
++            if (v5 < 2001 && (v3 < 500 || (result = GV_DiffDirAbs(work->vision.facedir, v2) < work->vision.range) != 0))
++            {
++                map = work->control.map;
++                result = HZD_OnlineHazardCheck(map->hzd, &GM_PlayerPosition, &work->control.mov, 15, 4);
++                if (result == 0)
++                {
++                    result = GM_OnlineTargetCheckAny(&work->control.mov, &GM_PlayerPosition, map->index, &vec3);
++                    if (result == 0)
++                    {
++                        result = 1;
++                        if (work->vision.length >= v3)
++                        {
++                            work->vision.pad = 2;
++                            return 2;
++                        }
++                        else
++                        {
++                            work->vision.pad = 1;
++                        }
++                        return result;
++                    }
++                }
++            }
++        }
++    LABEL_20:
++        work->vision.pad = 0;
++    }
++    return result;
++}
++
++void s19a_800D23D4(S19Work *work)
++{
++    if (work->act.motion1 < 49)
++    {
++        s19a_800D1C84(work);
++        s19a_800D220C(work);
++        s19a_800D20E8(work);
++        s19a_800D213C(work);
++        s19a_800D649C(work);
++        s19a_800D1C24(work);
++    }
++    s19a_800D092C(work);
++}
++
++void s19a_800D2440(S19Work *work)
++{
++    TARGET *target;
++    short   v3;
++    short   pad;
++    short   v5;
++    short   v6;
++    int     r_sphere;
++
++    target = work->target;
++    v3 = 0;
++    if ((target->damaged & 8) != 0)
++    {
++        GV_AddVec3(&target->offset, &work->control.step, &work->control.step);
++        target->damaged &= ~8u;
++        if ((unsigned int)(work->act.motion1 - 1) < 2)
++        {
++            pad = target->offset.pad;
++            if (pad == 0)
++            {
++            LABEL_11:
++                r_sphere = work->control.r_sphere;
++                work->control.turn.vy = v3;
++                work->control.r_sphere = GV_NearExp2(r_sphere, work->act.field_1C);
++                return;
++            }
++            if ((GV_Time & 0x100) != 0)
++            {
++                v5 = pad << 10;
++                if ((work->param.index & 1) != 0)
++                {
++                LABEL_10:
++                    v3 = v5 & 0xFFF;
++                    goto LABEL_11;
++                }
++                v6 = pad + 2;
++            }
++            else
++            {
++                v6 = pad + 2;
++                if ((work->param.index & 1) == 0)
++                {
++                    v5 = pad << 10;
++                    goto LABEL_10;
++                }
++            }
++            v5 = v6 << 10;
++            goto LABEL_10;
++        }
++    }
++}
+diff --git a/source/overlays/s19a/guard/strategy.c b/source/overlays/s19a/guard/strategy.c
+new file mode 100644
+--- /dev/null
++++ b/source/overlays/s19a/guard/strategy.c
+@@ -0,0 +1,454 @@
++#include "native.h"
++
++int s19a_800D5AB0(S19Work *work)
++{
++    int v2;
++    int v3;
++    int chase_dis;
++    int result;
++
++    switch (work->think3)
++    {
++    case 0x10:
++        if (s19a_800D4BE0(work) != 0)
++        {
++            work->think3 = 22;
++            goto LABEL_14;
++        }
++        break;
++    case 0x11:
++        if (s19a_800D4C7C(work) != 0)
++        {
++            work->think3 = 22;
++            goto LABEL_14;
++        }
++        break;
++    case 0x13:
++        if (s19a_800D4CD8(work) != 0)
++        {
++            work->think3 = 22;
++            goto LABEL_14;
++        }
++        break;
++    case 0x14:
++        if (s19a_800D4D3C(work) != 0)
++        {
++            work->think3 = 22;
++            goto LABEL_14;
++        }
++        break;
++    case 0x15:
++        if (s19a_800D4D98(work) != 0)
++        {
++            work->think3 = 22;
++            goto LABEL_14;
++        }
++        break;
++    case 0x16:
++        v2 = s19a_800D4E04(work);
++        if (v2 != 0)
++        {
++            work->think3 = v2;
++        LABEL_14:
++            work->count3 = 0;
++        }
++        break;
++    default:
++        break;
++    }
++    v3 = S19_Command.time >> 2;
++    if (S19_Command.time < 0)
++        v3 = (S19_Command.time + 3) >> 2;
++    if (v3 % 4 != work->param.index)
++    {
++    LABEL_29:
++        result = 2;
++        if (work->vision.pad != 2)
++            return result;
++        goto LABEL_30;
++    }
++    if ((unsigned char)work->param.next == 255)
++    {
++        if (work->current_addr == S19_PlayerAddress)
++            goto LABEL_29;
++        chase_dis = work->chase_dis;
++        if (chase_dis >= 4001)
++        {
++            if (chase_dis >= work->sn_dis)
++                goto LABEL_29;
++            goto LABEL_28;
++        }
++        if (chase_dis < work->sn_dis || work->vision.pad != 2)
++        {
++        LABEL_28:
++            s19a_800D3CFC(work);
++            goto LABEL_29;
++        }
++    }
++    else if (work->vision.pad != 2)
++    {
++        if (HZD_InsideZone(work->control.map->hzd, &work->control.mov, (unsigned char)work->param.next) != 0)
++            goto LABEL_29;
++        goto LABEL_28;
++    }
++LABEL_30:
++    s19a_800D65D4();
++    work->alert_level = 255;
++    return 255;
++}
++
++int s19a_800D5CB4(S19Work *work)
++{
++    int think3;
++    int v3;
++    int chase_dis;
++
++    think3 = work->think3;
++    if (think3 == 14)
++    {
++        s19a_800D3A84(work);
++        if (s19a_800D48F0(work) == 0)
++            goto LABEL_11;
++        work->think3 = 15;
++    LABEL_10:
++        work->count3 = 0;
++        goto LABEL_11;
++    }
++    if (think3 == 15)
++    {
++        v3 = s19a_800D4B4C(work);
++        if (v3 >= 0)
++        {
++            if (v3 <= 0)
++                goto LABEL_11;
++            work->think2 = 9;
++            work->think3 = 22;
++        }
++        else
++        {
++            work->think3 = 14;
++        }
++        goto LABEL_10;
++    }
++LABEL_11:
++    chase_dis = work->chase_dis;
++    if (work->sn_dis < chase_dis)
++    {
++        if (chase_dis < 7000 && work->vision.pad != 2)
++            return s19a_800D65D4();
++        work->think2 = 9;
++        work->think3 = 22;
++        work->count3 = 0;
++    }
++    if (work->vision.pad == 2)
++        work->alert_level = 255;
++    return s19a_800D65D4();
++}
++
++int s19a_800D5DAC(S19Work *work)
++{
++    int result;
++
++    if (work->think3 == 23 && s19a_800D48F0(work) != 0)
++    {
++        work->think2 = 9;
++        work->think3 = 22;
++        work->count3 = 0;
++    }
++    if ((unsigned char)work->param.next == 255 && (work->modetime[6] & 1) != 0)
++    {
++        s19a_800D65D4();
++        work->think2 = 7;
++        result = 13;
++    }
++    else
++    {
++        result = 9;
++        if (work->vision.pad != 2)
++            return result;
++        work->think2 = 9;
++        result = 22;
++    }
++    work->think3 = result;
++    work->count3 = 0;
++    return result;
++}
++
++int s19a_800D5E58(S19Work *work)
++{
++    int result;
++
++    if (s19a_800D48F0(work) != 0)
++    {
++        work->think2 = 13;
++        work->think3 = 24;
++        work->think4 = 2;
++        work->pad.field_4 = 0;
++        work->count3 = 0;
++    }
++    if (work->alert_level >= 2 || (work->modetime[6] & 2) != 0)
++        s19a_800D3CE4(work);
++    if ((work->modetime[6] & 1) != 0 && GM_NoisePower != 5)
++    {
++        s19a_800D3ACC(work);
++        s19a_800D6620();
++        work->think2 = 7;
++        work->think3 = 12;
++        work->count3 = 0;
++    }
++    result = work->modetime[6] & 4;
++    if ((work->modetime[6] & 0x10) != 0)
++    {
++        result = s19a_800D3F88(work);
++        work->pad.field_4 = 0;
++    }
++    else if ((work->modetime[6] & 4) != 0)
++    {
++        result = s19a_800D3E9C(work);
++        work->pad.field_4 = 0;
++    }
++    return result;
++}
++
++int s19a_800D5F50(S19Work *work)
++{
++    int result;
++
++    s19a_800D3A84(work);
++    if (s19a_800D48F0(work) != 0 || work->sn_dis < work->chase_dis || GM_AlertLevel == 100)
++    {
++        work->think2 = 13;
++        work->think3 = 24;
++        work->think4 = 2;
++        work->pad.field_4 = 0;
++        work->count3 = 0;
++    }
++    if (work->alert_level >= 2 || (work->modetime[6] & 2) != 0)
++        s19a_800D3CE4(work);
++    if ((work->modetime[6] & 1) != 0 && GM_NoisePower != 5)
++    {
++        s19a_800D3ACC(work);
++        s19a_800D6620();
++        work->think2 = 7;
++        work->think3 = 12;
++        work->count3 = 0;
++    }
++    result = work->modetime[6] & 4;
++    if ((work->modetime[6] & 0x10) != 0)
++    {
++        result = s19a_800D3F88(work);
++        work->pad.field_4 = 0;
++    }
++    else if ((work->modetime[6] & 4) != 0)
++    {
++        result = s19a_800D3E9C(work);
++        work->pad.field_4 = 0;
++    }
++    return result;
++}
++
++int s19a_800D607C(S19Work *work)
++{
++    int think3;
++    int result;
++
++    think3 = work->think3;
++    if (think3 == 25)
++    {
++        s19a_800D40CC(work);
++    }
++    else if (think3 >= 26)
++    {
++        if (think3 == 26)
++            s19a_800D4FB4(work);
++    }
++    else if (think3 == 24)
++    {
++        s19a_800D4F38(work);
++    }
++    if (work->alert_level >= 2 || (work->modetime[6] & 2) != 0)
++        return s19a_800D3CE4(work);
++    if ((work->modetime[6] & 1) != 0)
++    {
++        result = 5;
++        if (GM_NoisePower != 5)
++        {
++            s19a_800D3ACC(work);
++            s19a_800D6620();
++            work->think2 = 7;
++            work->think3 = 12;
++            work->count3 = 0;
++            return 12;
++        }
++    }
++    else
++    {
++        result = work->modetime[6] & 4;
++        if ((work->modetime[6] & 0x10) != 0)
++        {
++            return s19a_800D3F88(work);
++        }
++        else if ((work->modetime[6] & 4) != 0)
++        {
++            return s19a_800D3E9C(work);
++        }
++    }
++    return result;
++}
++
++int s19a_800D61A4(S19Work *work)
++{
++    int result;
++
++    switch (work->think2)
++    {
++    case 0:
++        s19a_800D5210(work);
++        break;
++    case 1:
++        work->control.radar_atr |= 0x1000u;
++        s19a_800D5624(work);
++        break;
++    case 2:
++        work->control.radar_atr |= 0x1000u;
++        s19a_800D5484(work);
++        break;
++    case 3:
++        work->control.radar_atr |= 0x1000u;
++        s19a_800D53B8();
++        break;
++    case 4:
++        work->control.radar_atr |= 0x1000u;
++        s19a_800D53C0(work);
++        break;
++    case 5:
++        work->control.radar_atr |= 0x1000u;
++        s19a_800D57F4(work);
++        break;
++    case 6:
++        s19a_800D5030(work);
++        break;
++    case 7:
++        work->control.radar_atr |= 0x1000u;
++        s19a_800D59B8(work);
++        break;
++    default:
++        break;
++    }
++    result = S19_Command.alert_mode;
++    if (S19_Command.alert_mode != 0)
++        return s19a_800D3D6C(work);
++    return result;
++}
++
++int s19a_800D62D0(S19Work *work)
++{
++    int think2;
++    int result;
++
++    think2 = work->think2;
++    if (think2 == 8)
++    {
++        s19a_800D5CB4(work);
++    }
++    else if (think2 >= 9)
++    {
++        if (think2 == 9)
++        {
++            s19a_800D5AB0(work);
++        }
++        else if (think2 == 10)
++        {
++            s19a_800D5DAC(work);
++        }
++    }
++    else if (think2 == 7)
++    {
++        s19a_800D59B8(work);
++    }
++    result = 1;
++    if (S19_Command.alert_mode != 1)
++        return s19a_800D3DD8(work);
++    return result;
++}
++
++int s19a_800D6388(S19Work *work)
++{
++    int result;
++
++    switch (work->think2)
++    {
++    case 4:
++        s19a_800D53C0(work);
++        break;
++    case 5:
++        s19a_800D57F4(work);
++        break;
++    case 7:
++        s19a_800D59B8(work);
++        break;
++    case 0xB:
++        s19a_800D5E58(work);
++        break;
++    case 0xC:
++        s19a_800D5F50(work);
++        break;
++    case 0xD:
++        s19a_800D607C(work);
++        break;
++    default:
++        break;
++    }
++    if (S19_Command.alert_mode == 1)
++        s19a_800D3D6C(work);
++    result = S19_Command.alert_mode;
++    if (S19_Command.alert_mode == 0)
++    {
++        S19_Command.field_10C |= 1u;
++        work->think2 = 6;
++        work->think1 = 0;
++        work->think3 = 3;
++        work->count3 = 0;
++        return 3;
++    }
++    return result;
++}
++
++int s19a_800D649C(S19Work *work)
++{
++    int think1;
++    int result;
++
++    think1 = work->think1;
++    work->pad.dir = -1;
++    work->pad.press = 0;
++    if (think1 == 1)
++    {
++        work->act.field_1E = 1;
++        s19a_800D62D0(work);
++    }
++    else if (think1 >= 2)
++    {
++        if (think1 == 2)
++        {
++            work->act.field_1E = 0;
++            s19a_800D6388(work);
++        }
++    }
++    else if (think1 == 0)
++    {
++        work->act.field_1E = 1;
++        s19a_800D61A4(work);
++    }
++    result = 255;
++    if (S19Activated <= 0)
++    {
++        work->alert_level = 0;
++        work->control.radar_atr = 0;
++    }
++    else
++    {
++        work->alert_level = 255;
++    }
++    return result;
++}
+diff --git a/source/overlays/s19a/guard/think.c b/source/overlays/s19a/guard/think.c
+new file mode 100644
+--- /dev/null
++++ b/source/overlays/s19a/guard/think.c
+@@ -0,0 +1,714 @@
++#include "native.h"
++
++int s19a_800D4B4C(S19Work *work)
++{
++    MAP     *map;
++    int      result;
++    int      Address;
++    int      target_addr;
++    MAP     *v6;
++    int      v7;
++    S19Work *v8;
++
++    s19a_800D3A84(work);
++    map = work->control.map;
++    result = -1;
++    if (map->index == work->target_map)
++    {
++        if ((work->count3 & 0x10) != 0)
++        {
++            Address = HZD_GetAddress(map->hzd, &work->control.mov, -1);
++            target_addr = work->target_addr;
++            v6 = work->control.map;
++            work->current_addr = Address;
++            v7 = HZD_ReachTo(v6->hzd, Address, target_addr);
++            v8 = work;
++            if (v7 >= 2)
++                return -1;
++        }
++        else
++        {
++            v8 = work;
++        }
++        return s19a_800D4960(v8, 1500);
++    }
++    return result;
++}
++
++int s19a_800D4BE0(S19Work *work)
++{
++    int   press;
++    short sn_dir;
++    int   count3;
++    int   v5;
++    int   v6;
++    int   result;
++
++    press = work->pad.press;
++    sn_dir = work->sn_dir;
++    count3 = work->count3;
++    work->pad.press = press | 0x10000;
++    work->pad.dir = sn_dir;
++    if (count3 == 0)
++        work->count3 = GV_RandU(8);
++    if (count3 < 9)
++    {
++        v5 = count3 < 12;
++        if ((count3 & 1) != 0)
++            goto LABEL_7;
++        work->pad.press |= 0x40000u;
++    }
++    v5 = count3 < 12;
++LABEL_7:
++    v6 = !v5;
++    result = 0;
++    if (v6)
++        return 1;
++    ++work->count3;
++    return result;
++}
++
++int s19a_800D4C7C(S19Work *work)
++{
++    int   press;
++    short sn_dir;
++    int   count3;
++    int   result;
++
++    press = work->pad.press;
++    sn_dir = work->sn_dir;
++    count3 = work->count3;
++    work->pad.press = press | 0x20000;
++    work->pad.dir = sn_dir;
++    if (count3 == 0)
++    {
++        work->pad.press |= 0x80000u;
++        goto LABEL_5;
++    }
++    result = 1;
++    if (count3 != 8)
++    {
++    LABEL_5:
++        ++work->count3;
++        return 0;
++    }
++    return result;
++}
++
++int s19a_800D4CD8(S19Work *work)
++{
++    int   press;
++    short sn_dir;
++    int   count3;
++    int   result;
++
++    press = work->pad.press;
++    sn_dir = work->sn_dir;
++    count3 = work->count3;
++    work->pad.press = press | 0x10000;
++    work->pad.dir = sn_dir;
++    if (count3 == 30)
++    {
++        work->pad.press |= 0x100000u;
++        goto LABEL_5;
++    }
++    result = 1;
++    if (work->body.is_end == 0)
++    {
++    LABEL_5:
++        ++work->count3;
++        return 0;
++    }
++    return result;
++}
++
++int s19a_800D4D3C(S19Work *work)
++{
++    int press;
++    int count3;
++    int v4;
++    int result;
++    int v6;
++
++    press = work->pad.press;
++    count3 = work->count3;
++    v4 = press | 0x10000;
++    work->pad.press = v4;
++    if (count3 != 0)
++    {
++        result = 0;
++        if (work->body.is_end != 0)
++            return 1;
++    }
++    else
++    {
++        work->pad.press = v4 | 0x200000;
++        result = 0;
++    }
++    v6 = work->count3 + 1;
++    work->pad.dir = work->sn_dir;
++    work->count3 = v6;
++    return result;
++}
++
++int s19a_800D4D98(S19Work *work)
++{
++    int   count3;
++    short sn_dir;
++    int   result;
++
++    count3 = work->count3;
++    sn_dir = work->sn_dir;
++    work->pad.press |= 0x10000u;
++    work->pad.dir = sn_dir;
++    if (count3 < 10)
++    {
++        if ((count3 & 1) == 0)
++            work->pad.press |= 0x40000u;
++        goto LABEL_6;
++    }
++    result = 1;
++    if (count3 < 20)
++    {
++    LABEL_6:
++        ++work->count3;
++        return 0;
++    }
++    return result;
++}
++
++int s19a_800D4E04(S19Work *work)
++{
++    int   press;
++    short sn_dir;
++    int   next;
++    int   sn_dis;
++    int   result;
++    int   v7;
++
++    press = work->pad.press;
++    sn_dir = work->sn_dir;
++    next = (unsigned char)work->param.next;
++    work->pad.press = press | 0x10000;
++    work->pad.dir = sn_dir;
++    if (next == 255)
++    {
++        if (work->count3 == 16)
++            work->count3 += GV_RandU(14);
++        if (work->count3 >= 0x21u)
++        {
++            sn_dis = work->sn_dis;
++            if (sn_dis < 6500 && work->vision.pad == 2)
++            {
++                if (sn_dis >= 1000)
++                    return 16;
++                result = 20;
++                if ((GM_PlayerStatus & 0x1060) != 0)
++                    return 16;
++                return result;
++            }
++        }
++    LABEL_16:
++        ++work->count3;
++        return 0;
++    }
++    v7 = work->sn_dis;
++    if (v7 >= 6500 || work->vision.pad != 2 || (work->count3 & 1) == 0)
++        goto LABEL_16;
++    if (v7 >= 1000)
++        return 21;
++    result = 20;
++    if ((GM_PlayerStatus & 0x1060) != 0)
++        return 21;
++    return result;
++}
++
++int s19a_800D4F38(S19Work *work)
++{
++    int think4;
++
++    think4 = work->think4;
++    if (think4 == 2)
++    {
++        if (s19a_800D3FC0(work) != 0)
++        {
++            work->think4 = 3;
++        LABEL_8:
++            work->count3 = 0;
++        }
++    }
++    else if (think4 == 3 && s19a_800D4060(work) != 0)
++    {
++        work->think4 = 2;
++        goto LABEL_8;
++    }
++    return 0;
++}
++
++int s19a_800D4FB4(S19Work *work)
++{
++    if (work->think4 != 0)
++    {
++        if (work->think4 == 2 && s19a_800D3FC0(work) != 0)
++        {
++            work->think4 = 0;
++            work->count3 = 0;
++            s19a_800D3A84(work);
++        }
++    }
++    else if (s19a_800D48F0(work) != 0)
++    {
++        work->think4 = 2;
++        work->count3 = 0;
++    }
++    return 0;
++}
++
++int s19a_800D5030(S19Work *work)
++{
++    int result;
++
++    if (work->think3 == 3 && s19a_800D40E8(work) != 0)
++    {
++        s19a_800D3A4C(work);
++        work->next_node = work->n_nodes - 1;
++        s19a_800D3CCC(work);
++        work->pad.field_4 = 1;
++    }
++    result = work->alert_level < 2;
++    if (work->alert_level >= 2)
++        return s19a_800D3CE4(work);
++    return result;
++}
++
++int s19a_800D50B0(S19Work *work)
++{
++    MAP     *Map;
++    HZD_PAT *v3;
++    int      n_points;
++    short   *p_x;
++    int      v7;
++    S19Work *v8;
++    short   *v9;
++    short    v10;
++    int      v11;
++
++    Map = GM_GetMap(work->start_map);
++    v3 = &Map->hzd->def->routes[work->param.root];
++    n_points = v3->n_points;
++    work->n_nodes = n_points;
++    if (n_points <= 0)
++        return -1;
++    p_x = &v3->points->x;
++    v7 = 0;
++    v8 = work;
++    v9 = p_x + 3;
++    do
++    {
++        v8->nodes[0].vx = *p_x;
++        p_x += 4;
++        v8->nodes[0].vy = *(v9 - 1);
++        ++v7;
++        v8->nodes[0].vz = *(v9 - 2);
++        v10 = *v9;
++        v9 += 4;
++        v8->nodes[0].pad = v10;
++        v8 = (S19Work *)((char *)v8 + 8);
++    } while (v7 < work->n_nodes);
++    v11 = *(unsigned int *)&work->nodes[0].vz;
++    *(unsigned int *)&work->start_pos.vx = *(unsigned int *)&work->nodes[0].vx;
++    *(unsigned int *)&work->start_pos.vz = v11;
++    work->field_BE8 = HZD_GetAddress(Map->hzd, &work->start_pos, -1);
++    return 0;
++}
++
++int s19a_800D51A4(S19Work *work)
++{
++    if ((unsigned char)work->param.c_root == S19_Command.field_20)
++        return 0;
++    fprintf(1, " Root Change !!\n");
++    work->param.c_root = S19_Command.field_20;
++    s19a_800D50B0(work);
++    return 1;
++}
++
++int s19a_800D5210(S19Work *work)
++{
++    int think3;
++    int result;
++
++    think3 = work->think3;
++    if (think3 == 1)
++    {
++        if (s19a_800D43E4(work) != 0)
++        {
++            if (s19a_800D51A4(work) != 0)
++            {
++                s19a_800D3A4C(work);
++                work->next_node = work->n_nodes - 1;
++                result = s19a_800D3CCC(work);
++                work->pad.field_4 = 1;
++                return result;
++            }
++            if (s19a_800D4438(work) != 0)
++            {
++                work->think3 = 2;
++            }
++            else
++            {
++                s19a_800D3BE4(work);
++                work->count3 = 0;
++            }
++        }
++    }
++    else if (think3 >= 2)
++    {
++        if (think3 == 2 && s19a_800D4530(work) != 0)
++        {
++            s19a_800D3BE4(work);
++            work->think3 = 1;
++            work->count3 = 0;
++        }
++    }
++    else if (work->think3 == 0 && s19a_800D48F0(work) != 0)
++    {
++        work->pad.field_4 = 0;
++        work->think2 = 0;
++        work->think3 = 1;
++        s19a_800D3BE4(work);
++        work->count3 = 0;
++    }
++    if ((work->modetime[6] & 4) != 0)
++        return s19a_800D3E9C(work);
++    if ((work->modetime[6] & 2) != 0)
++        return s19a_800D3F70(work);
++    if ((work->modetime[6] & 1) != 0)
++        return s19a_800D3EB4(work);
++    if ((work->modetime[6] & 0x10) != 0)
++        return s19a_800D3F88(work);
++    result = work->alert_level < 3;
++    if (work->alert_level >= 3)
++    {
++        s19a_800D65D4();
++        return s19a_800D3CE4(work);
++    }
++    return result;
++}
++
++void s19a_800D53B8()
++{
++    ;
++}
++
++int s19a_800D53C0(S19Work *work)
++{
++    int think3;
++    int result;
++
++    think3 = work->think3;
++    if (think3 == 4)
++    {
++        if (s19a_800D479C(work) != 0)
++        {
++            work->think3 = 5;
++            work->count3 = 0;
++        }
++    }
++    else if (think3 == 5 && s19a_800D480C(work) != 0)
++    {
++        if (S19_Command.alert_mode != 0)
++        {
++            s19a_800D3DD8(work);
++        }
++        else
++        {
++            --work->next_node;
++            s19a_800D3BE4(work);
++            s19a_800D3CCC(work);
++        }
++    }
++    result = work->alert_level < 2;
++    if (work->alert_level >= 2)
++        return s19a_800D3CE4(work);
++    return result;
++}
++
++int s19a_800D5484(S19Work *work)
++{
++    int think3;
++    int v3;
++    int result;
++
++    think3 = work->think3;
++    if (think3 == 8)
++    {
++        if (s19a_800D48F0(work) != 0)
++        {
++            work->think3 = 9;
++            work->count3 = 0;
++        }
++        v3 = s19a_800D49E8(&work->target_pos.vx, &work->control.mov.vx, 1500);
++    }
++    else
++    {
++        if (think3 < 9)
++        {
++            if (think3 == 5 && s19a_800D4728(work) != 0)
++            {
++                s19a_800D3A84(work);
++                work->think3 = 8;
++                work->count3 = 0;
++            }
++            goto LABEL_18;
++        }
++        if (think3 != 9)
++        {
++            if (think3 == 10 && s19a_800D4A88(work) != 0)
++            {
++                --work->next_node;
++                s19a_800D3BE4(work);
++                s19a_800D3CCC(work);
++            }
++            goto LABEL_18;
++        }
++        v3 = s19a_800D4960(work, 1500);
++    }
++    if (v3 != 0)
++    {
++        work->think3 = 10;
++        work->count3 = 0;
++    }
++LABEL_18:
++    if (work->alert_level >= 2 || (*(unsigned int *)&work->modetime[4] & 0x120000) != 0)
++        return s19a_800D3CE4(work);
++    result = -2146762752;
++    if ((work->modetime[6] & 1) != 0)
++    {
++        if (GM_NoisePower == 255)
++        {
++            s19a_800D3ACC(work);
++            s19a_800D6620();
++            work->think2 = 7;
++            result = 12;
++            work->think3 = 12;
++        }
++        else
++        {
++            result = s19a_800D3CE4(work);
++        }
++        work->count3 = 0;
++    }
++    return result;
++}
++
++int s19a_800D5624(S19Work *work)
++{
++    int         think3;
++    signed char v3;
++    short       v4;
++    int         v5;
++    int         result;
++
++    think3 = work->think3;
++    if (think3 == 7)
++    {
++        v5 = s19a_800D46B8(work) == 0;
++        v4 = 1;
++        if (v5)
++            goto LABEL_20;
++        work->think2 = 0;
++        goto LABEL_19;
++    }
++    if (think3 < 8)
++    {
++        if (think3 == 5 && s19a_800D4580(work) != 0)
++        {
++            v3 = work->modetime[0];
++            work->think3 = 8;
++            work->count3 = 0;
++            work->modetime[0] = v3 + 1;
++        }
++        goto LABEL_20;
++    }
++    if (think3 != 8)
++    {
++        if (think3 == 10 && s19a_800D4A3C(work) != 0)
++        {
++            --work->next_node;
++            s19a_800D3BE4(work);
++            s19a_800D3CCC(work);
++        }
++        goto LABEL_20;
++    }
++    if (s19a_800D48F0(work) != 0)
++    {
++        work->think3 = 10;
++        work->count3 = 0;
++    }
++    if (work->count3 >= 0x21u && (work->modetime[6] & 1) != 0)
++    {
++        s19a_800D3ACC(work);
++        v4 = 5;
++    LABEL_19:
++        work->think3 = v4;
++        work->count3 = 0;
++    }
++LABEL_20:
++    if (work->alert_level >= 3)
++        return s19a_800D3CE4(work);
++    if ((work->modetime[6] & 2) != 0)
++        return s19a_800D3F70(work);
++    if ((work->modetime[6] & 0x10) != 0)
++        return s19a_800D3F88(work);
++    result = -2146762752;
++    if ((work->modetime[6] & 1) != 0)
++    {
++        result = 255;
++        if (GM_NoisePower == 200 || GM_NoisePower == 255)
++        {
++            s19a_800D3ACC(work);
++            s19a_800D6620();
++            work->think2 = 7;
++            work->think3 = 12;
++            work->count3 = 0;
++            return 12;
++        }
++    }
++    return result;
++}
++
++int s19a_800D57F4(S19Work *work)
++{
++    int think3;
++    int result;
++
++    think3 = work->think3;
++    if (think3 == 9)
++    {
++        work->pad.press |= 4u;
++        if (s19a_800D4960(work, 500) != 0)
++        {
++            if (s19a_800D4AF8(work) != 0)
++            {
++                s19a_800D3C6C(work);
++            }
++            else
++            {
++                work->think3 = 10;
++                CleanAsiato();
++            }
++            work->count3 = 0;
++        }
++    }
++    else if (think3 >= 10)
++    {
++        if (think3 == 10 && s19a_800D4A3C(work) != 0)
++        {
++            if (S19_Command.alert_mode != 0)
++            {
++                s19a_800D3DD8(work);
++            }
++            else
++            {
++                --work->next_node;
++                s19a_800D3BE4(work);
++                s19a_800D3CCC(work);
++            }
++        }
++    }
++    else if (think3 == 5 && s19a_800D4854(work) != 0)
++    {
++        s19a_800D3C6C(work);
++        work->think3 = 9;
++        work->count3 = 0;
++    }
++    if (work->alert_level >= 2 || (work->modetime[6] & 2) != 0)
++    {
++        s19a_800D3CE4(work);
++        work->pad.sound = 240;
++        return 240;
++    }
++    else
++    {
++        result = -2146566144;
++        if ((work->modetime[6] & 1) != 0)
++        {
++            if (S19_Command.alert_mode != 0)
++            {
++                if (GM_NoisePower != 5)
++                {
++                    s19a_800D3ACC(work);
++                    s19a_800D6620();
++                    work->think2 = 7;
++                    work->think3 = 12;
++                    work->count3 = 0;
++                }
++            }
++            else
++            {
++                s19a_800D3EB4(work);
++            }
++            CleanAsiato();
++        }
++    }
++    return result;
++}
++
++int s19a_800D59B8(S19Work *work)
++{
++    int think3;
++    int result;
++    int v4;
++
++    think3 = work->think3;
++    if (think3 == 12)
++    {
++        v4 = s19a_800D48E0() == 0;
++        result = 1;
++        if (v4)
++            return result;
++        work->think1 = 1;
++        work->think2 = 10;
++        work->think3 = 23;
++        work->pad.field_4 = 1;
++        work->pad.sound = 240;
++        result = 255;
++        work->count3 = 0;
++        goto LABEL_16;
++    }
++    result = 11;
++    if (think3 >= 13)
++    {
++        result = 13;
++        if (think3 == 13)
++        {
++            result = s19a_800D48E0();
++            if (result != 0)
++            {
++                s19a_800D3CFC(work);
++                goto LABEL_14;
++            }
++        }
++    }
++    else if (think3 == 11)
++    {
++        result = s19a_800D48D0();
++        if (result != 0)
++        {
++            s19a_800D3CFC(work);
++            if (S19_Command.alert_mode != 0)
++            {
++                work->pad.sound = 246;
++            LABEL_15:
++                result = 255;
++            LABEL_16:
++                work->alert_level = 255;
++                return result;
++            }
++        LABEL_14:
++            work->pad.sound = 240;
++            goto LABEL_15;
++        }
++    }
++    return result;
++}
+diff --git a/source/overlays/s19a/timer.c b/source/overlays/s19a/timer.c
+new file mode 100644
+--- /dev/null
++++ b/source/overlays/s19a/timer.c
+@@ -0,0 +1,129 @@
++#include "game/game.h"
++#include "libgcl/libgcl.h"
++#include <stddef.h>
++
++typedef struct S19Timer
++{
++    GV_ACT   actor;
++    DG_PRIM *prim;
++    int      depth;
++    int      reserved[7];
++    int      u, width, v, height;
++    int      state;
++    int      reserved_58;
++    int      ticks;
++    int      tick_proc;
++    int      end_proc;
++} S19Timer;
++
++_Static_assert(sizeof(S19Timer) == 104, "Original garage timer layout");
++
++static void TimerDigit(S19Timer *work, POLY_FT4 *packet, int digit)
++{
++    int left = work->u + work->width * digit / 10;
++    int right = work->u + work->width * (digit + 1) / 10;
++    setUV4(packet, left, work->v, right, work->v, left, work->v + work->height, right, work->v + work->height);
++}
++
++static void TimerAct(S19Timer *work)
++{
++    int      seconds = work->ticks / 30;
++    int      minutes = seconds / 60;
++    int      digits[5] = {seconds % 60 % 10, seconds % 60 / 10, 0, minutes % 10, minutes / 10};
++    int      buffer, index;
++    GCL_ARGS args;
++    long     tick;
++    if (work->ticks % 30 == 0 && work->tick_proc >= 0)
++    {
++        tick = work->ticks;
++        args.argc = 1;
++        args.argv = &tick;
++        GCL_ExecProc(work->tick_proc, &args);
++    }
++    if (seconds == 0 && work->end_proc >= 0)
++    {
++        GCL_ExecProc(work->end_proc, NULL);
++        work->end_proc = -1;
++    }
++    for (buffer = 0; buffer < 2; ++buffer)
++    {
++        POLY_FT4 *packets = work->prim->packs[buffer];
++        for (index = 0; index < 5; ++index)
++            if (index != 2)
++                TimerDigit(work, &packets[index], digits[index]);
++    }
++    --work->ticks;
++    for (index = 0; index < 5; ++index)
++    {
++        POLY_FT4 *packets = work->prim->packs[GV_Clock];
++        setaddr(&packets[index], work->depth);
++    }
++}
++
++static void TimerDie(S19Timer *work)
++{
++    if (work->prim != NULL)
++    {
++        DG_DequeuePrim(work->prim);
++        DG_FreePrim(work->prim);
++    }
++}
++
++static int TimerResources(S19Timer *work)
++{
++    char   *option = GCL_GetOption('t');
++    DG_TEX *numbers, *colon;
++    int     buffer, index;
++    work->ticks = option ? GCL_StrToInt(option) + 29 : 5429;
++    work->tick_proc = GCL_GetOption('e') ? GCL_StrToInt(GCL_NextStr()) : -1;
++    work->end_proc = GCL_GetOption('z') ? GCL_StrToInt(GCL_NextStr()) : -1;
++    work->prim = DG_MakePrim(DG_PRIM_SORTONLY | DG_PRIM_POLY_FT4, 5, 0, NULL, NULL);
++    if (work->prim == NULL)
++        return -1;
++    DG_QueuePrim(work->prim);
++    work->prim->group_id = GM_CurrentMap;
++    numbers = DG_GetTexture(GV_StrCode("0123"));
++    colon = DG_GetTexture(GV_StrCode("dot2"));
++    if (numbers == NULL || colon == NULL)
++        return -1;
++    work->u = numbers->off_x;
++    work->width = numbers->w + 1;
++    work->v = numbers->off_y;
++    work->height = numbers->h + 1;
++    for (buffer = 0; buffer < 2; ++buffer)
++    {
++        POLY_FT4 *packets = work->prim->packs[buffer];
++        for (index = 0; index < 5; ++index)
++        {
++            POLY_FT4 *packet = &packets[index];
++            DG_TEX   *texture = index == 2 ? colon : numbers;
++            setPolyFT4(packet);
++            setSemiTrans(packet, 1);
++            setRGB0(packet, 255, 208, 208);
++            setXYWH(packet, 134 - index * 16, -100, 16, 18);
++            packet->tpage = texture->tpage;
++            packet->clut = texture->clut;
++            if (index == 2)
++                setUVWH(packet, texture->off_x, texture->off_y, texture->w, texture->h);
++            else
++                TimerDigit(work, packet, 0);
++        }
++    }
++    work->depth = 1;
++    work->state = 0;
++    return 0;
++}
++
++void *NewS19Timer(void)
++{
++    S19Timer *work = GV_NewActor(5, sizeof(*work));
++    if (work == NULL)
++        return NULL;
++    GV_SetNamedActor(&work->actor, TimerAct, TimerDie, "timer.c");
++    if (TimerResources(work) < 0)
++    {
++        GV_DestroyActor(&work->actor);
++        return NULL;
++    }
++    return work;
++}

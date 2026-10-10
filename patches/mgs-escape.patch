@@ -1,0 +1,5397 @@
+diff --git a/build/linker_command_file.txt b/build/linker_command_file.txt
+index fd7660812..39bd530de 100644
+--- a/build/linker_command_file.txt
++++ b/build/linker_command_file.txt
+@@ -2237,7 +2237,7 @@ overlay_bss group   file("{{OBJ_DIR}}\{{OVERLAY}}_{{OVERLAY_SUFFIX}}_bss.bin")
+     include "{{OBJ_DIR}}\takabe\fog.obj", overlay
+     include "{{OBJ_DIR}}\takabe\libdg2.obj", overlay
+ 
+-    include "{{OBJ_DIR}}\overlays\{{OVERLAY}}\overlay2.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s19b\overlay2.obj", overlay
+ 
+     include "{{OBJ_DIR}}\overlays\s19b\takabe\jeep_srl.obj", overlay
+     include "{{OBJ_DIR}}\overlays\s19b\takabe\jeep\jeep_gls.obj", overlay
+@@ -2245,12 +2245,12 @@ overlay_bss group   file("{{OBJ_DIR}}\{{OVERLAY}}_{{OVERLAY_SUFFIX}}_bss.bin")
+     include "{{OBJ_DIR}}\overlays\s19b\takabe\jeep\gsplash3.obj", overlay
+     include "{{OBJ_DIR}}\overlays\s19b\takabe\jeep\jeepdemo.obj", overlay
+ 
+-    include "{{OBJ_DIR}}\overlays\{{OVERLAY}}\overlay3.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s19b\overlay3.obj", overlay
+ 
+     include "{{OBJ_DIR}}\okajima\blur.obj", overlay
+     include "{{OBJ_DIR}}\overlays\s19b\takabe\jeep\jlamp.obj", overlay
+ 
+-    include "{{OBJ_DIR}}\overlays\{{OVERLAY}}\overlay4.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s19b\overlay4.obj", overlay
+ 
+     include "{{OBJ_DIR}}\takabe\object.obj", overlay
+     include "{{OBJ_DIR}}\overlays\s19b\takabe\jeep.obj", overlay
+@@ -2258,7 +2258,7 @@ overlay_bss group   file("{{OBJ_DIR}}\{{OVERLAY}}_{{OVERLAY_SUFFIX}}_bss.bin")
+     include "{{OBJ_DIR}}\overlays\s19b\takabe\jeep_sne\jeep_sne.obj", overlay
+     include "{{OBJ_DIR}}\overlays\s19b\takabe\jeep\jlamp2.obj", overlay
+ 
+-    include "{{OBJ_DIR}}\overlays\{{OVERLAY}}\overlay5.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s19b\overlay5.obj", overlay
+ 
+     include "{{OBJ_DIR}}\overlays\s19b\takabe\jeep2.obj", overlay
+     include "{{OBJ_DIR}}\overlays\s19b\takabe\jeep_liq\jeep_liq.obj", overlay
+diff --git a/source/overlays/s19b/escape.h b/source/overlays/s19b/escape.h
+new file mode 100644
+index 000000000..ce86582fe
+--- /dev/null
++++ b/source/overlays/s19b/escape.h
+@@ -0,0 +1,144 @@
++#ifndef MGS_ESCAPE_H
++#define MGS_ESCAPE_H
++
++#include <stddef.h>
++#include <stdint.h>
++#include "game/game.h"
++#include "game/camera.h"
++#include "libgcl/libgcl.h"
++
++typedef struct EscapeCameraEntry
++{
++    int f0;
++    int f4;
++    int f8;
++    SVECTOR fC;
++    SVECTOR f14;
++    int f1C;
++} EscapeCameraEntry;
++
++typedef struct EscapeCameraEvent
++{
++    int frame;
++    void (*callback)(void *);
++} EscapeCameraEvent;
++
++typedef int (*EscapeCameraNear)(int, int, int);
++typedef void (*EscapeCameraNearVector)(SVECTOR *, SVECTOR *, int);
++
++typedef struct EscapeCameraWork
++{
++    GV_ACT actor;
++    SVECTOR eye;
++    SVECTOR center;
++    SVECTOR rotate;
++    int track;
++    int type;
++    SVECTOR *field_40;
++    SVECTOR *field_44;
++    SVECTOR *field_48;
++    int *field_4C;
++    SVECTOR field_50;
++    SVECTOR field_58;
++    SVECTOR field_60;
++    int field_68;
++    int field_6C;
++    int field_70;
++    int field_74;
++    EscapeCameraNear field_78;
++    EscapeCameraNearVector field_7C;
++    EscapeCameraNearVector field_80;
++    EscapeCameraEntry *field_84;
++    int field_88;
++    int field_8C;
++    int field_90;
++    EscapeCameraEvent *events;
++    int reserved[4];
++} EscapeCameraWork;
++
++typedef struct EscapeSystem
++{
++    void *field_0;
++    CONTROL *control;
++    SVECTOR *rotation;
++    int field_C;
++    int field_10;
++    int field_14;
++    SVECTOR pos;
++    SVECTOR field_20;
++    VECTOR field_28;
++    SVECTOR field_38;
++    int field_40;
++    int field_44;
++    int field_48;
++    int field_4C;
++    int field_50;
++    int field_54;
++    int field_58;
++    int field_5C;
++    union
++    {
++        OBJECT *body;
++        OBJECT *snake_body;
++    };
++    OBJECT *field_64;
++    OBJECT *field_68;
++    MATRIX **field_6C;
++    MATRIX **field_70;
++    int field_74;
++    int field_78;
++    int field_7C;
++    MATRIX world;
++    char reserved_A0[0x88];
++    SVECTOR field_128;
++    SVECTOR field_130;
++    SVECTOR field_138;
++    SVECTOR field_140;
++    SVECTOR field_148;
++    MATRIX *field_150;
++    SVECTOR field_154;
++    MATRIX *field_15C;
++    SVECTOR field_160;
++    EscapeCameraWork *camera;
++} EscapeSystem;
++
++typedef struct EscapeViewState
++{
++    SVECTOR field_0;
++    int field_8;
++    int field_C;
++    int field_10;
++    int field_14;
++    int field_18;
++    SVECTOR target;
++} EscapeViewState;
++
++_Static_assert(sizeof(EscapeSystem) == 0x16c, "Original jeep system layout");
++_Static_assert(offsetof(EscapeSystem, world) == 0x80, "Original jeep world offset");
++_Static_assert(sizeof(EscapeCameraEntry) == 32, "Original camera instruction layout");
++_Static_assert(sizeof(EscapeCameraWork) == 0xa8, "Original camera actor layout");
++
++extern EscapeSystem Takabe_JeepSystem;
++extern EscapeViewState EscapeView;
++extern unsigned short EscapeModelNames[14];
++extern short EscapeRoadSequence[25][8];
++extern MATRIX EscapeRoadScale;
++extern unsigned char EscapeRoadRumble[52];
++extern SVECTOR s19b_dword_800C3760;
++extern SVECTOR s19b_dword_800C3768;
++extern SVECTOR s19b_dword_800C3770;
++extern EscapeCameraEntry EscapeCameraIntro[9];
++extern EscapeCameraEntry EscapeCameraFinal[4];
++extern unsigned char EscapeRumble3990[4];
++extern unsigned char EscapeRumble3994[8];
++extern unsigned char EscapeRumble399C[4];
++extern unsigned char EscapeRumble39A0[16];
++extern unsigned char EscapeRumble39B0[12];
++extern SVECTOR s19b_dword_800C39BC;
++extern SVECTOR s19b_dword_800C39C4;
++extern SVECTOR s19b_dword_800C39D0[3];
++extern SVECTOR EscapeCameraFixed[4];
++
++void *NewDemoCamera(EscapeCameraEntry *entries);
++
++#endif
+diff --git a/source/overlays/s19b/jeep_liquid.h b/source/overlays/s19b/jeep_liquid.h
+new file mode 100644
+index 000000000..9ae89f0df
+--- /dev/null
++++ b/source/overlays/s19b/jeep_liquid.h
+@@ -0,0 +1,55 @@
++#ifndef MGS_ESCAPE_LIQUID_H
++#define MGS_ESCAPE_LIQUID_H
++
++#include "jeep_vehicles.h"
++
++typedef struct EscapeLiquidWork
++{
++    GV_ACT actor;
++    CONTROL *control;
++    MATRIX *root_mat;
++    CONTROL own_control;
++    OBJECT obj;
++    MOTION_CONTROL m_ctrl;
++    MOTION_SEGMENT m_segs1[17];
++    MOTION_SEGMENT m_segs2[17];
++    SVECTOR svecs1[16];
++    SVECTOR svecs2[16];
++    SVECTOR sv_7A0;
++    SVECTOR sv_7A8;
++    SVECTOR sv_7B0;
++    SVECTOR sv_7B8;
++    MATRIX mtx[2];
++    OBJECT obj2;
++    TARGET *f8E4;
++    HOMING *homing;
++    void (*f8EC)(struct EscapeLiquidWork *, int);
++    int f8F0;
++    int f8F4;
++    int f8F8;
++    int f8FC;
++    int f900;
++    int f904;
++    int f908;
++    int f90C;
++    int f910;
++    int f914;
++    int f918;
++    int f91C;
++    int f920;
++    int f924;
++    int f928;
++    int f92C;
++    int f930;
++    int f934;
++    int f938;
++    int f93C;
++    int f940;
++    int *f944;
++} EscapeLiquidWork;
++
++_Static_assert(sizeof(EscapeLiquidWork) == 0x948, "Original escape Liquid actor layout");
++_Static_assert(offsetof(EscapeLiquidWork, mtx) == 0x7C0, "Original escape Liquid lighting");
++_Static_assert(offsetof(EscapeLiquidWork, f8EC) == 0x8EC, "Original escape Liquid action");
++
++#endif
+diff --git a/source/overlays/s19b/jeep_vehicles.h b/source/overlays/s19b/jeep_vehicles.h
+new file mode 100644
+index 000000000..41660d483
+--- /dev/null
++++ b/source/overlays/s19b/jeep_vehicles.h
+@@ -0,0 +1,119 @@
++#ifndef MGS_ESCAPE_VEHICLES_H
++#define MGS_ESCAPE_VEHICLES_H
++
++#include "escape.h"
++
++typedef struct EscapeJeepWork
++{
++    GV_ACT actor;
++    void *field_20;
++    int map;
++    CONTROL control;
++    TARGET *target;
++    OBJECT field_A8;
++    OBJECT field_18C;
++    MATRIX light[2];
++    TARGET target2;
++    OBJECT_NO_ROTS field_2F8;
++    OBJECT_NO_ROTS field_31C;
++    MATRIX lamp_light[2];
++    VECTOR position;
++    VECTOR previous;
++    SVECTOR step;
++    SVECTOR field_3A8;
++    SVECTOR field_3B0;
++    SVECTOR field_3B8;
++    SVECTOR field_3C0;
++    short field_3C8;
++    short field_3CA;
++    int field_3CC;
++    int field_3D0;
++    int field_3D4;
++    int field_3D8;
++    int field_3DC;
++    int field_3E0;
++    int field_3E4;
++    int field_3E8;
++    int field_3EC;
++    int field_3F0;
++    int field_3F4;
++    void (*state)(struct EscapeJeepWork *);
++} EscapeJeepWork;
++
++typedef struct EscapeJeep2Work
++{
++    GV_ACT actor;
++    void *field_20;
++    CONTROL control;
++    TARGET *target;
++    OBJECT jeep_b;
++    OBJECT jeep_t;
++    OBJECT_NO_ROTS gun;
++    MATRIX light[2];
++    OBJECT_NO_ROTS fhl;
++    OBJECT_NO_ROTS hl;
++    MATRIX lamp_light[2];
++    VECTOR position;
++    VECTOR previous;
++    SVECTOR step;
++    SVECTOR field_380;
++    SVECTOR field_388;
++    SVECTOR rotation;
++    SVECTOR field_398;
++    int field_3A0;
++    int field_3A4;
++    int field_3A8;
++    int field_3AC;
++    int field_3B0;
++    int field_3B4;
++    int field_3B8;
++    int field_3BC;
++    int field_3C0;
++    int field_3C4;
++    int field_3C8;
++    int field_3CC;
++    void (*field_3D0)(struct EscapeJeep2Work *);
++    int field_3D4;
++    int field_3D8;
++    void (*field_3DC)(struct EscapeJeep2Work *);
++    int field_3E0;
++    int field_3E4;
++    void (*field_3E8)(struct EscapeJeep2Work *);
++    int field_3EC;
++    int field_3F0;
++    int field_3F4;
++    void (*field_3F8)(struct EscapeJeep2Work *);
++} EscapeJeep2Work;
++
++_Static_assert(sizeof(EscapeJeepWork) == 0x3FC, "Original player jeep layout");
++_Static_assert(offsetof(EscapeJeepWork, position) == 0x380, "Original player jeep position");
++_Static_assert(offsetof(EscapeJeepWork, state) == 0x3F8, "Original player jeep controller");
++_Static_assert(sizeof(EscapeJeep2Work) == 0x3FC, "Original rival jeep layout");
++_Static_assert(offsetof(EscapeJeep2Work, position) == 0x358, "Original rival jeep position");
++_Static_assert(offsetof(EscapeJeep2Work, field_3D0) == 0x3D0, "Original rival jeep controller");
++
++void s19b_jeep_mrl_800D2E78(EscapeJeepWork *work);
++void s19b_jeep_mrl_800D3928(EscapeJeepWork *work);
++void s19b_jeep_liq_800D76B0(EscapeJeep2Work *work);
++void s19b_jeep_liq_800D7ACC(EscapeJeep2Work *work);
++void s19b_jeep_liq_800D7BB0(EscapeJeep2Work *work);
++void s19b_jeep_liq_800D81A8(EscapeJeep2Work *work);
++
++void s19b_jeep_liq_800D7D68(EscapeJeep2Work *work);
++void *s19b_jeep_mrl_800D40D4(CONTROL *control, MATRIX *root, int companion);
++void *NewJeepSnake(CONTROL *control, MATRIX *root);
++void *NewJeepLamp2(MATRIX *root);
++void *s19b_spark2_m_800D8670(CONTROL *control, MATRIX *root, int *damage);
++int s19b_spark2_m_800D9C90(CONTROL *control, VECTOR *position, int *speed, SVECTOR *delta);
++int s19b_spark2_m_800D9EC0(CONTROL *control, SVECTOR *rotation, SVECTOR *step, SVECTOR *previous);
++int s19b_spark2_m_800DA0B4(SVECTOR *joints, int speed, SVECTOR *rotation, SVECTOR *previous);
++void s19b_jeep_gls_800CEC24(int z, SVECTOR *out);
++int s19b_jeep_gls_800CEDFC(int z, int threshold);
++
++extern EscapeJeepWork *s19b_dword_800DE64C;
++extern const VECTOR EscapePlayerJeepScale;
++extern VECTOR s19b_dword_800C3A84;
++extern SVECTOR s19b_dword_800C3A7C;
++extern SVECTOR s19b_dword_800C3A94;
++
++#endif
+diff --git a/source/overlays/s19b/overlay2.c b/source/overlays/s19b/overlay2.c
+index e35902548..8d8ab22ef 100644
+--- a/source/overlays/s19b/overlay2.c
++++ b/source/overlays/s19b/overlay2.c
+@@ -1,332 +1,86 @@
+-#include "mgstype.h"
++#include "overlays/s19b/escape.h"
+ #include "libdg/libdg.h"
+ 
+-int s19b_dword_800C3530 = 0x1B3FCB82;
+-int s19b_dword_800C3534 = 0x1F3F1B40;
+-int s19b_dword_800C3538 = 0x1F411F40;
+-int s19b_dword_800C353C = 0x2340233F;
+-int s19b_dword_800C3540 = 0x273F2341;
+-int s19b_dword_800C3544 = 0x27412740;
+-int s19b_dword_800C3548 = 0x0000F6B4;
+-int s19b_dword_800C354C = 0x000A0000;
+-int s19b_dword_800C3550 = 0x03E80000;
+-int s19b_dword_800C3554 = 0x00C80000;
+-int s19b_dword_800C3558 = 0x00000000;
+-int s19b_dword_800C355C = 0x000A0000;
+-int s19b_dword_800C3560 = 0x03E803E8;
+-int s19b_dword_800C3564 = 0x00C80064;
+-int s19b_dword_800C3568 = 0x00000000;
+-int s19b_dword_800C356C = 0x00040000;
+-int s19b_dword_800C3570 = 0x03E8FC18;
+-int s19b_dword_800C3574 = 0x00000064;
+-int s19b_dword_800C3578 = 0x00000000;
+-int s19b_dword_800C357C = 0x000A0000;
+-int s19b_dword_800C3580 = 0x00000000;
+-int s19b_dword_800C3584 = 0x00640064;
+-int s19b_dword_800C3588 = 0x00010002;
+-int s19b_dword_800C358C = 0x00010001;
+-int s19b_dword_800C3590 = 0x00000000;
+-int s19b_dword_800C3594 = 0x00000000;
+-int s19b_dword_800C3598 = 0x00090001;
+-int s19b_dword_800C359C = 0x00010002;
+-int s19b_dword_800C35A0 = 0x00000000;
+-int s19b_dword_800C35A4 = 0x00000000;
+-int s19b_dword_800C35A8 = 0x00020001;
+-int s19b_dword_800C35AC = 0x000A0000;
+-int s19b_dword_800C35B0 = 0x03E80000;
+-int s19b_dword_800C35B4 = 0x00640000;
+-int s19b_dword_800C35B8 = 0x00000000;
+-int s19b_dword_800C35BC = 0x000A0000;
+-int s19b_dword_800C35C0 = 0x00000000;
+-int s19b_dword_800C35C4 = 0x00640000;
+-int s19b_dword_800C35C8 = 0x00030001;
+-int s19b_dword_800C35CC = 0x00010001;
+-int s19b_dword_800C35D0 = 0x00000000;
+-int s19b_dword_800C35D4 = 0x00000000;
+-int s19b_dword_800C35D8 = 0x00090001;
+-int s19b_dword_800C35DC = 0x00010002;
+-int s19b_dword_800C35E0 = 0x00000000;
+-int s19b_dword_800C35E4 = 0x00000000;
+-int s19b_dword_800C35E8 = 0x00040001;
+-int s19b_dword_800C35EC = 0x00140000;
+-int s19b_dword_800C35F0 = 0x03E80000;
+-int s19b_dword_800C35F4 = 0x00320000;
+-int s19b_dword_800C35F8 = 0x0005000F;
+-int s19b_dword_800C35FC = 0xFFF80000;
+-int s19b_dword_800C3600 = 0x03E80000;
+-int s19b_dword_800C3604 = 0x00000000;
+-int s19b_dword_800C3608 = 0x00060005;
+-int s19b_dword_800C360C = 0x00010003;
+-int s19b_dword_800C3610 = 0x03E80000;
+-int s19b_dword_800C3614 = 0x00000000;
+-int s19b_dword_800C3618 = 0x000A0001;
+-int s19b_dword_800C361C = 0xFFF80004;
+-int s19b_dword_800C3620 = 0x03E80000;
+-int s19b_dword_800C3624 = 0x00000000;
+-int s19b_dword_800C3628 = 0x000F0000;
+-int s19b_dword_800C362C = 0x00010005;
+-int s19b_dword_800C3630 = 0x03E80000;
+-int s19b_dword_800C3634 = 0x00000000;
+-int s19b_dword_800C3638 = 0x000C0001;
+-int s19b_dword_800C363C = 0xFFF80000;
+-int s19b_dword_800C3640 = 0x03E80000;
+-int s19b_dword_800C3644 = 0x00000000;
+-int s19b_dword_800C3648 = 0x00070005;
+-int s19b_dword_800C364C = 0x00010006;
+-int s19b_dword_800C3650 = 0x03E80000;
+-int s19b_dword_800C3654 = 0x00000000;
+-int s19b_dword_800C3658 = 0x000B0001;
+-int s19b_dword_800C365C = 0xFFF80007;
+-int s19b_dword_800C3660 = 0x03E80000;
+-int s19b_dword_800C3664 = 0x00000000;
+-int s19b_dword_800C3668 = 0x00000000;
+-int s19b_dword_800C366C = 0x00010008;
+-int s19b_dword_800C3670 = 0x03E80000;
+-int s19b_dword_800C3674 = 0x00000000;
+-int s19b_dword_800C3678 = 0x000D0001;
+-int s19b_dword_800C367C = 0xFFF00000;
+-int s19b_dword_800C3680 = 0x03E80000;
+-int s19b_dword_800C3684 = 0x00000000;
+-int s19b_dword_800C3688 = 0x0008000B;
+-int s19b_dword_800C368C = 0x00010009;
+-int s19b_dword_800C3690 = 0x03E80000;
+-int s19b_dword_800C3694 = 0x00000000;
+-int s19b_dword_800C3698 = 0x00000000;
+-int s19b_dword_800C369C = 0x0001000A;
+-int s19b_dword_800C36A0 = 0x03E80000;
+-int s19b_dword_800C36A4 = 0x00000000;
+-int s19b_dword_800C36A8 = 0x00000000;
+-int s19b_dword_800C36AC = 0x0001000B;
+-int s19b_dword_800C36B0 = 0x03E80000;
+-int s19b_dword_800C36B4 = 0x00000000;
+-int s19b_dword_800C36B8 = 0x00000000;
+-int s19b_dword_800C36BC = 0x0008000B;
+-int s19b_dword_800C36C0 = 0x03E80000;
+-int s19b_dword_800C36C4 = 0x00000000;
+-int s19b_dword_800C36C8 = 0x000E0000;
+-int s19b_dword_800C36CC = 0x0000FFFF;
+-int s19b_dword_800C36D0 = 0x03E80000;
+-int s19b_dword_800C36D4 = 0x00C80064;
+-int s19b_dword_800C36D8 = 0x00000000;
+-int s19b_dword_800C36DC = 0x00000800;
+-int s19b_dword_800C36E0 = 0x00000000;
+-int s19b_dword_800C36E4 = 0x00000801;
+-int s19b_dword_800C36E8 = 0x00000000;
+-int s19b_dword_800C36EC = 0x00000800;
+-int s19b_dword_800C36F0 = 0x00000000;
+-int s19b_dword_800C36F4 = 0x00000000;
+-int s19b_dword_800C36F8 = 0x00000000;
+-int s19b_dword_800C36FC = 0x0400097F;
+-int s19b_dword_800C3700 = 0x0400097F;
+-int s19b_dword_800C3704 = 0x0400067F;
+-int s19b_dword_800C3708 = 0x0600047F;
+-int s19b_dword_800C370C = 0x0000037F;
+-int s19b_dword_800C3710 = 0x02F309FF;
+-int s19b_dword_800C3714 = 0x06FF02E7;
+-int s19b_dword_800C3718 = 0x02E001F5;
+-int s19b_dword_800C371C = 0x08E508F3;
+-int s19b_dword_800C3720 = 0x07C8020B;
+-int s19b_dword_800C3724 = 0x06A4030B;
+-int s19b_dword_800C3728 = 0x2F3F1F65;
+-int s19b_dword_800C372C = 0x14400000;
+ 
+-VECTOR s19b_dword_800C3730 = {2048, 2048, 2048};
+ 
+-SVECTOR s19b_dword_800C3740 = {0, 1062, 1625};
+-SVECTOR s19b_dword_800C3748 = {0, 1062, 375};
+ 
+-SVECTOR s19b_dword_800C3750 = {-1250, 562, 1375};
+-SVECTOR s19b_dword_800C3758 = {1250, 562, 625};
+ 
+-int s19b_dword_800C3760 = 0x0BB801F4;
+-int s19b_dword_800C3764 = 0x00001388;
+-int s19b_dword_800C3768 = 0x00000000;
+-int s19b_dword_800C376C = 0x00000000;
+-int s19b_dword_800C3770 = 0x057800FA;
+-int s19b_dword_800C3774 = 0x000005DC;
+-int s19b_dword_800C3778 = 0x00000003;
+-int s19b_dword_800C377C = 0x0000001E;
+-int s19b_dword_800C3780 = 0x00000000;
+-int s19b_dword_800C3784 = 0x00000000;
+-int s19b_dword_800C3788 = 0x00000000;
+-int s19b_dword_800C378C = 0x00000000;
+-int s19b_dword_800C3790 = 0x00000000;
+-int s19b_dword_800C3794 = 0x00000300;
+-int s19b_dword_800C3798 = 0x00000003;
+-int s19b_dword_800C379C = 0x0000001F;
+-int s19b_dword_800C37A0 = 0x00000000;
+-int s19b_dword_800C37A4 = 0x00000000;
+-int s19b_dword_800C37A8 = 0x00000000;
+-int s19b_dword_800C37AC = 0x00000000;
+-int s19b_dword_800C37B0 = 0x00000000;
+-int s19b_dword_800C37B4 = 0x00000030;
+-int s19b_dword_800C37B8 = 0x00000003;
+-int s19b_dword_800C37BC = 0x00000082;
+-int s19b_dword_800C37C0 = 0x00000000;
+-int s19b_dword_800C37C4 = 0x00000000;
+-int s19b_dword_800C37C8 = 0x00000000;
+-int s19b_dword_800C37CC = 0x00000000;
+-int s19b_dword_800C37D0 = 0x00000000;
+-int s19b_dword_800C37D4 = 0x00000003;
+-int s19b_dword_800C37D8 = 0x00000000;
+-int s19b_dword_800C37DC = 0x000000AF;
+-int s19b_dword_800C37E0 = 0x00000000;
+-int s19b_dword_800C37E4 = 0x00000000;
+-int s19b_dword_800C37E8 = 0x00000000;
+-int s19b_dword_800C37EC = 0x00000000;
+-int s19b_dword_800C37F0 = 0x00000000;
+-int s19b_dword_800C37F4 = 0x00000021;
+-int s19b_dword_800C37F8 = 0x00000003;
+-int s19b_dword_800C37FC = 0x000000B0;
+-int s19b_dword_800C3800 = 0x00000002;
+-int s19b_dword_800C3804 = 0x00000000;
+-int s19b_dword_800C3808 = 0x00000000;
+-int s19b_dword_800C380C = 0xFAECFF56;
+-int s19b_dword_800C3810 = 0x000001F4;
+-int s19b_dword_800C3814 = 0x000000E0;
+-int s19b_dword_800C3818 = 0x00000003;
+-int s19b_dword_800C381C = 0x00000113;
+-int s19b_dword_800C3820 = 0x00000002;
+-int s19b_dword_800C3824 = 0x00000000;
+-int s19b_dword_800C3828 = 0x00000000;
+-int s19b_dword_800C382C = 0xFCE0FF56;
+-int s19b_dword_800C3830 = 0x000001F4;
+-int s19b_dword_800C3834 = 0x00000024;
+-int s19b_dword_800C3838 = 0x00000003;
+-int s19b_dword_800C383C = 0x00000131;
+-int s19b_dword_800C3840 = 0x00000002;
+-int s19b_dword_800C3844 = 0x00000000;
+-int s19b_dword_800C3848 = 0x00000000;
+-int s19b_dword_800C384C = 0xFC0000AA;
+-int s19b_dword_800C3850 = 0x000001F4;
+-int s19b_dword_800C3854 = 0x000000E0;
+-int s19b_dword_800C3858 = 0x00000001;
+-int s19b_dword_800C385C = 0x0000014F;
+-int s19b_dword_800C3860 = 0x00000002;
+-int s19b_dword_800C3864 = 0x00000000;
+-int s19b_dword_800C3868 = 0x00000000;
+-int s19b_dword_800C386C = 0xFFEC010E;
+-int s19b_dword_800C3870 = 0x00000BB8;
+-int s19b_dword_800C3874 = 0x0000002C;
+-int s19b_dword_800C3878 = 0xFFFFFFFF;
+-int s19b_dword_800C387C = 0x00000000;
+-int s19b_dword_800C3880 = 0x00000000;
+-int s19b_dword_800C3884 = 0x00000000;
+-int s19b_dword_800C3888 = 0x00000000;
+-int s19b_dword_800C388C = 0x00000000;
+-int s19b_dword_800C3890 = 0x00000000;
+-int s19b_dword_800C3894 = 0x00000000;
+-int s19b_dword_800C3898 = 0x00000001;
+-int s19b_dword_800C389C = 0x800D06E0;
+-int s19b_dword_800C38A0 = 0x0000001E;
+-int s19b_dword_800C38A4 = 0x800D072C;
+-int s19b_dword_800C38A8 = 0x00000082;
+-int s19b_dword_800C38AC = 0x800D07EC;
+-int s19b_dword_800C38B0 = 0x0000008D;
+-int s19b_dword_800C38B4 = 0x800D087C;
+-int s19b_dword_800C38B8 = 0x00000113;
+-int s19b_dword_800C38BC = 0x800D08C8;
+-int s19b_dword_800C38C0 = 0x0000014F;
+-int s19b_dword_800C38C4 = 0x800D08F0;
+-int s19b_dword_800C38C8 = 0xFFFFFFFF;
+-int s19b_dword_800C38CC = 0x800D072C;
+-int s19b_dword_800C38D0 = 0x00000003;
+-int s19b_dword_800C38D4 = 0x0000001E;
+-int s19b_dword_800C38D8 = 0x00000000;
+-int s19b_dword_800C38DC = 0x00000000;
+-int s19b_dword_800C38E0 = 0x00000000;
+-int s19b_dword_800C38E4 = 0x00000000;
+-int s19b_dword_800C38E8 = 0x00000000;
+-int s19b_dword_800C38EC = 0x00000300;
+-int s19b_dword_800C38F0 = 0x00000001;
+-int s19b_dword_800C38F4 = 0x00000082;
+-int s19b_dword_800C38F8 = 0x00000002;
+-int s19b_dword_800C38FC = 0x00000000;
+-int s19b_dword_800C3900 = 0x00000000;
+-int s19b_dword_800C3904 = 0x0BB80FD2;
+-int s19b_dword_800C3908 = 0x000001F4;
+-int s19b_dword_800C390C = 0x0000002C;
+-int s19b_dword_800C3910 = 0x00000001;
+-int s19b_dword_800C3914 = 0x00000276;
+-int s19b_dword_800C3918 = 0x00000000;
+-int s19b_dword_800C391C = 0x00000000;
+-int s19b_dword_800C3920 = 0x00000000;
+-int s19b_dword_800C3924 = 0x0FA00000;
+-int s19b_dword_800C3928 = 0x0000D120;
+-int s19b_dword_800C392C = 0x00000002;
+-int s19b_dword_800C3930 = 0xFFFFFFFF;
+-int s19b_dword_800C3934 = 0x00000000;
+-int s19b_dword_800C3938 = 0x00000000;
+-int s19b_dword_800C393C = 0x00000000;
+-int s19b_dword_800C3940 = 0x00000000;
+-int s19b_dword_800C3944 = 0x00000000;
+-int s19b_dword_800C3948 = 0x00000000;
+-int s19b_dword_800C394C = 0x00000000;
+-int s19b_dword_800C3950 = 0x00000001;
+-int s19b_dword_800C3954 = 0x800D0928;
+-int s19b_dword_800C3958 = 0x0000001E;
+-int s19b_dword_800C395C = 0x800D094C;
+-int s19b_dword_800C3960 = 0x0000003C;
+-int s19b_dword_800C3964 = 0x800D0970;
+-int s19b_dword_800C3968 = 0x00000082;
+-int s19b_dword_800C396C = 0x800D09B8;
+-int s19b_dword_800C3970 = 0x0000008C;
+-int s19b_dword_800C3974 = 0x800D0990;
+-int s19b_dword_800C3978 = 0x00000096;
+-int s19b_dword_800C397C = 0x800D09DC;
+-int s19b_dword_800C3980 = 0xFFFFFFFF;
+-int s19b_dword_800C3984 = 0x800D094C;
+-int s19b_dword_800C3988 = 0x012C012C;
+-int s19b_dword_800C398C = 0x02580258;
+-int s19b_dword_800C3990 = 0x0000017F;
+-int s19b_dword_800C3994 = 0x051702FF;
+-int s19b_dword_800C3998 = 0x000002A0;
+-int s19b_dword_800C399C = 0x0000027F;
+-int s19b_dword_800C39A0 = 0x06B701FF;
+-int s19b_dword_800C39A4 = 0x095C0B90;
+-int s19b_dword_800C39A8 = 0x04220445;
+-int s19b_dword_800C39AC = 0x00000000;
+-int s19b_dword_800C39B0 = 0x047E045A;
+-int s19b_dword_800C39B4 = 0x0F3F02BC;
+-int s19b_dword_800C39B8 = 0x00001921;
+ 
+-int s19b_dword_800C39BC = 0x01B8016D;
+-int s19b_dword_800C39C0 = 0x000002A5;
+ 
+-int s19b_dword_800C39C4 = 0x01B8013B;
+-int s19b_dword_800C39C8 = 0x0000016D;
+ 
+-int s19b_dword_800C39CC = 0x00000000;
+-int s19b_dword_800C39D0 = 0x01C20000;
+-int s19b_dword_800C39D4 = 0x0000012C;
+-int s19b_dword_800C39D8 = 0x01C20000;
+-int s19b_dword_800C39DC = 0x0000FED4;
+-int s19b_dword_800C39E0 = 0x03930159;
+-int s19b_dword_800C39E4 = 0x0000FE48;
+ 
+-VECTOR s19b_dword_800C39E8 = {2048, 2048, 2048};
+-SVECTOR s19b_dword_800C39F8 = {150, 750, 150};
++VECTOR s19b_dword_800C39E8 = {2048, 2048, 2048, 0};
++SVECTOR s19b_dword_800C39F8 = {150, 750, 150, 0};
+ 
+-int s19b_dword_800C3A00 = 0x00010000;
+-int s19b_dword_800C3A04 = 0x00030002;
+-int s19b_dword_800C3A08 = 0x00050004;
+-int s19b_dword_800C3A0C = 0x00070006;
+-int s19b_dword_800C3A10 = 0x00000008;
++short EscapeSnakeActions[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 0};
+ int s19b_dword_800C3A14 = 0x0000047F;
+-int s19b_dword_800C3A18 = 0x02FF01E1;
+-int s19b_dword_800C3A1C = 0x00000000;
++unsigned char s19b_dword_800C3A18[8] = {225, 1, 255, 2, 0, 0, 0, 0};
+ int s19b_dword_800C3A20 = 0x0000017F;
+ int s19b_dword_800C3A24 = 0x0000039B;
+-int s19b_dword_800C3A28 = 0x00000000;
+-int s19b_dword_800C3A2C = 0x00000064;
+-int s19b_dword_800C3A30 = 0x0000FC00;
+-int s19b_dword_800C3A34 = 0x00000000;
+-int s19b_dword_800C3A38 = 0x011E0000;
+-int s19b_dword_800C3A3C = 0x0000023E;
+-int s19b_dword_800C3A40 = 0x00000C00;
+-int s19b_dword_800C3A44 = 0x00000000;
+-int s19b_dword_800C3A48 = 0x059B0000;
+-int s19b_dword_800C3A4C = 0x0000FC63;
+-int s19b_dword_800C3A50 = 0xFC5C00B4;
+-int s19b_dword_800C3A54 = 0x0000FEAC;
++SVECTOR s19b_dword_800C3A28 = {0, 0, 100, 0};
++SVECTOR s19b_dword_800C3A30 = {-1024, 0, 0, 0};
++SVECTOR s19b_dword_800C3A38 = {0, 286, 574, 0};
++SVECTOR s19b_dword_800C3A40 = {3072, 0, 0, 0};
++SVECTOR s19b_dword_800C3A48 = {0, 1435, -925, 0};
++SVECTOR s19b_dword_800C3A50 = {180, -932, -340, 0};
+ int s19b_dword_800C3A58 = 0x00000000;
++
++unsigned short EscapeModelNames[14] = {52098, 6975, 6976, 7999, 8000, 8001, 9023, 9024, 9025, 10047, 10048, 10049, 63156, 0};
++short EscapeRoadSequence[25][8] = {{0, 10, 0, 1000, 0, 200, 0, 0},
++{0, 10, 1000, 1000, 100, 200, 0, 0},
++{0, 4, -1000, 1000, 100, 0, 0, 0},
++{0, 10, 0, 0, 100, 100, 2, 1},
++{1, 1, 0, 0, 0, 0, 1, 9},
++{2, 1, 0, 0, 0, 0, 1, 2},
++{0, 10, 0, 1000, 0, 100, 0, 0},
++{0, 10, 0, 0, 0, 100, 1, 3},
++{1, 1, 0, 0, 0, 0, 1, 9},
++{2, 1, 0, 0, 0, 0, 1, 4},
++{0, 20, 0, 1000, 0, 50, 15, 5},
++{0, -8, 0, 1000, 0, 0, 5, 6},
++{3, 1, 0, 1000, 0, 0, 1, 10},
++{4, -8, 0, 1000, 0, 0, 0, 15},
++{5, 1, 0, 1000, 0, 0, 1, 12},
++{0, -8, 0, 1000, 0, 0, 5, 7},
++{6, 1, 0, 1000, 0, 0, 1, 11},
++{7, -8, 0, 1000, 0, 0, 0, 0},
++{8, 1, 0, 1000, 0, 0, 1, 13},
++{0, -16, 0, 1000, 0, 0, 11, 8},
++{9, 1, 0, 1000, 0, 0, 0, 0},
++{10, 1, 0, 1000, 0, 0, 0, 0},
++{11, 1, 0, 1000, 0, 0, 0, 0},
++{11, 8, 0, 1000, 0, 0, 0, 14},
++{-1, 0, 0, 1000, 100, 200, 0, 0}};
++MATRIX EscapeRoadScale = {{{2048, 0, 0},{0, 2049, 0},{0, 0, 2048}}, {0, 0, 0}};
++unsigned char EscapeRoadRumble[52] = {127, 9, 0, 4, 127, 9, 0, 4, 127, 6, 0, 4, 127, 4, 0, 6, 127, 3, 0, 0, 255, 9, 243, 2, 231, 2, 255, 6, 245, 1, 224, 2, 243, 8, 229, 8, 11, 2, 200, 7, 11, 3, 164, 6, 101, 31, 63, 47, 0, 0, 64, 20};
++VECTOR s19b_dword_800C3730 = {2048, 2048, 2048, 0};
++SVECTOR s19b_dword_800C3740 = {0, 1062, 1625, 0};
++SVECTOR s19b_dword_800C3748 = {0, 1062, 375, 0};
++SVECTOR s19b_dword_800C3750 = {-1250, 562, 1375, 0};
++SVECTOR s19b_dword_800C3758 = {1250, 562, 625, 0};
++SVECTOR s19b_dword_800C3760 = {500, 3000, 5000, 0};
++SVECTOR s19b_dword_800C3768 = {0, 0, 0, 0};
++SVECTOR s19b_dword_800C3770 = {250, 1400, 1500, 0};
++SVECTOR s19b_dword_800C39BC = {365, 440, 677, 0};
++SVECTOR s19b_dword_800C39C4 = {315, 440, 365, 0};
++int s19b_dword_800C39CC = 0;
++EscapeCameraEntry EscapeCameraIntro[9] = {{3, 30, 0, {0, 0, 0, 0}, {0, 0, 0, 0}, 768},
++{3, 31, 0, {0, 0, 0, 0}, {0, 0, 0, 0}, 48},
++{3, 130, 0, {0, 0, 0, 0}, {0, 0, 0, 0}, 3},
++{0, 175, 0, {0, 0, 0, 0}, {0, 0, 0, 0}, 33},
++{3, 176, 2, {0, 0, 0, 0}, {-170, -1300, 500, 0}, 224},
++{3, 275, 2, {0, 0, 0, 0}, {-170, -800, 500, 0}, 36},
++{3, 305, 2, {0, 0, 0, 0}, {170, -1024, 500, 0}, 224},
++{1, 335, 2, {0, 0, 0, 0}, {270, -20, 3000, 0}, 44},
++{-1, 0, 0, {0, 0, 0, 0}, {0, 0, 0, 0}, 0}};
++EscapeCameraEntry EscapeCameraFinal[4] = {{3, 30, 0, {0, 0, 0, 0}, {0, 0, 0, 0}, 768},
++{1, 130, 2, {0, 0, 0, 0}, {4050, 3000, 500, 0}, 44},
++{1, 630, 0, {0, 0, 0, 0}, {0, 4000, -12000, 0}, 2},
++{-1, 0, 0, {0, 0, 0, 0}, {0, 0, 0, 0}, 0}};
++RECT s19b_dword_800C3988 = {300, 300, 600, 600};
++unsigned char EscapeRumble3990[4] = {127, 1, 0, 0};
++unsigned char EscapeRumble3994[8] = {255, 2, 23, 5, 160, 2, 0, 0};
++unsigned char EscapeRumble399C[4] = {127, 2, 0, 0};
++unsigned char EscapeRumble39A0[16] = {255, 1, 183, 6, 144, 11, 92, 9, 69, 4, 34, 4, 0, 0, 0, 0};
++unsigned char EscapeRumble39B0[12] = {90, 4, 126, 4, 188, 2, 63, 15, 33, 25, 0, 0};
++SVECTOR s19b_dword_800C39D0[3] = {{0, 450, 300, 0}, {0, 450, -300, 0}, {345, 915, -440, 0}};
+diff --git a/source/overlays/s19b/overlay3.c b/source/overlays/s19b/overlay3.c
+index 5e562a874..02ee703bf 100644
+--- a/source/overlays/s19b/overlay3.c
++++ b/source/overlays/s19b/overlay3.c
+@@ -1,27 +1,14 @@
+-#include "mgstype.h"
++#include "overlays/s19b/escape.h"
+ 
+-const char s19b_dword_800DDD4C[] = {0xe4, 0xfd, 0xbe, 0x4};
+-const char s19b_dword_800DDD50[] = {'=', 0xfc, 0x0, 0x0};
+-const char s19b_dword_800DDD54[] = {0xac, 0x1, 'U', 0x2};
+-const char s19b_dword_800DDD58[] = {0xb6, 0x6, 0x0, 0x0};
+-const char s19b_dword_800DDD5C[] = {'O', 0xfd, 0xde, 0x3};
+-const char s19b_dword_800DDD60[] = {'Q', 0xfe, 0x0, 0x0};
+-const char s19b_dword_800DDD64[] = {0xcb, 0x1, 'o', 0x3};
+-const char s19b_a_800DDD68[] = ";";
+ 
+-int SECTION(".bss") s19b_dword_800DE5B0;
++struct EscapeRoadWork;
++struct EscapeRoadWork *SECTION(".bss") s19b_dword_800DE5B0;
+ int SECTION(".bss") s19b_dword_800DE5B4;
+ int SECTION(".bss") s19b_dword_800DE5B8;
+ int SECTION(".bss") s19b_dword_800DE5BC;
+ int SECTION(".bss") s19b_dword_800DE5C0;
+ int SECTION(".bss") s19b_dword_800DE5C4;
+-int SECTION(".bss") s19b_dword_800DE5C8;
+-int SECTION(".bss") s19b_dword_800DE5CC;
+-int SECTION(".bss") s19b_dword_800DE5D0;
+-int SECTION(".bss") s19b_dword_800DE5D4;
+-int SECTION(".bss") s19b_dword_800DE5D8;
+-int SECTION(".bss") s19b_dword_800DE5DC;
+-int SECTION(".bss") s19b_dword_800DE5E0;
+-int SECTION(".bss") s19b_dword_800DE5E4;
+-int SECTION(".bss") s19b_dword_800DE5E8;
+ int SECTION(".bss") s19b_dword_800DE5EC;
++
++EscapeViewState EscapeView;
++SVECTOR EscapeCameraFixed[4] = {{-540, 1214, -963, 0}, {428, 597, 1718, 0}, {-689, 990, -431, 0}, {459, 879, 59, 0}};
+diff --git a/source/overlays/s19b/overlay4.c b/source/overlays/s19b/overlay4.c
+index 118eeabed..ff875030f 100644
+--- a/source/overlays/s19b/overlay4.c
++++ b/source/overlays/s19b/overlay4.c
+@@ -1,9 +1,7 @@
+ #include "mgstype.h"
++#include <libgte.h>
+ 
+-const char s19b_dword_800DDD7C[] = {0x0, 0x8, 0x0, 0x0};
+-const char s19b_dword_800DDD80[] = {0x0, 0x8, 0x0, 0x0};
+-const char s19b_dword_800DDD84[] = {0x0, 0x8, 0x0, 0x0};
+-const char s19b_dword_800DDD88[] = {0x0, 0x0, 0x0, 0x0};
++const VECTOR EscapePlayerJeepScale = {2048, 2048, 2048, 0};
+ const char s19b_aJeepc_800DDD8C[] = "jeep.c";
+ const int s19b_dword_800DDD94 = 0x800D2F9C;
+ const int s19b_dword_800DDD98 = 0x800D2FA8;
+@@ -17,7 +15,7 @@ const int s19b_dword_800DDDB4 = 0x800D340C;
+ const int s19b_dword_800DDDB8 = 0x800D34EC;
+ const int s19b_dword_800DDDBC = 0x800D3598;
+ const int s19b_dword_800DDDC0 = 0x800D3610;
+-const char s19b_dword_800DDDC4[] = {0x0, 0x0, 0x0, 0x0, 'e', 0x4, 0x0, 0x0};
++const SVECTOR s19b_dword_800DDDC4 = {0, 0, 1125, 0};
+ const char s19b_aMeryl_800DDDCC[] = "meryl";
+ const char s19b_aMelb_800DDDD4[] = "mel_19b";
+ const char s19b_dword_800DDDDC[] = "メリル";
+diff --git a/source/overlays/s19b/overlay5.c b/source/overlays/s19b/overlay5.c
+index 942d7c9ad..9f513eef2 100644
+--- a/source/overlays/s19b/overlay5.c
++++ b/source/overlays/s19b/overlay5.c
+@@ -1,27 +1,16 @@
+ #include "mgstype.h"
++#include <libgte.h>
+ 
+-int s19b_dword_800C3A7C = 0x059B0000;
+-int s19b_dword_800C3A80 = 0x0000FC63;
+-int s19b_dword_800C3A84 = 0x00000800;
+-int s19b_dword_800C3A88 = 0x00000800;
+-int s19b_dword_800C3A8C = 0x00000800;
+-int s19b_dword_800C3A90 = 0x00000000;
+-int s19b_dword_800C3A94 = 0x01B8016D;
+-int s19b_dword_800C3A98 = 0x000002A5;
+-int s19b_dword_800C3A9C = 0xBFBEBDB9;
+-int s19b_dword_800C3AA0 = 0x00000000;
+-int s19b_dword_800C3AA4 = 0x00000064;
+-int s19b_dword_800C3AA8 = 0x0000FC00;
+-int s19b_dword_800C3AAC = 0x00000000;
+-int s19b_dword_800C3AB0 = 0x01F400AF;
+-int s19b_dword_800C3AB4 = 0x000000AF;
+-int s19b_dword_800C3AB8 = 0x00000000;
+-int s19b_dword_800C3ABC = 0x00000000;
+-int s19b_dword_800C3AC0 = 0xFE0C0005;
+-int s19b_dword_800C3AC4 = 0x00000050;
+-int s19b_dword_800C3AC8 = 0x00140014;
+-int s19b_dword_800C3ACC = 0x000C0010;
+-int s19b_dword_800C3AD0 = 0x98660005;
++SVECTOR s19b_dword_800C3A7C = {0, 1435, -925, 0};
++VECTOR s19b_dword_800C3A84 = {2048, 2048, 2048, 0};
++SVECTOR s19b_dword_800C3A94 = {365, 440, 677, 0};
++unsigned char s19b_dword_800C3A9C[4] = {185, 189, 190, 191};
++SVECTOR s19b_dword_800C3AA0 = {0, 0, 100, 0};
++SVECTOR s19b_dword_800C3AA8 = {-1024, 0, 0, 0};
++SVECTOR s19b_dword_800C3AB0 = {175, 500, 175, 0};
++SVECTOR s19b_dword_800C3AB8 = {0, 0, 0, 0};
++SVECTOR s19b_dword_800C3AC0 = {5, -500, 80, 0};
++short s19b_dword_800C3AC8[5] = {20, 20, 16, 12, 5};
+ int s19b_dword_800C3AD4 = 0x00000000;
+ 
+ const char s19b_aJeepc_800DDE44[] = "jeep2.c";
+@@ -30,8 +19,7 @@ const int s19b_dword_800DDE50 = 0x800D74F8;
+ const int s19b_dword_800DDE54 = 0x800D753C;
+ const int s19b_dword_800DDE58 = 0x800D75B0;
+ const int s19b_dword_800DDE5C = 0x800D768C;
+-const char s19b_dword_800DDE60[] = {'^', 0x1, 0xcf, 0x3};
+-const char s19b_dword_800DDE64[] = {0xa2, 0xfe, 0x0, 0x0};
++const SVECTOR EscapeLiquidPosition = {350, 975, -350, 0};
+ const char s19b_aLiquid_800DDE68[] = "liquid";
+ const char s19b_aLqdb_800DDE70[] = "lqd_19b";
+ const char s19b_aFamas_800DDE78[] = "famas";
+@@ -42,5 +30,4 @@ const int s19b_dword_800DDE98 = 0x800D9AF0;
+ const int s19b_dword_800DDE9C = 0x800D9B00;
+ const int s19b_dword_800DDEA0 = 0x800D9B10;
+ const int s19b_dword_800DDEA4 = 0x800D9B20;
+-const char s19b_dword_800DDEA8[] = {0x0, 0x0, 0x0, 0x0};
+-const char s19b_dword_800DDEAC[] = {'2', 0x2, 0x0, 0x0};
++const SVECTOR EscapeVehicleHeightOffset = {0, 0, 562, 0};
+diff --git a/source/overlays/s19b/overlay6.c b/source/overlays/s19b/overlay6.c
+index 831ced93d..2821d6689 100644
+--- a/source/overlays/s19b/overlay6.c
++++ b/source/overlays/s19b/overlay6.c
+@@ -1,24 +1,12 @@
+-#include "mgstype.h"
++#include "overlays/s19b/escape.h"
++#include "overlays/s19b/jeep_vehicles.h"
+ #include "game/game.h"
+ 
+-typedef struct _JEEP_SYSTEM
+-{
+-    char     pad1[0x4];
+-    CONTROL *control;
+-    char     pad2[0x10];
+-    SVECTOR  pos;
+-    char     pad3[0x40];
+-    OBJECT  *body;
+-    char     pad4[0x1C];
+-    MATRIX   world;
+-    char     pad5[0xCC];
+-} JEEP_SYSTEM;
+-
+ int SECTION(".bss") s19b_dword_800DE648;
+-int SECTION(".bss") s19b_dword_800DE64C;
++EscapeJeepWork *SECTION(".bss") s19b_dword_800DE64C;
+ int SECTION(".bss") s19b_dword_800DE650;
+ int SECTION(".bss") s19b_dword_800DE654;
+ 
+-JEEP_SYSTEM SECTION(".bss") Takabe_JeepSystem;
++EscapeSystem SECTION(".bss") Takabe_JeepSystem;
+ 
+ int SECTION(".bss") s19b_dword_800DE7C4;
+diff --git a/source/overlays/s19b/takabe/democame.c b/source/overlays/s19b/takabe/democame.c
+index 87ccb9a1c..b0104488d 100644
+--- a/source/overlays/s19b/takabe/democame.c
++++ b/source/overlays/s19b/takabe/democame.c
+@@ -1,46 +1,10 @@
+-#include "game/game.h"
+-
+-typedef struct _DemocameUnk
+-{
+-    int     f0;
+-    int     f4;
+-    int     f8;
+-    SVECTOR fC;
+-    SVECTOR f14;
+-    int     f1C;
+-} DemocameUnk;
+-
+-typedef int  (*DemocameFn1)(int, int, int);
+-typedef void (*DemocameFn2)(SVECTOR *, SVECTOR *, int);
+-
+-typedef struct _Work
+-{
+-    GV_ACT       actor;
+-    SVECTOR      eye;
+-    SVECTOR      center;
+-    SVECTOR      rotate;
+-    int          track;
+-    int          type;
+-    SVECTOR     *field_40;
+-    SVECTOR     *field_44;
+-    SVECTOR     *field_48;
+-    int         *field_4C;
+-    SVECTOR      field_50;
+-    SVECTOR      field_58;
+-    SVECTOR      field_60;
+-    int          field_68;
+-    int          field_6C;
+-    int          field_70;
+-    int          field_74;
+-    DemocameFn1  field_78;
+-    DemocameFn2  field_7C;
+-    DemocameFn2  field_80;
+-    DemocameUnk *field_84;
+-    int          field_88;
+-    int          field_8C;
+-    int          field_90;
+-    char         pad1[0x18];
+-} Work;
++#include "overlays/s19b/escape.h"
++#include "game/camera.h"
++
++typedef EscapeCameraEntry DemocameUnk;
++typedef EscapeCameraWork Work;
++typedef EscapeCameraNear DemocameFn1;
++typedef EscapeCameraNearVector DemocameFn2;
+ 
+ void s19b_democame_800DB578(SVECTOR *in, SVECTOR *out, SVECTOR *angle, int *length);
+ void s19b_democame_800DB5C4(SVECTOR *out, SVECTOR *in, SVECTOR *angle, int *length);
+@@ -148,26 +112,14 @@ void s19b_democame_800DB770(SVECTOR *from, SVECTOR *to, int interp)
+     GV_NearTimePV((short *)from, (short *)to, interp, 3);
+ }
+ 
+-DemocameFn1 s19b_dword_800C3AE0[] = {
+-    s19b_democame_800DB610,
+-    s19b_democame_800DB630,
+-    s19b_democame_800DB650,
+-    s19b_democame_800DB670
+-};
++DemocameFn1 s19b_dword_800C3AE0[] = {s19b_democame_800DB610, s19b_democame_800DB630, s19b_democame_800DB650,
++                                     s19b_democame_800DB670};
+ 
+-DemocameFn2 s19b_dword_800C3AF0[4] = {
+-    s19b_democame_800DB690,
+-    s19b_democame_800DB6B0,
+-    s19b_democame_800DB6D0,
+-    s19b_democame_800DB6F0
+-};
++DemocameFn2 s19b_dword_800C3AF0[4] = {s19b_democame_800DB690, s19b_democame_800DB6B0, s19b_democame_800DB6D0,
++                                      s19b_democame_800DB6F0};
+ 
+-DemocameFn2 s19b_dword_800C3B00[4] = {
+-    s19b_democame_800DB710,
+-    s19b_democame_800DB730,
+-    s19b_democame_800DB750,
+-    s19b_democame_800DB770
+-};
++DemocameFn2 s19b_dword_800C3B00[4] = {s19b_democame_800DB710, s19b_democame_800DB730, s19b_democame_800DB750,
++                                      s19b_democame_800DB770};
+ 
+ void s19b_democame_800DB790(Work *work, DemocameUnk *unk)
+ {
+@@ -213,7 +165,79 @@ void s19b_democame_800DB790(Work *work, DemocameUnk *unk)
+     work->field_80 = s19b_dword_800C3B00[index];
+ }
+ 
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_democame_800DB968.s")
++void s19b_democame_800DB968(Work *work)
++{
++    int      flags;
++    int      remaining;
++    SVECTOR *source;
++    int     *track;
++
++    if (work->field_88 != 0)
++    {
++        return;
++    }
++    flags = work->field_74;
++    remaining = work->field_70 - 1;
++    if (flags & 1)
++    {
++        source = work->field_40 ? work->field_40 : &work->field_50;
++        if (remaining == 0)
++            work->eye = *source;
++        else
++            work->field_7C(&work->eye, source, remaining);
++    }
++    if (flags & 2)
++    {
++        source = work->field_44 ? work->field_44 : &work->field_58;
++        if (remaining == 0)
++            work->center = *source;
++        else
++            work->field_7C(&work->center, source, remaining);
++    }
++    if (flags & 4)
++    {
++        source = work->field_48 ? work->field_48 : &work->field_60;
++        if (remaining == 0)
++            work->rotate = *source;
++        else
++            work->field_80(&work->rotate, source, remaining);
++    }
++    if (flags & 8)
++    {
++        track = work->field_4C ? work->field_4C : &work->field_68;
++        work->track = remaining == 0 ? *track : work->field_78(work->track, *track, remaining);
++    }
++    if (flags & 0x10)
++        work->eye = *(work->field_40 ? work->field_40 : &work->field_50);
++    if (flags & 0x20)
++        work->center = *(work->field_44 ? work->field_44 : &work->field_58);
++    if (flags & 0x40)
++        work->rotate = *(work->field_48 ? work->field_48 : &work->field_60);
++    if (flags & 0x80)
++        work->track = *(work->field_4C ? work->field_4C : &work->field_68);
++    if (flags & 0x100)
++        work->eye = GM_Camera.position;
++    if (flags & 0x200)
++        work->center = GM_Camera.target;
++    if (flags & 0x400)
++        work->rotate = GM_Camera.rotate;
++    if (flags & 0x800)
++        work->track = GM_Camera.track;
++
++    work->field_70--;
++    if (work->field_70 <= 0)
++    {
++        s19b_democame_800DB470(work);
++        s19b_democame_800DB790(work, work->field_84);
++        work->field_84++;
++        work->field_8C++;
++        if (work->field_6C == -1)
++            work->field_88 = 1;
++        else
++            work->field_70 -= work->field_84[-2].f4;
++    }
++    work->field_90++;
++}
+ void s19b_democame_800DB968(Work *);
+ 
+ void s19b_democame_800DBD38(void)
+diff --git a/source/overlays/s19b/takabe/jeep.c b/source/overlays/s19b/takabe/jeep.c
+index 5df45192f..ad74ede93 100644
+--- a/source/overlays/s19b/takabe/jeep.c
++++ b/source/overlays/s19b/takabe/jeep.c
+@@ -1,21 +1,10 @@
+ #include "game/game.h"
+ 
+-typedef struct _Work
+-{
+-    GV_ACT         actor;
+-    void          *field_20;
+-    char           pad1[0x4];
+-    CONTROL        control;
+-    TARGET        *target;
+-    OBJECT         field_A8;
+-    OBJECT         field_18C;
+-    char           pad2[0x40];
+-    TARGET         target2;
+-    OBJECT_NO_ROTS field_2F8;
+-    OBJECT_NO_ROTS field_31C;
+-    char           pad3[0xBC];
+-} Work;
++#include "overlays/s19b/jeep_vehicles.h"
++#include "strcode.h"
++#include "chara/snake/sna_init.h"
+ 
++typedef EscapeJeepWork Work;
+ 
+ extern SVECTOR s19b_dword_800C39BC;
+ extern SVECTOR s19b_dword_800C39C4;
+@@ -39,6 +28,7 @@ void s19b_jeep_800D21DC(int ang, MATRIX *mat, SVECTOR *out)
+     VECTOR  sqr;
+     int     y;
+ 
++    sqr.vy = 0;
+     sqr.vx = 4096 - ang;
+     sqr.vz = ang;
+ 
+@@ -54,8 +44,7 @@ void s19b_jeep_800D21DC(int ang, MATRIX *mat, SVECTOR *out)
+     ApplyMatrixSV(mat, &vec, out);
+ }
+ 
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_800D2258.s")
+-void s19b_jeep_800D2258(Work *work);
++#include "jeep_native.h"
+ 
+ void s19b_jeep_800D2790(Work *work)
+ {
+@@ -81,8 +70,7 @@ void s19b_jeep_800D2800(Work *work)
+     GM_SetPowerTarget(trg, POWER_DECREASE | POWER_EXPLODE, 2, 8, 0, &DG_ZeroVector);
+ }
+ 
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_800D2880.s")
+-int s19b_jeep_800D2880(Work *work, int, int);
++
+ 
+ extern const char s19b_aJeepc_800DDD8C[]; // = "jeep.c"
+ 
+diff --git a/source/overlays/s19b/takabe/jeep/gsplash3.c b/source/overlays/s19b/takabe/jeep/gsplash3.c
+index 375ca6a6a..f2dba8d04 100644
+--- a/source/overlays/s19b/takabe/jeep/gsplash3.c
++++ b/source/overlays/s19b/takabe/jeep/gsplash3.c
+@@ -65,7 +65,31 @@ void MovePacks(SVECTOR *speeds, SVECTOR *vertices, int count)
+     }
+ }
+ 
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_gsplash3_800D00F4.s")
++void s19b_gsplash3_800D00F4(SVECTOR *speeds, SVECTOR *vertices, int count)
++{
++    int i;
++    int spread;
++
++    for (i = 0; i < count; i++, speeds++, vertices += 4)
++    {
++        speeds->vy -= 8;
++        speeds->vx -= speeds->vx / 4;
++        speeds->vz -= speeds->vz / 4;
++        spread = GV_RandS(64);
++        vertices[0].vx += speeds->vx;
++        vertices[0].vy += speeds->vy;
++        vertices[0].vz += speeds->vz;
++        vertices[1].vx += speeds->vx;
++        vertices[1].vy += speeds->vy;
++        vertices[1].vz = vertices[0].vz + spread;
++        vertices[2].vx += speeds->vx;
++        vertices[2].vy += speeds->vy;
++        vertices[2].vz = vertices[0].vz - spread;
++        vertices[3].vx += speeds->vx;
++        vertices[3].vy += speeds->vy;
++        vertices[3].vz = vertices[0].vz;
++    }
++}
+ void s19b_gsplash3_800D00F4(SVECTOR *, SVECTOR *, int);
+ 
+ void InitPacks(POLY_FT4 *packs0, POLY_FT4 *packs1, int n_packs, DG_TEX *tex)
+diff --git a/source/overlays/s19b/takabe/jeep/jdrumfir.c b/source/overlays/s19b/takabe/jeep/jdrumfir.c
+index af909fcdf..f5eda1fbe 100644
+--- a/source/overlays/s19b/takabe/jeep/jdrumfir.c
++++ b/source/overlays/s19b/takabe/jeep/jdrumfir.c
+@@ -101,7 +101,7 @@ int s19b_jdrumfir_800CA2BC(Work *work, MATRIX *world, int arg2, int arg3)
+ 
+ void *NewJeepDrumFire(MATRIX *world, int arg1, int arg2)
+ {
+-    Work* work;
++    Work *work;
+ 
+     work = GV_NewActor(GV_ACTOR_USER, sizeof(Work));
+     if (work != NULL)
+@@ -162,4 +162,83 @@ void s19b_jdrumfir_800CA4A0(Work *work)
+     prim->raise = 500;
+ }
+ 
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jdrumfir_800CA564.s")
++void s19b_jdrumfir_800CA564(Work *work, int emit)
++{
++    SVECTOR  *speed;
++    SVECTOR  *vertex;
++    POLY_FT4 *packet;
++    DG_TEX   *texture;
++    int       frame;
++    int       column;
++    int       row;
++    int       width;
++    int       height;
++    int       brightness;
++    int       i;
++
++    if (emit)
++    {
++        if (work->field_5C >= 0)
++        {
++            work->field_5C--;
++        }
++        else
++        {
++            speed = &work->speeds[work->field_60];
++            speed->vx = work->field_58;
++            speed->vy = 255;
++            speed->vz = GV_RandU(16);
++            vertex = &work->vertices[work->field_60];
++            vertex->vx = work->world.t[0] + GV_RandS(256) / 2;
++            vertex->vz = work->world.t[2] + GV_RandS(256) / 2;
++            vertex->pad = 20 * work->field_58 - 200;
++            if (vertex->pad < 200)
++                vertex->pad = 200;
++            vertex->vy = work->world.t[1] + vertex->pad;
++            work->field_5C = 12;
++            work->field_60 = (work->field_60 + 1) & 15;
++        }
++    }
++
++    packet = (POLY_FT4 *)work->prim->packs[GV_Clock];
++    texture = work->tex;
++    for (i = 0; i < 16; i++, packet++)
++    {
++        speed = &work->speeds[i];
++        vertex = &work->vertices[i];
++        if (speed->vx == 0)
++        {
++            vertex->pad = 0;
++            setRGB0(packet, 0, 0, 0);
++            continue;
++        }
++        frame = speed->vz;
++        column = frame & 3;
++        row = frame / 4;
++        width = texture->w + 1;
++        height = texture->h + 1;
++        packet->u0 = packet->u2 = texture->off_x + width * column / 4;
++        packet->u1 = packet->u3 = texture->off_x + width * (column + 1) / 4 - 1;
++        packet->v0 = packet->v1 = texture->off_y + height * row / 4;
++        packet->v2 = packet->v3 = texture->off_y + height * (row + 1) / 4 - 1;
++        if (++speed->vz >= 16)
++            speed->vz = 0;
++        brightness = 16 * speed->vx;
++        if (brightness >= 256)
++            brightness = 255;
++        if (speed->vy > 0)
++        {
++            brightness -= speed->vy;
++            if (brightness < 0)
++                brightness = 0;
++            speed->vy /= 2;
++        }
++        setRGB0(packet, brightness, brightness, brightness);
++        vertex->pad -= 10;
++        if (vertex->pad < 200)
++            vertex->pad = 200;
++        if (vertex->pad != 200)
++            vertex->vy -= 10;
++        speed->vx--;
++    }
++}
+diff --git a/source/overlays/s19b/takabe/jeep/jeepdemo.c b/source/overlays/s19b/takabe/jeep/jeepdemo.c
+index 5d0f84d72..a0cb79705 100644
+--- a/source/overlays/s19b/takabe/jeep/jeepdemo.c
++++ b/source/overlays/s19b/takabe/jeep/jeepdemo.c
+@@ -1,67 +1,14 @@
+-#include "game/game.h"
++#include "overlays/s19b/escape.h"
+ #include "game/camera.h"
+ #include "takabe/cinema.h"
+ 
+-typedef struct _JEEP_SYSTEM
+-{
+-    char     pad1[0x4];
+-    CONTROL *control;
+-    char     pad2[0x10];
+-    SVECTOR  pos;
+-    char     pad3a[0x4C - 0x20];
+-    int      field_4C;
+-    char     pad3b[0x54 - 0x4C - sizeof(int)];
+-    int      field_54;
+-    char     pad4[0x8];
+-    OBJECT  *body;
+-    char     pad5a[0x6C - 0x64];
+-    int      *field_6C;
+-    int      *field_70;
+-    char     pad5b[0x7C - 0x70 - sizeof(int *)];
+-    int      field_7C;
+-    MATRIX   world;
+-    char     pad6[0x88];
+-    int      field_128;
+-    char     pad7[0x130 - 0x128 - sizeof(int)];
+-    int      field_130;
+-    char     pad8[0x138 - 0x130 - sizeof(int)];
+-    SVECTOR  field_138;
+-    SVECTOR  field_140;
+-    SVECTOR  field_148;
+-    int      field_150;
+-    SVECTOR  field_154;
+-    int      field_15C;
+-    SVECTOR  field_160;
+-} JEEP_SYSTEM;
++typedef EscapeCameraWork Work;
++typedef EscapeViewState JlampState;
+ 
+-extern JEEP_SYSTEM Takabe_JeepSystem;
+-
+-typedef struct _Work
+-{
+-    GV_ACT actor;
+-    char   pad1[0x20];
+-    void  *field_40;
+-    void  *field_44;
+-    char   pad2[0x4C - 0x44 - sizeof(void *)];
+-    int    field_4C;
+-} Work;
+-
+-typedef struct _JlampState
+-{
+-    SVECTOR field_0;
+-    int     field_8;
+-    int     field_C;
+-    int     field_10;
+-    int     field_14;
+-    int     field_18;
+-} JlampState;
+-
+-extern JlampState s19b_dword_800DE5C8;
+-extern int s19b_dword_800DE5D0;
+ void s19b_jlamp_800D0C44(void);
+-extern SVECTOR s19b_dword_800C3760;
+-extern SVECTOR s19b_dword_800C3768;
+-extern SVECTOR s19b_dword_800C3770;
++void s19b_jeep_gls_800CEC24(int distance, SVECTOR *out);
++int s19b_jeep_mrl_800D39B4(SVECTOR *out);
++
+ extern int s19b_dword_800DE5B8;
+ void *NewBlurSet();
+ void s19b_jlamp_800D0FE4(int arg0);
+@@ -154,14 +101,94 @@ void s19b_jlamp_800D09DC(void)
+     GM_SetSound(0x01FFFF0B, 0);
+     GM_SetSound(0xFF0000FE, 0);
+ }
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jlamp_800D0A20.s")
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jlamp_800D0ABC.s")
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jlamp_800D0C44.s")
++static EscapeCameraEvent IntroEvents[] = {
++    {1, (void (*)(void *))s19b_jlamp_800D06E0},
++    {30, (void (*)(void *))s19b_jlamp_800D072C},
++    {130, (void (*)(void *))s19b_jlamp_800D07EC},
++    {141, (void (*)(void *))s19b_jlamp_800D087C},
++    {275, (void (*)(void *))s19b_jlamp_800D08C8},
++    {335, (void (*)(void *))s19b_jlamp_800D08F0},
++    {-1, (void (*)(void *))s19b_jlamp_800D072C}
++};
++static EscapeCameraEvent FinalEvents[] = {
++    {1, (void (*)(void *))s19b_jlamp_800D0928},
++    {30, (void (*)(void *))s19b_jlamp_800D094C},
++    {60, (void (*)(void *))s19b_jlamp_800D0970},
++    {130, (void (*)(void *))s19b_jlamp_800D09B8},
++    {140, (void (*)(void *))s19b_jlamp_800D0990},
++    {150, (void (*)(void *))s19b_jlamp_800D09DC},
++    {-1, (void (*)(void *))s19b_jlamp_800D094C}
++};
++
++void s19b_jlamp_800D0A20(int mode)
++{
++    EscapeCameraWork *work;
++    if (GM_GameOverTimer != 0 || Takabe_JeepSystem.camera != NULL)
++        return;
++    if (mode != 0 && mode != 1)
++        return;
++    work = NewDemoCamera(mode == 0 ? EscapeCameraIntro : EscapeCameraFinal);
++    if (!work)
++        return;
++    Takabe_JeepSystem.camera = work;
++    work->events = mode == 0 ? IntroEvents : FinalEvents;
++    DG_UnDrawFrameCount = 0;
++    GM_GameStatus |= 0x40000000;
++}
++void s19b_jlamp_800D0ABC(void)
++{
++    EscapeCameraWork *work = Takabe_JeepSystem.camera;
++    EscapeCameraEvent *event;
++    if (!work)
++        return;
++    event = work->events;
++    if (event && event->frame != -1 && work->field_90 >= event->frame)
++    {
++        event->callback(work);
++        work->events++;
++    }
++    if (Takabe_JeepSystem.field_150)
++    {
++        DG_SetPos(Takabe_JeepSystem.field_150);
++        DG_PutVector(&Takabe_JeepSystem.field_154, &Takabe_JeepSystem.field_140, 1);
++    }
++    if (Takabe_JeepSystem.field_15C)
++    {
++        DG_SetPos(Takabe_JeepSystem.field_15C);
++        DG_PutVector(&Takabe_JeepSystem.field_160, &Takabe_JeepSystem.field_148, 1);
++    }
++    GM_Camera.position = work->eye;
++    GM_Camera.target = work->center;
++    GM_Camera.rotate = work->rotate;
++    GM_Camera.track = work->track;
++    GM_Camera.type = work->type;
++    if (work->field_88)
++    {
++        GV_DestroyActor(work);
++        Takabe_JeepSystem.camera = NULL;
++        Takabe_JeepSystem.field_4C &= ~0x20000;
++    }
++}
++void s19b_jlamp_800D0C44(void)
++{
++    SVECTOR *target;
++    GV_NearExp4V(&GM_Camera.position.vx, &EscapeView.field_0.vx, 3);
++    if (EscapeView.field_18)
++        target = &EscapeView.target;
++    else
++    {
++        GM_Camera.target = GM_SnakeCamera.target;
++        target = &GM_SnakeCamera.position;
++    }
++    GV_NearExp4V(&GM_Camera.target.vx, &target->vx, 3);
++    GM_Camera.type = 0;
++    s19b_jlamp_800D0ABC();
++}
+ void s19b_jlamp_800D0CE0(void)
+ {
+     JlampState *state;
+ 
+-    state = &s19b_dword_800DE5C8;
++    state = &EscapeView;
+     state->field_0.vx = 0;
+     state->field_0.vy = 1500;
+     state->field_0.vz = 2000;
+@@ -173,9 +200,36 @@ void s19b_jlamp_800D0CE0(void)
+     GM_SetCameraCallbackFunc(1, s19b_jlamp_800D0C44);
+ }
+ 
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jlamp_800D0D40.s")
++void s19b_jlamp_800D0D40(void)
++{
++    SVECTOR position;
++    SVECTOR vehicle;
++    SVECTOR *target;
++    int side;
++    if (EscapeView.field_8 >= 0 && EscapeView.field_8 <= 2)
++        EscapeView.field_C = GV_NearExp4(EscapeView.field_C, EscapeView.field_8 == 1 ? -2000 : 2000);
++    if (EscapeView.field_8 == 3 || EscapeView.field_8 == 4)
++    {
++        side = EscapeView.field_8 == 3 ? 0 : 2;
++        EscapeView.field_0 = EscapeCameraFixed[side];
++        EscapeView.target = EscapeCameraFixed[side + 1];
++        EscapeView.field_18 = 1;
++        target = &EscapeView.target;
++    }
++    else
++    {
++        s19b_jeep_gls_800CEC24(Takabe_JeepSystem.control->mov.vz + EscapeView.field_C, &position);
++        EscapeView.field_10 = GV_NearSpeed(EscapeView.field_10, 1500, 100);
++        position.vy += EscapeView.field_10;
++        position.vx += s19b_jeep_mrl_800D39B4(&vehicle);
++        EscapeView.field_18 = 0;
++        EscapeView.field_0 = position;
++        target = &GM_SnakeCamera.position;
++    }
++    s19b_jlamp_800D0648(&EscapeView.field_0, target, &GM_SnakeCamera.rotate, &GM_SnakeCamera.track);
++}
+ 
+ void s19b_jlamp_800D0FE4(int arg0)
+ {
+-    s19b_dword_800DE5D0 = arg0;
++    EscapeView.field_8 = arg0;
+ }
+diff --git a/source/overlays/s19b/takabe/jeep2.c b/source/overlays/s19b/takabe/jeep2.c
+index f0810e3c0..97e659273 100644
+--- a/source/overlays/s19b/takabe/jeep2.c
++++ b/source/overlays/s19b/takabe/jeep2.c
+@@ -1,21 +1,11 @@
+ #include "mgstype.h"
+ #include "game/game.h"
+ 
+-typedef struct _Jeep2Work
+-{
+-    /* +0x000 */ GV_ACT         actor;
+-    /* +0x020 */ void          *field_20;
+-    /* +0x024 */ CONTROL        control;
+-    /* +0x0A0 */ TARGET        *target;
+-    /* +0x0A4 */ OBJECT         jeep_b;
+-    /* +0x188 */ OBJECT         jeep_t;
+-    /* +0x26C */ OBJECT_NO_ROTS gun;
+-    /* +0x290 */ MATRIX         light[2];
+-    /* +0x2D0 */ OBJECT_NO_ROTS fhl;
+-    /* +0x2F4 */ OBJECT_NO_ROTS hl;
+-} Jeep2Work;
+-
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep2_800D667C.s")
++#include "overlays/s19b/jeep_vehicles.h"
++
++typedef EscapeJeep2Work Jeep2Work;
++
++#include "jeep2_native.h"
+ 
+ void s19b_jeep2_800D6A70(Jeep2Work *work)
+ {
+@@ -28,16 +18,16 @@ void s19b_jeep2_800D6A70(Jeep2Work *work)
+     GM_FreeTarget(work->target);
+     GV_DestroyActor(work->field_20);
+ }
+-extern int s19b_dword_800C3A94;
++
+ 
+ void s19b_jeep2_800D6AD8(Jeep2Work *work)
+ {
+     TARGET *target = GM_AllocTarget();
+ 
+     work->target = target;
+-    GM_SetTarget(target, TARGET_PUSH, NO_SIDE, (SVECTOR *)&s19b_dword_800C3A94);
++    GM_SetTarget(target, TARGET_PUSH, NO_SIDE, &s19b_dword_800C3A94);
+ }
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep2_800D6B18.s")
++
+ 
+ extern void s19b_jeep2_800D667C(Jeep2Work *work);
+ extern int  s19b_jeep2_800D6B18(Jeep2Work *work, int arg0, int arg1);
+@@ -45,7 +35,7 @@ extern const char s19b_aJeepc_800DDE44[];
+ 
+ void *s19b_jeep2_800D6F24(int arg0, int arg1)
+ {
+-    Jeep2Work *work = GV_NewActor(GV_ACTOR_USER, 0x3FC);
++    Jeep2Work *work = GV_NewActor(GV_ACTOR_USER, sizeof(Jeep2Work));
+ 
+     if (work != NULL)
+     {
+diff --git a/source/overlays/s19b/takabe/jeep2_native.h b/source/overlays/s19b/takabe/jeep2_native.h
+new file mode 100644
+index 000000000..0cdea3057
+--- /dev/null
++++ b/source/overlays/s19b/takabe/jeep2_native.h
+@@ -0,0 +1,150 @@
++#ifndef MGS_ESCAPE_JEEP2_NATIVE_H
++#define MGS_ESCAPE_JEEP2_NATIVE_H
++
++void s19b_jeep2_800D6AD8(Jeep2Work *work);
++
++void s19b_jeep2_800D667C(Jeep2Work *work)
++{
++    TARGET *target;
++    SVECTOR delta = {0, 0, 0, 0}, position, rotation;
++    work->previous = work->position;
++    work->position.vx += work->step.vx;
++    work->position.vz += work->step.vz;
++    work->control.mov.vx = work->position.vx - Takabe_JeepSystem.field_28.vx;
++    work->control.mov.vz = work->position.vz - Takabe_JeepSystem.field_28.vz;
++    if (work->field_3C4 != 0)
++    {
++        if (work->field_3C0 == 0)
++            work->field_3B0 -= work->field_3B0 / 4;
++        work->field_3B4 |= 1;
++        if (work->field_3B8 == 0)
++            work->field_3B8 = 20;
++    }
++    else
++        work->field_3B4 &= ~1;
++    work->field_3C4 = 0;
++    if (work->field_3B8 != 0)
++        --work->field_3B8;
++    work->field_3D0(work);
++    if (s19b_jeep_gls_800CEDFC(work->control.mov.vz, -8000) == 31)
++    {
++        GV_DestroyActor(work);
++        return;
++    }
++    target = work->target;
++    work->field_3B4 &= ~12;
++    if (target->damaged & TARGET_PUSH)
++    {
++        work->control.mov.vx += target->offset.vx;
++        work->control.mov.vz += target->offset.vz;
++        work->position.vx += target->offset.vx;
++        work->position.vy += target->offset.vy;
++        if (work->field_3E8 == s19b_jeep_liq_800D7D68)
++        {
++            work->field_3B4 |= 4;
++            if (work->field_3C0 == 0)
++                work->rotation.vy = GV_NearExp2(work->rotation.vy, 2048);
++            if (work->field_3BC == 0 && target->offset.vx >= 41)
++            {
++                work->field_3BC = 15;
++                GM_SeSet(&work->control.mov, 176);
++            }
++        }
++        else
++        {
++            work->field_3B4 |= 8;
++            if (work->field_3BC == 0)
++            {
++                work->field_3BC = 15;
++                GM_SeSet(&work->control.mov, 176);
++            }
++        }
++    }
++    target->damaged &= ~TARGET_PUSH;
++    target->offset = DG_ZeroVector;
++    if (work->field_3BC != 0)
++        --work->field_3BC;
++    s19b_spark2_m_800D9C90(&work->control, &work->position, &work->field_3A8, &delta);
++    s19b_spark2_m_800D9EC0(&work->control, &work->rotation, &work->step, &work->field_388);
++    s19b_spark2_m_800DA0B4(work->jeep_t.rots, work->field_3AC, &work->rotation, &work->field_398);
++    work->control.turn = work->rotation;
++    work->control.turn.vx = 0;
++    position = work->control.mov;
++    position.vy += 250;
++    DG_GetLightMatrix(&position, work->light);
++    GM_ActControl(&work->control);
++    GM_ActObject2(&work->jeep_b);
++    RotMatrixX(work->rotation.vx, &work->jeep_b.objs->world);
++    ScaleMatrix(&work->jeep_b.objs->world, &s19b_dword_800C3A84);
++    rotation = work->control.rot;
++    rotation.vz = 0;
++    DG_SetPos2(&work->control.mov, &rotation);
++    GM_ActObject2(&work->jeep_t);
++    RotMatrixX(work->rotation.vx, &work->jeep_t.objs->world);
++    ScaleMatrix(&work->jeep_t.objs->world, &s19b_dword_800C3A84);
++    GM_ActObject2((OBJECT *)&work->fhl);
++    GM_ActObject2((OBJECT *)&work->hl);
++    DG_SetPos(&work->jeep_b.objs->world);
++    DG_MovePos(&s19b_dword_800C3A7C);
++    GM_ActObject2((OBJECT *)&work->gun);
++    GM_MoveTarget(work->target, &work->control.mov);
++}
++
++int s19b_jeep2_800D6B18(Jeep2Work *work, int name, int where)
++{
++    CONTROL *control = &work->control;
++    SVECTOR position;
++    if (GM_InitControl(control, name, where) < 0)
++        return -1;
++    GM_ConfigControlHazard(control, -1, -2, -1);
++    GM_ConfigControlInterp(control, 0);
++    control->turn = control->rot = control->mov = control->step = DG_ZeroVector;
++    control->turn.vy = control->rot.vy = 2048;
++    GM_InitObject(&work->jeep_b, 9927, 45, 0);
++    GM_InitObject(&work->jeep_t, 9945, 45, 0);
++    GM_ConfigObjectJoint(&work->jeep_b);
++    GM_ConfigObjectJoint(&work->jeep_t);
++    GM_ConfigObjectLight(&work->jeep_b, work->light);
++    GM_ConfigObjectLight(&work->jeep_t, work->light);
++    GM_InitObjectNoRots(&work->gun, 16297, 109, 0);
++    GM_ConfigObjectLight((OBJECT *)&work->gun, work->light);
++    GM_InitObjectNoRots(&work->fhl, 14855, 365, 0);
++    work->fhl.objs->root = &work->jeep_b.objs->world;
++    GM_ConfigObjectLight((OBJECT *)&work->fhl, work->lamp_light);
++    GM_InitObjectNoRots(&work->hl, 55824, 365, 0);
++    work->hl.objs->root = &work->jeep_b.objs->world;
++    GM_ConfigObjectLight((OBJECT *)&work->hl, work->lamp_light);
++    work->lamp_light[0].t[0] = work->lamp_light[0].t[1] = work->lamp_light[0].t[2] = 128;
++    s19b_jeep2_800D6AD8(work);
++    work->rotation = control->rot;
++    work->position = Takabe_JeepSystem.field_28;
++    work->position.vz += 20000;
++    work->previous = work->position;
++    work->previous.vz += 400;
++    work->field_380 = work->step = work->field_388 = DG_ZeroVector;
++    work->step.vz = -400;
++    work->field_388.vz = -2048;
++    work->field_3B0 = work->field_3A8 = 425;
++    work->field_3A0 = work->field_3A4 = work->field_3B4 = work->field_3B8 = 0;
++    control->mov.vz = work->position.vz - Takabe_JeepSystem.field_28.vz;
++    s19b_jeep_gls_800CEC24(control->mov.vz, &position);
++    control->mov.vx = position.vx;
++    work->position.vx = position.vx + Takabe_JeepSystem.field_28.vx;
++    control->mov.vy = position.vy;
++    work->field_3D0 = s19b_jeep_liq_800D76B0;
++    work->field_3DC = s19b_jeep_liq_800D7ACC;
++    work->field_3E8 = s19b_jeep_liq_800D7BB0;
++    work->field_3C8 = work->field_3CC = work->field_3D4 = work->field_3D8 = 0;
++    work->field_3E0 = work->field_3E4 = work->field_3EC = work->field_3F0 = work->field_3F4 = 0;
++    work->field_3F8 = s19b_jeep_liq_800D81A8;
++    work->field_20 = s19b_spark2_m_800D8670(control, &work->jeep_b.objs->world, &work->field_3C4);
++    NewJeepLamp2(&work->jeep_b.objs->world);
++    Takabe_JeepSystem.field_C = 1;
++    Takabe_JeepSystem.field_10 = (int)control;
++    Takabe_JeepSystem.field_14 = (int)&control->rot;
++    Takabe_JeepSystem.field_54 = 0x10000;
++    Takabe_JeepSystem.field_70 = (MATRIX **)&work->jeep_b.objs;
++    return 0;
++}
++
++#endif
+diff --git a/source/overlays/s19b/takabe/jeep_liq/jeep_collision_native.h b/source/overlays/s19b/takabe/jeep_liq/jeep_collision_native.h
+new file mode 100644
+index 000000000..270b7ec2e
+--- /dev/null
++++ b/source/overlays/s19b/takabe/jeep_liq/jeep_collision_native.h
+@@ -0,0 +1,95 @@
++#ifndef MGS_ESCAPE_JEEP_COLLISION_NATIVE_H
++#define MGS_ESCAPE_JEEP_COLLISION_NATIVE_H
++
++extern int s19b_dword_800C3AD4;
++extern const SVECTOR EscapeVehicleHeightOffset;
++void *NewSpark2M(MATRIX *world);
++
++int s19b_spark2_m_800D9C90(CONTROL *control, VECTOR *position, int *speed, SVECTOR *delta)
++{
++    SVECTOR near, hit, from = control->mov;
++    MATRIX world;
++    int distance;
++    (void)speed;
++    from.vy += 250;
++    if (HZD_NearHazardCheck(control->map->hzd, &from, 475, 12, 0) <= 0)
++        return 0;
++    HZD_GetNearVector(&near);
++    hit = near;
++    distance = GV_VecLen3(&near);
++    GV_AddVec3(&near, &from, &hit);
++    if (distance < 485)
++    {
++        world = DG_ZeroMatrix;
++        world.t[0] = hit.vx;
++        world.t[1] = hit.vy;
++        world.t[2] = hit.vz;
++        NewSpark2M(&world);
++        s19b_dword_800C3AD4 += GV_PassageTime;
++        if (s19b_dword_800C3AD4 >= 7)
++        {
++            s19b_dword_800C3AD4 -= 6;
++            GM_SeSetMode(&hit, 195, 1);
++        }
++    }
++    if (distance >= 475)
++        return 0;
++    GV_LenVec3(&near, &near, distance, -475);
++    GV_AddVec3(&near, &hit, &hit);
++    GV_SubVec3(&from, &hit, delta);
++    control->mov = hit;
++    /* Retail subtracts the X correction three times from the same world component. */
++    position->vx -= delta->vx;
++    position->vx -= delta->vx;
++    position->vx -= delta->vx;
++    return 1;
++}
++
++int s19b_spark2_m_800D9EC0(CONTROL *control, SVECTOR *rotation, SVECTOR *step, SVECTOR *previous)
++{
++    SVECTOR position, ahead, offset = EscapeVehicleHeightOffset;
++    SVECTOR yaw = DG_ZeroVector, distant;
++    int z = control->mov.vz;
++    int roll;
++    yaw.vy = rotation->vy;
++    DG_SetPos2(&DG_ZeroVector, &yaw);
++    DG_RotVector(&offset, &offset, 1);
++    s19b_jeep_gls_800CEC24(z, &position);
++    s19b_jeep_gls_800CEC24(z + offset.vz, &ahead);
++    control->mov.vy = position.vy;
++    GV_SubVec3(&position, &ahead, &position);
++    s19b_jeep_gls_800CEC24(z + 1024, &distant);
++    rotation->vx = -ratan2(distant.vy - control->mov.vy, 1024);
++    rotation->vz -= (-step->vx * previous->vz + step->vz * previous->vx) >> 9;
++    *previous = *step;
++    roll = rotation->vz;
++    if (roll < 0)
++        roll = -roll;
++    rotation->vz = GV_NearSpeed(rotation->vz, 0, (200 - roll) / 32 + 1);
++    if (rotation->vz < -140)
++        rotation->vz = -140;
++    if (rotation->vz > 140)
++        rotation->vz = 140;
++    return control->mov.vy;
++}
++
++int s19b_spark2_m_800DA0B4(SVECTOR *joints, int speed, SVECTOR *rotation, SVECTOR *previous)
++{
++    int spin = (speed * 4096) / 1178;
++    int steering = rotation->vy - previous->vy;
++    int result;
++    joints[1].vx += spin;
++    joints[2].vx += spin;
++    joints[3].vx += spin;
++    joints[4].vx += spin;
++    if (speed < 0)
++        steering = -steering;
++    steering *= 4;
++    joints[3].vy = GV_NearExp4P(joints[3].vy, steering);
++    result = GV_NearExp4P(joints[4].vy, steering);
++    joints[4].vy = result;
++    *previous = *rotation;
++    return result;
++}
++
++#endif
+diff --git a/source/overlays/s19b/takabe/jeep_liq/jeep_liq.c b/source/overlays/s19b/takabe/jeep_liq/jeep_liq.c
+index 41ba7da63..234d3c061 100644
+--- a/source/overlays/s19b/takabe/jeep_liq/jeep_liq.c
++++ b/source/overlays/s19b/takabe/jeep_liq/jeep_liq.c
+@@ -4,123 +4,38 @@
+ #include "mgstype.h"
+ #include "game/game.h"
+ 
+-typedef struct _Work
+-{
+-    GV_ACT          actor;        /* 0x000 */
+-    CONTROL        *control;      /* 0x020 */
+-    DG_PRIM        *prim;         /* 0x024 */
+-    MATRIX          world;        /* 0x028 */
+-    SVECTOR         vecs[11];     /* 0x048 */
+-    char            pad_obj[0x0A4 - 0x048 - sizeof(SVECTOR[11])];
+-    OBJECT          obj;          /* 0x0A4 */
+-    MOTION_CONTROL  m_ctrl;       /* 0x188 */
+-    /* m_segs1[17] @ 0x1D8 - poked as scalars below by the setters */
+-    char            pad_seg1[0x1F0 - 0x188 - sizeof(MOTION_CONTROL)];
+-    int             f1F0;         /* 0x1F0 */
+-    char            pad_360[0x360 - 0x1F4];
+-    int             field_360;    /* 0x360 */
+-    char            pad_3A0[0x3A0 - 0x360 - sizeof(int)];
+-    int             field_3A0;    /* 0x3A0 */
+-    int             field_3A4;    /* 0x3A4 */
+-    int             field_3A8;    /* 0x3A8 */
+-    char            pad_3B0[0x3B0 - 0x3A8 - sizeof(int)];
+-    int             field_3B0;    /* 0x3B0 */
+-    int             field_3B4;    /* 0x3B4 */
+-    char            pad_3D0[0x3D0 - 0x3B4 - sizeof(int)];
+-    int             field_3D0;    /* 0x3D0 */
+-    int             field_3D4;
+-    int             field_3D8;
+-    int             field_3DC;
+-    int             field_3E0;
+-    int             field_3E4;
+-    int             field_3E8;
+-    int             field_3EC;    /* 0x3EC */
+-    int             field_3F0;    /* 0x3F0 */
+-    char            pad_3F4[0x3F8 - 0x3F0 - sizeof(int)];
+-    int             field_3F8;    /* 0x3F8 */
+-    char            pad_segs2[0x43C - 0x3F8 - sizeof(int)];
+-    MOTION_SEGMENT  m_segs2[17];  /* 0x43C */
+-    SVECTOR         svecs1[16];   /* 0x6A0 */
+-    SVECTOR         svecs2[16];   /* 0x720 */
+-    SVECTOR         sv_7A0;       /* 0x7A0 */
+-    SVECTOR         sv_7A8;       /* 0x7A8 */
+-    char            pad_7C0[0x7C0 - 0x7A8 - sizeof(SVECTOR)];
+-    MATRIX          mtx[2];       /* 0x7C0 */
+-    OBJECT          obj2;         /* 0x800 */
+-    TARGET         *f8E4;         /* 0x8E4 */
+-    HOMING         *homing;       /* 0x8E8 */
+-    void           *f8EC;         /* 0x8EC */
+-    char            pad_8F4[0x8F4 - 0x8EC - sizeof(void *)];
+-    int             f8F4;         /* 0x8F4 */
+-    char            pad_8FC[0x8FC - 0x8F4 - sizeof(int)];
+-    int             f8FC;         /* 0x8FC */
+-    int             f900;         /* 0x900 */
+-    int             f904;         /* 0x904 */
+-    char            pad_90C[0x90C - 0x904 - sizeof(int)];
+-    int             f90C;         /* 0x90C */
+-    int             f910;         /* 0x910 */
+-    int             f914;         /* 0x914 */
+-    int             f918;         /* 0x918 */
+-    char            pad_920[0x920 - 0x918 - sizeof(int)];
+-    int             f920;         /* 0x920 */
+-    char            pad_930[0x930 - 0x920 - sizeof(int)];
+-    int             f930;         /* 0x930 */
+-    int             f934;         /* 0x934 */
+-    char            pad_93C[0x93C - 0x934 - sizeof(int)];
+-    int             f93C;         /* 0x93C */
+-    int             f940;         /* 0x940 */
+-    int            *f944;         /* 0x944 */
+-} Work;
+-
+-typedef struct _JEEP_SYSTEM_S
+-{
+-    char     pad1[0x4];
+-    CONTROL *control;
+-    char     pad2[0x10];
+-    SVECTOR  pos;
+-    char     pad3a[0x24 - 0x18 - sizeof(SVECTOR)];
+-    short    field_24;
+-    char     pad3b[0x30 - 0x24 - sizeof(short)];
+-    int      field_30;
+-    char     pad3c[0x54 - 0x30 - sizeof(int)];
+-    int      field_54;
+-    char     pad5c[0x5C - 0x54 - sizeof(int)];
+-    int      field_5C;
+-} JEEP_SYSTEM_S;
+-
+-extern JEEP_SYSTEM_S Takabe_JeepSystem;
+-
+-extern int  s19b_dword_800C3AA0;
+-extern int  s19b_dword_800C3AA8;
+-extern int  s19b_dword_800C3AB0;
+-extern int  s19b_dword_800C3AB8;
+-extern int  s19b_dword_800C3AC0;
+-extern int  s19b_dword_800C3AC8;
++#include "overlays/s19b/jeep_liquid.h"
++#include "chara/snake/sna_init.h"
++
++typedef EscapeLiquidWork Work;
++
++extern SVECTOR s19b_dword_800C3AA0;
++extern SVECTOR s19b_dword_800C3AA8;
++extern SVECTOR s19b_dword_800C3AB0;
++extern SVECTOR s19b_dword_800C3AB8;
++extern SVECTOR s19b_dword_800C3AC0;
++extern short s19b_dword_800C3AC8[5];
+ extern int  s19b_dword_800DE650;
+ 
+ extern void *NewJeepBlood(MATRIX *world, int count, MATRIX *root);
+ extern void *NewJeepBullet(MATRIX *world, int side, int mode, int mode2);
+ extern void  s19b_jblood_800C7FB8(MATRIX *world);
+-extern void  ReadRotMatrix(MATRIX *m);
+ 
+ extern int   s19b_jeep_mrl_800D399C(void);
+ extern int   s19b_jeep_liq_800D771C(int center, int from, int to);
+-extern void  s19b_jeep_liq_800D6FB8(Work *work);
+-
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_liq_800D6FB8.s")
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_liq_800D7114.s")
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_liq_800D7200.s")
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_liq_800D7330.s")
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_liq_800D769C.s")
+-void s19b_jeep_liq_800D76B0(Work *work)
++#include "jeep_liq_vehicle_native.h"
++
++extern void  s19b_jeep_liq_800D6FB8(EscapeJeep2Work *work);
++
++void s19b_jeep_liq_800D76B0(EscapeJeep2Work *work)
+ {
+-    ((void (*)(void))work->field_3DC)();
++    work->field_3DC(work);
+     work->field_3A0 = 0;
+-    ((void (*)(Work *))work->field_3F8)(work);
++    work->field_3F8(work);
+     s19b_jeep_liq_800D6FB8(work);
+ }
+ 
+-void s19b_jeep_liq_800D76F8(Work *work, int arg1)
++void s19b_jeep_liq_800D76F8(EscapeJeep2Work *work, void (*arg1)(EscapeJeep2Work *))
+ {
+     if (work->field_3DC != arg1)
+     {
+@@ -130,17 +45,16 @@ void s19b_jeep_liq_800D76F8(Work *work, int arg1)
+     }
+ }
+ 
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_liq_800D771C.s")
+-void s19b_jeep_liq_800D77F0(Work *work)
++void s19b_jeep_liq_800D77F0(EscapeJeep2Work *work)
+ {
+-    int v = work->field_360 - (Takabe_JeepSystem.field_30 - Takabe_JeepSystem.field_24);
++    int v = work->position.vz - (Takabe_JeepSystem.field_28.vz - Takabe_JeepSystem.field_20.vz);
+     s19b_jeep_mrl_800D399C();
+     work->field_3B0 = s19b_jeep_liq_800D771C(work->field_3B0, 0x753, v);
+     work->field_3A8 = GV_NearSpeed(work->field_3A8, work->field_3B0, 5);
+ }
+-void s19b_jeep_liq_800D7860(Work *work)
++void s19b_jeep_liq_800D7860(EscapeJeep2Work *work)
+ {
+-    int s1 = work->field_360 - (Takabe_JeepSystem.field_30 - Takabe_JeepSystem.field_24);
++    int s1 = work->position.vz - (Takabe_JeepSystem.field_28.vz - Takabe_JeepSystem.field_20.vz);
+     int a1 = s19b_jeep_mrl_800D399C();
+ 
+     if (work->field_3D4 == 0)
+@@ -169,36 +83,36 @@ void s19b_jeep_liq_800D7860(Work *work)
+     }
+     work->field_3A8 = GV_NearSpeed(work->field_3A8, work->field_3B0, 5);
+ }
+-void s19b_jeep_liq_800D797C(Work *work)
++void s19b_jeep_liq_800D797C(EscapeJeep2Work *work)
+ {
+-    int v = work->field_360 - (Takabe_JeepSystem.field_30 - Takabe_JeepSystem.field_24);
++    int v = work->position.vz - (Takabe_JeepSystem.field_28.vz - Takabe_JeepSystem.field_20.vz);
+     s19b_jeep_mrl_800D399C();
+     work->field_3B0 = s19b_jeep_liq_800D771C(work->field_3B0, 0, v);
+     work->field_3A8 = GV_NearSpeed(work->field_3A8, work->field_3B0, 5);
+ }
+-void s19b_jeep_liq_800D79EC(Work *work)
++void s19b_jeep_liq_800D79EC(EscapeJeep2Work *work)
+ {
+-    int v = work->field_360 - (Takabe_JeepSystem.field_30 - Takabe_JeepSystem.field_24);
++    int v = work->position.vz - (Takabe_JeepSystem.field_28.vz - Takabe_JeepSystem.field_20.vz);
+     s19b_jeep_mrl_800D399C();
+     work->field_3B0 = s19b_jeep_liq_800D771C(work->field_3B0, -0x177, v);
+     work->field_3A8 = GV_NearSpeed(work->field_3A8, work->field_3B0, 5);
+ }
+-void s19b_jeep_liq_800D7A5C(Work *work)
++void s19b_jeep_liq_800D7A5C(EscapeJeep2Work *work)
+ {
+-    int v = work->field_360 - (Takabe_JeepSystem.field_30 - Takabe_JeepSystem.field_24);
++    int v = work->position.vz - (Takabe_JeepSystem.field_28.vz - Takabe_JeepSystem.field_20.vz);
+     s19b_jeep_mrl_800D399C();
+     work->field_3B0 = s19b_jeep_liq_800D771C(work->field_3B0, 0xbb8, v);
+     work->field_3A8 = GV_NearSpeed(work->field_3A8, work->field_3B0, 5);
+ }
+-void s19b_jeep_liq_800D7ACC(Work *work)
++void s19b_jeep_liq_800D7ACC(EscapeJeep2Work *work)
+ {
+-    int v = work->field_360 - (Takabe_JeepSystem.field_30 - Takabe_JeepSystem.field_24);
++    int v = work->position.vz - (Takabe_JeepSystem.field_28.vz - Takabe_JeepSystem.field_20.vz);
+     s19b_jeep_mrl_800D399C();
+     work->field_3B0 = s19b_jeep_liq_800D771C(work->field_3B0, 0x1194, v);
+     work->field_3A8 = GV_NearSpeed(work->field_3A8, work->field_3B0, 5);
+ }
+ 
+-void s19b_jeep_liq_800D7B3C(Work *work, int arg1)
++void s19b_jeep_liq_800D7B3C(EscapeJeep2Work *work, void (*arg1)(EscapeJeep2Work *))
+ {
+     if (work->field_3E8 != arg1)
+     {
+@@ -212,7 +126,7 @@ int s19b_jeep_liq_800D7B60(int center, int range)
+ {
+     return (rand() * range >> 15) - range / 2 + center;
+ }
+-void s19b_jeep_liq_800D7BB0(Work *work)
++void s19b_jeep_liq_800D7BB0(EscapeJeep2Work *work)
+ {
+     if (++work->field_3E0 == 0x1e)
+     {
+@@ -221,7 +135,7 @@ void s19b_jeep_liq_800D7BB0(Work *work)
+     }
+     work->field_3A0 = GV_NearSpeed(work->field_3A0, work->field_3A4, 0x1e);
+ }
+-void s19b_jeep_liq_800D7C0C(Work *work)
++void s19b_jeep_liq_800D7C0C(EscapeJeep2Work *work)
+ {
+     int n = work->field_3E0 + 1;
+     work->field_3E0 = n;
+@@ -247,7 +161,7 @@ void s19b_jeep_liq_800D7C0C(Work *work)
+         break;
+     }
+ }
+-void s19b_jeep_liq_800D7CBC(Work *work)
++void s19b_jeep_liq_800D7CBC(EscapeJeep2Work *work)
+ {
+     int n = work->field_3E0 + 1;
+     work->field_3E0 = n;
+@@ -273,7 +187,7 @@ void s19b_jeep_liq_800D7CBC(Work *work)
+         break;
+     }
+ }
+-void s19b_jeep_liq_800D7D68(Work *work)
++void s19b_jeep_liq_800D7D68(EscapeJeep2Work *work)
+ {
+     int n = work->field_3E0 + 1;
+     work->field_3E0 = n;
+@@ -306,7 +220,7 @@ void s19b_jeep_liq_800D7D68(Work *work)
+         break;
+     }
+ }
+-void s19b_jeep_liq_800D7E2C(Work *work)
++void s19b_jeep_liq_800D7E2C(EscapeJeep2Work *work)
+ {
+     int n = work->field_3E0 + 1;
+     work->field_3E0 = n;
+@@ -346,7 +260,7 @@ void s19b_jeep_liq_800D7E2C(Work *work)
+         break;
+     }
+ }
+-void s19b_jeep_liq_800D7F20(Work *work)
++void s19b_jeep_liq_800D7F20(EscapeJeep2Work *work)
+ {
+     int n = work->field_3E0 + 1;
+     work->field_3E0 = n;
+@@ -387,7 +301,7 @@ void s19b_jeep_liq_800D7F20(Work *work)
+         break;
+     }
+ }
+-void s19b_jeep_liq_800D8014(Work *work, int arg1)
++void s19b_jeep_liq_800D8014(EscapeJeep2Work *work, void (*arg1)(EscapeJeep2Work *))
+ {
+     if (work->field_3F8 != arg1)
+     {
+@@ -400,7 +314,7 @@ void s19b_jeep_liq_800D8014(Work *work, int arg1)
+ extern unsigned char s19b_dword_800C3A9C[];
+ extern int s19b_jeep_mrl_800D39B4(SVECTOR *dst);
+ 
+-void s19b_jeep_liq_800D8044(Work *work)
++void s19b_jeep_liq_800D8044(EscapeJeep2Work *work)
+ {
+     SVECTOR sp10;
+ 
+@@ -410,44 +324,44 @@ void s19b_jeep_liq_800D8044(Work *work)
+         work->field_3F0 = 0;
+         if (work->field_3A0 > 0)
+         {
+-            s19b_jeep_liq_800D7B3C(work, (int)s19b_jeep_liq_800D7E2C);
++            s19b_jeep_liq_800D7B3C(work, s19b_jeep_liq_800D7E2C);
+         }
+         else
+         {
+-            s19b_jeep_liq_800D7B3C(work, (int)s19b_jeep_liq_800D7F20);
++            s19b_jeep_liq_800D7B3C(work, s19b_jeep_liq_800D7F20);
+         }
+         Takabe_JeepSystem.field_54 |= 0x1000;
+-        GM_SeSet((SVECTOR *)&work->prim, s19b_dword_800C3A9C[GV_RandU(4)]);
++        GM_SeSet(&work->control.mov, s19b_dword_800C3A9C[GV_RandU(4)]);
+     }
+     else
+     {
+         work->field_3F0++;
+     }
+ }
+-void s19b_jeep_liq_800D8118(Work *work)
++void s19b_jeep_liq_800D8118(EscapeJeep2Work *work)
+ {
+     SVECTOR dst;
+     int     d;
+ 
+     s19b_jeep_mrl_800D39B4(&dst);
+-    d = *(short *)&work->world - dst.vz;
++    d = work->control.mov.vz - dst.vz;
+     if (d < 0)
+     {
+         work->field_3EC = 5;
+-        s19b_jeep_liq_800D76F8(work, (int)s19b_jeep_liq_800D79EC);
+-        s19b_jeep_liq_800D7B3C(work, (int)s19b_jeep_liq_800D7D68);
++        s19b_jeep_liq_800D76F8(work, s19b_jeep_liq_800D79EC);
++        s19b_jeep_liq_800D7B3C(work, s19b_jeep_liq_800D7D68);
+     }
+     else
+     {
+         work->field_3EC = 2;
+-        s19b_jeep_liq_800D76F8(work, (int)s19b_jeep_liq_800D79EC);
+-        s19b_jeep_liq_800D7B3C(work, (int)s19b_jeep_liq_800D7F20);
++        s19b_jeep_liq_800D76F8(work, s19b_jeep_liq_800D79EC);
++        s19b_jeep_liq_800D7B3C(work, s19b_jeep_liq_800D7F20);
+     }
+ }
+ extern void s19b_jlamp_800D0A20(int arg0);
+-extern void s19b_jeep_liq_800D7114(Work *work);
++extern void s19b_jeep_liq_800D7114(EscapeJeep2Work *work);
+ 
+-void s19b_jeep_liq_800D81A8(Work *work)
++void s19b_jeep_liq_800D81A8(EscapeJeep2Work *work)
+ {
+     int n = work->field_3F0;
+     work->field_3F0 = n + 1;
+@@ -459,19 +373,18 @@ void s19b_jeep_liq_800D81A8(Work *work)
+     else if (n >= 0x150)
+     {
+         GM_GameStatus &= ~(STATE_RADIO_OFF | STATE_LIFE_OFF | STATE_MENU_DISABLE | STATE_RADAR_OFF | STATE_PADRELEASE);
+-        s19b_jeep_liq_800D8014(work, (int)s19b_jeep_liq_800D8044);
+-        s19b_jeep_liq_800D76F8(work, (int)s19b_jeep_liq_800D77F0);
+-        work->field_3D0 = (int)s19b_jeep_liq_800D7114;
++        s19b_jeep_liq_800D8014(work, s19b_jeep_liq_800D8044);
++        s19b_jeep_liq_800D76F8(work, s19b_jeep_liq_800D77F0);
++        work->field_3D0 = s19b_jeep_liq_800D7114;
+     }
+ }
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_liq_800D8250.s")
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_liq_800D8420.s")
++#include "jeep_liq_actor_native.h"
+ void s19b_spark2_m_800D8620(Work *work)
+ {
+     GM_FreeTarget(work->f8E4);
+     GM_ResetHomingTarget(work->homing);
+     GM_FreeObject(&work->obj2);
+-    GM_FreeControl((CONTROL *)&work->world);
++    GM_FreeControl(&work->own_control);
+     GM_FreeObject(&work->obj);
+ }
+ extern void s19b_jeep_liq_800D8250(Work *work);
+@@ -479,7 +392,7 @@ extern int  s19b_jeep_liq_800D8420(Work *work, int name);
+ extern const char s19b_aJeepliqc_800DDE80[];
+ extern const char s19b_dword_800DDE8C[];
+ 
+-void *s19b_spark2_m_800D8670(CONTROL *arg0, DG_PRIM *arg1, int *arg2)
++void *s19b_spark2_m_800D8670(CONTROL *arg0, MATRIX *arg1, int *arg2)
+ {
+     Work *work = GV_NewActor(GV_ACTOR_USER, sizeof(Work));
+ 
+@@ -488,7 +401,7 @@ void *s19b_spark2_m_800D8670(CONTROL *arg0, DG_PRIM *arg1, int *arg2)
+         GV_SetNamedActor(work, s19b_jeep_liq_800D8250, s19b_spark2_m_800D8620,
+                          s19b_aJeepliqc_800DDE80);
+         work->control = arg0;
+-        work->prim = arg1;
++        work->root_mat = arg1;
+         work->f944 = arg2;
+         if (s19b_jeep_liq_800D8420(work, GV_StrCode(s19b_dword_800DDE8C)) < 0)
+         {
+@@ -505,13 +418,12 @@ void s19b_spark2_m_800D8724(Work *work, int arg1, int arg2)
+     DG_OBJ *obj = &work->obj.objs->objs[arg1];
+ 
+     DG_SetPos(&obj->world);
+-    DG_MovePos((SVECTOR *)&s19b_dword_800C3AA0);
+-    DG_RotatePos((SVECTOR *)&s19b_dword_800C3AA8);
++    DG_MovePos(&s19b_dword_800C3AA0);
++    DG_RotatePos(&s19b_dword_800C3AA8);
+     ReadRotMatrix(&m);
+     NewJeepBlood(&m, arg2, &obj->world);
+ }
+ 
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_spark2_m_800D87A4.s")
+ extern int s19b_spark2_m_800D87A4(Work *work);
+ 
+ int s19b_spark2_m_800D88D8(Work *work)
+@@ -539,15 +451,15 @@ void s19b_spark2_m_800D8918(Work *work)
+         vital = 0xBF;
+     }
+ 
+-    GM_SetTarget(target, 20, 2, (SVECTOR *)&s19b_dword_800C3AB0);
+-    GM_SetPowerTarget(target, 1, -1, vital, 7, (SVECTOR *)&s19b_dword_800C3AB8);
++    GM_SetTarget(target, 20, 2, &s19b_dword_800C3AB0);
++    GM_SetPowerTarget(target, 1, -1, vital, 7, &s19b_dword_800C3AB8);
+ }
+ 
+-extern void s19b_spark2_m_800D8BC8();
+-extern void s19b_spark2_m_800D8CEC();
+-extern void s19b_spark2_m_800D8E10();
+-extern void s19b_spark2_m_800D90A8();
+-extern void s19b_spark2_m_800D92C8();
++extern void s19b_spark2_m_800D8BC8(Work *work, int mode);
++extern void s19b_spark2_m_800D8CEC(Work *work, int mode);
++extern void s19b_spark2_m_800D8E10(Work *work, int mode);
++extern void s19b_spark2_m_800D90A8(Work *work, int mode);
++extern void s19b_spark2_m_800D92C8(Work *work, int mode);
+ 
+ int s19b_spark2_m_800D899C(Work *work)
+ {
+@@ -555,42 +467,42 @@ int s19b_spark2_m_800D899C(Work *work)
+ 
+     if (v & 0x1)
+     {
+-        work->f8EC = (void *)s19b_spark2_m_800D8BC8;
++        work->f8EC = s19b_spark2_m_800D8BC8;
+         work->f8F4 = 0;
+-        work->vecs[6].vx = 0;
+-        work->vecs[5].vz = 0;
++        work->own_control.turn.vz = 0;
++        work->own_control.turn.vx = 0;
+         return 1;
+     }
+     if (v & 0x2)
+     {
+-        work->f8EC = (void *)s19b_spark2_m_800D8CEC;
++        work->f8EC = s19b_spark2_m_800D8CEC;
+         work->f8F4 = 0;
+-        work->vecs[6].vx = 0;
+-        work->vecs[5].vz = 0;
++        work->own_control.turn.vz = 0;
++        work->own_control.turn.vx = 0;
+         return 1;
+     }
+     if (v & 0x4)
+     {
+-        work->f8EC = (void *)s19b_spark2_m_800D8E10;
++        work->f8EC = s19b_spark2_m_800D8E10;
+         work->f8F4 = 0;
+-        work->vecs[6].vx = 0;
+-        work->vecs[5].vz = 0;
++        work->own_control.turn.vz = 0;
++        work->own_control.turn.vx = 0;
+         return 1;
+     }
+     if (v & 0x10)
+     {
+-        work->f8EC = (void *)s19b_spark2_m_800D90A8;
++        work->f8EC = s19b_spark2_m_800D90A8;
+         work->f8F4 = 0;
+-        work->vecs[6].vx = 0;
+-        work->vecs[5].vz = 0;
++        work->own_control.turn.vz = 0;
++        work->own_control.turn.vx = 0;
+         return 1;
+     }
+     if (v & 0x04000000)
+     {
+-        work->f8EC = (void *)s19b_spark2_m_800D92C8;
++        work->f8EC = s19b_spark2_m_800D92C8;
+         work->f8F4 = 0;
+-        work->vecs[6].vx = 0;
+-        work->vecs[5].vz = 0;
++        work->own_control.turn.vz = 0;
++        work->own_control.turn.vx = 0;
+         return 1;
+     }
+     return 0;
+@@ -630,10 +542,10 @@ void s19b_spark2_m_800D8AEC(Work *work)
+     MATRIX m;
+ 
+     DG_SetPos(&work->obj.objs->objs[4].world);
+-    DG_MovePos((SVECTOR *)&s19b_dword_800C3AC0);
++    DG_MovePos(&s19b_dword_800C3AC0);
+     ReadRotMatrix(&m);
+     NewJeepBullet(&m, 2, 1, 0);
+-    GM_SeSet((SVECTOR *)&work->world, 0x2E);
++    GM_SeSet(&work->own_control.mov, 0x2E);
+     s19b_jblood_800C7FB8(&m);
+ }
+ 
+@@ -668,10 +580,10 @@ void s19b_spark2_m_800D8BC8(Work *work, int mode)
+ 
+     if (!(f900 & 1))
+     {
+-        work->f8EC = (void *)s19b_spark2_m_800D8B54;
++        work->f8EC = s19b_spark2_m_800D8B54;
+         work->f8F4 = 0;
+-        work->vecs[6].vx = 0;
+-        work->vecs[5].vz = 0;
++        work->own_control.turn.vz = 0;
++        work->own_control.turn.vx = 0;
+         work->sv_7A0 = DG_ZeroVector;
+         work->sv_7A8 = DG_ZeroVector;
+         return;
+@@ -679,10 +591,10 @@ void s19b_spark2_m_800D8BC8(Work *work, int mode)
+ 
+     if (f900 & 8)
+     {
+-        work->f8EC = (void *)s19b_spark2_m_800D8F34;
++        work->f8EC = s19b_spark2_m_800D8F34;
+         work->f8F4 = 0;
+-        work->vecs[6].vx = 0;
+-        work->vecs[5].vz = 0;
++        work->own_control.turn.vz = 0;
++        work->own_control.turn.vx = 0;
+         return;
+     }
+ 
+@@ -706,10 +618,10 @@ void s19b_spark2_m_800D8CEC(Work *work, int mode)
+ 
+     if (!(f900 & 2))
+     {
+-        work->f8EC = (void *)s19b_spark2_m_800D8B54;
++        work->f8EC = s19b_spark2_m_800D8B54;
+         work->f8F4 = 0;
+-        work->vecs[6].vx = 0;
+-        work->vecs[5].vz = 0;
++        work->own_control.turn.vz = 0;
++        work->own_control.turn.vx = 0;
+         work->sv_7A0 = DG_ZeroVector;
+         work->sv_7A8 = DG_ZeroVector;
+         return;
+@@ -717,10 +629,10 @@ void s19b_spark2_m_800D8CEC(Work *work, int mode)
+ 
+     if (f900 & 8)
+     {
+-        work->f8EC = (void *)s19b_spark2_m_800D8FB0;
++        work->f8EC = s19b_spark2_m_800D8FB0;
+         work->f8F4 = 0;
+-        work->vecs[6].vx = 0;
+-        work->vecs[5].vz = 0;
++        work->own_control.turn.vz = 0;
++        work->own_control.turn.vx = 0;
+         return;
+     }
+ 
+@@ -744,10 +656,10 @@ void s19b_spark2_m_800D8E10(Work *work, int mode)
+ 
+     if (!(f900 & 4))
+     {
+-        work->f8EC = (void *)s19b_spark2_m_800D8B54;
++        work->f8EC = s19b_spark2_m_800D8B54;
+         work->f8F4 = 0;
+-        work->vecs[6].vx = 0;
+-        work->vecs[5].vz = 0;
++        work->own_control.turn.vz = 0;
++        work->own_control.turn.vx = 0;
+         work->sv_7A0 = DG_ZeroVector;
+         work->sv_7A8 = DG_ZeroVector;
+         return;
+@@ -755,10 +667,10 @@ void s19b_spark2_m_800D8E10(Work *work, int mode)
+ 
+     if (f900 & 8)
+     {
+-        work->f8EC = (void *)s19b_spark2_m_800D902C;
++        work->f8EC = s19b_spark2_m_800D902C;
+         work->f8F4 = 0;
+-        work->vecs[6].vx = 0;
+-        work->vecs[5].vz = 0;
++        work->own_control.turn.vz = 0;
++        work->own_control.turn.vx = 0;
+         return;
+     }
+ 
+@@ -779,10 +691,10 @@ void s19b_spark2_m_800D8F34(Work *work, int mode)
+     }
+     if (mode == 1)
+     {
+-        work->f8EC = (void *)s19b_spark2_m_800D8BC8;
++        work->f8EC = s19b_spark2_m_800D8BC8;
+         work->f8F4 = 0;
+-        work->vecs[6].vx = 0;
+-        work->vecs[5].vz = 0;
++        work->own_control.turn.vz = 0;
++        work->own_control.turn.vx = 0;
+     }
+     work->f8E4->class |= 0x14;
+ }
+@@ -799,10 +711,10 @@ void s19b_spark2_m_800D8FB0(Work *work, int mode)
+     }
+     if (mode == 1)
+     {
+-        work->f8EC = (void *)s19b_spark2_m_800D8CEC;
++        work->f8EC = s19b_spark2_m_800D8CEC;
+         work->f8F4 = 0;
+-        work->vecs[6].vx = 0;
+-        work->vecs[5].vz = 0;
++        work->own_control.turn.vz = 0;
++        work->own_control.turn.vx = 0;
+     }
+     work->f8E4->class |= 0x14;
+ }
+@@ -819,15 +731,15 @@ void s19b_spark2_m_800D902C(Work *work, int mode)
+     }
+     if (mode == 1)
+     {
+-        work->f8EC = (void *)s19b_spark2_m_800D8E10;
++        work->f8EC = s19b_spark2_m_800D8E10;
+         work->f8F4 = 0;
+-        work->vecs[6].vx = 0;
+-        work->vecs[5].vz = 0;
++        work->own_control.turn.vz = 0;
++        work->own_control.turn.vx = 0;
+     }
+     work->f8E4->class |= 0x14;
+ }
+ 
+-extern void s19b_spark2_m_800D9148(Work *work);
++extern void s19b_spark2_m_800D9148(Work *work, int mode);
+ 
+ void s19b_spark2_m_800D90A8(Work *work, int mode)
+ {
+@@ -846,23 +758,22 @@ void s19b_spark2_m_800D90A8(Work *work, int mode)
+     }
+     if (work->obj.is_end != 0)
+     {
+-        work->f8EC = (void *)s19b_spark2_m_800D9148;
++        work->f8EC = s19b_spark2_m_800D9148;
+         work->f8F4 = 0;
+-        work->vecs[6].vx = 0;
+-        work->vecs[5].vz = 0;
++        work->own_control.turn.vz = 0;
++        work->own_control.turn.vx = 0;
+     }
+ }
+ 
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_spark2_m_800D9148.s")
+ 
+ void s19b_spark2_m_800D91DC(Work *work, int mode)
+ {
+     if (mode < 8 && (work->f900 & 0x10))
+     {
+-        work->f8EC = (void *)s19b_spark2_m_800D9148;
++        work->f8EC = s19b_spark2_m_800D9148;
+         work->f8F4 = 0;
+-        work->vecs[6].vx = 0;
+-        work->vecs[5].vz = 0;
++        work->own_control.turn.vz = 0;
++        work->own_control.turn.vx = 0;
+         return;
+     }
+ 
+@@ -878,10 +789,10 @@ void s19b_spark2_m_800D91DC(Work *work, int mode)
+ 
+     if (work->f93C != 0 && mode >= 0xB)
+     {
+-        work->f8EC = (void *)s19b_spark2_m_800D8B54;
++        work->f8EC = s19b_spark2_m_800D8B54;
+         work->f8F4 = 0;
+-        work->vecs[6].vx = 0;
+-        work->vecs[5].vz = 0;
++        work->own_control.turn.vz = 0;
++        work->own_control.turn.vx = 0;
+         work->f93C = 0;
+     }
+ 
+@@ -896,10 +807,10 @@ void s19b_spark2_m_800D91DC(Work *work, int mode)
+         return;
+     }
+ 
+-    work->f8EC = (void *)s19b_spark2_m_800D8B54;
++    work->f8EC = s19b_spark2_m_800D8B54;
+     work->f8F4 = 0;
+-    work->vecs[6].vx = 0;
+-    work->vecs[5].vz = 0;
++    work->own_control.turn.vz = 0;
++    work->own_control.turn.vx = 0;
+ }
+ 
+ void s19b_spark2_m_800D932C(Work *work, int mode);
+@@ -913,10 +824,10 @@ void s19b_spark2_m_800D92C8(Work *work, int mode)
+     }
+     if (work->obj.is_end != 0)
+     {
+-        work->f8EC = (void *)s19b_spark2_m_800D932C;
++        work->f8EC = s19b_spark2_m_800D932C;
+         work->f8F4 = 0;
+-        work->vecs[6].vx = 0;
+-        work->vecs[5].vz = 0;
++        work->own_control.turn.vz = 0;
++        work->own_control.turn.vx = 0;
+     }
+ }
+ 
+@@ -929,10 +840,10 @@ void s19b_spark2_m_800D932C(Work *work, int mode)
+     }
+     if (work->obj.is_end != 0)
+     {
+-        work->f8EC = (void *)s19b_spark2_m_800D932C;
++        work->f8EC = s19b_spark2_m_800D932C;
+         work->f8F4 = 0;
+-        work->vecs[6].vx = 0;
+-        work->vecs[5].vz = 0;
++        work->own_control.turn.vz = 0;
++        work->own_control.turn.vx = 0;
+     }
+ }
+ 
+@@ -942,16 +853,16 @@ void s19b_spark2_m_800D9390(Work *work, int mode)
+     {
+         work->f8FC = 20;
+         GM_ConfigObjectAction((OBJECT *)&work->obj, 20, 0, 4);
+-        GM_SeSet((SVECTOR *)&work->world, 0x81);
++        GM_SeSet(&work->own_control.mov, 0x81);
+         s19b_spark2_m_800D8724(work, 5, 1);
+         *work->f944 |= 1;
+     }
+     if (work->obj.is_end != 0)
+     {
+-        work->f8EC = (void *)s19b_spark2_m_800D8B54;
++        work->f8EC = s19b_spark2_m_800D8B54;
+         work->f8F4 = 0;
+-        work->vecs[6].vx = 0;
+-        work->vecs[5].vz = 0;
++        work->own_control.turn.vz = 0;
++        work->own_control.turn.vx = 0;
+         work->f940 = 45;
+         work->f93C = 0;
+     }
+@@ -965,7 +876,7 @@ void s19b_spark2_m_800D9434(Work *work, int mode)
+     }
+     if (mode == 0)
+     {
+-        GM_SeSet((SVECTOR *)&work->world, 0x81);
++        GM_SeSet(&work->own_control.mov, 0x81);
+         s19b_spark2_m_800D8724(work, 5, 1);
+         *work->f944 |= 1;
+     }
+@@ -973,10 +884,10 @@ void s19b_spark2_m_800D9434(Work *work, int mode)
+     {
+         return;
+     }
+-    work->f8EC = (void *)s19b_spark2_m_800D8B54;
++    work->f8EC = s19b_spark2_m_800D8B54;
+     work->f8F4 = 0;
+-    work->vecs[6].vx = 0;
+-    work->vecs[5].vz = 0;
++    work->own_control.turn.vz = 0;
++    work->own_control.turn.vx = 0;
+ }
+ 
+ void s19b_spark2_m_800D94C8(Work *work, int mode)
+@@ -993,17 +904,17 @@ void s19b_spark2_m_800D94C8(Work *work, int mode)
+     }
+     if (work->obj.is_end != 0)
+     {
+-        work->f8EC = (void *)s19b_spark2_m_800D8B54;
++        work->f8EC = s19b_spark2_m_800D8B54;
+         work->f8F4 = 0;
+-        work->vecs[6].vx = 0;
+-        work->vecs[5].vz = 0;
++        work->own_control.turn.vz = 0;
++        work->own_control.turn.vx = 0;
+     }
+ }
+ 
+ void s19b_spark2_m_800D9558(Work *work)
+ {
+     int   old;
+-    void *handler;
++    void (*handler)(Work *, int);
+ 
+     work->f8E4->class = 1;
+     old     = work->f8F4;
+@@ -1013,10 +924,10 @@ void s19b_spark2_m_800D9558(Work *work)
+     if (handler == NULL)
+     {
+         s19b_spark2_m_800D8918(work);
+-        handler       = (void *)s19b_spark2_m_800D8B54;
++        handler       = s19b_spark2_m_800D8B54;
+         work->f8EC    = handler;
+     }
+-    ((void (*)(Work *, int))handler)(work, old);
++    handler(work, old);
+ 
+     s19b_spark2_m_800D8A48(work);
+ 
+@@ -1031,7 +942,7 @@ void s19b_spark2_m_800D95FC(Work *work)
+ {
+     SVECTOR diff;
+ 
+-    GV_SubVec3(&GM_PlayerPosition, (SVECTOR *)&work->world, &diff);
++    GV_SubVec3(&GM_PlayerPosition, &work->own_control.mov, &diff);
+     diff.vy = 0;
+     work->f930 = GV_VecDir2(&diff);
+     work->f934 = GV_VecLen3(&diff);
+@@ -1046,7 +957,6 @@ void s19b_spark2_m_800D964C(Work *work)
+     s19b_spark2_m_800D9558(work);
+ }
+ 
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_spark2_m_800D9680.s")
+ extern int s19b_spark2_m_800D9680(Work *work);
+ 
+ void s19b_spark2_m_800D9704(Work *work)
+@@ -1223,7 +1133,6 @@ void s19b_spark2_m_800D9A74(Work *work)
+     work->f918 += 1;
+ }
+ 
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_spark2_m_800D9AA8.s")
+ extern void s19b_spark2_m_800D9AA8(Work *work);
+ 
+ void s19b_spark2_m_800D9B38(Work *work)
+@@ -1259,7 +1168,7 @@ void s19b_spark2_m_800D9B88(Work *work)
+ 
+ void s19b_spark2_m_800D9C04(Work *work)
+ {
+-    short *table = (short *)&s19b_dword_800C3AC8;
++    short *table = s19b_dword_800C3AC8;
+     int    idx;
+ 
+     work->f904 = -1;
+@@ -1276,6 +1185,5 @@ void s19b_spark2_m_800D9C04(Work *work)
+     work->f920 += 1;
+ }
+ 
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_spark2_m_800D9C90.s")
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_spark2_m_800D9EC0.s")
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_spark2_m_800DA0B4.s")
++
++#include "jeep_collision_native.h"
+diff --git a/source/overlays/s19b/takabe/jeep_liq/jeep_liq_actor_native.h b/source/overlays/s19b/takabe/jeep_liq/jeep_liq_actor_native.h
+new file mode 100644
+index 000000000..54dee5310
+--- /dev/null
++++ b/source/overlays/s19b/takabe/jeep_liq/jeep_liq_actor_native.h
+@@ -0,0 +1,167 @@
++#ifndef MGS_ESCAPE_LIQ_ACTOR_NATIVE_H
++#define MGS_ESCAPE_LIQ_ACTOR_NATIVE_H
++
++extern const SVECTOR EscapeLiquidPosition;
++extern const char s19b_aLiquid_800DDE68[];
++extern const char s19b_aLqdb_800DDE70[];
++extern const char s19b_aFamas_800DDE78[];
++
++void s19b_spark2_m_800D964C(Work *work);
++void s19b_spark2_m_800D9390(Work *work, int mode);
++void s19b_spark2_m_800D9434(Work *work, int mode);
++void s19b_spark2_m_800D94C8(Work *work, int mode);
++int s19b_spark2_m_800D88D8(Work *work);
++void s19b_spark2_m_800D91DC(Work *work, int mode);
++void s19b_spark2_m_800D9704(Work *work);
++void s19b_spark2_m_800D97A8(Work *work);
++void s19b_spark2_m_800D985C(Work *work);
++void s19b_spark2_m_800D9910(Work *work);
++void s19b_spark2_m_800D99C4(Work *work);
++
++void s19b_jeep_liq_800D8250(Work *work)
++{
++    MATRIX *world;
++    GM_ActMotion(&work->obj);
++    work->own_control.turn = work->own_control.rot = DG_ZeroVector;
++    work->own_control.mov = EscapeLiquidPosition;
++    GM_ActControl(&work->own_control);
++    GM_ActObject(&work->obj);
++    world = &work->obj.objs->world;
++    CompMatrix(work->root_mat, world, world);
++    DG_GetLightMatrix(&work->own_control.mov, work->mtx);
++    work->own_control.mov.vx = world->t[0];
++    work->own_control.mov.vy = world->t[1];
++    work->own_control.mov.vz = world->t[2];
++    Takabe_JeepSystem.field_138.vx = work->obj.objs->objs[6].world.t[0];
++    Takabe_JeepSystem.field_138.vy = work->obj.objs->objs[6].world.t[1];
++    Takabe_JeepSystem.field_138.vz = work->obj.objs->objs[6].world.t[2];
++    GM_MoveTarget(work->f8E4, &work->own_control.mov);
++    s19b_spark2_m_800D964C(work);
++    sna_act_helper2_helper2_80033054(31730, &work->sv_7B8);
++    work->svecs2[6].vx = work->sv_7B8.vx;
++    if ((work->f940 & 3) == 1)
++        DG_InvisibleObjs(work->obj.objs);
++    else
++        DG_VisibleObjs(work->obj.objs);
++}
++
++int s19b_jeep_liq_800D8420(Work *work, int name)
++{
++    CONTROL *control = &work->own_control;
++    int model, motion;
++    if (GM_InitControl(control, name, GM_CurrentMap) < 0)
++        return -1;
++    control->mov = work->control->mov;
++    control->rot = work->control->rot;
++    GM_ConfigControlAttribute(control, 5);
++    GM_ConfigControlInterp(control, 4);
++    model = GV_StrCode(s19b_aLiquid_800DDE68);
++    motion = GV_StrCode(s19b_aLqdb_800DDE70);
++    GM_InitObject(&work->obj, model, 45, motion);
++    GM_ConfigObjectJoint(&work->obj);
++    motion = GV_StrCode(s19b_aLqdb_800DDE70);
++    GM_ConfigMotionControl(&work->obj, &work->m_ctrl, motion,
++                          work->m_segs1, work->m_segs2, control, work->svecs1);
++    GM_ConfigObjectLight(&work->obj, work->mtx);
++    GM_ConfigObjectAction(&work->obj, 0, 0, 0);
++    GM_ConfigMotionAdjust(&work->obj, work->svecs2);
++    GM_InitObject(&work->obj2, GV_StrCode(s19b_aFamas_800DDE78), 109, 0);
++    GM_ConfigObjectLight(&work->obj2, work->mtx);
++    GM_ConfigObjectRoot(&work->obj2, &work->obj, 4);
++    work->f8E4 = GM_AllocTarget();
++    work->homing = GM_SetHomingTarget(&work->obj.objs->objs[5].world, control);
++    if (work->homing != NULL)
++        work->homing->flag = 1;
++    Takabe_JeepSystem.field_68 = &work->obj;
++    control->r_sphere = -2;
++    work->f90C = work->f910 = work->f914 = 0;
++    return 0;
++}
++
++int s19b_spark2_m_800D87A4(Work *work)
++{
++    TARGET *target = work->f8E4;
++    if (target->damaged & TARGET_POWER)
++    {
++        target->force = DG_ZeroVector;
++        GM_SeSet(&work->own_control.mov, 129);
++        work->f8EC = (Takabe_JeepSystem.field_54 & 0x20000) ?
++            s19b_spark2_m_800D9434 : s19b_spark2_m_800D9390;
++        work->f8F4 = 0;
++        work->own_control.turn.vz = work->own_control.turn.vx = 0;
++        target->damage = target->damaged = 0;
++        if (target->vital <= 0)
++        {
++            ++Takabe_JeepSystem.field_44;
++            target->vital += 191;
++            if (GM_GameLevel > 0)
++                target->vital += GM_GameLevel * 64;
++        }
++        return 1;
++    }
++    if (work->f900 & 0x2000000)
++    {
++        work->f8EC = s19b_spark2_m_800D94C8;
++        work->f8F4 = 0;
++        work->own_control.turn.vz = work->own_control.turn.vx = 0;
++        return 1;
++    }
++    return 0;
++}
++
++void s19b_spark2_m_800D9148(Work *work, int mode)
++{
++    if (work->f900 & 0x10)
++    {
++        if (s19b_spark2_m_800D88D8(work) != 0)
++            return;
++        if (mode == 0)
++        {
++            work->f8FC = 17;
++            GM_ConfigObjectAction(&work->obj, 17, 0, 4);
++        }
++        if (mode < 91)
++            return;
++    }
++    work->f8EC = s19b_spark2_m_800D91DC;
++    work->f8F4 = 0;
++    work->own_control.turn.vz = work->own_control.turn.vx = 0;
++}
++
++int s19b_spark2_m_800D9680(Work *work)
++{
++    int flags = Takabe_JeepSystem.field_54;
++    if (!(flags & 0x1000))
++    {
++        if (flags & 2)
++        {
++            work->f900 |= 0x2000000;
++            return 0;
++        }
++        if (flags & 0x8000)
++        {
++            work->f900 = 0x4000000;
++            return 1;
++        }
++        if (work->f8FC != 20)
++            return 0;
++    }
++    work->f914 = 4;
++    work->f918 = 0;
++    work->f900 |= 0x10;
++    return 1;
++}
++
++void s19b_spark2_m_800D9AA8(Work *work)
++{
++    switch (work->f914)
++    {
++    case 0: s19b_spark2_m_800D9704(work); break;
++    case 1: s19b_spark2_m_800D97A8(work); break;
++    case 2: s19b_spark2_m_800D985C(work); break;
++    case 3: s19b_spark2_m_800D9910(work); break;
++    case 4: s19b_spark2_m_800D99C4(work); break;
++    }
++}
++
++#endif
+diff --git a/source/overlays/s19b/takabe/jeep_liq/jeep_liq_vehicle_native.h b/source/overlays/s19b/takabe/jeep_liq/jeep_liq_vehicle_native.h
+new file mode 100644
+index 000000000..6f1a48017
+--- /dev/null
++++ b/source/overlays/s19b/takabe/jeep_liq/jeep_liq_vehicle_native.h
+@@ -0,0 +1,300 @@
++#ifndef MGS_ESCAPE_LIQ_VEHICLE_NATIVE_H
++#define MGS_ESCAPE_LIQ_VEHICLE_NATIVE_H
++
++void s19b_jeep_liq_800D76B0(EscapeJeep2Work *work);
++void s19b_jeep_liq_800D76F8(EscapeJeep2Work *work, void (*arg1)(EscapeJeep2Work *));
++void s19b_jeep_liq_800D77F0(EscapeJeep2Work *work);
++void s19b_jeep_liq_800D7860(EscapeJeep2Work *work);
++void s19b_jeep_liq_800D797C(EscapeJeep2Work *work);
++void s19b_jeep_liq_800D79EC(EscapeJeep2Work *work);
++void s19b_jeep_liq_800D7A5C(EscapeJeep2Work *work);
++void s19b_jeep_liq_800D7ACC(EscapeJeep2Work *work);
++void s19b_jeep_liq_800D7B3C(EscapeJeep2Work *work, void (*arg1)(EscapeJeep2Work *));
++int s19b_jeep_liq_800D7B60(int center, int range);
++void s19b_jeep_liq_800D7BB0(EscapeJeep2Work *work);
++void s19b_jeep_liq_800D7C0C(EscapeJeep2Work *work);
++void s19b_jeep_liq_800D7CBC(EscapeJeep2Work *work);
++void s19b_jeep_liq_800D7D68(EscapeJeep2Work *work);
++void s19b_jeep_liq_800D7E2C(EscapeJeep2Work *work);
++void s19b_jeep_liq_800D7F20(EscapeJeep2Work *work);
++void s19b_jeep_liq_800D8014(EscapeJeep2Work *work, void (*arg1)(EscapeJeep2Work *));
++void s19b_jeep_liq_800D8044(EscapeJeep2Work *work);
++void s19b_jeep_liq_800D8118(EscapeJeep2Work *work);
++void s19b_jeep_liq_800D81A8(EscapeJeep2Work *work);
++void s19b_jeep_liq_800D6FB8(EscapeJeep2Work *work);
++void s19b_jeep_liq_800D7114(EscapeJeep2Work *work);
++void s19b_jeep_liq_800D7200(EscapeJeep2Work *work);
++void s19b_jeep_liq_800D7330(EscapeJeep2Work *work);
++void EscapeState_800D7468(EscapeJeep2Work *work);
++void s19b_jlamp_800D0A20(int mode);
++
++void s19b_jeep_liq_800D6FB8(EscapeJeep2Work *work)
++{
++  int v2;
++  SVECTOR to;
++  SVECTOR vec3;
++
++  memset(&vec3, 0, sizeof(vec3));
++  vec3.vz = work->field_3A8;
++  to = vec3;
++  DG_SetPos2(&DG_ZeroVector, &work->rotation);
++  DG_RotVector(&to, &to, 1);
++  work->step.vx = to.vx;
++  work->step.vz = to.vz;
++  s19b_jeep_gls_800CEC24(work->control.mov.vz - 1600, &vec3);
++  GV_SubVec3(&vec3, &work->control.mov, &vec3);
++  vec3.vx += work->field_3A0;
++  vec3.vx += (50 * rsin(32 * work->field_3C8)) >> 12;
++  vec3.vx += (2 * rsin(work->field_3C8 * 128) * work->field_3B8) >> 12;
++  work->rotation.vy = GV_VecDir2(&vec3);
++  v2 = work->field_3A8;
++  ++work->field_3C8;
++  work->field_3AC = v2;
++}
++
++void s19b_jeep_liq_800D7114(EscapeJeep2Work *work)
++{
++  void (*v2)(struct EscapeJeep2Work *);
++
++  work->field_3DC(work);
++  work->field_3E8(work);
++  work->field_3F8(work);
++  s19b_jeep_liq_800D6FB8(work);
++  if ( Takabe_JeepSystem.field_40 != 0 )
++  {
++    switch ( Takabe_JeepSystem.field_40 )
++    {
++      case 6:
++        v2 = s19b_jeep_liq_800D7200;
++        break;
++      case 7:
++        v2 = s19b_jeep_liq_800D7330;
++        break;
++      case 8:
++        v2 = EscapeState_800D7468;
++        break;
++      default:
++        goto LABEL_9;
++    }
++    work->field_3D0 = v2;
++  }
++LABEL_9:
++  if ( work->field_3D0 != s19b_jeep_liq_800D7114 )
++  {
++    work->field_3EC = 0;
++    s19b_jeep_liq_800D76F8(work, s19b_jeep_liq_800D77F0);
++    s19b_jeep_liq_800D7B3C(work, s19b_jeep_liq_800D7BB0);
++    s19b_jeep_liq_800D8014(work, s19b_jeep_liq_800D8044);
++    work->field_3CC = 0;
++  }
++}
++
++void s19b_jeep_liq_800D7200(EscapeJeep2Work *work)
++{
++    switch (work->field_3CC)
++    {
++    case 0:
++        s19b_jeep_liq_800D7A5C(work);
++        s19b_jeep_liq_800D6FB8(work);
++        work->field_3A0 = GV_NearSpeed(work->field_3A0, 750, 50);
++        if (s19b_jeep_gls_800CEDFC(work->control.mov.vz, 2000) == 10)
++            work->field_3CC = 1;
++        break;
++    case 1:
++        s19b_jeep_liq_800D7860(work);
++        s19b_jeep_liq_800D6FB8(work);
++        s19b_jeep_liq_800D7CBC(work);
++        if (s19b_jeep_gls_800CEDFC(work->control.mov.vz, 3000) == 12)
++            work->field_3CC = 2;
++        break;
++    case 2:
++        s19b_jeep_liq_800D77F0(work);
++        s19b_jeep_liq_800D6FB8(work);
++        work->field_3A0 = GV_NearSpeed(work->field_3A0, 650, 50);
++        if (work->field_3A0 == 650)
++        {
++            work->field_3D0 = s19b_jeep_liq_800D7114;
++            work->field_3A4 = 650;
++            work->field_3CC = 0;
++        }
++        break;
++    }
++}
++void s19b_jeep_liq_800D7330(EscapeJeep2Work *a1)
++{
++  int v2;
++  CONTROL *p_control;
++  int v4;
++
++  v2 = a1->field_3CC;
++  p_control = &a1->control;
++  if ( v2 == 1 )
++  {
++    s19b_jeep_liq_800D797C(a1);
++    s19b_jeep_liq_800D6FB8(a1);
++    s19b_jeep_liq_800D7C0C(a1);
++    if ( s19b_jeep_gls_800CEDFC(p_control->mov.vz, 3000) == 13 )
++      a1->field_3CC = 2;
++  }
++  else if ( v2 >= 2 )
++  {
++    if ( v2 == 2 )
++    {
++      s19b_jeep_liq_800D797C(a1);
++      s19b_jeep_liq_800D6FB8(a1);
++      v4 = GV_NearSpeed(a1->field_3A0, 750, 50);
++      a1->field_3A0 = v4;
++      if ( v4 == 750 )
++      {
++        a1->field_3D0 = s19b_jeep_liq_800D7114;
++        s19b_jeep_liq_800D8014(a1, s19b_jeep_liq_800D8118);
++        a1->field_3CC = 0;
++      }
++    }
++  }
++  else if ( v2 == 0 )
++  {
++    s19b_jeep_liq_800D7A5C(a1);
++    s19b_jeep_liq_800D6FB8(a1);
++    a1->field_3A0 = GV_NearSpeed(a1->field_3A0, 750, 50);
++    if ( s19b_jeep_gls_800CEDFC(p_control->mov.vz, 2000) == 11 )
++      a1->field_3CC = 1;
++  }
++}
++
++void EscapeState_800D7468(EscapeJeep2Work *work)
++{
++  CONTROL *p_control;
++  int v3;
++  int v4;
++  short v6;
++  int vz;
++  int vy;
++  short v9;
++  int v10;
++  int v11;
++  int vx;
++  SVECTOR to;
++  SVECTOR v14;
++
++  p_control = &work->control;
++  switch ( work->field_3CC )
++  {
++    case 0:
++      work->field_3C8 = 0;
++      work->field_3CC = 1;
++      work->field_3C0 = 1;
++      Takabe_JeepSystem.field_54 |= 0x20000u;
++      GM_GameStatus |= 0x104A2000u;
++      s19b_jlamp_800D0A20(1);
++      goto LABEL_3;
++    case 1:
++LABEL_3:
++      s19b_jeep_liq_800D797C(work);
++      s19b_jeep_liq_800D6FB8(work);
++      work->field_3A0 = GV_NearSpeed(work->field_3A0, 500, 30);
++      if ( s19b_jeep_gls_800CEDFC(p_control->mov.vz, 22000) == 14 )
++        work->field_3CC = 2;
++      break;
++    case 2:
++      s19b_jeep_liq_800D6FB8(work);
++      v3 = GV_NearSpeed(work->field_3A0, 250, 30);
++      v4 = work->field_3A8;
++      work->field_3A0 = v3;
++      work->field_3A8 = GV_NearSpeed(v4, 500, 3);
++      if ( s19b_jeep_gls_800CEDFC(p_control->mov.vz, 6000) == 14 )
++      {
++        work->field_3CC = 3;
++        work->field_380 = work->step;
++      }
++      break;
++    case 3:
++      memset(&v14, 0, sizeof(v14));
++      v14.vz = work->field_3A8;
++      to = v14;
++      DG_SetPos2(&DG_ZeroVector, &work->rotation);
++      DG_RotVector(&to, &to, 1);
++      v6 = GV_NearExp8(work->field_380.vx, 0);
++      vz = work->field_380.vz;
++      work->field_380.vx = v6;
++      work->field_380.vz = GV_NearExp8(vz, 0);
++      work->step.vx = to.vx + work->field_380.vx;
++      vy = work->rotation.vy;
++      work->step.vz = to.vz + work->field_380.vz;
++      v9 = GV_NearExp8(vy, 3072);
++      v10 = work->field_3A8;
++      work->rotation.vy = v9;
++      v11 = GV_NearExp4(v10, 0);
++      vx = work->step.vx;
++      work->field_3A8 = v11;
++      work->field_3AC = 0;
++      if ( vx == 0 && work->step.vz == 0 )
++        work->field_3CC = 4;
++      break;
++    default:
++      break;
++  }
++  ++work->field_3C8;
++}
++
++int s19b_jeep_liq_800D771C(int center, int from, int to)
++{
++  int v4;
++  int v5;
++  int v6;
++  int v7;
++  int v8;
++  int v9;
++  int result;
++
++  v5 = to - from;
++  v4 = s19b_jeep_mrl_800D399C();
++  v6 = v4;
++  if ( v5 >= 0 )
++  {
++    if ( v5 >= 3001 )
++    {
++      v7 = center;
++      v8 = v4 + 100;
++      v9 = 15;
++      return GV_NearSpeed(v7, v8, v9);
++    }
++    if ( v5 >= 751 )
++    {
++      v7 = center;
++      v8 = v4 + 50;
++      v9 = 8;
++      return GV_NearSpeed(v7, v8, v9);
++    }
++    result = center;
++    if ( v5 < 94 )
++      return result;
++    v7 = center;
++    v8 = v6 + 15;
++LABEL_14:
++    v9 = 3;
++    return GV_NearSpeed(v7, v8, v9);
++  }
++  v7 = center;
++  if ( v5 < -3000 )
++  {
++    v8 = v4 - 100;
++    v9 = 15;
++    return GV_NearSpeed(v7, v8, v9);
++  }
++  v9 = 8;
++  if ( v5 < -750 )
++  {
++    v8 = v4 - 50;
++    return GV_NearSpeed(v7, v8, v9);
++  }
++  v7 = center;
++  if ( v5 < -93 )
++  {
++    v8 = v4 - 15;
++    goto LABEL_14;
++  }
++  return center;
++}
++
++#endif
+diff --git a/source/overlays/s19b/takabe/jeep_mrl/jeep_mrl.c b/source/overlays/s19b/takabe/jeep_mrl/jeep_mrl.c
+index 345a6d40b..4333f3dfc 100644
+--- a/source/overlays/s19b/takabe/jeep_mrl/jeep_mrl.c
++++ b/source/overlays/s19b/takabe/jeep_mrl/jeep_mrl.c
+@@ -1,64 +1,8 @@
+-#include "mgstype.h"
+-#include <libgte.h>
++#include "jeep_mrl_native.h"
+ #include <rand.h>
+-#include "game/game.h"
+-
+-typedef struct _Work
+-{
+-    GV_ACT   actor;                                    /* 0x000 */
+-    CONTROL *root_ctrl;                                /* 0x020 */
+-    MATRIX  *root_mat;                                 /* 0x024 */
+-    CONTROL  control;                                  /* 0x028 */
+-    OBJECT   body;                                     /* 0x0A4 */
+-    char     pad_2B0[0x2B0 - 0xA4 - sizeof(OBJECT)];
+-    TARGET   field_2B0;                                /* 0x2B0 */
+-    char     pad_3A0[0x3A0 - 0x2B0 - sizeof(TARGET)];
+-    short    field_3A0;                                /* 0x3A0 */
+-    char     pad_3A4[0x3A4 - 0x3A0 - sizeof(short)];
+-    short    field_3A4;                                /* 0x3A4 */
+-    char     pad_3B8[0x3B8 - 0x3A4 - sizeof(short)];
+-    SVECTOR  field_3B8;                                /* 0x3B8 */
+-    char     pad_3C8[0x3C8 - 0x3B8 - sizeof(SVECTOR)];
+-    short    field_3C8;                                /* 0x3C8 */
+-    short    field_3CA;                                /* 0x3CA */
+-    int      field_3CC;                                /* 0x3CC */
+-    int      field_3D0;                                /* 0x3D0 */
+-    int      field_3D4;                                /* 0x3D4 */
+-    char     pad_3E0[0x3E0 - 0x3D4 - sizeof(int)];
+-    int      field_3E0;                                /* 0x3E0 */
+-    char     pad_7E4[0x7E4 - 0x3E0 - sizeof(int)];
+-    int      field_7E4;                                /* 0x7E4 */
+-    TARGET  *target;                                   /* 0x7E8 */
+-    void    *field_7EC;                                /* 0x7EC: current state handler */
+-    char     pad_7F4[0x7F4 - 0x7EC - sizeof(void *)];
+-    int      field_7F4;                                /* 0x7F4: frame counter */
+-    char     pad_7FC[0x7FC - 0x7F4 - sizeof(int)];
+-    int      field_7FC;                                /* 0x7FC: action id */
+-    int      field_800;                                /* 0x800: flags */
+-    char     pad_818[0x818 - 0x800 - sizeof(int)];
+-    short    field_818;                                /* 0x818 */
+-    char     pad_81C[0x81C - 0x818 - sizeof(short)];
+-    short    field_81C;                                /* 0x81C */
+-} Work;
+-
+-typedef struct _JEEP_SYSTEM
+-{
+-    char     pad1[0x4];
+-    CONTROL *control;
+-    char     pad2a[0x4C - 0x8];
+-    int      field_4C;
+-    int      field_50;
+-    char     pad2b[0x60 - 0x50 - sizeof(int)];
+-    OBJECT  *snake_body;
+-    char     pad3[0x78 - 0x60 - sizeof(OBJECT *)];
+-    int      field_78;
+-} JEEP_SYSTEM;
+-
+-extern JEEP_SYSTEM Takabe_JeepSystem;
+-
+-extern Work *s19b_dword_800DE64C;
+-
+-void s19b_jeep_mrl_800D2CE8(Work *work)
++#include <string.h>
++
++void s19b_jeep_mrl_800D2CE8(EscapeJeepWork *work)
+ {
+     if (work->field_3E0 == 0)
+     {
+@@ -71,7 +15,7 @@ void s19b_jeep_mrl_800D2CE8(Work *work)
+ }
+ extern void s19b_jeep_gls_800CEC24(int arg0, SVECTOR *out);
+ 
+-void s19b_jeep_mrl_800D2D3C(Work *work)
++void s19b_jeep_mrl_800D2D3C(EscapeJeepWork *work)
+ {
+     CONTROL *ctl = &work->control;
+     SVECTOR  rot;
+@@ -82,8 +26,8 @@ void s19b_jeep_mrl_800D2D3C(Work *work)
+     rot = vec;
+     DG_SetPos2(&DG_ZeroVector, &work->field_3B8);
+     DG_RotVector(&rot, &rot, 1);
+-    work->field_3A0 = rot.vx;
+-    work->field_3A4 = rot.vz;
++    work->step.vx = rot.vx;
++    work->step.vz = rot.vz;
+     s19b_jeep_gls_800CEC24(ctl->mov.vz - 0x640, &vec);
+     GV_SubVec3(&vec, &ctl->mov, &vec);
+     vec.vx += work->field_3C8;
+@@ -92,15 +36,291 @@ void s19b_jeep_mrl_800D2D3C(Work *work)
+     work->field_3CC++;
+     work->field_3D4 = GV_NearSpeed(work->field_3D4, 0x190, 0xa);
+ }
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_mrl_800D2E78.s")
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_mrl_800D32B4.s")
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_mrl_800D368C.s")
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_mrl_800D36A4.s")
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_mrl_800D37D0.s")
++void s19b_jeep_mrl_800D2E78(EscapeJeepWork *work)
++{
++    s19b_jeep_mrl_800D2CE8(work);
++    s19b_jeep_mrl_800D2D3C(work);
++    if ((work->field_3CC & 63) == 0)
++        work->field_3CA = (rand() * 1200 >> 15) - 600;
++    work->field_3C8 = GV_NearSpeed(work->field_3C8, work->field_3CA, 30);
++    switch (Takabe_JeepSystem.field_40)
++    {
++    case 1:
++    case 3:
++        work->state = EscapeState_800D2F54;
++        break;
++    case 6:
++        work->state = s19b_jeep_mrl_800D36A4;
++        break;
++    case 7:
++        work->state = s19b_jeep_mrl_800D37D0;
++        break;
++    }
++}
++
++static void GateApproach(EscapeJeepWork *work, int distance)
++{
++    s19b_jeep_mrl_800D2D3C(work);
++    work->field_3C8 = GV_NearSpeed(work->field_3C8, 250, 30);
++    work->field_3D0 = GV_NearSpeed(work->field_3D0, work->field_3D4, 5);
++    if (s19b_jeep_gls_800CEDFC(work->control.mov.vz, distance) != 9)
++        return;
++    if (distance == 13500)
++    {
++        Voicesys_800CE2D0();
++        work->field_3DC = 1;
++    }
++    else
++    {
++        work->field_3DC = 2;
++        work->field_3A8 = work->step;
++        Takabe_JeepSystem.field_50 |= 0x20020;
++        GM_SeSet(&work->control.mov, 182);
++        NewPadVibration(EscapeRumble39B0, 2);
++        GM_SetSound(0xff0000fe, 0);
++    }
++}
++
++static void GateTireSmoke(EscapeJeepWork *work)
++{
++    s19b_jblood_800C850C(&work->field_18C.objs->objs[1].world, &work->field_A8.objs->world);
++    s19b_jblood_800C850C(&work->field_18C.objs->objs[2].world, &work->field_A8.objs->world);
++}
++
++static void GateBrake(EscapeJeepWork *work)
++{
++    SVECTOR velocity = {0};
++    velocity.vz = work->field_3D0;
++    DG_SetPos2(&DG_ZeroVector, &work->field_3B8);
++    DG_RotVector(&velocity, &velocity, 1);
++    work->field_3A8.vx = GV_NearExp8(work->field_3A8.vx, 0);
++    work->field_3A8.vz = GV_NearExp8(work->field_3A8.vz, 0);
++    work->step.vx = velocity.vx + work->field_3A8.vx;
++    work->step.vz = velocity.vz + work->field_3A8.vz;
++    work->field_3B8.vy = GV_NearExp8(work->field_3B8.vy, 3072);
++    work->field_3D0 = GV_NearExp4(work->field_3D0, 0);
++    work->field_3E8 = 0;
++    if ((unsigned)(work->field_3D0 - 6) < 44)
++        GateTireSmoke(work);
++    work->field_3EC = GV_NearSpeed(work->field_3EC, -400, 20);
++    if (work->step.vx == 0 && work->step.vz == 0)
++    {
++        work->field_3DC = 3;
++        Takabe_JeepSystem.field_50 &= ~0x30020;
++        work->field_3CC = 0;
++    }
++}
++
++void EscapeState_800D2F54(EscapeJeepWork *work)
++{
++    switch (work->field_3DC)
++    {
++    case 0:
++        work->field_3CC = 0;
++        work->field_3DC = 5;
++        GateApproach(work, 3500);
++        break;
++    case 1:
++        GateApproach(work, 3500);
++        break;
++    case 2:
++        GateBrake(work);
++        break;
++    case 3:
++        work->field_3CC++;
++        work->field_3EC = GV_NearSpeed(work->field_3EC, -300, 10);
++        if (s19b_jeep_mrl_800D39F0() == 1)
++        {
++            work->field_3DC = 4;
++            work->field_3CC = 0;
++            Voicesys_800CE6AC(1);
++            Voicesys_800CE2D0();
++        }
++        else if (work->field_3CC == 90)
++            Voicesys_800CE5F8(10, 2);
++        break;
++    case 4:
++        if (++work->field_3CC >= 61)
++        {
++            work->state = EscapeState_800D32C4;
++            work->field_3DC = 0;
++        }
++        break;
++    case 5:
++        GateApproach(work, 13500);
++        break;
++    }
++}
++static void GateTurn(EscapeJeepWork *work, int phase)
++{
++    SVECTOR velocity = DG_ZeroVector;
++    work->field_3C8 = GV_NearSpeed(work->field_3C8, 750, 50);
++    s19b_jeep_mrl_800D3A54(&velocity, &work->field_3B8.vy, work->field_3EC, work->field_3D0);
++    work->step.vx = velocity.vx;
++    work->step.vz = velocity.vz;
++    if (phase == 1)
++    {
++        work->field_3D0 = GV_NearSpeed(work->field_3D0, -250, 10);
++        work->field_3EC = GV_NearSpeed(work->field_3EC, -400, 10);
++        if ((work->field_3B8.vy & 4095) < 1800)
++            work->field_3DC = 2;
++    }
++    else
++    {
++        work->field_3D0 = GV_NearSpeed(work->field_3D0, 0, 20);
++        work->field_3EC = GV_NearSpeed(work->field_3EC, 0, 7);
++        if (work->field_3D0 == 0)
++        {
++            work->field_3CC = 0;
++            work->field_3DC = 5;
++            GM_SeSet(&work->control.mov, 180);
++            NewPadVibration(EscapeRumble39A0, 2);
++            Takabe_JeepSystem.field_50 = (Takabe_JeepSystem.field_50 & ~0x20220) | 0x200;
++        }
++    }
++}
++
++static void GateAccelerate(EscapeJeepWork *work, int phase)
++{
++    s19b_jeep_mrl_800D2D3C(work);
++    if (phase == 3)
++    {
++        work->field_3C8 = GV_NearSpeed(work->field_3C8, 1000, 50);
++        work->field_3D0 = GV_NearSpeed(work->field_3D0, work->field_3D4, s19b_dword_800DE648);
++        s19b_dword_800DE648 += 2;
++        work->field_3EC = GV_NearSpeed(work->field_3EC, 50, 10);
++        if (s19b_jeep_gls_800CEDFC(work->control.mov.vz, -3250) == 9)
++            work->field_3DC = 4;
++        if (work->field_3D0 < 200)
++            GateTireSmoke(work);
++    }
++    else
++    {
++        work->field_3C8 = GV_NearSpeed(work->field_3C8, 600, 50);
++        work->field_3D0 = GV_NearSpeed(work->field_3D0, 400, 5);
++        work->field_3EC = GV_NearSpeed(work->field_3EC, 0, 7);
++        if (s19b_jeep_gls_800CEDFC(work->control.mov.vz, -6000) == 9)
++            work->field_3DC = -1;
++        work->field_3EC = GV_NearSpeed(work->field_3EC, 0, 20);
++    }
++}
++
++void EscapeState_800D32C4(EscapeJeepWork *work)
++{
++    switch (work->field_3DC)
++    {
++    case 0:
++        work->field_3DC = 1;
++        work->field_3CC = 0;
++        work->field_3EC = -300;
++        Takabe_JeepSystem.field_50 |= 0x30020;
++        GM_SeSet(&work->control.mov, 187);
++        NewPadVibration(EscapeRumble39A0, 2);
++        GateTurn(work, 1);
++        break;
++    case 1:
++    case 2:
++        GateTurn(work, work->field_3DC);
++        break;
++    case 3:
++    case 4:
++        GateAccelerate(work, work->field_3DC);
++        break;
++    case 5:
++        work->field_3EC = GV_NearSpeed(work->field_3EC, 100, 30);
++        if (++work->field_3CC >= 6)
++        {
++            work->field_3DC = 3;
++            work->field_3C8 = 750;
++            work->field_3D0 = 0;
++            s19b_dword_800DE648 = 2;
++            GM_SeSet(NULL, 192);
++        }
++        break;
++    }
++    if (work->field_3DC == -1)
++    {
++        work->state = s19b_jeep_mrl_800D2E78;
++        work->field_3DC = 0;
++    }
++    s19b_jeep_mrl_800D3CA8(work, 0);
++}
++
++void s19b_jeep_mrl_800D36A4(EscapeJeepWork *work)
++{
++    s19b_jeep_mrl_800D2CE8(work);
++    s19b_jeep_mrl_800D2D3C(work);
++    switch (work->field_3DC)
++    {
++    case 0:
++        work->field_3C8 = GV_NearSpeed(work->field_3C8, 750, 50);
++        if (s19b_jeep_gls_800CEDFC(work->control.mov.vz, 2000) == 10)
++        {
++            work->field_3DC = 1;
++            s19b_jlamp_800D0FE4(3);
++            GM_SeSet(NULL, 194);
++        }
++        break;
++    case 1:
++        work->field_3C8 = GV_NearSpeed(work->field_3C8, 1500, 50);
++        if (s19b_jeep_gls_800CEDFC(work->control.mov.vz, 3000) == 12)
++        {
++            work->field_3DC = 2;
++            s19b_jlamp_800D0FE4(1);
++            GM_SeSet(NULL, 194);
++        }
++        break;
++    case 2:
++        work->field_3C8 = GV_NearSpeed(work->field_3C8, 750, 50);
++        if (work->field_3C8 == 750)
++        {
++            work->state = s19b_jeep_mrl_800D2E78;
++            work->field_3DC = 0;
++        }
++        break;
++    }
++}
++void s19b_jeep_mrl_800D37D0(EscapeJeepWork *work)
++{
++    s19b_jeep_mrl_800D2CE8(work);
++    s19b_jeep_mrl_800D2D3C(work);
++    switch (work->field_3DC)
++    {
++    case 0:
++        work->field_3C8 = GV_NearSpeed(work->field_3C8, -750, 50);
++        if (s19b_jeep_gls_800CEDFC(work->control.mov.vz, 2000) == 11)
++        {
++            work->field_3DC = 1;
++            s19b_jlamp_800D0FE4(4);
++        }
++        break;
++    case 1:
++        work->field_3C8 = GV_NearSpeed(work->field_3C8, -1350, 50);
++        if (s19b_jeep_gls_800CEDFC(work->control.mov.vz, 3000) == 13)
++        {
++            work->field_3DC = 2;
++            s19b_jlamp_800D0FE4(1);
++        }
++        if (++s19b_dword_800C39CC >= 10)
++        {
++            s19b_dword_800C39CC = 0;
++            GM_SeSet(NULL, 193);
++        }
++        break;
++    case 2:
++        work->field_3C8 = GV_NearSpeed(work->field_3C8, -750, 50);
++        if (work->field_3C8 == -750)
++        {
++            work->state = s19b_jeep_mrl_800D3928;
++            work->field_3DC = 0;
++        }
++        break;
++    }
++}
+ 
+-extern void s19b_jeep_mrl_800D2D3C(Work *work);
++extern void s19b_jeep_mrl_800D2D3C(EscapeJeepWork *work);
+ 
+-void s19b_jeep_mrl_800D3928(Work *work)
++void s19b_jeep_mrl_800D3928(EscapeJeepWork *work)
+ {
+     s19b_jeep_mrl_800D2CE8(work);
+     s19b_jeep_mrl_800D2D3C(work);
+@@ -140,26 +360,99 @@ int s19b_jeep_mrl_800D39F0(void)
+     return count;
+ }
+ 
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_mrl_800D3A54.s")
++int s19b_jeep_mrl_800D3A54(SVECTOR *position, short *heading, int turn, short speed)
++{
++    SVECTOR axle = s19b_dword_800DDDC4;
++    SVECTOR forward = DG_ZeroVector;
++    SVECTOR velocity;
++    SVECTOR steering;
++    MATRIX matrix = DG_ZeroMatrix;
++    int flag;
++    forward.vz = speed;
++    RotMatrixY(*heading, &matrix);
++    SetRotMatrix(&matrix);
++    SetTransMatrix(&matrix);
++    RotTransSV(&axle, &axle, &flag);
++    RotTransSV(&forward, &velocity, &flag);
++    velocity.vx = velocity.vx * rcos(turn) / 4096;
++    velocity.vz = velocity.vz * rcos(turn) / 4096;
++    GV_AddVec3(position, &velocity, position);
++    matrix = DG_ZeroMatrix;
++    RotMatrixY(turn, &matrix);
++    SetRotMatrix(&matrix);
++    RotTransSV(&forward, &steering, &flag);
++    GV_AddVec3(&axle, &steering, &steering);
++    GV_SubVec3(&steering, &velocity, &axle);
++    *heading = ratan2(axle.vx, axle.vz);
++    return *heading;
++}
+ extern SVECTOR s19b_dword_800C39D0[];
+-extern int s19b_dword_800C399C;
+-extern int s19b_dword_800C3994;
+ extern void *NewPadVibration(unsigned char *, int);
+ 
+-void s19b_jeep_mrl_800D3CA8(Work *work, int arg1)
++void s19b_jeep_mrl_800D3CA8(EscapeJeepWork *work, int arg1)
+ {
+     DG_SetPos2(&work->control.mov, &work->control.rot);
+-    DG_PutVector(&s19b_dword_800C39D0[arg1], &work->field_2B0.center, 1);
+-    work->field_2B0.vital = 8;
+-    if (GM_PowerTarget(&work->field_2B0) == 0)
++    DG_PutVector(&s19b_dword_800C39D0[arg1], &work->target2.center, 1);
++    work->target2.vital = 8;
++    if (GM_PowerTarget(&work->target2) == 0)
+     {
+         return;
+     }
+-    NewPadVibration((unsigned char *)&s19b_dword_800C399C, 1);
+-    NewPadVibration((unsigned char *)&s19b_dword_800C3994, 0);
++    NewPadVibration(EscapeRumble399C, 1);
++    NewPadVibration(EscapeRumble3994, 0);
++}
++void s19b_jeep_mrl_800D3D30(Work *work)
++{
++    DG_OBJS *objects;
++    s19b_jeep_mrl_800D47B8(work);
++    GM_ActMotion(&work->body);
++    sna_act_helper2_helper2_80033054(work->voice, &work->adjust[6]);
++    work->adjust[6].vy = GV_NearSpeed(work->adjust[6].vy, work->field_7E4, 200);
++    work->control.turn = DG_ZeroVector;
++    work->control.rot = work->control.turn;
++    work->control.mov = s19b_dword_800C39D0[2];
++    GM_ActControl(&work->control);
++    GM_ActObject(&work->body);
++    objects = work->body.objs;
++    CompMatrix(work->root_mat, &objects->world, &objects->world);
++    work->control.mov.vx = objects->world.t[0];
++    work->control.mov.vy = objects->world.t[1];
++    work->control.mov.vz = objects->world.t[2];
++    DG_GetLightMatrix(&work->control.mov, work->light);
++    Takabe_JeepSystem.field_130.vx = objects->objs[6].world.t[0];
++    Takabe_JeepSystem.field_130.vy = objects->objs[6].world.t[1];
++    Takabe_JeepSystem.field_130.vz = objects->objs[6].world.t[2];
++    GM_MoveTarget(work->target, &work->control.mov);
++}
++int s19b_jeep_mrl_800D3E98(Work *work, int name, int otacon)
++{
++    int model;
++    int motion;
++    if (GM_InitControl(&work->control, name, GM_CurrentMap) < 0)
++        return -1;
++    work->control.mov = work->root_ctrl->mov;
++    work->control.rot = work->root_ctrl->rot;
++    GM_ConfigControlInterp(&work->control, 4);
++    model = GV_StrCode(otacon ? s19b_aOtacom_800DDDE4 : "meryl");
++    motion = GV_StrCode(s19b_aMelb_800DDDD4);
++    GM_InitObject(&work->body, model, 45, motion);
++    work->voice = GV_StrCode(otacon ? s19b_dword_800DDDEC : s19b_dword_800DDDDC);
++    work->field_818 = otacon ? 133 : 130;
++    work->field_81A = otacon ? 134 : 131;
++    work->field_81C = otacon ? 135 : 132;
++    work->field_81E = work->field_818;
++    GM_ConfigObjectJoint(&work->body);
++    GM_ConfigMotionControl(&work->body, &work->motion, motion, work->segments1,
++                           work->segments2, &work->control, work->rots);
++    GM_ConfigObjectLight(&work->body, work->light);
++    GM_ConfigObjectAction(&work->body, 0, 0, 0);
++    GM_ActMotion(&work->body);
++    GM_ConfigMotionAdjust(&work->body, work->adjust);
++    work->target = GM_AllocTarget();
++    Takabe_JeepSystem.field_64 = &work->body;
++    work->control.r_sphere = -2;
++    return 0;
+ }
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_mrl_800D3D30.s")
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_mrl_800D3E98.s")
+ 
+ void s19b_jeep_mrl_800D4098(Work *work)
+ {
+@@ -172,16 +465,16 @@ extern int  s19b_jeep_mrl_800D3E98(Work *work, int name, int arg2);
+ extern const char s19b_dword_800DDDF8[];
+ extern const char s19b_aMeryl_800DDDCC[];
+ 
+-void *s19b_jeep_mrl_800D40D4(int arg0, int arg1, int arg2)
++void *s19b_jeep_mrl_800D40D4(CONTROL *arg0, MATRIX *arg1, int arg2)
+ {
+-    Work *work = GV_NewActor(GV_ACTOR_AFTER, 0x820);
++    Work *work = GV_NewActor(GV_ACTOR_AFTER, sizeof(Work));
+ 
+     if (work != NULL)
+     {
+         GV_SetNamedActor(work, s19b_jeep_mrl_800D3D30, s19b_jeep_mrl_800D4098,
+                          s19b_dword_800DDDF8);
+-        work->root_ctrl = (CONTROL *)arg0;
+-        work->root_mat = (MATRIX *)arg1;
++        work->root_ctrl = arg0;
++        work->root_mat = arg1;
+         if (s19b_jeep_mrl_800D3E98(work, GV_StrCode(s19b_aMeryl_800DDDCC), arg2) < 0)
+         {
+             GV_DestroyActor(work);
+@@ -204,7 +497,7 @@ int s19b_jeep_mrl_800D4188(Work *work)
+ 
+     if (flags & 2)
+     {
+-        work->field_7EC = (void *)s19b_jeep_mrl_800D46D4;
++        work->field_7EC = s19b_jeep_mrl_800D46D4;
+         work->field_7F4 = 0;
+         work->control.turn.vz = 0;
+         work->control.turn.vx = 0;
+@@ -212,7 +505,7 @@ int s19b_jeep_mrl_800D4188(Work *work)
+     }
+     if (flags & 1)
+     {
+-        work->field_7EC = (void *)s19b_jeep_mrl_800D424C;
++        work->field_7EC = s19b_jeep_mrl_800D424C;
+         work->field_7F4 = 0;
+         work->control.turn.vz = 0;
+         work->control.turn.vx = 0;
+@@ -220,7 +513,7 @@ int s19b_jeep_mrl_800D4188(Work *work)
+     }
+     if (flags & 0x20)
+     {
+-        work->field_7EC = (void *)s19b_jeep_mrl_800D4414;
++        work->field_7EC = s19b_jeep_mrl_800D4414;
+         work->field_7F4 = 0;
+         work->control.turn.vz = 0;
+         work->control.turn.vx = 0;
+@@ -228,7 +521,7 @@ int s19b_jeep_mrl_800D4188(Work *work)
+     }
+     if (flags & 0x200)
+     {
+-        work->field_7EC = (void *)s19b_jeep_mrl_800D4574;
++        work->field_7EC = s19b_jeep_mrl_800D4574;
+         work->field_7F4 = 0;
+         work->control.turn.vz = 0;
+         work->control.turn.vx = 0;
+@@ -236,7 +529,7 @@ int s19b_jeep_mrl_800D4188(Work *work)
+     }
+     if (flags & 0x1000)
+     {
+-        work->field_7EC = (void *)s19b_jeep_mrl_800D43AC;
++        work->field_7EC = s19b_jeep_mrl_800D43AC;
+         work->field_7F4 = 0;
+         work->control.turn.vz = 0;
+         work->control.turn.vx = 0;
+@@ -244,7 +537,7 @@ int s19b_jeep_mrl_800D4188(Work *work)
+     }
+     if ((flags & 0x10000) == 0)
+     {
+-        work->field_7EC = (void *)s19b_jeep_mrl_800D4290;
++        work->field_7EC = s19b_jeep_mrl_800D4290;
+         work->field_7F4 = 0;
+         work->control.turn.vz = 0;
+         work->control.turn.vx = 0;
+@@ -299,7 +592,7 @@ void s19b_jeep_mrl_800D4290(Work *work, int arg1)
+         work->field_7E4 = 0;
+         if (s19b_jeep_mrl_800D4188(work) == 0)
+         {
+-            work->field_7EC = (void *)s19b_jeep_mrl_800D424C;
++            work->field_7EC = s19b_jeep_mrl_800D424C;
+             work->field_7F4 = 0;
+             work->control.turn.vz = 0;
+             work->control.turn.vx = 0;
+@@ -315,7 +608,7 @@ void s19b_jeep_mrl_800D43AC(Work *work, int arg1)
+     }
+     if (work->field_800 & 0x10000)
+     {
+-        work->field_7EC = (void *)s19b_jeep_mrl_800D424C;
++        work->field_7EC = s19b_jeep_mrl_800D424C;
+         work->field_7F4 = 0;
+         work->control.turn.vz = 0;
+         work->control.turn.vx = 0;
+@@ -335,7 +628,7 @@ void s19b_jeep_mrl_800D4414(Work *work, int arg1)
+     }
+     if (s19b_jeep_mrl_800D4188(work) != 0) return;
+     if (work->body.is_end == 0) return;
+-    work->field_7EC = (void *)s19b_jeep_mrl_800D4488;
++    work->field_7EC = s19b_jeep_mrl_800D4488;
+     work->field_7F4 = 0;
+     work->control.turn.vz = 0;
+     work->control.turn.vx = 0;
+@@ -350,7 +643,7 @@ void s19b_jeep_mrl_800D4488(Work *work, int arg1)
+     }
+     if (s19b_jeep_mrl_800D4188(work) != 0) return;
+     if (work->field_800 & 0x20000) return;
+-    work->field_7EC = (void *)s19b_jeep_mrl_800D4500;
++    work->field_7EC = s19b_jeep_mrl_800D4500;
+     work->field_7F4 = 0;
+     work->control.turn.vz = 0;
+     work->control.turn.vx = 0;
+@@ -365,7 +658,7 @@ void s19b_jeep_mrl_800D4500(Work *work, int arg1)
+     }
+     if (s19b_jeep_mrl_800D4188(work) != 0) return;
+     if (work->body.is_end == 0) return;
+-    work->field_7EC = (void *)s19b_jeep_mrl_800D424C;
++    work->field_7EC = s19b_jeep_mrl_800D424C;
+     work->field_7F4 = 0;
+     work->control.turn.vz = 0;
+     work->control.turn.vx = 0;
+@@ -380,7 +673,7 @@ void s19b_jeep_mrl_800D4574(Work *work, int arg1)
+     }
+     if (s19b_jeep_mrl_800D4188(work) != 0) return;
+     if (work->body.is_end == 0) return;
+-    work->field_7EC = (void *)s19b_jeep_mrl_800D45E8;
++    work->field_7EC = s19b_jeep_mrl_800D45E8;
+     work->field_7F4 = 0;
+     work->control.turn.vz = 0;
+     work->control.turn.vx = 0;
+@@ -395,7 +688,7 @@ void s19b_jeep_mrl_800D45E8(Work *work, int arg1)
+     }
+     if (s19b_jeep_mrl_800D4188(work) != 0) return;
+     if (work->field_800 & 0x20000) return;
+-    work->field_7EC = (void *)s19b_jeep_mrl_800D4660;
++    work->field_7EC = s19b_jeep_mrl_800D4660;
+     work->field_7F4 = 0;
+     work->control.turn.vz = 0;
+     work->control.turn.vx = 0;
+@@ -410,7 +703,7 @@ void s19b_jeep_mrl_800D4660(Work *work, int arg1)
+     }
+     if (s19b_jeep_mrl_800D4188(work) != 0) return;
+     if (work->body.is_end == 0) return;
+-    work->field_7EC = (void *)s19b_jeep_mrl_800D424C;
++    work->field_7EC = s19b_jeep_mrl_800D424C;
+     work->field_7F4 = 0;
+     work->control.turn.vz = 0;
+     work->control.turn.vx = 0;
+@@ -424,7 +717,7 @@ void s19b_jeep_mrl_800D46D4(Work *work, int arg1)
+         GM_SeSet(&work->control.mov, work->field_818);
+     }
+     if (work->body.is_end == 0) return;
+-    work->field_7EC = (void *)s19b_jeep_mrl_800D424C;
++    work->field_7EC = s19b_jeep_mrl_800D424C;
+     work->field_7F4 = 0;
+     work->control.turn.vz = 0;
+     work->control.turn.vx = 0;
+@@ -435,11 +728,11 @@ void s19b_jeep_mrl_800D4744(Work *work)
+     int   old = work->field_7F4;
+ 
+     work->field_7F4 = old + 1;
+-    fn = (void (*)(Work *, int))work->field_7EC;
++    fn = work->field_7EC;
+     if (fn == 0)
+     {
+         fn = s19b_jeep_mrl_800D424C;
+-        work->field_7EC = (void *)fn;
++        work->field_7EC = fn;
+         work->field_7FC = 0;
+         GM_ConfigObjectAction(&work->body, 0, 0, 4);
+     }
+diff --git a/source/overlays/s19b/takabe/jeep_mrl/jeep_mrl_native.h b/source/overlays/s19b/takabe/jeep_mrl/jeep_mrl_native.h
+new file mode 100644
+index 000000000..80ff23ab1
+--- /dev/null
++++ b/source/overlays/s19b/takabe/jeep_mrl/jeep_mrl_native.h
+@@ -0,0 +1,72 @@
++#ifndef MGS_JEEP_MRL_NATIVE_H
++#define MGS_JEEP_MRL_NATIVE_H
++
++#include "overlays/s19b/jeep_vehicles.h"
++#include "game/vibrate.h"
++
++typedef struct EscapeMerylWork
++{
++    GV_ACT actor;
++    CONTROL *root_ctrl;
++    MATRIX *root_mat;
++    CONTROL control;
++    OBJECT body;
++    MOTION_CONTROL motion;
++    MOTION_SEGMENT segments1[17];
++    MOTION_SEGMENT segments2[17];
++    SVECTOR rots[16];
++    SVECTOR adjust[16];
++    MATRIX light[2];
++    int voice;
++    int field_7E4;
++    TARGET *target;
++    void (*field_7EC)(struct EscapeMerylWork *, int);
++    int field_7F0;
++    int field_7F4;
++    int field_7F8;
++    int field_7FC;
++    int field_800;
++    int field_804;
++    int field_808;
++    int field_80C;
++    int field_810;
++    int field_814;
++    short field_818;
++    short field_81A;
++    short field_81C;
++    short field_81E;
++} Work;
++
++_Static_assert(offsetof(Work, motion) == 0x188, "Original companion motion offset");
++_Static_assert(offsetof(Work, segments2) == 0x43c, "Original companion segment offset");
++_Static_assert(offsetof(Work, light) == 0x7a0, "Original companion light offset");
++_Static_assert(offsetof(Work, field_7EC) == 0x7ec, "Original companion callback offset");
++_Static_assert(sizeof(Work) == 0x820, "Original companion actor layout");
++
++extern EscapeJeepWork *s19b_dword_800DE64C;
++extern int s19b_dword_800DE648;
++extern int s19b_dword_800C39CC;
++extern const SVECTOR s19b_dword_800DDDC4;
++extern const char s19b_aMelb_800DDDD4[];
++extern const char s19b_aOtacom_800DDDE4[];
++extern const char s19b_dword_800DDDEC[];
++extern const char s19b_dword_800DDDDC[];
++
++void s19b_jeep_gls_800CEC24(int distance, SVECTOR *position);
++int s19b_jeep_gls_800CEDFC(int distance, int offset);
++void s19b_jlamp_800D0FE4(int view);
++void s19b_jblood_800C850C(MATRIX *joint, MATRIX *world);
++void s19b_jeep_mrl_800D36A4(EscapeJeepWork *work);
++void s19b_jeep_mrl_800D37D0(EscapeJeepWork *work);
++void s19b_jeep_mrl_800D3CA8(EscapeJeepWork *work, int index);
++int s19b_jeep_mrl_800D39F0(void);
++int s19b_jeep_mrl_800D3A54(SVECTOR *position, short *heading, int turn, short speed);
++void s19b_jeep_mrl_800D47B8(Work *work);
++void sna_act_helper2_helper2_80033054(int voice, SVECTOR *rotation);
++void Voicesys_800CE2D0(void);
++void Voicesys_800CE5F8(int index, int mode);
++void Voicesys_800CE6AC(int value);
++void EscapeState_800D2F54(EscapeJeepWork *work);
++void EscapeState_800D32C4(EscapeJeepWork *work);
++
++#endif
+diff --git a/source/overlays/s19b/takabe/jeep_native.h b/source/overlays/s19b/takabe/jeep_native.h
+new file mode 100644
+index 000000000..42ff98ef1
+--- /dev/null
++++ b/source/overlays/s19b/takabe/jeep_native.h
+@@ -0,0 +1,158 @@
++#ifndef MGS_ESCAPE_JEEP_NATIVE_H
++#define MGS_ESCAPE_JEEP_NATIVE_H
++
++#include "game/vibrate.h"
++
++void s19b_jeep_800D2800(Work *work);
++
++void s19b_jeep_800D2258(Work *work)
++{
++    TARGET *target = work->target;
++    int collision = 0;
++    int next_z;
++    SVECTOR position, rotation;
++    VECTOR scale = EscapePlayerJeepScale;
++
++    Takabe_JeepSystem.field_20 = DG_ZeroVector;
++    work->control.mov.vx = work->position.vx - Takabe_JeepSystem.field_28.vx;
++    work->control.mov.vz = work->position.vz - Takabe_JeepSystem.field_28.vz;
++    GM_CurrentMap = work->map;
++    if (target->damaged & TARGET_PUSH)
++    {
++        work->control.mov.vx += target->offset.vx;
++        work->control.mov.vz += target->offset.vz;
++        work->position.vx += target->offset.vx;
++        work->position.vy += target->offset.vy;
++        Takabe_JeepSystem.field_20.vx -= target->offset.vx;
++        Takabe_JeepSystem.field_20.vz -= target->offset.vz;
++        if (work->state == s19b_jeep_mrl_800D3928)
++        {
++            work->field_3D4 -= work->field_3D4 / 128;
++            work->field_3CA -= 20;
++            if (work->field_3CA < -950)
++                work->field_3CA = -950;
++            if (work->field_3E4 == 0)
++                Takabe_JeepSystem.field_50 |= 0x20200;
++            work->field_3E4 = 5;
++        }
++        else
++        {
++            work->field_3D0 += work->field_3D0 / 16;
++            work->field_3D4 -= work->field_3D4 / 4;
++            work->field_3E0 = 5;
++            NewPadVibration(EscapeRumble3990, 1);
++            NewPadVibration(EscapeRumble3994, 0);
++        }
++        collision = 2;
++    }
++    target->damaged &= ~TARGET_PUSH;
++    collision |= s19b_spark2_m_800D9C90(&work->control, &work->position,
++                                       &work->field_3D0, &Takabe_JeepSystem.field_20);
++    if (collision & 1)
++        GM_PadVibration = 1;
++    if (collision == 2)
++        work->field_3C8 += target->offset.vx;
++    Takabe_JeepSystem.field_20.vy = -s19b_spark2_m_800D9EC0(
++        &work->control, &work->field_3B8, &work->step, &work->field_3B0);
++    s19b_spark2_m_800DA0B4(work->field_18C.rots, work->field_3E8,
++                          &work->field_3B8, &work->field_3C0);
++    work->field_18C.objs->rots[3].vy = -work->field_3EC;
++    work->field_18C.objs->rots[4].vy = -work->field_3EC;
++    work->control.turn = work->field_3B8;
++    work->control.turn.vx = 0;
++    position = work->control.mov;
++    position.vy += 250;
++    DG_GetLightMatrix(&position, work->light);
++    GM_ActControl(&work->control);
++    GM_ActObject2(&work->field_A8);
++    RotMatrixX(work->field_3B8.vx, &work->field_A8.objs->world);
++    ScaleMatrix(&work->field_A8.objs->world, &scale);
++    rotation = work->control.rot;
++    rotation.vz = 0;
++    DG_SetPos2(&work->control.mov, &rotation);
++    GM_ActObject2(&work->field_18C);
++    RotMatrixX(work->field_3B8.vx, &work->field_18C.objs->world);
++    ScaleMatrix(&work->field_18C.objs->world, &scale);
++    GM_ActObject2((OBJECT *)&work->field_2F8);
++    GM_ActObject2((OBJECT *)&work->field_31C);
++    work->field_3E8 = work->field_3D0;
++    work->state(work);
++    work->previous.vx = work->position.vx;
++    work->position.vx += work->step.vx;
++    Takabe_JeepSystem.field_20.vx -= work->position.vx - work->previous.vx;
++    Takabe_JeepSystem.field_28.vx = work->previous.vx;
++    next_z = work->position.vz + work->step.vz;
++    if (next_z < work->previous.vz)
++    {
++        if (work->position.vz < work->previous.vz)
++            work->previous.vz = work->position.vz;
++        work->position.vz = next_z;
++        Takabe_JeepSystem.field_20.vz -= work->position.vz - work->previous.vz;
++        Takabe_JeepSystem.field_28.vz = work->previous.vz;
++    }
++    else
++        work->position.vz = next_z;
++    GM_MoveTarget(work->target, &work->control.mov);
++    GM_PushTarget(work->target);
++    if (work->field_3E0 != 0)
++    {
++        --work->field_3E0;
++        Takabe_JeepSystem.field_50 |= 2;
++        Takabe_JeepSystem.field_4C |= 2;
++    }
++    if (work->field_3E4 != 0 && --work->field_3E4 == 0)
++        Takabe_JeepSystem.field_50 &= ~0x20200;
++}
++
++int s19b_jeep_800D2880(Work *work, int name, int where)
++{
++    CONTROL *control = &work->control;
++    if (GM_InitControl(control, name, where) < 0)
++        return -1;
++    GM_ConfigControlHazard(control, -1, -2, -1);
++    GM_ConfigControlInterp(control, 0);
++    control->turn = control->rot = control->mov = control->step = DG_ZeroVector;
++    control->turn.vy = control->rot.vy = 2048;
++    GM_InitObject(&work->field_A8, 9927, 45, 0);
++    GM_ConfigObjectJoint(&work->field_A8);
++    GM_InitObject(&work->field_18C, 9945, 45, 0);
++    GM_ConfigObjectJoint(&work->field_18C);
++    GM_ConfigObjectLight(&work->field_A8, work->light);
++    GM_ConfigObjectLight(&work->field_18C, work->light);
++    GM_InitObjectNoRots(&work->field_2F8, 14855, 365, 0);
++    work->field_2F8.objs->root = &work->field_A8.objs->world;
++    GM_ConfigObjectLight((OBJECT *)&work->field_2F8, work->lamp_light);
++    GM_InitObjectNoRots(&work->field_31C, 55824, 365, 0);
++    work->field_31C.objs->root = &work->field_A8.objs->world;
++    GM_ConfigObjectLight((OBJECT *)&work->field_31C, work->lamp_light);
++    work->lamp_light[0].t[0] = work->lamp_light[0].t[1] = work->lamp_light[0].t[2] = 128;
++    s19b_jeep_800D2800(work);
++    work->map = where;
++    work->field_3B8 = control->rot;
++    work->position.vx = work->position.vy = work->position.vz = 0;
++    Takabe_JeepSystem.field_28 = work->previous = work->position;
++    work->field_3A8 = work->step = work->field_3B0 = DG_ZeroVector;
++    work->step.vz = -400;
++    work->field_3B0.vz = -2048;
++    work->field_3C8 = work->field_3CA = 0;
++    Takabe_JeepSystem.field_20.vx = -work->step.vx;
++    Takabe_JeepSystem.field_20.vy = -work->step.vy;
++    Takabe_JeepSystem.field_20.vz = -work->step.vz;
++    Takabe_JeepSystem.pos = Takabe_JeepSystem.field_20;
++    work->field_3D4 = work->field_3D0 = work->field_3E8 = 400;
++    work->field_3CC = work->field_3EC = work->field_3DC = work->field_3E0 = 0;
++    work->state = s19b_jeep_mrl_800D2E78;
++    work->field_20 = s19b_jeep_mrl_800D40D4(control, &work->field_A8.objs->world,
++                                         Takabe_JeepSystem.field_48);
++    s19b_dword_800DE64C = work;
++    NewJeepSnake(control, &work->field_A8.objs->world);
++    Takabe_JeepSystem.control = control;
++    Takabe_JeepSystem.rotation = &control->rot;
++    Takabe_JeepSystem.field_6C = (MATRIX **)&work->field_A8.objs;
++    Takabe_JeepSystem.field_50 |= 0x10000;
++    NewJeepLamp2(&work->field_A8.objs->world);
++    GM_SeSet(NULL, 192);
++    return 0;
++}
++
++#endif
+diff --git a/source/overlays/s19b/takabe/jeep_sne/jeep_sne.c b/source/overlays/s19b/takabe/jeep_sne/jeep_sne.c
+index c17576009..cfd916d74 100644
+--- a/source/overlays/s19b/takabe/jeep_sne/jeep_sne.c
++++ b/source/overlays/s19b/takabe/jeep_sne/jeep_sne.c
+@@ -1,5 +1,9 @@
+ #include "game/game.h"
+ 
++#ifdef MGS_NATIVE
++#include "overlays/s19b/escape.h"
++#include "mgs_probe.h"
++#else
+ typedef struct _JEEP_SYSTEM
+ {
+     char     pad1[0x4];
+@@ -13,6 +17,8 @@ typedef struct _JEEP_SYSTEM
+     int      field_78;
+ } JEEP_SYSTEM;
+ 
++#endif
++
+ typedef struct _Work
+ {
+     GV_ACT         actor;
+@@ -31,11 +37,13 @@ typedef struct _Work
+ 
+     OBJECT         weapon;            /* 0x7E8 */
+ 
+-    char           pad2a[0x8E4 - 0x7E8 - sizeof(OBJECT)];
++    SVECTOR        field_8CC;
++    SVECTOR        aim;
++    int            field_8DC[2];
+     MATRIX         field_8E4;         /* 0x8E4 */
+-    char           pad2b[0x908 - 0x8E4 - sizeof(MATRIX)];
++    int            field_904;
+     int            field_908;         /* 0x908 */
+-    char           pad_910[0x910 - 0x908 - sizeof(int)];
++    int            field_90C;
+ 
+     TARGET        *target;            /* 0x910 */
+ 
+@@ -52,14 +60,21 @@ typedef struct _Work
+ 
+     int            field_940;         /* 0x940 */
+     int            field_944;         /* 0x944 */
+-    char           pad_950[0x950 - 0x944 - sizeof(int)];
++    int            field_948;
++    int            field_94C;
+     int            field_950;         /* 0x950 */
+     char           pad4[0x958 - 0x950 - sizeof(int)];
+ 
+     SVECTOR        pos;               /* 0x958 */
+ } Work;
+ 
++#ifndef MGS_NATIVE
+ extern JEEP_SYSTEM Takabe_JeepSystem;
++#else
++_Static_assert(sizeof(Work) == 0x960, "Original escape Snake allocation");
++_Static_assert(offsetof(Work, aim) == 0x8D4, "Original gun aim offset");
++_Static_assert(offsetof(Work, target) == 0x910, "Original damage target offset");
++#endif
+ 
+ /* gcc sinks a plain `work->field_928 = x` store into the branch-delay slot
+    of the following GM_ call; routing the store through a char* alias keeps
+@@ -67,6 +82,7 @@ extern JEEP_SYSTEM Takabe_JeepSystem;
+ #define SET_WEAPON_ACTION(work, val) (*(int *)((char *)&(work)->field_928) = (val))
+ 
+ extern SVECTOR s19b_dword_800C39F8;
++extern short EscapeSnakeActions[10];
+ 
+ #define MOTION_DATA GV_StrCode("sne_19b")
+ #define BODY_DATA   GV_StrCode("snake")
+@@ -75,8 +91,98 @@ extern SVECTOR s19b_dword_800C39F8;
+ #define BODY_FLAG   ( DG_FLAG_TEXT | DG_FLAG_TRANS | DG_FLAG_SHADE | DG_FLAG_GBOUND )
+ #define WEAPON_FLAG ( DG_FLAG_TEXT | DG_FLAG_TRANS | DG_FLAG_SHADE | DG_FLAG_GBOUND | DG_FLAG_ONEPIECE )
+ 
++#ifdef MGS_NATIVE
++void s19b_jlamp2_800D613C(void *work);
++void sna_act_helper2_helper2_80033054(int voice, SVECTOR *rotation);
++extern VECTOR s19b_dword_800C39E8;
++
++void s19b_jeep_sne_800D47F8(Work *work)
++{
++    SVECTOR rotation = work->control.rot;
++    SVECTOR delta;
++    int health;
++
++    work->control.rot = DG_ZeroVector;
++    GM_ActMotion(&work->body);
++    work->control.rot = rotation;
++    work->field_7E0.vx += work->control.step.vx;
++    work->field_7E0.vz += work->control.step.vz;
++    work->field_7E0.vy = work->body.height - 503;
++    GM_ActControl(&work->control);
++    GM_ActObject(&work->body);
++    ScaleMatrix(&work->body.objs->world, &s19b_dword_800C39E8);
++    DG_GetLightMatrix(&work->control.mov, work->light);
++    s19b_jlamp2_800D613C(work);
++    sna_act_helper2_helper2_80033054(8650, &work->adjust[6]);
++    GM_PlayerPosition = work->control.mov;
++    Takabe_JeepSystem.field_128.vx = work->body.objs->objs[6].world.t[0];
++    Takabe_JeepSystem.field_128.vy = work->body.objs->objs[6].world.t[1];
++    Takabe_JeepSystem.field_128.vz = work->body.objs->objs[6].world.t[2];
++    GV_SubVec3(&Takabe_JeepSystem.control->mov, &work->pos, &delta);
++    work->pos = Takabe_JeepSystem.control->mov;
++    GV_AddVec3(&Takabe_JeepSystem.field_128, &delta, &Takabe_JeepSystem.field_128);
++    GM_SnakeCamera.position = Takabe_JeepSystem.field_128;
++    GM_SnakeCamera.target = Takabe_JeepSystem.field_128;
++    if (GM_GameOverTimer == 0)
++    {
++        if (GM_GameStatus & 0x104A2000)
++            work->target->vital = GM_Vitality;
++        health = work->target->vital + GM_Vitality - work->hp;
++        if (health > GM_VitalityMax)
++            health = GM_VitalityMax;
++        work->target->vital = (short)health;
++        work->hp = GM_Vitality = (short)health;
++        if (GM_Vitality <= 0)
++        {
++            if (GM_Item == 13 && GM_RationFlag != 0)
++            {
++                if (--GM_RationFlag == 0)
++                    GM_Item = -1;
++                health = GM_GameLevel <= 0 ? 384 : 256;
++                if (GM_GameLevel < 0)
++                    health = GM_VitalityMax;
++                work->target->vital = health;
++                work->hp = GM_Vitality = health;
++                GM_SeSet2(0, 63, 12);
++                ++GM_RationUseCount;
++            }
++            else if (GM_GameStatus & 0x40000000)
++                GM_Vitality = 1;
++            else
++            {
++                GM_Vitality = 0;
++                GM_GameOver();
++                GM_GameOverTimer = -1;
++                work->field_950 = 1;
++                GM_SeSet(NULL, 26);
++                GM_GameStatus |= 0x10000000;
++            }
++        }
++    }
++    GM_MoveTarget(work->target, &work->control.mov);
++    if (work->field_944 != 0)
++    {
++        work->target->class = 1;
++        if ((work->field_944 & 3) == 1)
++            DG_InvisibleObjs(work->body.objs);
++        else
++            DG_VisibleObjs(work->body.objs);
++        --work->field_944;
++    }
++    else
++    {
++        work->target->class = 20;
++        DG_VisibleObjs(work->body.objs);
++    }
++    if (work->field_948 != 0)
++        DG_InvisibleObjs(work->body.objs);
++    else if (GM_GameStatus & 0x40000000)
++        DG_VisibleObjs(work->body.objs);
++}
++#else
+ #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_sne_800D47F8.s")
+ void s19b_jeep_sne_800D47F8(Work *); // Act
++#endif
+ 
+ void InitTarget(Work *work)
+ {
+@@ -137,7 +243,11 @@ static int GetResources(Work *work, int name)
+     work->hp = GM_Vitality;
+ 
+     Takabe_JeepSystem.snake_body = body;
++#ifdef MGS_NATIVE
++    work->pos = work->root_ctrl->mov;
++#else
+     work->pos = Takabe_JeepSystem.control->mov;
++#endif
+     return 0;
+ }
+ 
+@@ -200,7 +310,7 @@ void s19b_jlamp2_800D5054(Work *work, int model, int arg2)
+ void s19b_jlamp2_800D5484(Work *work, int arg1);
+ extern void *NewPadVibration(unsigned char *, int);
+ extern int s19b_dword_800C3A14;
+-extern int s19b_dword_800C3A18;
++extern unsigned char s19b_dword_800C3A18[8];
+ 
+ int s19b_jlamp2_800D50F4(Work *work)
+ {
+@@ -222,7 +332,34 @@ int s19b_jlamp2_800D50F4(Work *work)
+     return 0;
+ }
+ 
++#ifdef MGS_NATIVE
++void s19b_jlamp2_800D55E8(Work *work, int tick);
++int s19b_jlamp2_800D519C(Work *work)
++{
++    int range;
++    if (s19b_jlamp2_800D50F4(work))
++    {
++        work->target->class = 1;
++        work->field_944 = 4;
++        range = 512;
++    }
++    else
++    {
++        if (work->field_944 != 0 || !(work->field_92C & 8))
++            return 0;
++        work->field_918 = (void *)s19b_jlamp2_800D55E8;
++        work->field_920 = 0;
++        work->control.turn.vx = work->control.turn.vz = 0;
++        NewPadVibration((unsigned char *)&s19b_dword_800C3A14, 1);
++        NewPadVibration((unsigned char *)&s19b_dword_800C3A18, 2);
++        range = 256;
++    }
++    work->field_908 += GV_RandS(range);
++    return 1;
++}
++#else
+ #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jlamp2_800D519C.s")
++#endif
+ extern void *NewJeepBullet(MATRIX *world, int side, int mode, int mode2);
+ extern void AN_FamasFlash(MATRIX *world);
+ extern void s19b_jblood_800C8070(MATRIX *world);
+@@ -233,13 +370,22 @@ void s19b_jlamp2_800D5260(Work *work)
+ {
+     MATRIX  mtx;
+     SVECTOR svec;
++#ifdef MGS_NATIVE
++    int     flag;
++#else
+     long    flag;
++#endif
+ 
+     RotMatrix(&s19b_dword_800C3A40, &mtx);
+     MulMatrix0(&work->field_8E4, &mtx, &mtx);
+     DG_SetPos(&work->field_8E4);
+     RotTrans(&s19b_dword_800C3A38, (VECTOR *)mtx.t, &flag);
++#ifdef MGS_NATIVE
++    if (NewJeepBullet(&mtx, 1, 1, 0) != NULL)
++        MgsProbeEscapeShot();
++#else
+     NewJeepBullet(&mtx, 1, 1, 0);
++#endif
+     svec.vx = *(short *)&mtx.t[0];
+     svec.vy = *(short *)&mtx.t[1];
+     svec.vz = *(short *)&mtx.t[2];
+@@ -255,7 +401,6 @@ void s19b_jlamp2_800D5260(Work *work)
+     }
+ }
+ extern int  s19b_jlamp2_800D519C(Work *work);
+-extern int  s19b_dword_800C3A00;
+ 
+ void s19b_jlamp2_800D5328(Work *work, int arg1)
+ {
+@@ -274,7 +419,7 @@ void s19b_jlamp2_800D5328(Work *work, int arg1)
+         if (work->field_928 != 0)
+         {
+             SET_WEAPON_ACTION(work, 0);
+-            GM_ConfigObjectAction(&work->body, *(short *)&s19b_dword_800C3A00, 0, 4);
++            GM_ConfigObjectAction(&work->body, EscapeSnakeActions[0], 0, 4);
+             work->field_7E0 = DG_ZeroVector;
+         }
+     }
+@@ -283,7 +428,7 @@ void s19b_jlamp2_800D5328(Work *work, int arg1)
+         if (work->field_928 != 2)
+         {
+             SET_WEAPON_ACTION(work, 2);
+-            GM_ConfigObjectAction(&work->body, *(short *)((char *)&s19b_dword_800C3A00 + 4), 0, 4);
++            GM_ConfigObjectAction(&work->body, EscapeSnakeActions[2], 0, 4);
+             work->field_7E0 = DG_ZeroVector;
+         }
+     }
+@@ -292,7 +437,7 @@ void s19b_jlamp2_800D5328(Work *work, int arg1)
+         if (work->field_928 != 3)
+         {
+             SET_WEAPON_ACTION(work, 3);
+-            GM_ConfigObjectAction(&work->body, *(short *)((char *)&s19b_dword_800C3A00 + 6), 0, 4);
++            GM_ConfigObjectAction(&work->body, EscapeSnakeActions[3], 0, 4);
+             work->field_7E0 = DG_ZeroVector;
+         }
+     }
+@@ -301,7 +446,7 @@ void s19b_jlamp2_800D5328(Work *work, int arg1)
+         if (work->field_928 != 0)
+         {
+             SET_WEAPON_ACTION(work, 0);
+-            GM_ConfigObjectAction(&work->body, *(short *)&s19b_dword_800C3A00, 0, 4);
++            GM_ConfigObjectAction(&work->body, EscapeSnakeActions[0], 0, 4);
+             work->field_7E0 = DG_ZeroVector;
+         }
+     }
+@@ -309,7 +454,6 @@ void s19b_jlamp2_800D5328(Work *work, int arg1)
+ extern void s19b_jlamp2_800D5054(Work *work, int arg1, int arg2);
+ extern void s19b_jlamp2_800D5328(Work *work, int arg1);
+ extern void s19b_jlamp2_800D571C(Work *work, int arg1);
+-extern int  s19b_dword_800C3A00;
+ 
+ void s19b_jlamp2_800D5484(Work *work, int arg1)
+ {
+@@ -320,7 +464,7 @@ void s19b_jlamp2_800D5484(Work *work, int arg1)
+         if (work->field_928 != 1)
+         {
+             SET_WEAPON_ACTION(work, 1);
+-            GM_ConfigObjectAction(&work->body, *(short *)((char *)&s19b_dword_800C3A00 + 2), 0, 4);
++            GM_ConfigObjectAction(&work->body, EscapeSnakeActions[1], 0, 4);
+             work->field_7E0 = DG_ZeroVector;
+         }
+         s19b_jlamp2_800D5054(work, 5, 0);
+@@ -341,7 +485,7 @@ void s19b_jlamp2_800D5484(Work *work, int arg1)
+             if (work->field_928 != 0)
+             {
+                 SET_WEAPON_ACTION(work, 0);
+-                GM_ConfigObjectAction(&work->body, *(short *)&s19b_dword_800C3A00, 0, 4);
++                GM_ConfigObjectAction(&work->body, EscapeSnakeActions[0], 0, 4);
+                 work->field_7E0 = DG_ZeroVector;
+             }
+             work->field_940 = 0;
+@@ -358,7 +502,6 @@ void s19b_jlamp2_800D5484(Work *work, int arg1)
+ }
+ extern int  s19b_jlamp2_800D50F4(Work *work);
+ extern int  GV_RandS(int);
+-extern int  s19b_dword_800C3A10;
+ 
+ void s19b_jlamp2_800D55E8(Work *work, int arg1)
+ {
+@@ -374,7 +517,7 @@ void s19b_jlamp2_800D55E8(Work *work, int arg1)
+         if (work->field_928 != 8)
+         {
+             SET_WEAPON_ACTION(work, 8);
+-            GM_ConfigObjectAction(&work->body, *(short *)&s19b_dword_800C3A10, 0, 4);
++            GM_ConfigObjectAction(&work->body, EscapeSnakeActions[8], 0, 4);
+             work->field_7E0 = DG_ZeroVector;
+         }
+         GM_SeSet(&work->control.mov, 0x88);
+@@ -388,7 +531,7 @@ void s19b_jlamp2_800D55E8(Work *work, int arg1)
+         if (work->field_928 != 0)
+         {
+             SET_WEAPON_ACTION(work, 0);
+-            GM_ConfigObjectAction(&work->body, *(short *)&s19b_dword_800C3A00, 0, 4);
++            GM_ConfigObjectAction(&work->body, EscapeSnakeActions[0], 0, 4);
+             work->field_7E0 = DG_ZeroVector;
+         }
+     }
+@@ -399,7 +542,6 @@ extern void Voicesys_800CE5F8(int, int);
+ extern void Voicesys_800CE734(void);
+ extern void *NewPadVibration(unsigned char *, int);
+ extern int  GM_GameOverTimer;
+-extern int  s19b_dword_800C3A08;
+ extern int  s19b_dword_800C3A20;
+ extern int  s19b_dword_800C3A24;
+ 
+@@ -410,7 +552,7 @@ void s19b_jlamp2_800D571C(Work *work, int arg1)
+         if (work->field_928 != 4)
+         {
+             SET_WEAPON_ACTION(work, 4);
+-            GM_ConfigObjectAction(&work->body, *(short *)&s19b_dword_800C3A08, 0, 4);
++            GM_ConfigObjectAction(&work->body, EscapeSnakeActions[4], 0, 4);
+             work->field_7E0 = DG_ZeroVector;
+         }
+         Voicesys_800CE310();
+@@ -432,8 +574,6 @@ void s19b_jlamp2_800D571C(Work *work, int arg1)
+         work->control.turn.vx = 0;
+     }
+ }
+-extern int s19b_dword_800C3A00;
+-extern int s19b_dword_800C3A08;
+ 
+ void s19b_jlamp2_800D5820(Work *work, int arg1)
+ {
+@@ -443,7 +583,7 @@ void s19b_jlamp2_800D5820(Work *work, int arg1)
+            work->field_928 = 5 sinks it into the delay slot and diverges */
+         SET_WEAPON_ACTION(work, 5);
+         GM_ConfigObjectAction(&work->body,
+-                              *(short *)((char *)&s19b_dword_800C3A08 + 2), 0, 4);
++                              EscapeSnakeActions[5], 0, 4);
+         work->field_7E0 = DG_ZeroVector;
+     }
+ }
+@@ -466,7 +606,7 @@ void s19b_jlamp2_800D5894(Work *work)
+         {
+             /* char* launder keeps the store ahead of the call (see 800D5820) */
+             SET_WEAPON_ACTION(work, 0);
+-            GM_ConfigObjectAction(&work->body, *(short *)&s19b_dword_800C3A00, 0, 4);
++            GM_ConfigObjectAction(&work->body, EscapeSnakeActions[0], 0, 4);
+             work->field_7E0 = DG_ZeroVector;
+         }
+     }
+@@ -476,7 +616,170 @@ void s19b_jlamp2_800D5894(Work *work)
+         work->target->class = 1;
+     }
+ }
++#ifdef MGS_NATIVE
++extern SVECTOR s19b_dword_800C3A48;
++extern SVECTOR s19b_dword_800C3A50;
++extern int s19b_dword_800C3A58;
++void GM_CheckShukanReverse(unsigned short *input);
++void GM_CheckShukanReverseAnalog(unsigned char *input);
++
++static int EscapeSnakeAxis(unsigned char axis)
++{
++    if (axis < 64)
++        return (axis - 64) * 2;
++    if (axis > 192)
++        return (axis - 192) * 2;
++    return 0;
++}
++
++static int EscapeSnakeInput(Work *work, int *horizontal, int *vertical)
++{
++    unsigned short status;
++    unsigned char axis;
++    *horizontal = *vertical = 0;
++    if (work->field_950)
++        return 0;
++    status = GV_PadData[0].status;
++    if (GV_PadData[0].analog == 2)
++    {
++        *horizontal = EscapeSnakeAxis(GV_PadData[0].left_dx);
++        *vertical = EscapeSnakeAxis(GV_PadData[0].left_dy);
++    }
++    if (*horizontal == 0 && *vertical == 0)
++    {
++        if (status & PAD_LEFT) *horizontal = -128;
++        if (status & PAD_RIGHT) *horizontal = 127;
++        if (status & PAD_UP) *vertical = -128;
++        if (status & PAD_DOWN) *vertical = 127;
++    }
++    if (GM_PlayerStatus & 1)
++    {
++        GM_CheckShukanReverse(&status);
++        axis = *vertical + 128;
++        GM_CheckShukanReverseAnalog(&axis);
++        *vertical = axis - 128;
++    }
++    return status;
++}
++
++void s19b_jlamp2_800D596C(void *actor)
++{
++    Work *work = actor;
++    int horizontal, vertical, status, first_person, turn, yaw, pitch, base_pitch;
++    unsigned char camera_buttons;
++    SVECTOR mov, delta, rot, head_direction;
++    MATRIX right, matrix;
++    MATRIX *head;
++    VECTOR squared;
++
++    work->field_92C = 0;
++    status = EscapeSnakeInput(work, &horizontal, &vertical);
++    first_person = GM_Camera.first_person;
++    if (first_person)
++    {
++        if (s19b_dword_800C3A58 < 15) ++s19b_dword_800C3A58;
++        work->field_948 = s19b_dword_800C3A58 >= 13;
++    }
++    else
++    {
++        if (s19b_dword_800C3A58 > 0) --s19b_dword_800C3A58;
++        work->field_948 = s19b_dword_800C3A58 >= 18;
++    }
++    if (Takabe_JeepSystem.field_4C & 0x10000)
++        work->aim.vy = 0;
++    else if (Takabe_JeepSystem.field_4C & 0x20000)
++        work->aim.vy = work->field_908 = 2048;
++    else if (Takabe_JeepSystem.field_4C & 0x40000)
++    {
++        turn = (work->aim.vy - 1024) & 0xFFF;
++        if ((unsigned)(turn - 101) < 0x79B)
++        {
++            horizontal = -128;
++            status |= PAD_LEFT;
++        }
++        else if ((unsigned)(turn - 2048) < 0x7A0)
++        {
++            horizontal = 128;
++            status |= PAD_RIGHT;
++        }
++        status |= 0x80;
++    }
++    mov = s19b_dword_800C3A48;
++    work->field_8CC.vy = (work->aim.vy + work->root_ctrl->rot.vy) & 0xFFF;
++    DG_SetPos2(&mov, &work->aim);
++    RotMatrixZYX(&work->aim, &right);
++    right.t[0] = mov.vx;
++    right.t[1] = mov.vy;
++    right.t[2] = mov.vz;
++    CompMatrix(work->root_mat, &right, &work->field_8E4);
++    GM_ActObject2(&work->weapon);
++    work->weapon.objs->world = work->field_8E4;
++    camera_buttons = status;
++    if (work->field_940 != 0 && work->field_950 == 0)
++    {
++        horizontal = vertical = 0;
++        camera_buttons = (status & ~0x10) | (GM_Camera.first_person ? 0x10 : 0);
++    }
++    work->field_908 -= horizontal / 4;
++    if (horizontal < 0) work->field_92C |= 2;
++    if (horizontal > 0) work->field_92C |= 4;
++    work->aim.vy = GV_NearExp4P(work->aim.vy, work->field_908);
++    work->field_90C = GV_NearExp4P(work->field_90C, first_person == 1 ? 300 * vertical / 128 : 0);
++    if (work->field_904 != 0) --work->field_904;
++    if ((status & 0x80) && work->field_904 == 0)
++    {
++        work->field_904 = 3;
++        work->field_92C |= 1;
++    }
++    if (camera_buttons & 0x10)
++    {
++        GM_Camera.first_person = 1;
++        GM_PlayerStatus |= 1;
++    }
++    else
++    {
++        GM_Camera.first_person = 0;
++        GM_PlayerStatus &= ~1;
++    }
++    if (first_person)
++    {
++        GM_PlayerControl->rot.vy = work->field_8CC.vy;
++        head = &GM_PlayerBody->objs->objs[6].world;
++        head_direction.vx = head->m[0][2];
++        head_direction.vy = 0;
++        head_direction.vz = head->m[2][2];
++        GM_SnakeCamera.rotate2.vx = (short)work->field_90C - ratan2(head->m[1][2], GV_VecLen3(&head_direction));
++    }
++    else
++        GM_PlayerControl->rot = work->field_8CC;
++    GM_SnakeCamera.rotate2.vy = work->field_8CC.vy;
++    rot = GM_PlayerControl->rot;
++    rot.vy -= work->root_ctrl->rot.vy;
++    DG_SetPos2(&DG_ZeroVector, &rot);
++    GV_AddVec3(&s19b_dword_800C3A50, &work->field_7E0, &delta);
++    DG_RotVector(&delta, &delta, 1);
++    GV_AddVec3(&delta, &s19b_dword_800C3A48, &delta);
++    DG_SetPos2(&delta, &rot);
++    ReadRotMatrix(&matrix);
++    CompMatrix(work->root_mat, &matrix, &GM_PlayerBody->objs->world);
++    GM_PlayerControl->mov.vx = work->body.objs->world.t[0];
++    GM_PlayerControl->mov.vy = work->body.objs->world.t[1];
++    GM_PlayerControl->mov.vz = work->body.objs->world.t[2];
++    GM_GetHomingTarget2(&work->weapon.objs->world, work->field_8CC.vy, &yaw, &pitch, GM_CurrentMap, 6000, 128);
++    squared.vx = GM_PlayerBody->objs->world.m[0][2];
++    squared.vy = 0;
++    squared.vz = GM_PlayerBody->objs->world.m[2][2];
++    Square0(&squared, &squared);
++    base_pitch = -ratan2(GM_PlayerBody->objs->world.m[1][2], SquareRoot0(squared.vx + squared.vz));
++    work->aim.vx = GV_NearExp4(work->aim.vx, yaw == -1 ? 0 : pitch - base_pitch);
++    Takabe_JeepSystem.field_5C = yaw == -1 ? 0 : 1;
++    if (Takabe_JeepSystem.field_4C & 2) work->field_92C |= 8;
++    MgsProbeEscapeAim(work->aim.vy, work->field_950 || work->field_940 ||
++                      (Takabe_JeepSystem.field_4C & 0xFFFF0000));
++}
++#else
+ #pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jlamp2_800D596C.s")
++#endif
+ extern void s19b_jlamp2_800D596C(void *work);
+ 
+ void s19b_jlamp2_800D613C(void *work)
+diff --git a/source/overlays/s19b/takabe/jeep_srl.c b/source/overlays/s19b/takabe/jeep_srl.c
+index 48f5759ef..a3d805e9e 100644
+--- a/source/overlays/s19b/takabe/jeep_srl.c
++++ b/source/overlays/s19b/takabe/jeep_srl.c
+@@ -1,120 +1,549 @@
++#include "jeep_srl_native.h"
+ #include "strcode.h"
+-#include "game/game.h"
+-#include "libgcl/libgcl.h"
+-
+-typedef struct _JEEP_SYSTEM
+-{
+-    char     pad1[0x4];
+-    CONTROL *control;
+-    char     pad2[0x10];
+-    SVECTOR  pos;
+-    char     pad3[0x18];
+-    SVECTOR  field_38;
+-    int      field_40;
+-    char     pad4[0x1C];
+-    OBJECT  *body;
+-    char     pad5[0x18];
+-    int      field_7C;
+-    MATRIX   world;
+-    char     pad6[0xCC];
+-} JEEP_SYSTEM;
+-
+-extern JEEP_SYSTEM Takabe_JeepSystem;
+-
+-typedef struct _Work
+-{
+-    GV_ACT work;
+-    char   pad1[0xC50 - 0x20];
+-    int    field_C50;
+-    int    field_C54;
+-    short *field_C58;
+-    char   pad1b[0xC70 - 0xC58 - sizeof(short *)];
+-    int    field_C70;
+-    int    field_C74;
+-    char   pad2[0xC];
+-} Work;
++#include "takabe/thing.h"
++#include "game/vibrate.h"
++#include "sound/g_sound.h"
++
++void Takabe_ReshadeModel(DG_OBJS *objects, DG_LITS *lights);
++#include "takabe/fadeio.h"
++#include <stdio.h>
++#include <stdlib.h>
+ 
+ const char s19b_aLightoverjeepsrlc_800DDC94[] = "<<<<< light over !!!!!!!(jeep.srl.c) >>>>>\n";
+ const char s19b_aMaxlightd_800DDCC0[] = "max light:%d\n";
+ const char s19b_aJsnake_800DDCD0[] = "j_snake";
+ 
+-void *NewJeepGate(int name, SVECTOR *pos, int side);
+-void *NewJeepGlass(int name, SVECTOR *pos, int side);
+-void *NewJeepLamp(SVECTOR *root_pos, int tex_id, int unused);
+-void *s19b_jeep2_800D6F24(int name, int map); // NewJeep2
+-
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_srl_800CD638.s")
+-extern int s19b_dword_800C354C;
++void s19b_jeep_srl_800CD638(Work *work, int *out)
++{
++    short *sequence = work->sequence;
++    work->curve_x = GV_NearSpeed(work->curve_x, sequence[2], sequence[4]);
++    work->curve_y = GV_NearSpeed(work->curve_y, sequence[3], sequence[5]);
++    out[0] = sequence[0];
++    out[1] = work->curve_x;
++    out[2] = work->curve_y;
++    out[3] = sequence[7];
++    if (work->remaining <= 0)
++    {
++        Takabe_JeepSystem.field_40 = 0;
++        if (Takabe_JeepSystem.field_44 != 0)
++        {
++            Takabe_JeepSystem.field_44--;
++            work->remaining = -work->remaining;
++        }
++        return;
++    }
++    Takabe_JeepSystem.field_40 = work->event_delay-- == 1 ? sequence[7] : 0;
++    if (--work->remaining == 0)
++    {
++        sequence += 8;
++        if (sequence[0] == -1)
++            sequence = EscapeRoadSequence[0];
++        work->sequence = sequence;
++        work->remaining = sequence[1];
++        work->event_delay = sequence[6];
++    }
++}
+ 
+ void s19b_jeep_srl_800CD790(Work *work)
+ {
+-    short *p = (short *)&s19b_dword_800C354C;
+-    work->field_C58 = p;
+-    work->field_C50 = p[1];
+-    work->field_C54 = p[6];
++    work->sequence = EscapeRoadSequence[0];
++    work->remaining = work->sequence[1];
++    work->event_delay = work->sequence[6];
+ }
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_srl_800CD7B4.s")
+ 
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_srl_800CDAA4.s")
+-void s19b_jeep_srl_800CDAA4(Work *work);
++static void TransformLights(Work *work, DG_LITS *source)
++{
++    int i;
++    int flag;
++    DG_LIT *light;
++    DG_LIT *out;
++    for (i = 0; i < source->n_lights; ++i)
++    {
++        if (work->lights->n_lights >= work->light_capacity)
++        {
++            printf("%s", s19b_aLightoverjeepsrlc_800DDC94);
++            break;
++        }
++        light = &source->lights[i];
++        out = &work->lights->lights[work->lights->n_lights++];
++        RotTransSV(&light->point, &out->point, &flag);
++        out->r_range = (short)light->r_range >> 1;
++        out->e_range = (short)light->e_range >> 1;
++        out->color = light->color;
++    }
++}
+ 
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_srl_800CDF48.s")
+-void s19b_jeep_srl_800CDF48(Work *work);
++void s19b_jeep_srl_800CD7B4(Work *work)
++{
++    int i;
++    int relative;
++    EscapeRoadSegment *segment;
++    DG_OBJS *objects;
++    DG_OBJS *distant;
++    for (i = 0; i < 16; ++i)
++    {
++        relative = (i - work->tail) & 15;
++        segment = &work->segments[i];
++        objects = segment->objects;
++        distant = work->distant[i];
++        if ((unsigned)(relative - 4) >= 8)
++        {
++            objects->flag |= DG_FLAG_INVISIBLE;
++            distant->flag |= DG_FLAG_INVISIBLE;
++        }
++        else
++        {
++            DG_SetPos2(&segment->position, &DG_ZeroVector);
++            DG_PutObjs(objects);
++            EscapeRoadScale.m[0][2] = segment->shear_x;
++            EscapeRoadScale.m[1][2] = segment->shear_y;
++            MulMatrix0(&objects->world, &EscapeRoadScale, &objects->world);
++            SetRotMatrix(&objects->world);
++            objects->group_id = GM_CurrentMap;
++            distant->root = &objects->world;
++            if (objects->def == work->resources[0].model &&
++                (segment->position.vz > 6000 || segment->position.vz < -6000))
++            {
++                distant->flag &= ~DG_FLAG_INVISIBLE;
++                objects->flag |= DG_FLAG_INVISIBLE;
++            }
++            else
++            {
++                objects->flag &= ~DG_FLAG_INVISIBLE;
++                distant->flag |= DG_FLAG_INVISIBLE;
++            }
++            TransformLights(work, segment->lights);
++            s19b_jeep_gls_800CE8DC(work, segment, (unsigned)(relative - 5) < 5);
++            segment->flags &= ~2;
++        }
++        segment->flags &= ~1;
++    }
++}
+ 
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_srl_800CE020.s")
+-int s19b_jeep_srl_800CE020(Work *work, int name, int where);
++static void RecycleSegment(Work *work, int index, int depth)
++{
++    EscapeRoadSegment *segment = &work->segments[index];
++    int next_index = (index + 1) & 15;
++    EscapeRoadSegment *next = &work->segments[next_index];
++    int instruction[4];
++    s19b_jeep_srl_800CD638(work, instruction);
++    segment->tangent.vx = instruction[1] / 2;
++    segment->tangent.vy = instruction[2] / 2;
++    segment->shear_x = -2048 * instruction[1] / 4000;
++    segment->shear_y = -2048 * instruction[2] / 4000;
++    segment->flags = 3;
++    segment->event = instruction[3];
++    segment->position.vx = next->position.vx + next->tangent.vx + segment->tangent.vx;
++    segment->position.vy = next->position.vy + next->tangent.vy + segment->tangent.vy;
++    if (next_index < index)
++    {
++        segment->position.vx -= Takabe_JeepSystem.pos.vx;
++        segment->position.vy -= Takabe_JeepSystem.pos.vy;
++    }
++    work->tail = index;
++    s19b_jeep_gls_800CE5F8(segment->objects);
++    segment->objects = s19b_jeep_gls_800CE52C(instruction[0], work);
++    segment->lights = work->resources[instruction[0]].lights;
++    segment->hazard = work->resources[instruction[0]].group;
++    segment->position.vz = depth + 1536;
++    segment->position.vx += Takabe_JeepSystem.pos.vx;
++    segment->position.vy += Takabe_JeepSystem.pos.vy;
++    s19b_jeep_gls_800CEE7C(work, instruction[3], &segment->position);
++    s19b_jeep_gls_800CEFE4(work, instruction[0]);
++}
+ 
+-void *NewJeepScroll(int name, int where)
++static void UpdateFinale(Work *work)
++{
++    if (work->final_timer != 0)
++    {
++        if (++work->final_timer >= 71)
++        {
++            if (work->final_proc != 0 && GM_GameOverTimer == 0)
++                GCL_ExecProc(work->final_proc, NULL);
++        }
++        else if (work->final_timer == 31)
++        {
++            NewPadVibration(EscapeRoadRumble, 1);
++            NewPadVibration(EscapeRoadRumble + 20, 2);
++        }
++    }
++    else if (s19b_jeep_gls_800CEDFC(Takabe_JeepSystem.control->mov.vz, 9600) == 14)
++    {
++        NewFadeInOut(2, 20);
++        work->final_timer = 1;
++    }
++}
++
++void s19b_jeep_srl_800CDAA4(Work *work)
+ {
+-    Work *work;
++    int i;
++    int depth;
++    EscapeRoadSegment *segment;
++    GM_CurrentMap = work->map;
++    if (!work->preshaded)
++    {
++        for (i = 0; i < 13; ++i)
++            Takabe_ReshadeModel(work->resources[i].shaded, work->resources[i].lights);
++        work->preshaded = 1;
++    }
++    Takabe_JeepSystem.pos = Takabe_JeepSystem.field_20;
++    work->lights->n_lights = 0;
++    work->next_floor = work->floors;
++    work->next_wall = work->walls;
++    work->hazard->n_d_segs = 0;
++    work->hazard->n_d_flrs = 0;
++    for (i = 0; i < 16; ++i)
++    {
++        segment = &work->segments[i];
++        depth = segment->position.vz + Takabe_JeepSystem.pos.vz;
++        if (depth >= 32000)
++            RecycleSegment(work, i, depth);
++        else
++        {
++            segment->position.vz = depth;
++            segment->position.vx += Takabe_JeepSystem.pos.vx;
++            segment->position.vy += Takabe_JeepSystem.pos.vy;
++        }
++    }
++    s19b_jeep_srl_800CD7B4(work);
++    s19b_jlamp_800D0D40();
++    GM_Camera.zoom = 240;
++    GM_Camera.flag |= 2;
++    UpdateFinale(work);
++    Takabe_JeepSystem.world.t[0] += Takabe_JeepSystem.pos.vx;
++    Takabe_JeepSystem.world.t[1] += Takabe_JeepSystem.pos.vy;
++    Takabe_JeepSystem.world.t[2] += Takabe_JeepSystem.pos.vz;
++}
+ 
+-    work = GV_NewActor(GV_ACTOR_PREV, sizeof(Work));
+-    if (work != NULL)
++void s19b_jeep_srl_800CDF48(Work *work)
++{
++    int i;
++    for (i = 0; i < 16; ++i)
+     {
+-        GV_SetNamedActor(work, s19b_jeep_srl_800CDAA4, s19b_jeep_srl_800CDF48, "jeep_srl.c");
++        s19b_jeep_gls_800CE5F8(work->distant[i]);
++        s19b_jeep_gls_800CE5F8(work->segments[i].objects);
++    }
++    for (i = 0; i < 13; ++i)
++    {
++        DG_FreePreshade(work->resources[i].shaded);
++        DG_FreeObjs(work->resources[i].shaded);
++    }
++    Takabe_JeepSystem.field_78 = 0;
++    GM_StreamPlayStop();
++    work->lights->n_lights = work->light_capacity;
++    GM_GameStatus &= ~0x20000000;
++}
+ 
+-        if (s19b_jeep_srl_800CE020(work, name, where) < 0)
++void s19b_jeep_gls_800CE400(Work *work)
++{
++    int i;
++    EscapeRoadResource *resource;
++    for (i = 0; i < 13; ++i)
++    {
++        resource = &work->resources[i];
++        resource->model = GV_GetCache(GV_CacheID(EscapeModelNames[i], 'k'));
++        resource->lights = GV_GetCache(GV_CacheID(EscapeModelNames[i], 'l'));
++        if (!resource->lights)
++            resource->lights = work->resources[0].lights;
++        resource->hazard = GV_GetCache(GV_CacheID(EscapeModelNames[i], 'h'));
++        if (!resource->hazard && i < 12)
+         {
+-            GV_DestroyActor(work);
+-            return NULL;
++            fprintf(2, "Missing escape road hazard %04x.h\n", EscapeModelNames[i]);
++            abort();
+         }
++        /* The distant scenery resource has no hazard file on the original disc. */
++        resource->group = resource->hazard ? resource->hazard->groups : NULL;
++        resource->shaded = DG_MakeObjs(resource->model, 87, 0);
++        DG_MakePreshade(resource->shaded,
++                        resource->lights ? resource->lights->lights : NULL,
++                        resource->lights ? resource->lights->n_lights : 0);
++        resource->shaded->flag |= DG_FLAG_INVISIBLE;
+     }
++}
+ 
+-    return work;
++DG_OBJS *s19b_jeep_gls_800CE52C(int type, Work *work)
++{
++    int i;
++    EscapeRoadResource *resource = &work->resources[type];
++    DG_OBJS *objects = DG_MakeObjs(resource->model, 87, 0);
++    DG_OBJ *target;
++    DG_OBJ *source;
++    for (i = 0; i < objects->n_models; ++i)
++    {
++        target = &objects->objs[i];
++        source = &resource->shaded->objs[i];
++        do
++        {
++            target->rgbs = source->rgbs;
++            target = target->extend;
++            source = source->extend;
++        } while (target);
++    }
++    DG_SetPos(&DG_ZeroMatrix);
++    DG_PutObjs(objects);
++    DG_QueueObjs(objects);
++    objects->group_id = GM_CurrentMap;
++    return objects;
+ }
+ 
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_gls_800CE400.s")
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_gls_800CE52C.s")
+-void s19b_jeep_gls_800CE5F8(DG_OBJS *objs)
++void s19b_jeep_gls_800CE5F8(DG_OBJS *objects)
+ {
+-    DG_DequeueObjs(objs);
+-    objs->objs[0].rgbs = NULL;
+-    DG_FreeObjs(objs);
++    DG_DequeueObjs(objects);
++    objects->objs[0].rgbs = NULL;
++    DG_FreeObjs(objects);
+ }
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_gls_800CE628.s")
+-void s19b_jeep_gls_800CE83C(SVECTOR *src, SVECTOR *dst)
++
++static void CopyHazardPoint(SVECTOR *source, HZD_VEC *target)
++{
++    target->x = source->vx;
++    target->y = source->vy;
++    target->z = source->vz;
++}
++
++void s19b_jeep_gls_800CE628(SVECTOR *position, SVECTOR *vertices, HZD_FLR *floor, int normal)
++{
++    VECTOR edge1;
++    VECTOR edge2;
++    VECTOR cross;
++    SVECTOR direction;
++    CopyHazardPoint(&vertices[0], &floor->p1);
++    CopyHazardPoint(&vertices[1], &floor->p2);
++    CopyHazardPoint(&vertices[2], &floor->p3);
++    CopyHazardPoint(&vertices[3], &floor->p4);
++    if (floor->p4.z < floor->p1.z)
++        floor->p1.z = floor->p2.z = floor->p3.z = floor->p4.z = position->vz;
++    if (normal)
++    {
++        edge1.vx = vertices[2].vx - vertices[1].vx;
++        edge1.vy = vertices[2].vy - vertices[1].vy;
++        edge1.vz = vertices[2].vz - vertices[1].vz;
++        edge2.vx = vertices[1].vx - vertices[0].vx;
++        edge2.vy = vertices[1].vy - vertices[0].vy;
++        edge2.vz = vertices[1].vz - vertices[0].vz;
++        OuterProduct12(&edge1, &edge2, &cross);
++        VectorNormalS(&cross, &direction);
++        floor->p1.h = direction.vx >> 4;
++        floor->p2.h = direction.vz >> 4;
++        floor->p3.h = direction.vy >> 4;
++    }
++    floor->b1.x = position->vx - 8000;
++    floor->b2.x = position->vx + 8000;
++    floor->b1.y = position->vy - 8000;
++    floor->b2.y = position->vy + 8000;
++    floor->b1.z = position->vz - 2000;
++    floor->b2.z = position->vz + 2000;
++    floor->b1.h = 0;
++}
++
++void s19b_jeep_gls_800CE83C(SVECTOR *source, SVECTOR *target)
++{
++    target[0].vx = source[0].vx;
++    target[0].vy = source[0].vz;
++    target[0].vz = source[0].vy;
++    target[0].pad = source[0].pad;
++    target[1].vx = source[1].vx;
++    target[1].vy = source[1].vz;
++    target[1].vz = source[1].vy;
++    target[1].pad = source[1].pad;
++    HZD_SetDynamicSegment((HZD_SEG *)target, (HZD_SEG *)target);
++}
++
++void s19b_jeep_gls_800CE8B8(SVECTOR *source, SVECTOR *target)
++{
++    target->vx = source->vx;
++    target->vy = source->vz;
++    target->vz = source->vy;
++}
++
++static void QueueRoadFloors(Work *work, EscapeRoadSegment *segment)
++{
++    int i;
++    int vertex;
++    HZD_FLR *source = segment->hazard->floors;
++    SVECTOR vertices[4];
++    HZD_VEC *corners[4];
++    for (i = 0; i < segment->hazard->n_floors; ++i)
++    {
++        if (work->hazard->n_d_flrs >= 24 || work->next_floor == work->floors + 24)
++            break;
++        corners[0] = &source[i].p1;
++        corners[1] = &source[i].p2;
++        corners[2] = &source[i].p3;
++        corners[3] = &source[i].p4;
++        for (vertex = 0; vertex < 4; ++vertex)
++        {
++            vertices[vertex].vx = corners[vertex]->x;
++            vertices[vertex].vy = corners[vertex]->y;
++            vertices[vertex].vz = corners[vertex]->z;
++        }
++        DG_PutVector(vertices, vertices, 4);
++        if (Takabe_JeepSystem.pos.vz != 0)
++            s19b_jeep_gls_800CE628(&segment->position, vertices, work->next_floor, segment->flags & 2);
++        HZD_QueueDynamicFloor(work->hazard, work->next_floor++);
++    }
++}
++
++static void QueueRoadWalls(Work *work, EscapeRoadSegment *segment)
++{
++    int i;
++    int count = segment->hazard->n_walls;
++    HZD_SEG *source;
++    unsigned char *flags = (unsigned char *)segment->hazard->wallsFlags;
++    SVECTOR vertices[2];
++    for (i = 0; i < count; ++i)
++    {
++        if (work->hazard->n_d_segs >= 48 || work->next_wall == work->walls + 48)
++            break;
++        source = &segment->hazard->walls[i];
++        vertices[0].vx = source->p1.x;
++        vertices[0].vy = source->p1.y;
++        vertices[0].vz = source->p1.z;
++        vertices[1].vx = source->p2.x;
++        vertices[1].vy = source->p2.y;
++        vertices[1].vz = source->p2.z;
++        DG_PutVector(vertices, vertices, 2);
++        vertices[0].pad = source->p1.h / 2;
++        vertices[1].pad = source->p2.h / 2;
++        if (Takabe_JeepSystem.pos.vz != 0)
++            s19b_jeep_gls_800CE83C(vertices, (SVECTOR *)work->next_wall);
++        HZD_QueueDynamicSegment2(work->hazard, work->next_wall++, flags[i] | (flags[i + count] << 8));
++    }
++}
++
++void s19b_jeep_gls_800CE8DC(Work *work, EscapeRoadSegment *segment, int walls)
++{
++    SetRotMatrix(&segment->objects->world);
++    QueueRoadFloors(work, segment);
++    if (walls)
++        QueueRoadWalls(work, segment);
++}
++
++static int RoadIndex(int distance)
++{
++    Work *work = s19b_dword_800DE5B0;
++    return (work->tail + (distance - (work->segments[work->tail].position.vz - 2000)) / 4000) & 15;
++}
++
++int s19b_jeep_gls_800CEB2C(int distance, SVECTOR *rotation)
++{
++    SVECTOR tangent = s19b_dword_800DE5B0->segments[RoadIndex(distance)].tangent;
++    rotation->vy = GV_VecDir2(&tangent);
++    rotation->vx = ratan2(-tangent.vy, SquareRoot0(tangent.vx * tangent.vx + tangent.vz * tangent.vz));
++    rotation->vz = 0;
++    return rotation->vx;
++}
++
++void s19b_jeep_gls_800CEC24(int distance, SVECTOR *out)
++{
++    Work *work = s19b_dword_800DE5B0;
++    int index = RoadIndex(distance);
++    EscapeRoadSegment *next = &work->segments[index];
++    EscapeRoadSegment *previous;
++    SVECTOR start = DG_ZeroVector;
++    SVECTOR control;
++    SVECTOR end;
++    MATRIX curve;
++    if (distance >= next->position.vz)
++    {
++        previous = next;
++        next = &work->segments[(index + 1) & 15];
++    }
++    else
++        previous = &work->segments[(index + 15) & 15];
++    control = next->tangent;
++    end.vx = control.vx + previous->tangent.vx;
++    end.vy = control.vy + previous->tangent.vy;
++    end.vz = -4000;
++    s19b_jeep_800D2170(&start, &control, &end, curve.m[0]);
++    s19b_jeep_800D21DC((next->position.vz - distance) * 4096 / 4000, &curve, out);
++    GV_AddVec3(out, &next->position, out);
++}
++
++int s19b_jeep_gls_800CEDFC(int distance, int offset)
++{
++    return s19b_dword_800DE5B0->segments[RoadIndex(distance - offset)].event;
++}
++
++static void InitializeRoad(Work *work)
++{
++    int i;
++    EscapeRoadSegment *segment;
++    for (i = 0; i < 16; ++i)
++    {
++        segment = &work->segments[i];
++        segment->objects = s19b_jeep_gls_800CE52C(0, work);
++        segment->lights = work->resources[0].lights;
++        segment->hazard = work->resources[0].group;
++        segment->tangent.vx = segment->tangent.vy = segment->tangent.pad = 0;
++        segment->tangent.vz = -2000;
++        segment->shear_x = segment->shear_y = 0;
++        segment->position.vx = segment->position.vy = 0;
++        segment->position.vz = -31500 + i * 4000;
++        segment->flags = 1;
++        segment->event = 0;
++        Takabe_JeepSystem.field_38 = segment->position;
++        if (segment->position.vz < 16000)
++            s19b_jeep_gls_800CEFE4(work, 0);
++    }
++    for (i = 0; i < 16; ++i)
++    {
++        work->distant[i] = s19b_jeep_gls_800CE52C(12, work);
++        work->distant[i]->flag |= DG_FLAG_INVISIBLE;
++    }
++}
++
++int s19b_jeep_srl_800CE020(Work *work, int name, int where)
+ {
+-    dst[0].vx  = src->vx;
+-    dst[0].vz  = src->vy;
+-    dst[0].vy  = src->vz;
+-    dst[0].pad = src->pad;
+-    src++;
+-    dst[1].vx  = src->vx;
+-    dst[1].vz  = src->vy;
+-    dst[1].vy  = src->vz;
+-    dst[1].pad = src->pad;
+-    HZD_SetDynamicSegment((HZD_SEG *)dst, (HZD_SEG *)dst);
++    s19b_jeep_gls_800CF088();
++    GM_CurrentMap = work->map = where;
++    work->name = name;
++    work->reserved_C64 = 0;
++    work->world = DG_ZeroMatrix;
++    s19b_jeep_gls_800CE400(work);
++    work->lights = GM_GetMap(GM_CurrentMap)->lit;
++    work->light_capacity = work->lights->n_lights;
++    printf(s19b_aMaxlightd_800DDCC0, work->light_capacity);
++    Takabe_JeepSystem.field_48 = THING_Gcl_GetInt('c');
++    work->reserved_C60 = 0;
++    work->preshaded = 0;
++    work->tail = 0;
++    Takabe_JeepSystem.field_20 = DG_ZeroVector;
++    Takabe_JeepSystem.pos = DG_ZeroVector;
++    Takabe_JeepSystem.field_28.vx = 0;
++    Takabe_JeepSystem.field_28.vy = 0;
++    Takabe_JeepSystem.field_28.vz = 0;
++    InitializeRoad(work);
++    work->hazard = GM_GetMap(work->map)->hzd;
++    s19b_dword_800DE5B0 = work;
++    if (GCL_GetOption('e'))
++    {
++        work->first_gate_proc = GCL_StrToInt(GCL_NextStr());
++        work->second_gate_proc = GCL_StrToInt(GCL_NextStr());
++        work->final_proc = GCL_StrToInt(GCL_NextStr());
++    }
++    Takabe_JeepSystem.field_78 = 2048;
++    Takabe_JeepSystem.world = DG_ZeroMatrix;
++    NewJeep(GV_StrCode(s19b_aJsnake_800DDCD0), where);
++    s19b_jlamp_800D0CE0();
++    s19b_jeep_srl_800CD790(work);
++    GM_GameStatus |= 0x20000000;
++    return 0;
+ }
+-void s19b_jeep_gls_800CE8B8(SVECTOR *src, SVECTOR *dst)
++
++void *NewJeepScroll(int name, int where)
+ {
+-    dst->vx = src->vx;
+-    dst->vy = src->vz;
+-    dst->vz = src->vy;
++    Work *work = GV_NewActor(GV_ACTOR_PREV, sizeof(Work));
++    if (work)
++    {
++        GV_SetNamedActor(work, s19b_jeep_srl_800CDAA4, s19b_jeep_srl_800CDF48, "jeep_srl.c");
++        if (s19b_jeep_srl_800CE020(work, name, where) < 0)
++        {
++            GV_DestroyActor(work);
++            return NULL;
++        }
++    }
++    return work;
+ }
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_gls_800CE8DC.s")
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_gls_800CEB2C.s")
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_gls_800CEC24.s")
+-#pragma INCLUDE_ASM("asm/overlays/s19b/s19b_jeep_gls_800CEDFC.s")
+ 
+ void s19b_jeep_gls_800CEE7C(Work *work, int arg1, SVECTOR *pos)
+ {
+@@ -123,6 +552,7 @@ void s19b_jeep_gls_800CEE7C(Work *work, int arg1, SVECTOR *pos)
+     int      state;
+     int      proc_id;
+     
++    (void)arg1;
+     Takabe_JeepSystem.field_38 = *pos;
+     state = Takabe_JeepSystem.field_40;
+ 
+@@ -137,7 +567,7 @@ void s19b_jeep_gls_800CEE7C(Work *work, int arg1, SVECTOR *pos)
+         NewJeepGlass(2, &diff, 0);
+         NewJeepGlass(2, &diff, 1);
+ 
+-        proc_id = work->field_C70;
++        proc_id = work->first_gate_proc;
+         if (proc_id)
+         {
+             args.argc = 0;
+@@ -154,7 +584,7 @@ void s19b_jeep_gls_800CEE7C(Work *work, int arg1, SVECTOR *pos)
+         NewJeepGlass(2, &diff, 0);
+         NewJeepGlass(2, &diff, 1);
+ 
+-        proc_id = work->field_C74;
++        proc_id = work->second_gate_proc;
+         if (proc_id)
+         {
+             args.argc = 0;
+@@ -173,6 +603,7 @@ void s19b_jeep_gls_800CEFE4(Work *work, int disable)
+     SVECTOR diff;
+     SVECTOR pos;
+ 
++    (void)work;
+     GV_SubVec3(&Takabe_JeepSystem.field_38, &Takabe_JeepSystem.pos, &diff);
+ 
+     if (disable == 0)
+diff --git a/source/overlays/s19b/takabe/jeep_srl_native.h b/source/overlays/s19b/takabe/jeep_srl_native.h
+new file mode 100644
+index 000000000..d153d57f9
+--- /dev/null
++++ b/source/overlays/s19b/takabe/jeep_srl_native.h
+@@ -0,0 +1,91 @@
++#ifndef MGS_JEEP_SRL_NATIVE_H
++#define MGS_JEEP_SRL_NATIVE_H
++
++#include "overlays/s19b/escape.h"
++
++typedef struct EscapeRoadResource
++{
++    DG_DEF *model;
++    DG_LITS *lights;
++    HZD_DEF *hazard;
++    HZD_GRP *group;
++    DG_OBJS *shaded;
++    int reserved[2];
++} EscapeRoadResource;
++
++typedef struct EscapeRoadSegment
++{
++    SVECTOR position;
++    SVECTOR tangent;
++    short shear_x;
++    short shear_y;
++    int reserved;
++    DG_OBJS *objects;
++    DG_LITS *lights;
++    HZD_GRP *hazard;
++    int flags;
++    int event;
++} EscapeRoadSegment;
++
++typedef struct EscapeRoadWork
++{
++    GV_ACT actor;
++    int map;
++    int name;
++    MATRIX world;
++    EscapeRoadResource resources[13];
++    EscapeRoadSegment segments[16];
++    DG_OBJS *distant[16];
++    HZD_HDL *hazard;
++    HZD_FLR *next_floor;
++    HZD_FLR floors[24];
++    HZD_SEG *next_wall;
++    HZD_SEG walls[48];
++    int light_capacity;
++    DG_LITS *lights;
++    int curve_x;
++    int curve_y;
++    int remaining;
++    int event_delay;
++    short *sequence;
++    int reserved_C5C;
++    int reserved_C60;
++    int reserved_C64;
++    int preshaded;
++    int tail;
++    int first_gate_proc;
++    int second_gate_proc;
++    int final_proc;
++    int reserved_C7C;
++    int final_timer;
++} Work;
++
++_Static_assert(sizeof(EscapeRoadResource) == 28, "Original road resource layout");
++_Static_assert(sizeof(EscapeRoadSegment) == 44, "Original road segment layout");
++_Static_assert(offsetof(Work, segments) == 0x1b4, "Original road ring offset");
++_Static_assert(offsetof(Work, floors) == 0x4bc, "Original road floor offset");
++_Static_assert(offsetof(Work, walls) == 0x940, "Original road wall offset");
++_Static_assert(offsetof(Work, sequence) == 0xc58, "Original road sequence offset");
++_Static_assert(offsetof(Work, tail) == 0xc6c, "Original road tail offset");
++_Static_assert(sizeof(Work) == 0xc84, "Original road actor layout");
++
++extern struct EscapeRoadWork *s19b_dword_800DE5B0;
++
++void *NewJeep(int name, int map);
++void *NewJeepGate(int name, SVECTOR *pos, int side);
++void *NewJeepGlass(int name, SVECTOR *pos, int side);
++void *NewJeepLamp(SVECTOR *root_pos, int tex_id, int unused);
++void *s19b_jeep2_800D6F24(int name, int map);
++void s19b_jlamp_800D0CE0(void);
++void s19b_jlamp_800D0D40(void);
++void s19b_jeep_800D2170(SVECTOR *a, SVECTOR *b, SVECTOR *c, short *out);
++void s19b_jeep_800D21DC(int t, MATRIX *curve, SVECTOR *out);
++void s19b_jeep_gls_800CE8DC(Work *work, EscapeRoadSegment *segment, int walls);
++void s19b_jeep_gls_800CE5F8(DG_OBJS *objects);
++DG_OBJS *s19b_jeep_gls_800CE52C(int type, Work *work);
++void s19b_jeep_gls_800CEE7C(Work *work, int event, SVECTOR *position);
++void s19b_jeep_gls_800CEFE4(Work *work, int disable);
++void s19b_jeep_gls_800CF088(void);
++int s19b_jeep_gls_800CEDFC(int distance, int offset);
++
++#endif

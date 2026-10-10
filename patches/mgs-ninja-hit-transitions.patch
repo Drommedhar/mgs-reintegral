@@ -1,0 +1,107 @@
+diff --git a/source/overlays/s08b/animal/ninja/ninja_native_combat.h b/source/overlays/s08b/animal/ninja/ninja_native_combat.h
+index bb8182218..f33520e15 100644
+--- a/source/overlays/s08b/animal/ninja/ninja_native_combat.h
++++ b/source/overlays/s08b/animal/ninja/ninja_native_combat.h
+@@ -954,7 +954,34 @@ int s08b_bunsin2_800CF354(Work *work)
+     int result;
+ 
+     if (work->field_1A34 != 0)
++    {
++        switch (work->field_1A34)
++        {
++        case 1:
++            work->field_19C8 = 7;
++            work->field_19CC = 23;
++            work->field_1A38 = 1;
++            break;
++        case 2:
++            s08b_bunsin2_800CDE74(work);
++            work->field_19C8 = 7;
++            work->field_19CC = 5;
++            work->field_1A38 = 2;
++            break;
++        case 3:
++        case 4:
++            work->field_19C8 = 7;
++            work->field_19CC = 23;
++            work->field_1A38 = 3;
++            break;
++        case 6:
++            work->field_19C8 = 7;
++            work->field_19CC = 34;
++            work->field_1A38 = 6;
++            break;
++        }
+         return 1;
++    }
+     result = 0;
+     if ((unsigned int)(work->field_19CC - 3) >= 2)
+     {
+@@ -977,7 +1004,33 @@ int s08b_bunsin2_800CF464(Work *work)
+     int result;
+ 
+     if (work->field_1A34 != 0)
++    {
++        switch (work->field_1A34)
++        {
++        case 1:
++            work->field_19C8 = 7;
++            work->field_19CC = 23;
++            work->field_1A38 = 1;
++            break;
++        case 2:
++            work->field_19C8 = 4;
++            work->field_19CC = 10;
++            work->field_1A38 = 2;
++            break;
++        case 3:
++        case 4:
++            work->field_19C8 = 7;
++            work->field_19CC = 23;
++            work->field_1A38 = 3;
++            break;
++        case 6:
++            work->field_19C8 = 7;
++            work->field_19CC = 34;
++            work->field_1A38 = 6;
++            break;
++        }
+         return 1;
++    }
+     if ((unsigned int)(work->field_19CC - 3) < 2)
+         return 0;
+     result = 1;
+@@ -993,7 +1046,33 @@ int s08b_bunsin2_800CF54C(Work *work)
+     int result;
+ 
+     if (work->field_1A34 != 0)
++    {
++        switch (work->field_1A34)
++        {
++        case 1:
++            s08b_dword_800C3448 = 0;
++            work->field_19C8 = 7;
++            work->field_19CC = 23;
++            break;
++        case 2:
++            s08b_dword_800C3448 = 0;
++            s08b_bunsin2_800CE2E8(work);
++            work->field_19C8 = 7;
++            work->field_19CC = 5;
++            break;
++        case 3:
++        case 4:
++            work->field_19C8 = 7;
++            work->field_19CC = 23;
++            s08b_dword_800C3448++;
++            break;
++        case 6:
++            work->field_19C8 = 7;
++            work->field_19CC = 34;
++            break;
++        }
+         return 1;
++    }
+     result = 0;
+     if ((unsigned int)(work->field_19CC - 3) >= 2)
+     {

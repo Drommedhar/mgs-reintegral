@@ -1,0 +1,193 @@
+diff --git a/source/kojo/demoexec.c b/source/kojo/demoexec.c
+index 5e9302c4d..ea300404e 100644
+--- a/source/kojo/demoexec.c
++++ b/source/kojo/demoexec.c
+@@ -29,6 +29,9 @@
+ #include "demo.h"
+ #include "common.h"
+ #include "kojo/m1e1.h"
++#ifdef MGS_NATIVE
++#include "mgs_cadence.h"
++#endif
+ 
+ #define BODY_FLAG ( DG_FLAG_SHADE | DG_FLAG_TRANS | DG_FLAG_TEXT )
+ 
+@@ -290,6 +293,9 @@ BOOL CreateDemo(LPMGSDEMOACT lpAct, DMO_DEF *header)
+     DG_InvisibleObjs(lpAct->object.objs);
+ 
+     GM_GameStatus |= STATE_DEMO;
++#ifdef MGS_NATIVE
++    MgsCadenceDemoStart(header->n_frames);
++#endif
+     return 1;
+ }
+ 
+@@ -299,6 +305,9 @@ BOOL DestroyDemo(LPMGSDEMOACT lpAct)
+     DMO_MDL    *model_file;
+     DEMO_MODEL *model;
+     int         i;
++#ifdef MGS_NATIVE
++    MgsCadenceDemoEnd();
++#endif
+ 
+     if (lpAct->flag & 0x2)
+     {
+@@ -535,6 +544,11 @@ BOOL FrameRunDemo(LPMGSDEMOACT lpAct, DMO_DAT *data)
+     trans.vz = -DG_Chanl(0)->eye.t[2];
+ 
+     ApplyMatrixLV(&DG_Chanl(0)->eye_inv, &trans, (VECTOR *)DG_Chanl(0)->eye_inv.t);
++#ifdef MGS_NATIVE
++    MgsCadenceDemoApplied(data->frame, &(MgsCadenceCamera){
++        {data->eye_x, data->eye_y, data->eye_z},
++        {data->center_x, data->center_y, data->center_z}});
++#endif
+     return 1;
+ }
+ 
+diff --git a/source/kojo/demothrd.c b/source/kojo/demothrd.c
+index ff347a615..acb07d508 100644
+--- a/source/kojo/demothrd.c
++++ b/source/kojo/demothrd.c
+@@ -20,6 +20,9 @@
+ #include "libdg/libdg.h"
+ #include "libfs/libfs.h"
+ #include "libgcl/libgcl.h"
++#ifdef MGS_NATIVE
++#include "mgs_cadence.h"
++#endif
+ 
+ extern int demodebug_finish_proc;
+ 
+@@ -158,6 +161,9 @@ static void ActStream(LPMGSDEMOACT lpAct)
+     }
+ 
+     lpAct->frame = (ticks - lpAct->start_time) / 2;
++#ifdef MGS_NATIVE
++    MgsCadenceDemoDesired(lpAct->frame);
++#endif
+     status = 0;
+     temp = 0;
+ 
+diff --git a/source/mts/mts_new.c b/source/mts/mts_new.c
+index 978374352..edf4a79fd 100644
+--- a/source/mts/mts_new.c
++++ b/source/mts/mts_new.c
+@@ -11,6 +11,7 @@
+ 
+ #ifdef MGS_NATIVE
+ #include "mgs_threads.h"
++#include <psyz/audio.h>
+ #undef EnterCriticalSection
+ #undef ExitCriticalSection
+ #define EnterCriticalSection SwEnterCriticalSection
+@@ -1404,19 +1405,27 @@ void mts_unlock_sio( void )
+     mts_sio_unlocked = 1;
+ }
+ 
++#ifdef MGS_NATIVE
++static void mts_native_service_interrupts(void)
++{
++    if (mts_native_interrupt_pending)
++    {
++        mts_native_interrupt_pending = 0;
++        SwEnterCriticalSection();
++        mts_SetActiveTaskAndTransferExecution(mts_FindFirstReadyTask());
++        SwExitCriticalSection();
++    }
++}
++#endif
++
+ void mts_SioTaskEntrypoint( void )
+ {
+ #ifdef MGS_NATIVE
++    Psyz_AudioSetServiceCallback(mts_native_service_interrupts);
+     for (;;)
+     {
+         VSync(0);
+-        if (mts_native_interrupt_pending)
+-        {
+-            mts_native_interrupt_pending = 0;
+-            SwEnterCriticalSection();
+-            mts_SetActiveTaskAndTransferExecution(mts_FindFirstReadyTask());
+-            SwExitCriticalSection();
+-        }
++        mts_native_service_interrupts();
+     }
+ #else
+     int ch;
+diff --git a/source/takabe/wt_view.c b/source/takabe/wt_view.c
+index 77c8793bd..f5b91a487 100644
+--- a/source/takabe/wt_view.c
++++ b/source/takabe/wt_view.c
+@@ -15,10 +15,7 @@
+ // XXX in Runtime Library Release 3.7 (built December 27, 1996).
+ 
+ // clang-format off
+-typedef struct {
+-        u_long  tag;
+-        u_long  code[2];
+-} DR_PRIO;                              /* Priority */
++typedef DR_STP DR_PRIO;
+ 
+ extern void SetPriority(DR_PRIO *p, int pbc, int pbw);
+ // clang-format on
+@@ -74,7 +71,7 @@ static void SetupSprites1(SPRT *sa, SPRT *sb, CVECTOR *color)
+     sprt.g0 = color->g;
+     sprt.b0 = color->b;
+ 
+-    for (i = 122; i >= 0; i--)
++    for (i = 0; i < 122; i++)
+     {
+         *sa = sprt;
+         *sb = *sa;
+@@ -102,7 +99,7 @@ static void SetupSprites2(SPRT *sa, SPRT *sb, CVECTOR *color)
+     sprt.g0 = color->g;
+     sprt.b0 = color->b;
+ 
+-    for (i = 122; i >= 0; i--)
++    for (i = 0; i < 122; i++)
+     {
+         *sa = sprt;
+         *sb = *sa;
+@@ -149,6 +146,7 @@ static void Act(Work *work)
+         if (work->has_alloc != 0)
+         {
+             GV_DelayedFree(work->prims);
++            work->prims = NULL;
+             work->has_alloc = 0;
+         }
+         else if (!WaterViewCreatePrims(work))
+@@ -339,8 +337,6 @@ static void WaterViewDraw(Work *work)
+     short  *scratch1;
+     short  *scratch2;
+     short  *scratch3;
+-    short  *scratch4;
+-    short  *scratch5;
+     OT_TYPE *ot;
+     int     i;
+     SPRT   *sprt;
+@@ -353,7 +349,7 @@ static void WaterViewDraw(Work *work)
+     addPrim(ot, &work->prims->tile[GV_Clock * 2 + 1]);
+ 
+     scratch1 = (short *)(SCRPAD_ADDR + 0x200);
+-    scratch2 = (short *)0x1F800400;
++    scratch2 = (short *)(SCRPAD_ADDR + SCRPAD_SIZE);
+ 
+     nprims = work->n_prims;
+ 
+@@ -380,13 +376,11 @@ static void WaterViewDraw(Work *work)
+ 
+     nprims = 0;
+ 
+-    scratch4 = scratch1 - 256;
+-    count2 = scratch4 - scratch3;
++    count2 = scratch1 - (short *)(SCRPAD_ADDR + 0x200);
+ 
+     scratch1 = (short *)(SCRPAD_ADDR + 0x200);
+ 
+-    scratch5 = scratch2 - 512;
+-    count1 = scratch3 - scratch5;
++    count1 = (short *)(SCRPAD_ADDR + SCRPAD_SIZE) - scratch2;
+ 
+     sprt = work->prims->sprt2[GV_Clock];
+ 

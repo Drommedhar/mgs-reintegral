@@ -1,0 +1,6 @@
+.lines -e
+bu /1 mgs_integral_native!MgsNativeReloadOverlay "ew mgs_integral_native!var_buf+a 8e; .printf \"FIXTURE original story variable $w:00000A=142 before s09a scenario; no player flags changed\\n\"; gc"
+bu /1 mgs_integral_native!NewDog ".printf \"FIXTURE observed original dog constructor\\n\"; gc"
+sxe -c "r;kv;q" av
+g
+q

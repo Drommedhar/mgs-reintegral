@@ -1,0 +1,23 @@
+diff --git a/psyz/src/psyz/libgte.c b/psyz/src/psyz/libgte.c
+index 47069b5..a30c9c6 100644
+--- a/psyz/src/psyz/libgte.c
++++ b/psyz/src/psyz/libgte.c
+@@ -2625,6 +2625,18 @@ void RotTrans(SVECTOR* v0, VECTOR* v1, int* flag) {
+     *flag = (int)FLAG;
+ }
+ 
++void RotTransSV(SVECTOR* input, SVECTOR* output, int* flag) {
++    V0 = *input;
++    FLAG = 0;
++    mat_vec(1, 0, M.m, V0.vx, V0.vy, V0.vz, M.t[0], M.t[1], M.t[2]);
++    FLAG_UPDATE_ERROR();
++    output->vx = IR1;
++    output->vy = IR2;
++    output->vz = IR3;
++    output->pad = IR3 < 0 ? -1 : 0;
++    *flag = (int)FLAG;
++}
++
+ void ApplyMatrix(MATRIX* m, SVECTOR* v0, VECTOR* v1) {
+     // TODO unoptimized for 32-bit targets
+     v1->vx = ((long long)m->m[0][0] * v0->vx + (long long)m->m[0][1] * v0->vy +

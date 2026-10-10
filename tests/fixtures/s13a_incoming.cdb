@@ -1,0 +1,6 @@
+.lines -e
+bu /1 mgs_integral_native!MgsNativeReloadOverlay "ew mgs_integral_native!linkvarbuf+10 1e2c 4c50 2ab4; ew mgs_integral_native!var_buf+2 800 0; .printf \"FIXTURE s12c original sub_DECC incoming s13a pose (7724,19536,10932), heading2048, standing; use --stage-map0x4986\\n\"; gc"
+sxe -c "r;kv;q" av
+sxe -c "r;kv;q" dz
+g
+q

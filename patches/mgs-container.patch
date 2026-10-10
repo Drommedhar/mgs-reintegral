@@ -1,0 +1,1409 @@
+diff --git a/build/linker_command_file.txt b/build/linker_command_file.txt
+index ae1905bc6..c2b7b8bce 100644
+--- a/build/linker_command_file.txt
++++ b/build/linker_command_file.txt
+@@ -1547,6 +1547,8 @@ overlay_bss group   file("{{OBJ_DIR}}\{{OVERLAY}}_{{OVERLAY_SUFFIX}}_bss.bin")
+ 
+     include "{{OBJ_DIR}}\overlays\s15c\okajima\valcan\dyncon.obj", overlay
+     include "{{OBJ_DIR}}\overlays\s15c\okajima\valcan\dyncon_geo.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s15c\okajima\valcan\dyncon_setup.obj", overlay
++    include "{{OBJ_DIR}}\overlays\s15c\okajima\valcan\dyncon_act.obj", overlay
+     include "{{OBJ_DIR}}\overlays\s15c\okajima\valcan\valcan.obj", overlay
+     include "{{OBJ_DIR}}\overlays\s15c\okajima\valcan\crow.obj", overlay
+     include "{{OBJ_DIR}}\takabe\gas_efct.obj", overlay
+diff --git a/source/overlays/s15c/okajima/valcan/dyncon.c b/source/overlays/s15c/okajima/valcan/dyncon.c
+index e0084826e..23c22b940 100644
+--- a/source/overlays/s15c/okajima/valcan/dyncon.c
++++ b/source/overlays/s15c/okajima/valcan/dyncon.c
+@@ -10,19 +10,6 @@ extern DG_OBJS *Takabe_MakePreshade(int model, DG_LITS *lit);
+ 
+ #include "dyncon.h"
+ 
+-typedef struct _DynStack
+-{
+-    char  pad[0x70];
+-    short val_70;
+-    short val_72;
+-    short val_74;
+-    short pad2;
+-    short val_78;
+-    short val_7A;
+-    short val_7C;
+-    char  pad3[156 - 0x7E];
+-} DynStack;
+-
+ void s15c_dyncon_800D3EBC(OBJECT_NO_ROTS *obj, int model, int flag)
+ {
+     GV_ZeroMemory(obj, sizeof(*obj));
+@@ -154,20 +141,19 @@ void s15c_dyncon_800D5428(DynCon *work, int i, int depth)
+         work->slots[i][1].p2.z = a.vz + 0x9C4;
+     }
+ }
+-extern void s15c_dyncon_800D3F24(HZD_SEG *segs, HZD_FLR *floors, MATRIX *mtx,
+-                                 SVECTOR *a, SVECTOR *b);
++extern void s15c_dyncon_800D3F24(HZD_SEG *segs, HZD_FLR *floors, MATRIX *mtx, SVECTOR *a, SVECTOR *b);
+ 
+ void s15c_dyncon_800D567C(DynCon *work, int s1, int s2, int code)
+ {
+-    MATRIX    mtx;
+-    SVECTOR   pos;
+-    SVECTOR   rot;
+-    SVECTOR   a;
+-    SVECTOR   b;
+-    DynStack *ds;
+-
+-    ds  = (DynStack *)work + work->field_3594[s1][s2];
+-    pos = *(SVECTOR *)&ds->val_70;
++    MATRIX          mtx;
++    SVECTOR         pos;
++    SVECTOR         rot;
++    SVECTOR         a;
++    SVECTOR         b;
++    ContainerEntry *entry;
++
++    entry = &work->entries[work->field_3594[s1][s2]];
++    pos = entry->position;
+     rot = DG_ZeroVector;
+ 
+     switch (code)
+@@ -175,57 +161,56 @@ void s15c_dyncon_800D567C(DynCon *work, int s1, int s2, int code)
+     case 1:
+         a = work->field_3C0C[0];
+         b = work->field_3C0C[1];
+-        ds = (DynStack *)work + work->field_3594[s1][s2];
+-        rot.vy = ds->val_7A;
++        rot.vy = entry->rotation.vy;
+         break;
+     case 2:
+         a = work->field_3C0C[2];
+         b = work->field_3C0C[3];
+-        ds = (DynStack *)work + work->field_3594[s1][s2];
+-        rot.vy = ds->val_7C + 0x800;
++        rot.vy = entry->rotation.vz + 0x800;
+         break;
+     case 3:
+         a = work->field_3C0C[2];
+         b = work->field_3C0C[3];
+-        ds = (DynStack *)work + work->field_3594[s1][s2];
+-        rot.vy = ds->val_7C - 0x400;
++        rot.vy = entry->rotation.vz - 0x400;
+         break;
+     }
+ 
+     DG_SetPos2(&pos, &rot);
+     ReadRotMatrix(&mtx);
+-    s15c_dyncon_800D3F24(&work->segs[s1][s2][0], &work->floors[s1][s2][0],
+-                         &mtx, &a, &b);
++    s15c_dyncon_800D3F24(&work->segs[s1][s2][0], &work->floors[s1][s2][0], &mtx, &a, &b);
+ }
++#ifndef MGS_NATIVE
+ #pragma INCLUDE_ASM("asm/overlays/s15c/s15c_dyncon_800D5910.s")
++#endif
+ void s15c_dyncon_800D59C0(SVECTOR *vec, int code)
+ {
+     switch (code)
+     {
+-    case 0:
+-        {
+-            int x = vec->vx;
+-            int z = vec->vz;
+-            vec->vx = -x;
+-            vec->vz = -z;
+-        }
+-        break;
+-    case 1:
+-        {
+-            int x = vec->vx;
+-            vec->vx = -x;
+-        }
+-        break;
+-    case 3:
+-        {
+-            int z = vec->vz;
+-            vec->vz = -z;
+-        }
+-        break;
++    case 0: {
++        int x = vec->vx;
++        int z = vec->vz;
++        vec->vx = -x;
++        vec->vz = -z;
++    }
++    break;
++    case 1: {
++        int x = vec->vx;
++        vec->vx = -x;
++    }
++    break;
++    case 3: {
++        int z = vec->vz;
++        vec->vz = -z;
++    }
++    break;
+     }
+ }
++#ifndef MGS_NATIVE
+ #pragma INCLUDE_ASM("asm/overlays/s15c/s15c_dyncon_800D5A3C.s")
++#endif
++#ifndef MGS_NATIVE
+ #pragma INCLUDE_ASM("asm/overlays/s15c/s15c_dyncon_800D5C38.s")
++#endif
+ void s15c_dyncon_800D5DC0(SVECTOR *vec, SVECTOR *target, int len)
+ {
+     vec->vx = (vec->vx * (len - 1) + target->vx) / len;
+@@ -233,9 +218,7 @@ void s15c_dyncon_800D5DC0(SVECTOR *vec, SVECTOR *target, int len)
+     vec->vz = (vec->vz * (len - 1) + target->vz) / len;
+ }
+ 
+-void s15c_dyncon_800D5EA8(DynCon *work, int i,
+-                          short ax, short ay, short az,
+-                          short bx, short by, short bz)
++void s15c_dyncon_800D5EA8(DynCon *work, int i, short ax, short ay, short az, short bx, short by, short bz)
+ {
+     work->field_3F60[i].vx = ax;
+     work->field_3F60[i].vy = ay;
+@@ -263,20 +246,19 @@ void s15c_dyncon_800D5EDC(DynCon *work, int a1, int a2)
+     }
+ }
+ 
+-void s15c_dyncon_800D5F68(DynCon *work, int index, int arg2, int a3_val,
+-                          int sp28, int sp2c, int sp30, int sp34,
++void s15c_dyncon_800D5F68(DynCon *work, int index, int arg2, int a3_val, int sp28, int sp2c, int sp30, int sp34,
+                           int sp38, int sp3c)
+ {
+-    DynStack *item = (DynStack *)work + index;
++    ContainerEntry *item = &work->entries[index];
+ 
+-    item->val_78 += (short)a3_val;
+-    item->val_7A += (short)sp28;
++    item->rotation.vx += (short)a3_val;
++    item->rotation.vy += (short)sp28;
+ 
+-    item->val_7C += (short)sp2c;
+-    item->val_70 += (short)sp30;
++    item->rotation.vz += (short)sp2c;
++    item->position.vx += (short)sp30;
+ 
+-    item->val_72 += (short)sp34;
+-    item->val_74 += (short)sp38;
++    item->position.vy += (short)sp34;
++    item->position.vz += (short)sp38;
+ 
+     s15c_dyncon_800D5EDC(work, arg2, sp3c);
+ }
+@@ -299,28 +281,25 @@ void s15c_dyncon_800D603C(DynCon *work, int i)
+ }
+ void s15c_dyncon_800D6070(DynCon *work, int row, int idx)
+ {
+-    DynStack *item = (DynStack *)work + row;
++    ContainerEntry *item = &work->entries[row];
+ 
+-    item->val_70 += (work->field_3F40[idx].vx * work->field_3F10[idx]) / 128;
+-    item->val_72 += (work->field_3F40[idx].vy * work->field_3F10[idx]) / 128;
+-    item->val_74 += (work->field_3F40[idx].vz * work->field_3F10[idx]) / 128;
++    item->position.vx += (work->field_3F40[idx].vx * work->field_3F10[idx]) / 128;
++    item->position.vy += (work->field_3F40[idx].vy * work->field_3F10[idx]) / 128;
++    item->position.vz += (work->field_3F40[idx].vz * work->field_3F10[idx]) / 128;
+ }
+-extern int s15c_dword_800E344C;
+ 
+ void s15c_dyncon_800D6128(DynCon *work, SVECTOR *pos, int range)
+ {
+     int  i;
+     int *out;
+ 
+-    out = &s15c_dword_800E344C;
++    out = s15c_container_available;
+     for (i = 0; i < 4; i++)
+     {
+         if (work->field_3F20[i] > 0)
+         {
+-            if (work->field_3F80[i][0] - range < pos->vx &&
+-                pos->vx < work->field_3F80[i][2] + range &&
+-                work->field_3F80[i][1] - range < pos->vz &&
+-                pos->vz < work->field_3F80[i][3] + range)
++            if (work->field_3F80[i][0] - range < pos->vx && pos->vx < work->field_3F80[i][2] + range &&
++                work->field_3F80[i][1] - range < pos->vz && pos->vz < work->field_3F80[i][3] + range)
+             {
+                 work->field_3F30[i] = 0;
+             }
+@@ -332,8 +311,10 @@ void s15c_dyncon_800D6128(DynCon *work, SVECTOR *pos, int range)
+         out[i] = work->field_3F30[i];
+     }
+ }
++#ifndef MGS_NATIVE
+ #pragma INCLUDE_ASM("asm/overlays/s15c/s15c_dyncon_800D61E0.s")
+-extern void *NewItemPut(SVECTOR *pos, SVECTOR *step, ITEM_INFO *info);
++#endif
++extern void      *NewItemPut(SVECTOR *pos, SVECTOR *step, ITEM_INFO *info);
+ extern const char s15c_aNikitamissile_800E2D80[];
+ extern const char s15c_aC_800E2D94[];
+ extern const char s15c_aRation_800E2D9C[];
+@@ -346,35 +327,41 @@ void *s15c_dyncon_800D6434(DynCon *work, SVECTOR *pos, SVECTOR *step, int item_t
+     {
+     case 0:
+         item.message = s15c_aNikitamissile_800E2D80;
+-        item.type    = 3;
+-        item.id      = WP_Nikita;
+-        item.num     = 4;
++        item.type = 3;
++        item.id = WP_Nikita;
++        item.num = 4;
+         break;
+     case 1:
+         item.message = s15c_aC_800E2D94;
+-        item.id      = WP_C4;
+-        item.type    = 0;
+-        item.num     = 2;
++        item.id = WP_C4;
++        item.type = 0;
++        item.num = 2;
+         break;
+     case 2:
+         item.message = s15c_aC_800E2D94;
+-        item.type    = 0;
+-        item.id      = WP_C4;
+-        item.num     = 2;
++        item.type = 0;
++        item.id = WP_C4;
++        item.num = 2;
+         break;
+     case 3:
+         item.message = s15c_aRation_800E2D9C;
+-        item.type    = 4;
+-        item.id      = IT_Ration;
+-        item.num     = 1;
++        item.type = 4;
++        item.id = IT_Ration;
++        item.num = 1;
+         break;
+     }
+     item.time = -1;
+     return NewItemPut(pos, step, &item);
+ }
++#ifndef MGS_NATIVE
+ #pragma INCLUDE_ASM("asm/overlays/s15c/s15c_dyncon_800D6528.s")
++#endif
++#ifndef MGS_NATIVE
+ #pragma INCLUDE_ASM("asm/overlays/s15c/s15c_dyncon_800D7A84.s")
++#endif
++#ifndef MGS_NATIVE
+ #pragma INCLUDE_ASM("asm/overlays/s15c/s15c_dyncon_800D7AB4.s")
++#endif
+ int s15c_dyncon_800D7D44(DynCon *work)
+ {
+     int i, j;
+@@ -406,14 +393,24 @@ int s15c_dyncon_800D7D44(DynCon *work)
+ 
+     return 1;
+ }
++#ifndef MGS_NATIVE
+ #pragma INCLUDE_ASM("asm/overlays/s15c/s15c_dyncon_800D7E30.s")
++#endif
++#ifndef MGS_NATIVE
+ #pragma INCLUDE_ASM("asm/overlays/s15c/s15c_dyncon_800D7EF4.s")
++#endif
++#ifndef MGS_NATIVE
+ #pragma INCLUDE_ASM("asm/overlays/s15c/s15c_dyncon_800D7F88.s")
++#endif
++#ifndef MGS_NATIVE
+ #pragma INCLUDE_ASM("asm/overlays/s15c/s15c_dyncon_800D82FC.s")
++#endif
++#ifndef MGS_NATIVE
+ #pragma INCLUDE_ASM("asm/overlays/s15c/s15c_dyncon_800D8510.s")
++#endif
++#ifndef MGS_NATIVE
+ #pragma INCLUDE_ASM("asm/overlays/s15c/s15c_dyncon_800D88C8.s")
+-extern void s15c_dyncon_800D82FC(void *work);
+-extern void s15c_dyncon_800D88C8(void *work);
++#endif
+ 
+ void s15c_dyncon_800D89F8(DynCon *work)
+ {
+@@ -439,17 +436,17 @@ void s15c_dyncon_800D8A34(char *opt, short *out, int count)
+         out++;
+     }
+ }
++#ifndef MGS_NATIVE
+ #pragma INCLUDE_ASM("asm/overlays/s15c/s15c_dyncon_800D8A9C.s")
+-extern void s15c_dyncon_800D6528(void *work);
+-extern int  s15c_dyncon_800D8A9C(DynCon *work, int arg);
++#endif
++extern int        s15c_dyncon_800D8A9C(DynCon *work, int arg);
+ extern const char s15c_dword_800E2E30[];
+ 
+ GV_ACT *s15c_dyncon_800D8C9C(int name, int where)
+ {
+     DynCon *work;
+ 
+-
+-    work = (DynCon *)GV_NewActor(GV_ACTOR_USER, 0x4170);
++    work = (DynCon *)GV_NewActor(GV_ACTOR_USER, sizeof(DynCon));
+     if (work != NULL)
+     {
+         GV_SetNamedActor(&work->actor, s15c_dyncon_800D6528, s15c_dyncon_800D89F8, s15c_dword_800E2E30);
+@@ -459,5 +456,5 @@ GV_ACT *s15c_dyncon_800D8C9C(int name, int where)
+             return NULL;
+         }
+     }
+-    return &work->actor;
++    return work ? &work->actor : NULL;
+ }
+diff --git a/source/overlays/s15c/okajima/valcan/dyncon.h b/source/overlays/s15c/okajima/valcan/dyncon.h
+index f10aaceb0..9e3fac415 100644
+--- a/source/overlays/s15c/okajima/valcan/dyncon.h
++++ b/source/overlays/s15c/okajima/valcan/dyncon.h
+@@ -5,77 +5,117 @@
+ 
+ typedef struct
+ {
+-    TARGET *target;
++    TARGET        *target;
+     OBJECT_NO_ROTS objects[2];
+-    SVECTOR position;
+-    SVECTOR rotation;
+-    MATRIX light[2];
++    SVECTOR        position;
++    SVECTOR        rotation;
++    MATRIX         light[2];
+ } ContainerEntry;
+ 
+ typedef struct
+ {
+     OBJECT_NO_ROTS object;
+-    SVECTOR position;
+-    SVECTOR rotation;
+-    MATRIX light[2];
++    SVECTOR        position;
++    SVECTOR        rotation;
++    MATRIX         light[2];
+ } ContainerPanel;
+ 
+ typedef struct
+ {
+     OBJECT_NO_ROTS object;
+-    MATRIX light[2];
++    MATRIX         light[2];
+ } ContainerTop;
+ 
+ typedef struct
+ {
+     OBJECT_NO_ROTS object;
+-    SVECTOR *position;
+-    SVECTOR *rotation;
+-    SVECTOR step;
+-    SVECTOR offset;
+-    MATRIX light[2];
+-    int state;
++    SVECTOR       *position;
++    SVECTOR       *rotation;
++    SVECTOR        step;
++    SVECTOR        offset;
++    MATRIX         light[2];
++    int            state;
+ } ContainerFragment;
+ 
+ typedef struct _DynCon
+ {
+-    GV_ACT actor;
+-    int map;
+-    ContainerEntry entries[72];
+-    int object_active[72][2];
+-    ContainerPanel panels[8];
+-    int panel_active[8];
+-    ContainerTop tops[4];
++    GV_ACT            actor;
++    int               map;
++    ContainerEntry    entries[72];
++    int               object_active[72][2];
++    ContainerPanel    panels[8];
++    int               panel_active[8];
++    ContainerTop      tops[4];
+     ContainerFragment fragments[4];
+-    int field_3594[5][2];
+-    HZD_SEG segs[5][2][4];
+-    HZD_FLR floors[5][2][2];
+-    int field_3BFC[4];
+-    SVECTOR field_3C0C[4];
+-    int field_3C2C[36];
+-    int field_3CBC[36];
+-    int field_3D4C[36];
+-    int copies;
+-    int models[36];
+-    int field_3E70[36];
+-    int field_3F00[4];
+-    int field_3F10[4];
+-    int field_3F20[4];
+-    int field_3F30[4];
+-    SVECTOR field_3F40[4];
+-    SVECTOR field_3F60[4];
+-    short field_3F80[4][4];
+-    HZD_SEG slots[4][2];
+-    int field_4020[4];
+-    int field_4030[4];
+-    int field_4040[4];
+-    int field_4050;
+-    int save_procs[3];
+-    int saved_state[40];
+-    char pad_4100[0x60];
+-    int field_4160[4];
++    int               field_3594[5][2];
++    HZD_SEG           segs[5][2][4];
++    HZD_FLR           floors[5][2][2];
++    int               field_3BFC[4];
++    SVECTOR           field_3C0C[4];
++    int               field_3C2C[36];
++    int               field_3CBC[36];
++    int               field_3D4C[36];
++    int               copies;
++    int               models[36];
++    int               field_3E70[36];
++    int               field_3F00[4];
++    int               field_3F10[4];
++    int               field_3F20[4];
++    int               field_3F30[4];
++    SVECTOR           field_3F40[4];
++    SVECTOR           field_3F60[4];
++    short             field_3F80[4][4];
++    HZD_SEG           slots[4][2];
++    int               field_4020[4];
++    int               field_4030[4];
++    int               field_4040[4];
++    int               field_4050;
++    int               save_procs[3];
++    int               saved_state[40];
++    char              pad_4100[0x60];
++    int               field_4160[4];
+ } DynCon;
+ 
++extern int     s15c_container_available[4];
++extern int     s15c_container_phase[4];
++extern int     s15c_container_destroy;
++extern SVECTOR s15c_valcan_position;
++
++void  s15c_dyncon_800D3EBC(OBJECT_NO_ROTS *obj, int model, int flag);
++void  s15c_dyncon_800D5090(DynCon *work, int i);
++void  s15c_dyncon_800D5114(DynCon *work, int i);
++void  s15c_dyncon_800D518C(DynCon *work, int i, int j);
++void  s15c_dyncon_800D5270(DynCon *work, int i, int j);
++void  s15c_dyncon_800D5354(DynCon *work, int i, int j);
++void  s15c_dyncon_800D5428(DynCon *work, int i, int depth);
++void  s15c_dyncon_800D567C(DynCon *work, int i, int j, int code);
++void  s15c_dyncon_800D5910(DynCon *work, int column, int row);
++void  s15c_dyncon_800D59C0(SVECTOR *vec, int code);
++void  s15c_dyncon_800D5A3C(DynCon *work, int quadrant, int index, int mode, short rz, short rx, short sx, short sy,
++                           short sz, short dx, short dy, short dz);
++void  s15c_dyncon_800D5C38(DynCon *work, int pair, int index);
++void  s15c_dyncon_800D5DC0(SVECTOR *vec, SVECTOR *target, int len);
++void  s15c_dyncon_800D5EA8(DynCon *work, int i, short ax, short ay, short az, short bx, short by, short bz);
++void  s15c_dyncon_800D5EDC(DynCon *work, int i, int code);
++void  s15c_dyncon_800D5F68(DynCon *work, int index, int quadrant, int rx, int ry, int rz, int dx, int dy, int dz,
++                           int code);
++void  s15c_dyncon_800D6004(DynCon *work, int i);
++void  s15c_dyncon_800D603C(DynCon *work, int i);
++void  s15c_dyncon_800D6070(DynCon *work, int row, int index);
++void  s15c_dyncon_800D6128(DynCon *work, SVECTOR *pos, int range);
++void  s15c_dyncon_800D61E0(DynCon *work);
++void *s15c_dyncon_800D6434(DynCon *work, SVECTOR *pos, SVECTOR *step, int type);
++void  s15c_dyncon_800D6528(DynCon *work);
++int   s15c_dyncon_800D7AB4(DynCon *work);
++int   s15c_dyncon_800D7D44(DynCon *work);
++void  s15c_dyncon_800D7E30(DynCon *work, int top, int index, int model);
++void  s15c_dyncon_800D7EF4(DynCon *work, int index, int model);
++int   s15c_dyncon_800D7F88(DynCon *work);
++void  s15c_dyncon_800D82FC(DynCon *work);
++int   s15c_dyncon_800D8510(DynCon *work);
++void  s15c_dyncon_800D88C8(DynCon *work);
++int   s15c_dyncon_800D8A9C(DynCon *work, int map);
++
+ #ifdef MGS_NATIVE
+ _Static_assert(sizeof(ContainerEntry) == 156, "Original container entry layout");
+ _Static_assert(sizeof(ContainerPanel) == 116, "Original panel layout");
+diff --git a/source/overlays/s15c/okajima/valcan/dyncon_act.c b/source/overlays/s15c/okajima/valcan/dyncon_act.c
+new file mode 100644
+index 000000000..7c04f71cd
+--- /dev/null
++++ b/source/overlays/s15c/okajima/valcan/dyncon_act.c
+@@ -0,0 +1,363 @@
++#include "dyncon.h"
++#include "game/vibrate.h"
++
++#ifdef MGS_NATIVE
++
++static void DynConActFragments(DynCon *work)
++{
++    int i;
++    for (i = 0; i < 4; i++)
++    {
++        ContainerFragment *fragment = &work->fragments[i];
++        MATRIX             parent, local;
++        SVECTOR            position;
++        if (fragment->state == 2)
++        {
++            DG_SetPos2(&DG_ZeroVector, fragment->rotation);
++            ReadRotMatrix(&parent);
++            DG_SetPos2(fragment->position, fragment->rotation);
++            fragment->offset.vy += 300;
++            DG_PutVector(&fragment->offset, &position, 1);
++            fragment->object.objs->flag |= DG_FLAG_INVISIBLE;
++            s15c_dyncon_800D6434(work, &position, &DG_ZeroVector, i);
++            fragment->state = 3;
++        }
++        else if (fragment->state == 0 || fragment->state == 1)
++        {
++            fragment->step.vx = 0;
++            fragment->step.vz = 0;
++            fragment->step.vy -= 90;
++            if (fragment->state == 1)
++            {
++                DG_SetPos2(&DG_ZeroVector, fragment->rotation);
++                ReadRotMatrix(&parent);
++            }
++            DG_SetPos2(fragment->position, fragment->rotation);
++            DG_PutVector(&fragment->offset, &position, 1);
++            DG_SetPos2(&position, &fragment->step);
++            if (fragment->state == 1)
++            {
++                ReadRotMatrix(&local);
++                CompMatrix(&parent, &local, &parent);
++                SetRotMatrix(&parent);
++            }
++            GM_ActObject2((OBJECT *)&fragment->object);
++            DG_GetLightMatrix2(&position, fragment->light);
++        }
++    }
++}
++
++static void DynConSoundPosition(SVECTOR *container, SVECTOR *position)
++{
++    SVECTOR delta;
++    GV_SubVec3(container, &GM_PlayerPosition, &delta);
++    position->vx = GM_PlayerPosition.vx + delta.vx / 8;
++    position->vy = container->vy;
++    position->vz = GM_PlayerPosition.vz + delta.vz / 8;
++}
++
++static int DynConDamageEnabled(DynCon *work, int index)
++{
++    static const int selected[4] = {3, 21, 24, 34};
++    int              i;
++    for (i = 0; i < 4; i++)
++        if (index == selected[i] && work->field_3F30[i] == 0)
++            return 0;
++    return 1;
++}
++
++static void DynConCollectDamage(DynCon *work)
++{
++    int group, part;
++    for (group = 0; group < 9; group++)
++    {
++        int changed = 0;
++        for (part = 0; part < 4; part++)
++        {
++            int index = 4 * group + part;
++            int hit = 0;
++            if (!DynConDamageEnabled(work, index))
++                continue;
++            if (work->field_4050 == 1)
++            {
++                TARGET *target = work->entries[index].target;
++                if (target->damaged & TARGET_POWER)
++                {
++                    SVECTOR position;
++                    target->damaged &= ~TARGET_POWER;
++                    DynConSoundPosition(&work->entries[index].position, &position);
++                    GM_SeSet(&position, 189);
++                    hit = 1;
++                }
++            }
++            else if ((work->field_4050 == 2 || work->field_4050 == 3) &&
++                     work->field_3CBC[index] < work->saved_state[index])
++                hit = 1;
++            if (hit && ++work->field_3C2C[index] >= work->copies)
++            {
++                work->field_3C2C[index] = 0;
++                work->field_3CBC[index]++;
++                changed = 1;
++            }
++        }
++        if (changed)
++            s15c_dyncon_800D5910(work, group % 3, group / 3);
++    }
++}
++
++static void DynConStartCollapse(DynCon *work, int group, int index, int damage)
++{
++    if (damage == 4)
++    {
++        ContainerEntry *upper = &work->entries[index + 4];
++        work->field_3F10[group] = 32;
++        s15c_dyncon_800D5A3C(work, group, index, damage, -80, 112, -48, -24, -48, -48, -212, -48);
++        s15c_dyncon_800D5C38(work, group, index);
++        GM_FreeObject((OBJECT *)&upper->objects[0]);
++        work->object_active[index + 4][0] = 0;
++        DG_SetPos2(&upper->position, &upper->rotation);
++        s15c_dyncon_800D3EBC(&upper->objects[1], GV_StrCode("con_all"), 71);
++        work->object_active[index + 4][1] = 1;
++    }
++    if (damage == 5)
++    {
++        work->field_3F10[group] = 32;
++        s15c_dyncon_800D5A3C(work, group, index, damage, -112, 32, -80, -52, -80, -80, -240, -80);
++        if (group == 2)
++            work->field_3F40[2].vx = -work->field_3F40[2].vx;
++    }
++}
++
++static void DynConReplaceDamaged(DynCon *work)
++{
++    int i;
++    for (i = 0; i < 36; i++)
++    {
++        int             damage = work->field_3CBC[i];
++        int             index, slot, group;
++        ContainerEntry *entry;
++        SVECTOR         position;
++        if (damage == work->field_3D4C[i])
++            continue;
++        index = 8 * (i / 4) + i % 4;
++        entry = &work->entries[index];
++        DynConSoundPosition(&entry->position, &position);
++        work->field_3D4C[i] = damage;
++        if (work->field_4050 == 1)
++            GM_SeSet(&position, 180);
++        slot = damage % 2;
++        GM_FreeObject((OBJECT *)&entry->objects[1 - slot]);
++        work->object_active[index][1 - slot] = 0;
++        work->object_active[index][slot] = 1;
++        if ((i == 21 || i == 34) && (damage == 4 || damage == 5))
++        {
++            entry->rotation.vy += 2048;
++            DG_SetPos2(&entry->position, &entry->rotation);
++            entry->rotation.vy -= 2048;
++        }
++        else
++            DG_SetPos2(&entry->position, &entry->rotation);
++        s15c_dyncon_800D3EBC(&entry->objects[slot], work->models[6 * work->field_3E70[i] + damage], 71);
++        GM_ActObject2((OBJECT *)&entry->objects[slot]);
++        for (group = 0; group < 4; group++)
++            if (i == work->field_3F00[group])
++                DynConStartCollapse(work, group, index, damage);
++    }
++}
++
++static void DynConSettleSaved(DynCon *work, int group, int index)
++{
++    static const SVECTOR positions[4] = {
++        {-4000, 749, -3500, 0}, {8000, 749, -750, 0}, {-7999, 749, 4999, 0}, {4000, 749, 8000, 0}};
++    static const SVECTOR rotations[4] = {
++        {1023, 1023, -511, 0}, {1023, 2048, -511, 0}, {1023, 1024, -511, 0}, {1023, -1023, 511, 0}};
++    ContainerEntry *entry = &work->entries[index + 4];
++    if (work->field_4050 == 2)
++    {
++        entry->position.vx = positions[group].vx;
++        entry->position.vy = positions[group].vy;
++        entry->position.vz = positions[group].vz;
++        entry->rotation.vx = rotations[group].vx;
++        entry->rotation.vy = rotations[group].vy;
++        entry->rotation.vz = rotations[group].vz;
++    }
++    else
++    {
++        entry->position.vx = group % 2 ? 10000 : -10000;
++        entry->position.vy = -10000;
++        entry->position.vz = group < 2 ? -10000 : 10000;
++        entry->rotation.vx = 0;
++        entry->rotation.vy = 0;
++        entry->rotation.vz = 0;
++    }
++    s15c_dyncon_800D5EDC(work, group, group == 1 ? 3 : 2);
++    if (work->field_4050 == 3)
++        entry->objects[0].objs->flag |= DG_FLAG_INVISIBLE;
++    s15c_dyncon_800D5354(work, group, 0);
++    work->field_4040[group] = 1;
++    work->field_4160[group] = 1;
++}
++
++static void DynConCollapseSound(DynCon *work, SVECTOR *position)
++{
++    if (work->field_4050 == 1 && GV_RandU(2) == 0)
++        GM_SeSet(position, 178);
++}
++
++static void DynConRotateFalling(DynCon *work, int group, int index)
++{
++    int time = 32 - work->field_3F10[group];
++    int half = time / 2;
++    switch (group)
++    {
++    case 0:
++        s15c_dyncon_800D5F68(work, index + 4, group, time, time, -half, time, -half, -half, 2);
++        break;
++    case 1:
++        s15c_dyncon_800D5F68(work, index + 4, group, time, time, half, -half, -half, -2 * time, 3);
++        break;
++    case 2:
++        s15c_dyncon_800D5F68(work, index + 4, group, 2 * time, -half, -half, time, -half, -2 * time, 3);
++        break;
++    case 3:
++        s15c_dyncon_800D5F68(work, index + 4, group, time, -time, half, -time, -half, half, 2);
++        break;
++    }
++}
++
++static void DynConFall(DynCon *work, int group, int index, SVECTOR *position)
++{
++    static const SVECTOR positions[4] = {
++        {-4000, 750, -3500, 0}, {8000, 750, -750, 0}, {-8000, 750, 5000, 0}, {4000, 750, 8000, 0}};
++    static const SVECTOR rotations[4] = {
++        {896, 1024, -512, 0}, {896, 2048, -512, 0}, {896, 1024, -512, 0}, {896, -1024, 512, 0}};
++    DynConCollapseSound(work, position);
++    DynConRotateFalling(work, group, index);
++    s15c_dyncon_800D6070(work, index + 4, group);
++    if (--work->field_3F10[group] == 0)
++    {
++        work->field_3F10[group] = 8;
++        work->field_3F20[group]++;
++        s15c_dyncon_800D5EA8(work, group, rotations[group].vx, rotations[group].vy, rotations[group].vz,
++                             positions[group].vx, positions[group].vy, positions[group].vz);
++        if (work->field_4050 == 1)
++            GM_SeSet(&work->entries[index + 4].position, 41);
++    }
++}
++
++static void DynConImpact(DynCon *work, int group, ContainerEntry *entry, SVECTOR *position)
++{
++    static unsigned char small_vibration[] = {0, 4, 127, 4, 0, 0, 0, 0};
++    static unsigned char large_vibration[] = {85, 4, 135, 8, 100, 10, 65, 12, 0, 0};
++    if (work->field_3F20[group] == 4)
++    {
++        DynConCollapseSound(work, position);
++        work->field_3F10[group]--;
++        s15c_dyncon_800D5DC0(&entry->position, &work->field_3F40[group], 2);
++        s15c_dyncon_800D5DC0(&entry->rotation, &work->field_3F60[group], 2);
++        s15c_dyncon_800D5EDC(work, group, group == 1 ? 3 : 2);
++        if (work->field_3F10[group] == 0)
++        {
++            work->field_3F10[group] = 8;
++            work->field_3F20[group]++;
++            work->field_3F60[group].vx = 1024;
++            if (work->field_4050 == 1)
++                GM_SeSet(position, 177);
++            GM_SetNoise(255, 32, &entry->position);
++            NewPadVibration(small_vibration, 1);
++            NewPadVibration(large_vibration, 2);
++        }
++    }
++    else
++    {
++        work->field_3F10[group]--;
++        s15c_dyncon_800D5DC0(&entry->position, &work->field_3F40[group], 2);
++        s15c_dyncon_800D5DC0(&entry->rotation, &work->field_3F60[group], 2);
++        if (work->field_3F10[group] == 0)
++        {
++            s15c_dyncon_800D5354(work, group, 0);
++            work->field_4040[group] = 1;
++            s15c_dyncon_800D5114(work, group);
++            if (work->field_4050 == 1)
++                GM_SeSet(position, 177);
++            GM_SetNoise(255, 32, &entry->position);
++            work->field_3F10[group] = 32;
++            work->field_3F20[group]++;
++            if (work->field_4050 == 1)
++                work->fragments[group].state = 2;
++        }
++    }
++}
++
++static void DynConActCollapse(DynCon *work, int group, int index, SVECTOR *position)
++{
++    switch (work->field_3F20[group])
++    {
++    case 0:
++        if (work->field_4050 == 2 || work->field_4050 == 3)
++            DynConSettleSaved(work, group, index);
++        else
++        {
++            if (work->field_4050 == 1)
++                work->fragments[group].state = 1;
++            DynConCollapseSound(work, position);
++            s15c_dyncon_800D6070(work, index + 4, group);
++            s15c_dyncon_800D603C(work, group);
++        }
++        break;
++    case 1:
++        DynConCollapseSound(work, position);
++        if (work->field_3F10[group] != 32)
++            s15c_dyncon_800D5114(work, group);
++        s15c_dyncon_800D5428(work, group, 4 * (32 - work->field_3F10[group]));
++        s15c_dyncon_800D5090(work, group);
++        work->entries[index + 4].rotation.vy += group < 2 ? 16 : -16;
++        s15c_dyncon_800D6070(work, index + 4, group);
++        /* Fall through: both phases update the same dynamic floor. */
++    case 2:
++        s15c_dyncon_800D6004(work, group);
++        s15c_dyncon_800D5EDC(work, group, 1);
++        break;
++    case 3:
++        DynConFall(work, group, index, position);
++        break;
++    case 4:
++    case 5:
++        DynConImpact(work, group, &work->entries[index + 4], position);
++        break;
++    }
++}
++
++void s15c_dyncon_800D6528(DynCon *work)
++{
++    int i;
++    GM_CurrentMap = work->map;
++    if (work->field_4050 == 1)
++        DynConActFragments(work);
++    if (s15c_container_destroy == 1)
++        GV_DestroyActor(&work->actor);
++    if (work->field_4050 == 1)
++    {
++        for (i = 0; i < 4; i++)
++            work->field_3F30[i] = 1;
++        s15c_dyncon_800D6128(work, &s15c_valcan_position, 10000);
++        s15c_dyncon_800D6128(work, &GM_PlayerPosition, 5000);
++    }
++    DynConCollectDamage(work);
++    DynConReplaceDamaged(work);
++    for (i = 0; i < 4; i++)
++        if (work->field_3F10[i] != 0 && work->field_4160[i] == 0)
++        {
++            int             damage_index = work->field_3F00[i];
++            int             index = 8 * (damage_index / 4) + damage_index % 4;
++            ContainerEntry *upper = &work->entries[index + 4];
++            SVECTOR         position;
++            DynConSoundPosition(&work->entries[index].position, &position);
++            DynConActCollapse(work, i, index, &position);
++            DG_SetPos2(&upper->position, &upper->rotation);
++            GM_ActObject2((OBJECT *)&upper->objects[1]);
++            s15c_container_phase[i] = work->field_3F20[i];
++        }
++}
++
++#endif
+diff --git a/source/overlays/s15c/okajima/valcan/dyncon_geo.c b/source/overlays/s15c/okajima/valcan/dyncon_geo.c
+index b7b8552c1..f53637d78 100644
+--- a/source/overlays/s15c/okajima/valcan/dyncon_geo.c
++++ b/source/overlays/s15c/okajima/valcan/dyncon_geo.c
+@@ -19,17 +19,13 @@ static int IsExtreme(const SVECTOR *candidate, const SVECTOR *current, int side)
+     switch (side)
+     {
+     case 0:
+-        return candidate->vx < current->vx ||
+-               (candidate->vx == current->vx && candidate->vz < current->vz);
++        return candidate->vx < current->vx || (candidate->vx == current->vx && candidate->vz < current->vz);
+     case 1:
+-        return candidate->vz > current->vz ||
+-               (candidate->vz == current->vz && candidate->vx < current->vx);
++        return candidate->vz > current->vz || (candidate->vz == current->vz && candidate->vx < current->vx);
+     case 2:
+-        return candidate->vx > current->vx ||
+-               (candidate->vx == current->vx && candidate->vz > current->vz);
++        return candidate->vx > current->vx || (candidate->vx == current->vx && candidate->vz > current->vz);
+     default:
+-        return candidate->vz < current->vz ||
+-               (candidate->vz == current->vz && candidate->vx > current->vx);
++        return candidate->vz < current->vz || (candidate->vz == current->vz && candidate->vx > current->vx);
+     }
+ }
+ 
+@@ -46,8 +42,8 @@ static HZD_VEC HazardPoint(SVECTOR position, int height)
+ static void MakeFloor(HZD_FLR *floor, const SVECTOR *vertices)
+ {
+     static const int order[4] = {0, 3, 2, 1};
+-    HZD_VEC points[4];
+-    int nx, nz, ny, length, i;
++    HZD_VEC          points[4];
++    int              nx, nz, ny, length, i;
+     for (i = 0; i < 4; ++i)
+         points[i] = HazardPoint(vertices[order[i]], 0);
+     floor->b1 = floor->b2 = points[0];
+@@ -61,11 +57,14 @@ static void MakeFloor(HZD_FLR *floor, const SVECTOR *vertices)
+         floor->b2.y = MAX(floor->b2.y, points[i].y);
+     }
+     nx = ((points[1].y - points[0].y) * (points[2].z - points[1].z) -
+-          (points[1].z - points[0].z) * (points[2].y - points[1].y)) >> 16;
++          (points[1].z - points[0].z) * (points[2].y - points[1].y)) >>
++         16;
+     nz = ((points[1].x - points[0].x) * (points[2].y - points[1].y) -
+-          (points[1].y - points[0].y) * (points[2].x - points[1].x)) >> 16;
++          (points[1].y - points[0].y) * (points[2].x - points[1].x)) >>
++         16;
+     ny = ((points[1].z - points[0].z) * (points[2].x - points[1].x) -
+-          (points[1].x - points[0].x) * (points[2].z - points[1].z)) >> 16;
++          (points[1].x - points[0].x) * (points[2].z - points[1].z)) >>
++         16;
+     length = SquareRoot0(nx * nx + nz * nz + ny * ny);
+     if (length == 0)
+         length = 1;
+@@ -78,12 +77,11 @@ static void MakeFloor(HZD_FLR *floor, const SVECTOR *vertices)
+     floor->p4 = points[3];
+ }
+ 
+-void s15c_dyncon_800D3F24(HZD_SEG *segments, HZD_FLR *floors, MATRIX *matrix,
+-                        SVECTOR *minimum, SVECTOR *maximum)
++void s15c_dyncon_800D3F24(HZD_SEG *segments, HZD_FLR *floors, MATRIX *matrix, SVECTOR *minimum, SVECTOR *maximum)
+ {
+     static const int edges[4][2] = {{0, 1}, {1, 2}, {3, 2}, {0, 3}};
+-    SVECTOR corners[8], lower[4], upper[4];
+-    int side, i, index;
++    SVECTOR          corners[8], lower[4], upper[4];
++    int              side, i, index;
+     MakeCorners(corners, minimum, maximum);
+     DG_SetPos(matrix);
+     DG_PutVector(corners, corners, 8);
+diff --git a/source/overlays/s15c/okajima/valcan/dyncon_setup.c b/source/overlays/s15c/okajima/valcan/dyncon_setup.c
+new file mode 100644
+index 000000000..7154f152d
+--- /dev/null
++++ b/source/overlays/s15c/okajima/valcan/dyncon_setup.c
+@@ -0,0 +1,298 @@
++#include "dyncon.h"
++#include "libgcl/libgcl.h"
++#include <string.h>
++
++#ifdef MGS_NATIVE
++
++void s15c_dyncon_800D5910(DynCon *work, int column, int row)
++{
++    int i;
++    int base = 4 * (column + 3 * row);
++    for (i = 0; i < 4; i++)
++    {
++        if (work->field_3CBC[base + i] >= 6)
++            work->field_3CBC[base + i] = 5;
++    }
++}
++
++void s15c_dyncon_800D5A3C(DynCon *work, int quadrant, int index, int mode, short rz, short rx, short sx, short sy,
++                          short sz, short dx, short dy, short dz)
++{
++    ContainerEntry *entry = &work->entries[index + 4];
++    SVECTOR         step = {sx, sy, sz, 0};
++    SVECTOR         delta = {dx, dy, dz, 0};
++    entry->rotation.vz += quadrant % 2 ? -rz : rz;
++    entry->rotation.vx += rx;
++    s15c_dyncon_800D59C0(&step, quadrant);
++    if (mode == 5)
++    {
++        if (quadrant == 0 || quadrant == 3)
++            step.vz = 0;
++        else
++            step.vx = 0;
++    }
++    work->field_3F40[quadrant] = step;
++    s15c_dyncon_800D59C0(&delta, quadrant);
++    GV_AddVec3(&entry->position, &delta, &entry->position);
++}
++
++void s15c_dyncon_800D5C38(DynCon *work, int pair, int index)
++{
++    int     i;
++    SVECTOR rotation = work->entries[index].rotation;
++    for (i = 0; i < 2; i++)
++    {
++        ContainerPanel *panel = &work->panels[2 * pair + i];
++        if (i == 1 && pair % 2 == 1)
++            rotation.vy += 2048;
++        DG_SetPos2(&work->entries[index].position, &rotation);
++        s15c_dyncon_800D3EBC(&panel->object, GV_StrCode(i ? "pan2" : "pan1"), 71);
++        panel->object.objs->objs[0].raise = -250;
++        work->panel_active[2 * pair + i] = 1;
++        GM_ActObject2((OBJECT *)&panel->object);
++    }
++}
++
++void s15c_dyncon_800D61E0(DynCon *work)
++{
++    static const int models[4] = {19810, 19807, 19807, 19811};
++    int              i;
++    for (i = 0; i < 4; i++)
++    {
++        ContainerFragment *fragment = &work->fragments[i];
++        int                index = work->field_3F00[i];
++        ContainerEntry    *entry = &work->entries[8 * (index / 4) + index % 4 + 4];
++        fragment->step = DG_ZeroVector;
++        fragment->offset.vx = i % 2 ? 250 : -250;
++        fragment->offset.vy = 1800;
++        fragment->offset.vz = -250;
++        GM_InitObjectNoRots(&fragment->object, models[i], 877, 0);
++        GM_ConfigObjectLight((OBJECT *)&fragment->object, fragment->light);
++        fragment->object.objs->objs[0].raise = i == 2 ? 0 : 250;
++        fragment->position = &entry->position;
++        fragment->rotation = &entry->rotation;
++        fragment->state = 0;
++    }
++}
++
++int s15c_dyncon_800D7AB4(DynCon *work)
++{
++    static const int selected[4] = {3, 21, 24, 34};
++    SVECTOR          size = {1010, 885, 760, 0};
++    int              i;
++    for (i = 0; i < 36; i++)
++    {
++        int index = 8 * (i / 4) + i % 4;
++        if (work->field_4050 == 1)
++        {
++            SVECTOR position = work->entries[index].position;
++            TARGET *target = GM_AllocTarget();
++            work->entries[i].target = target;
++            if (target == NULL)
++                return -1;
++            GM_SetTarget(target, 20, 1, &size);
++            position.vy += 437;
++            GM_MoveTarget(target, &position);
++        }
++        work->field_3C2C[i] = 0;
++        work->field_3CBC[i] = 0;
++        work->field_3D4C[i] = 0;
++        work->field_3E70[i] = (i % 2 == (i / 2) % 2) ? 2 : 3;
++    }
++    for (i = 0; i < 4; i++)
++    {
++        work->field_3F00[i] = selected[i];
++        work->field_3F10[i] = 0;
++        work->field_3F20[i] = 0;
++        work->field_3F30[i] = 1;
++        work->field_3E70[selected[i]] = i % 2;
++        work->field_3E70[28 + i] = i == 0 || i == 3 ? 4 : 5;
++    }
++    return 1;
++}
++
++void s15c_dyncon_800D7E30(DynCon *work, int top, int index, int model)
++{
++    SVECTOR         position = work->entries[index].position;
++    OBJECT_NO_ROTS *object = &work->tops[top].object;
++    position.vy += 1749;
++    DG_SetPos2(&position, &work->entries[index].rotation);
++    s15c_dyncon_800D3EBC(object, model, 71);
++    object->objs->objs[0].raise = -250;
++    GM_ActObject2((OBJECT *)object);
++}
++
++void s15c_dyncon_800D7EF4(DynCon *work, int index, int model)
++{
++    ContainerEntry *entry = &work->entries[index];
++    DG_SetPos2(&entry->position, &entry->rotation);
++    s15c_dyncon_800D3EBC(&entry->objects[0], model, 71);
++    work->object_active[index][0] = 1;
++    GM_ActObject2((OBJECT *)&entry->objects[0]);
++}
++
++int s15c_dyncon_800D7F88(DynCon *work)
++{
++    static const char *const models[8] = {"con_uf0", "con_ub0", "con_ub0", "con_uf0",
++                                          "con_tf",  "con_tb",  "con_tb",  "con_tf"};
++    int                      i;
++    for (i = 0; i < 72; i++)
++    {
++        ContainerEntry *entry = &work->entries[i];
++        entry->position.vx = 7000 * ((i / 8) % 3) - 8000 + 2000 * (i % 2);
++        entry->position.vy = 1750 * ((i / 4) % 2);
++        entry->position.vz = 6000 * (i / 24) - 5250 + 1500 * ((i / 2) % 2);
++        entry->rotation.vx = 0;
++        entry->rotation.vy = (1 - (i / 2) % 2) * 2048;
++        entry->rotation.vz = 0;
++    }
++    for (i = 0; i < 72; i++)
++    {
++        if (i >= 60 && i < 64)
++            continue;
++        s15c_dyncon_800D7EF4(work, i, GV_StrCode(models[i % 8]));
++        if (i >= 56 && i < 60)
++            s15c_dyncon_800D7E30(work, i - 56, i, GV_StrCode("con_ten"));
++    }
++    return 0;
++}
++
++void s15c_dyncon_800D82FC(DynCon *work)
++{
++    int i, j;
++    for (i = 0; i < 72; i++)
++        for (j = 0; j < 2; j++)
++            if (work->object_active[i][j] == 1)
++            {
++                GM_FreeObject((OBJECT *)&work->entries[i].objects[j]);
++                work->object_active[i][j] = 0;
++            }
++    for (i = 0; i < 8; i++)
++        if (work->panel_active[i] == 1)
++        {
++            GM_FreeObject((OBJECT *)&work->panels[i].object);
++            work->panel_active[i] = 0;
++        }
++    for (i = 0; i < 4; i++)
++        GM_FreeObject((OBJECT *)&work->tops[i].object);
++    if (work->field_4050 != 0)
++    {
++        for (i = 0; i < 4; i++)
++            if (work->field_4040[i] == 0)
++                s15c_dyncon_800D5354(work, i, 0);
++        for (i = 0; i < 4; i++)
++            if (work->field_4020[i] == 1)
++                s15c_dyncon_800D5114(work, i);
++    }
++    if (work->field_4050 == 1)
++    {
++        for (i = 0; i < 36; i++)
++            GM_FreeTarget(work->entries[i].target);
++        for (i = 0; i < 4; i++)
++            GM_FreeObject((OBJECT *)&work->fragments[i].object);
++    }
++}
++
++int s15c_dyncon_800D8510(DynCon *work)
++{
++    static const SVECTOR bounds[4] = {
++        {-1000, 0, -750, 0}, {1000, 1750, 750, 0}, {-1000, -750, 0, 0}, {1000, 750, 1750, 0}};
++    static const short areas[4][4] = {
++        {-5000, -5500, -2000, -3000}, {5000, -3000, 9000, 500}, {-9000, 3000, -5000, 6000}, {2000, 6000, 5000, 9000}};
++    static const char *const models[36] = {
++        "con_uf0", "con_uf1", "con_uf2", "con_uf3", "br5",     "br6",     "con_ub0", "con_ub1", "con_ub2",
++        "con_ub3", "br7",     "br8",     "con_uf0", "con_uf1", "con_uf2", "con_uf3", "con_uf3", "con_uf3",
++        "con_ub0", "con_ub1", "con_ub2", "con_ub3", "con_ub3", "con_ub3", "con_uf0", "con_uf1", "con_uf2",
++        "con_uf3", "con_uf3", "con_uf3", "con_ub0", "con_ub1", "con_ub2", "con_ub3", "con_ub3", "con_ub3"};
++    int i;
++    memset(work->object_active, 0, sizeof(work->object_active));
++    memset(work->panel_active, 0, sizeof(work->panel_active));
++    memset(work->field_4020, 0, sizeof(work->field_4020));
++    memset(work->field_3F20, 0, sizeof(work->field_3F20));
++    memset(s15c_container_phase, 0, sizeof(s15c_container_phase));
++    for (i = 0; i < 4; i++)
++    {
++        work->field_3C0C[i].vx = bounds[i].vx;
++        work->field_3C0C[i].vy = bounds[i].vy;
++        work->field_3C0C[i].vz = bounds[i].vz;
++    }
++    memcpy(work->field_3F80, areas, sizeof(areas));
++    for (i = 0; i < 36; i++)
++        work->models[i] = GV_StrCode(models[i]);
++    s15c_dyncon_800D7F88(work);
++    if (work->field_4050 != 0 && (s15c_dyncon_800D7D44(work) < 0 || s15c_dyncon_800D7AB4(work) < 0))
++        return -1;
++    return 1;
++}
++
++void s15c_dyncon_800D88C8(DynCon *work)
++{
++    int      values[40];
++    long     packed[20];
++    GCL_ARGS args;
++    int      i;
++    /* The retail loop also serializes the first four previous-damage values. */
++    memcpy(values, (char *)work + offsetof(DynCon, field_3CBC), sizeof(values));
++    for (i = 0; i < 20; i++)
++        packed[i] = ((values[2 * i] & 255) << 8) | (values[2 * i + 1] & 255);
++    for (i = 0; i < 3; i++)
++        if (work->save_procs[i] >= 0)
++        {
++            args.argc = i == 2 ? 4 : 8;
++            args.argv = &packed[8 * i];
++            GCL_ForceExecProc(work->save_procs[i], &args);
++        }
++}
++
++static int DynConReadSavedState(DynCon *work)
++{
++    static const int counts[3] = {8, 8, 4};
++    int              group, i, index = 0;
++    for (group = 0; group < 3; group++)
++    {
++        if (GCL_GetOption('l' + group) == NULL)
++            return -1;
++        for (i = 0; i < counts[group]; i++)
++        {
++            char          *value = GCL_NextStr();
++            unsigned short packed;
++            if (value == NULL)
++                return -1;
++            packed = GCL_StrToInt(value);
++            work->saved_state[index++] = packed >> 8;
++            work->saved_state[index++] = packed & 255;
++        }
++    }
++    return 0;
++}
++
++int s15c_dyncon_800D8A9C(DynCon *work, int map)
++{
++    char *option = GCL_GetOption('s');
++    int   i;
++    work->field_4050 = option ? GCL_StrToInt(option) : 1;
++    option = GCL_GetOption('c');
++    work->copies = option ? GCL_StrToInt(option) : 1;
++    if (work->copies <= 0)
++        work->copies = 1;
++    work->map = map;
++    GM_CurrentMap = map;
++    if (s15c_dyncon_800D8510(work) < 0)
++        return -1;
++    if (work->field_4050 == 1)
++    {
++        for (i = 0; i < 3; i++)
++        {
++            option = GCL_GetOption('f' + i);
++            work->save_procs[i] = option ? GCL_StrToInt(option) : -1;
++        }
++        s15c_dyncon_800D61E0(work);
++    }
++    if ((work->field_4050 == 2 || work->field_4050 == 3) && DynConReadSavedState(work) < 0)
++        return -1;
++    memset(work->field_4160, 0, sizeof(work->field_4160));
++    memset(work->field_4040, 0, sizeof(work->field_4040));
++    return 0;
++}
++
++#endif
+diff --git a/source/overlays/s15c/overlay2.c b/source/overlays/s15c/overlay2.c
+index 96b543c96..659f36e7f 100644
+--- a/source/overlays/s15c/overlay2.c
++++ b/source/overlays/s15c/overlay2.c
+@@ -16,7 +16,6 @@ int s15c_dword_800C35FC = 0x00000320;
+ int s15c_dword_800C3600 = 0xF63C000A;
+ int s15c_dword_800C3604 = 0x0000FFBA;
+ 
+-
+ const char s15c_aPan_800E2D70[] = "pan1";
+ const char s15c_aPan_800E2D78[] = "pan2";
+ const char s15c_aNikitamissile_800E2D80[] = "NIKITA MISSILE * 4";
+@@ -24,12 +23,12 @@ const char s15c_aC_800E2D94[] = "C4 * 2";
+ const char s15c_aRation_800E2D9C[] = "RATION";
+ const char s15c_aConall_800E2DA4[] = "con_all";
+ const char s15c_dword_800E2DAC[] = {0x0, 0x0, 0x0, 0x0};
+-const int s15c_dword_800E2DB0 = 0x800D6F34;
+-const int s15c_dword_800E2DB4 = 0x800D733C;
+-const int s15c_dword_800E2DB8 = 0x800D741C;
+-const int s15c_dword_800E2DBC = 0x800D7440;
+-const int s15c_dword_800E2DC0 = 0x800D76FC;
+-const int s15c_dword_800E2DC4 = 0x800D78DC;
++const int  s15c_dword_800E2DB0 = 0x800D6F34;
++const int  s15c_dword_800E2DB4 = 0x800D733C;
++const int  s15c_dword_800E2DB8 = 0x800D741C;
++const int  s15c_dword_800E2DBC = 0x800D7440;
++const int  s15c_dword_800E2DC0 = 0x800D76FC;
++const int  s15c_dword_800E2DC4 = 0x800D78DC;
+ const char s15c_aConuf_800E2DC8[] = "con_uf0";
+ const char s15c_aConten_800E2DD0[] = "con_ten";
+ const char s15c_aConub_800E2DD8[] = "con_ub0";
+@@ -45,66 +44,61 @@ const char s15c_aConub_800E2E18[] = "con_ub2";
+ const char s15c_aConub_800E2E20[] = "con_ub3";
+ const char s15c_aBr_800E2E28[] = "br7";
+ const char s15c_aBr_800E2E2C[] = "br8";
+-const char s15c_dword_800E2E30[] = {'d', 'y', 'n', 'c'};
++const char s15c_dword_800E2E30[] = "dyncon.c";
+ const char s15c_dword_800E2E34[] = {'o', 'n', '.', 'c'};
+ const char s15c_dword_800E2E38[] = {0x0, 0xb3, 'B', 0x8c};
+ const char s15c_aValwep_800E2E3C[] = "val_wep";
+ const char s15c_aVala_800E2E44[] = "val_15a";
+ const char s15c_aBarrel_800E2E4C[] = "barrel";
+ const char s15c_aShadow_800E2E54[] = "shadow";
+-const char s15c_dword_800E2E5C[] = {'v', 'a', 'l', 'c'};
++const char s15c_dword_800E2E5C[] = "valcan.c";
+ const char s15c_dword_800E2E60[] = {'a', 'n', '.', 'c'};
+ const char s15c_dword_800E2E64[] = {0x0, 0x19, 0x0, 0xae};
+ const char s15c_aRaven_800E2E68[] = {'R', 'A', 'V', 'E', 'N', 0x0, 0x0, 0x2};
+-const int s15c_dword_800E2E70 = 0x800DABE4;
+-const int s15c_dword_800E2E74 = 0x800DABE4;
+-const int s15c_dword_800E2E78 = 0x800DABEC;
+-const int s15c_dword_800E2E7C = 0x800DABF4;
+-const int s15c_dword_800E2E80 = 0x800DABFC;
++const int  s15c_dword_800E2E70 = 0x800DABE4;
++const int  s15c_dword_800E2E74 = 0x800DABE4;
++const int  s15c_dword_800E2E78 = 0x800DABEC;
++const int  s15c_dword_800E2E7C = 0x800DABF4;
++const int  s15c_dword_800E2E80 = 0x800DABFC;
+ const char s15c_dword_800E2E84[] = {0x0, 0x0, 0x0, 0x0};
+-const int s15c_dword_800E2E88 = 0x800DC358;
+-const int s15c_dword_800E2E8C = 0x800DC378;
+-const int s15c_dword_800E2E90 = 0x800DC38C;
+-const int s15c_dword_800E2E94 = 0x800DC3A8;
+-const int s15c_dword_800E2E98 = 0x800DC3D8;
+-const int s15c_dword_800E2E9C = 0x800DC490;
+-const int s15c_dword_800E2EA0 = 0x800DC4A8;
+-const int s15c_dword_800E2EA4 = 0x800DC790;
+-const int s15c_dword_800E2EA8 = 0x800DC4C0;
+-const int s15c_dword_800E2EAC = 0x800DC54C;
+-const int s15c_dword_800E2EB0 = 0x800DC790;
+-const int s15c_dword_800E2EB4 = 0x800DC790;
+-const int s15c_dword_800E2EB8 = 0x800DC564;
+-const int s15c_dword_800E2EBC = 0x800DC57C;
+-const int s15c_dword_800E2EC0 = 0x800DC5A8;
+-const int s15c_dword_800E2EC4 = 0x800DC790;
+-const int s15c_dword_800E2EC8 = 0x800DC790;
+-const int s15c_dword_800E2ECC = 0x800DC5C8;
+-const int s15c_dword_800E2ED0 = 0x800DC5E0;
+-const int s15c_dword_800E2ED4 = 0x800DC60C;
+-const int s15c_dword_800E2ED8 = 0x800DC62C;
+-const int s15c_dword_800E2EDC = 0x800DC6E4;
+-const int s15c_dword_800E2EE0 = 0x800DC650;
+-const int s15c_dword_800E2EE4 = 0x800DC668;
+-const int s15c_dword_800E2EE8 = 0x800DC6A0;
+-const int s15c_dword_800E2EEC = 0x800DC6C0;
+-const int s15c_dword_800E2EF0 = 0x800DC6E4;
+-const int s15c_dword_800E2EF4 = 0x800DC730;
+-const int s15c_dword_800E2EF8 = 0x800DC768;
+-const int s15c_dword_800E2EFC = 0x800DC740;
+-const int s15c_dword_800E2F00 = 0x800DC768;
++const int  s15c_dword_800E2E88 = 0x800DC358;
++const int  s15c_dword_800E2E8C = 0x800DC378;
++const int  s15c_dword_800E2E90 = 0x800DC38C;
++const int  s15c_dword_800E2E94 = 0x800DC3A8;
++const int  s15c_dword_800E2E98 = 0x800DC3D8;
++const int  s15c_dword_800E2E9C = 0x800DC490;
++const int  s15c_dword_800E2EA0 = 0x800DC4A8;
++const int  s15c_dword_800E2EA4 = 0x800DC790;
++const int  s15c_dword_800E2EA8 = 0x800DC4C0;
++const int  s15c_dword_800E2EAC = 0x800DC54C;
++const int  s15c_dword_800E2EB0 = 0x800DC790;
++const int  s15c_dword_800E2EB4 = 0x800DC790;
++const int  s15c_dword_800E2EB8 = 0x800DC564;
++const int  s15c_dword_800E2EBC = 0x800DC57C;
++const int  s15c_dword_800E2EC0 = 0x800DC5A8;
++const int  s15c_dword_800E2EC4 = 0x800DC790;
++const int  s15c_dword_800E2EC8 = 0x800DC790;
++const int  s15c_dword_800E2ECC = 0x800DC5C8;
++const int  s15c_dword_800E2ED0 = 0x800DC5E0;
++const int  s15c_dword_800E2ED4 = 0x800DC60C;
++const int  s15c_dword_800E2ED8 = 0x800DC62C;
++const int  s15c_dword_800E2EDC = 0x800DC6E4;
++const int  s15c_dword_800E2EE0 = 0x800DC650;
++const int  s15c_dword_800E2EE4 = 0x800DC668;
++const int  s15c_dword_800E2EE8 = 0x800DC6A0;
++const int  s15c_dword_800E2EEC = 0x800DC6C0;
++const int  s15c_dword_800E2EF0 = 0x800DC6E4;
++const int  s15c_dword_800E2EF4 = 0x800DC730;
++const int  s15c_dword_800E2EF8 = 0x800DC768;
++const int  s15c_dword_800E2EFC = 0x800DC740;
++const int  s15c_dword_800E2F00 = 0x800DC768;
+ const char s15c_dword_800E2F04[] = {0x0, 0x0, 0x0, 0x0};
+-const int s15c_dword_800E2F08 = 0x800DC904;
+-const int s15c_dword_800E2F0C = 0x800DC904;
+-const int s15c_dword_800E2F10 = 0x800DC938;
+-const int s15c_dword_800E2F14 = 0x800DC97C;
+-const int s15c_dword_800E2F18 = 0x800DC9C0;
++const int  s15c_dword_800E2F08 = 0x800DC904;
++const int  s15c_dword_800E2F0C = 0x800DC904;
++const int  s15c_dword_800E2F10 = 0x800DC938;
++const int  s15c_dword_800E2F14 = 0x800DC97C;
++const int  s15c_dword_800E2F18 = 0x800DC9C0;
+ 
+-int SECTION(".bss") s15c_dword_800E344C;
+-int SECTION(".bss") s15c_dword_800E3450;
+-int SECTION(".bss") s15c_dword_800E3454;
+-int SECTION(".bss") s15c_dword_800E3458;
+-int SECTION(".bss") s15c_dword_800E345C;
+-int SECTION(".bss") s15c_dword_800E3460;
+-int SECTION(".bss") s15c_dword_800E3464;
+-int SECTION(".bss") s15c_dword_800E3468;
++int SECTION(".bss") s15c_container_available[4];
++int SECTION(".bss") s15c_container_phase[4];
++int SECTION(".bss") s15c_container_destroy;

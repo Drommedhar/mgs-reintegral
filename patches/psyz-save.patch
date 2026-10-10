@@ -1,0 +1,661 @@
+diff --git a/psyz/src/platform/plat_win.c b/psyz/src/platform/plat_win.c
+index c98e9c6..9f2213c 100644
+--- a/psyz/src/platform/plat_win.c
++++ b/psyz/src/platform/plat_win.c
+@@ -19,6 +19,103 @@
+ #include <share.h>
+ #include <romio.h>
+ 
++enum { CARD_BLOCK_BYTES = 8192, CARD_BLOCKS = 15, CARD_NAME_BYTES = 20 };
++
++typedef struct {
++    int active, fd, flags, channel;
++    long size;
++} NativeFile;
++
++static NativeFile files[32];
++extern int Psyz_CardFileComplete(long channel, unsigned int bytes, int success);
++extern int Psyz_CardFileBusy(void);
++
++static int card_channel(const char* path) {
++    if (!path || strlen(path) < 5 || path[0] != 'b' || path[1] != 'u' ||
++        path[3] != '0' || path[4] != ':' || (path[2] != '0' && path[2] != '1')) {
++        return -1;
++    }
++    return (path[2] - '0') * 16;
++}
++
++static int decode_card_name(char* output, const char* name) {
++    unsigned int count = 0;
++    while (*name) {
++        unsigned char value = (unsigned char)*name++;
++        if (value == '%') {
++            unsigned int code;
++            int used = 0;
++            if (strlen(name) < 2 || sscanf(name, "%2x%n", &code, &used) != 1 || used != 2 || !code) {
++                return 0;
++            }
++            value = (unsigned char)code;
++            name += 2;
++        }
++        if (count == CARD_NAME_BYTES) {
++            return 0;
++        }
++        output[count++] = value;
++    }
++    output[count] = 0;
++    return count != 0;
++}
++
++static int directory_usage(const char* path, unsigned int* blocks) {
++    struct _stat status;
++    struct _finddata_t entry;
++    char pattern[1024], decoded[CARD_NAME_BYTES + 1];
++    unsigned int count = 0;
++    *blocks = 0;
++    if (_stat(path, &status) != 0 || !(status.st_mode & _S_IFDIR) ||
++        snprintf(pattern, sizeof(pattern), "%s\\*", path) >= sizeof(pattern)) {
++        return 0;
++    }
++    intptr_t search = _findfirst(pattern, &entry);
++    if (search == -1) {
++        return errno == ENOENT;
++    }
++    int valid = 1;
++    do {
++        if ((entry.attrib & _A_SUBDIR) || entry.name[0] == '.') {
++            continue;
++        }
++        if (!decode_card_name(decoded, entry.name) || entry.size == 0 ||
++            entry.size > CARD_BLOCKS * CARD_BLOCK_BYTES) {
++            valid = 0;
++            break;
++        }
++        *blocks += (entry.size + CARD_BLOCK_BYTES - 1) / CARD_BLOCK_BYTES;
++        if (++count > CARD_BLOCKS || *blocks > CARD_BLOCKS) {
++            valid = 0;
++            break;
++        }
++    } while (_findnext(search, &entry) == 0);
++    if (_findclose(search) != 0) {
++        return 0;
++    }
++    return valid;
++}
++
++int Psyz_CardDirectoryStatus(long channel) {
++    char device[] = "bu00:", path[1024];
++    unsigned int blocks;
++    if (channel != 0 && channel != 16) {
++        return 0;
++    }
++    device[2] += channel / 16;
++    Psyz_AdjustPath(path, device, sizeof(path));
++    return path[0] && directory_usage(path, &blocks);
++}
++
++static NativeFile* find_file(int fd) {
++    for (unsigned int i = 0; i < sizeof(files) / sizeof(files[0]); ++i) {
++        if (files[i].active && files[i].fd == fd) {
++            return &files[i];
++        }
++    }
++    return NULL;
++}
++
+ typedef struct {
+     char** filenames;
+     int file_count;
+@@ -74,6 +171,10 @@ static int open_filesearch_handle(const char* basePath) {
+     int capacity = 16;
+     singleton_dir.filenames = (char**)malloc(capacity * sizeof(char*));
+     singleton_dir.file_count = 0;
++    if (!singleton_dir.filenames) {
++        _findclose(handle);
++        return 0;
++    }
+ 
+     do {
+         // skip directories: ps1 memcards are flat
+@@ -92,6 +193,11 @@ static int open_filesearch_handle(const char* basePath) {
+             }
+             singleton_dir.filenames[singleton_dir.file_count] =
+                 _strdup(file_info.name);
++            if (!singleton_dir.filenames[singleton_dir.file_count]) {
++                close_filesearch_handle();
++                _findclose(handle);
++                return 0;
++            }
+             singleton_dir.file_count++;
+         }
+     } while (!_findnext(handle, &file_info));
+@@ -112,7 +218,7 @@ static int open_filesearch_handle(const char* basePath) {
+     return 1;
+ }
+ 
+-static void populate_entry(
++static int populate_entry(
+     const char* baseDir, struct DIRENTRY* dst, const char* filename) {
+     char buf[512];
+     struct _stat fileStat = {0};
+@@ -121,28 +227,36 @@ static void populate_entry(
+     if (!Psyz_JoinPath(buf, filename, sizeof(buf))) {
+         ERRORF("failed to join '%s' and '%s': strings are too large", baseDir,
+                filename);
+-        return;
++        return 0;
+     }
+ 
+     if (_stat(buf, &fileStat) != 0) {
+         ERRORF("failed to stat '%s'", buf);
+-        return;
++        return 0;
+     }
+ 
+-    // ensure max 20 characters per name entry
+-    if (strlen(filename) >= sizeof(dst->name)) {
+-        WARNF("'%s' will be truncated", filename);
++    char decoded[CARD_NAME_BYTES + 1];
++    if (!decode_card_name(decoded, filename)) {
++        ERRORF("invalid memory card filename '%s'", filename);
++        return 0;
+     }
+-    strncpy_s(dst->name, sizeof(dst->name), filename, _TRUNCATE);
++    memset(dst->name, 0, sizeof(dst->name));
++    memcpy(dst->name, decoded, strlen(decoded));
+     dst->attr = 0x10 | 0x40; // Same as Unix version
+     dst->size = (long)fileStat.st_size;
+     dst->next = NULL;
+     dst->system[0] = 0;
++    return 1;
+ }
+ 
+ struct DIRENTRY* my_firstfile(char* dirPath, struct DIRENTRY* firstEntry) {
+     char basePath[0x100];
++    unsigned int blocks;
++    if (!dirPath || !firstEntry) return NULL;
+     Psyz_AdjustPath(basePath, dirPath, sizeof(basePath));
++    if (!basePath[0] || (card_channel(dirPath) >= 0 && !directory_usage(basePath, &blocks))) {
++        return NULL;
++    }
+     DEBUGF("opendir('%s')", basePath);
+ 
+     if (!open_filesearch_handle(basePath)) {
+@@ -151,8 +265,11 @@ struct DIRENTRY* my_firstfile(char* dirPath, struct DIRENTRY* firstEntry) {
+     if (singleton_dir.current_index >= singleton_dir.file_count) {
+         return NULL;
+     }
+-    populate_entry(singleton_dir.base_dir, firstEntry,
+-                   singleton_dir.filenames[singleton_dir.current_index++]);
++    if (!populate_entry(singleton_dir.base_dir, firstEntry,
++                        singleton_dir.filenames[singleton_dir.current_index++])) {
++        close_filesearch_handle();
++        return NULL;
++    }
+     return firstEntry;
+ }
+ 
+@@ -164,13 +281,17 @@ struct DIRENTRY* my_nextfile(struct DIRENTRY* outEntry) {
+         close_filesearch_handle();
+         return NULL;
+     }
+-    populate_entry(singleton_dir.base_dir, outEntry,
+-                   singleton_dir.filenames[singleton_dir.current_index++]);
++    if (!populate_entry(singleton_dir.base_dir, outEntry,
++                        singleton_dir.filenames[singleton_dir.current_index++])) {
++        close_filesearch_handle();
++        return NULL;
++    }
+     return outEntry;
+ }
+ 
+ long my_erase(char* path) {
+     char adjPath[0x100];
++    if (!path || Psyz_CardFileBusy()) return 0;
+     Psyz_AdjustPath(adjPath, path, sizeof(adjPath));
+ 
+     DEBUGF("remove('%s')", adjPath);
+@@ -178,100 +299,149 @@ long my_erase(char* path) {
+ }
+ 
+ long my_format(char* fs) {
+-    NOT_IMPLEMENTED;
+-    return 0;
+-}
+-
+-int psyz_open(const char* devname, int flag, ...) {
+-    int oflag = _O_RDONLY;
+-    if (flag & FCREAT) {
+-        // fix: implies FWRITE, avoid creating 0kb unwritable files
+-        flag |= FWRITE;
+-    }
+-    if ((flag & (FREAD | FWRITE)) == (FREAD | FWRITE)) {
+-        oflag = _O_RDWR;
+-    } else if (flag & FREAD) {
+-        oflag = _O_RDONLY;
+-    } else if (flag & FWRITE) {
+-        oflag = _O_WRONLY;
+-    }
+-    if (flag & FNBLOCK) {
+-        DEBUGF("FNBLOCK ignored for %s", devname);
++    char path[1024];
++    unsigned int blocks;
++    if (card_channel(fs) < 0 || fs[5] || Psyz_CardFileBusy()) {
++        return 0;
+     }
+-    if (flag & FRLOCK) {
+-        DEBUGF("FRLOCK ignored for %s", devname);
++    Psyz_AdjustPath(path, fs, sizeof(path));
++    if (!path[0]) {
++        return 0;
+     }
+-    if (flag & FWLOCK) {
+-        DEBUGF("FWLOCK ignored for %s", devname);
++    if (!open_filesearch_handle(path)) {
++        return directory_usage(path, &blocks) && blocks == 0;
+     }
+-    if (flag & FAPPEND) {
+-        oflag |= _O_APPEND;
++    int result = 1;
++    for (int i = 0; i < singleton_dir.file_count; ++i) {
++        char filename[1024];
++        int length = snprintf(filename, sizeof(filename), "%s\\%s", path, singleton_dir.filenames[i]);
++        if (length < 0 || length >= sizeof(filename) || remove(filename) != 0) {
++            result = 0;
++            break;
++        }
+     }
+-    if (flag & FCREAT) {
+-        oflag |= _O_CREAT;
++    close_filesearch_handle();
++    return result;
++}
++
++static int open_flags(int flags) {
++    int native = _O_BINARY;
++    if ((flags & (FREAD | FWRITE)) == (FREAD | FWRITE)) native |= _O_RDWR;
++    else if (flags & (FWRITE | FCREAT)) native |= _O_WRONLY;
++    else native |= _O_RDONLY;
++    if (flags & FAPPEND) native |= _O_APPEND;
++    if (flags & FTRUNC) native |= _O_TRUNC;
++    if (flags & FCREAT) native |= _O_CREAT;
++    return native;
++}
++
++static int create_card_file(const char* device, const char* path, int flags) {
++    unsigned int requested = (unsigned int)flags >> 16, used;
++    char directory[1024], prefix[6];
++    int fd = -1;
++    if (!requested || requested > CARD_BLOCKS) {
++        errno = EINVAL;
++        return -1;
+     }
+-    if (flag & FTRUNC) {
+-        oflag |= _O_TRUNC;
++    memcpy(prefix, device, 5);
++    prefix[5] = 0;
++    Psyz_AdjustPath(directory, prefix, sizeof(directory));
++    if (!directory_usage(directory, &used) || used + requested > CARD_BLOCKS) {
++        errno = ENOSPC;
++        return -1;
+     }
+-    if (flag & FSCAN) {
+-        DEBUGF("FSCAN ignored for %s", devname);
++    if (_sopen_s(&fd, path, _O_CREAT | _O_EXCL | _O_BINARY | _O_RDWR,
++                 _SH_DENYRW, _S_IREAD | _S_IWRITE) != 0) {
++        return -1;
+     }
+-    if (flag & FRCOM) {
+-        DEBUGF("FRCOM ignored for %s", devname);
++    if (_chsize_s(fd, requested * CARD_BLOCK_BYTES) != 0 || _commit(fd) != 0) {
++        _close(fd);
++        if (remove(path) != 0) ERRORF("cannot remove failed card allocation '%s'", path);
++        return -1;
+     }
+-    if (flag & FNBUF) {
+-        DEBUGF("FNBUF ignored for %s", devname);
++    return fd;
++}
++
++int psyz_open(const char* devname, int flags, ...) {
++    char path[1024];
++    int channel = card_channel(devname), fd = -1;
++    NativeFile* slot = NULL;
++    if (!devname || (channel >= 0 && (!devname[5] || strlen(devname + 5) > CARD_NAME_BYTES))) {
++        errno = EINVAL;
++        return -1;
+     }
+-    if (flag & FASYNC) {
+-        DEBUGF("FASYNC ignored for %s", devname);
++    if ((strncmp(devname, "bu", 2) == 0 && channel < 0) ||
++        (channel >= 0 && (flags & 0xffff & ~(FREAD | FWRITE | FCREAT | FASYNC)))) {
++        errno = EINVAL;
++        return -1;
+     }
+-    if (flag & 0x10000) {
+-        DEBUGF("0x10000 ignored for %s", devname);
++    for (unsigned int i = 0; i < sizeof(files) / sizeof(files[0]); ++i) {
++        if (!files[i].active) { slot = &files[i]; break; }
+     }
+-
+-    char path[0x100];
++    if (!slot) { errno = EMFILE; return -1; }
+     Psyz_AdjustPath(path, devname, sizeof(path));
+-    int fd = -1;
+-    if (oflag & _O_CREAT) {
+-        // Use _sopen_s for creation with default sharing mode
+-        errno_t err = _sopen_s(
+-            &fd, path, oflag | _O_BINARY, _SH_DENYNO, _S_IREAD | _S_IWRITE);
+-        if (err != 0) {
+-            return -1;
+-        }
+-        return fd;
+-    } else {
+-        struct _stat st;
+-        if (_stat(path, &st) != 0) {
+-            WARNF("path '%s' mapped from '%s' not found", path, devname);
+-            return -1;
+-        }
+-        if (!(st.st_mode & _S_IFREG)) {
+-            if (st.st_mode & _S_IFDIR) {
+-                WARNF("path '%s' mapped as '%s' is a directory", path, devname);
+-            } else {
+-                WARNF("path '%s' mapped as '%s' is not a file", path, devname);
+-            }
+-            return -1;
+-        }
+-        errno_t err = _sopen_s(&fd, path, oflag | _O_BINARY, _SH_DENYNO, 0);
+-        if (err != 0) {
+-            return -1;
+-        }
+-        return fd;
++    if (!path[0]) { errno = ENAMETOOLONG; return -1; }
++    if (channel >= 0 && (flags & FCREAT)) {
++        fd = create_card_file(devname, path, flags);
++    } else if (_sopen_s(&fd, path, open_flags(flags), _SH_DENYNO, _S_IREAD | _S_IWRITE) != 0) {
++        return -1;
+     }
++    if (fd < 0) return -1;
++    struct _stat status;
++    if (_fstat(fd, &status) != 0 || !(status.st_mode & _S_IFREG)) {
++        _close(fd);
++        errno = EINVAL;
++        return -1;
++    }
++    *slot = (NativeFile){1, fd, flags, channel, status.st_size};
++    return fd;
+ }
+ 
+-int psyz_close(int fd) { return _close(fd); }
++int psyz_close(int fd) {
++    NativeFile* file = find_file(fd);
++    if (!file) { errno = EBADF; return -1; }
++    int result = _close(fd);
++    if (result == 0) file->active = 0;
++    return result;
++}
+ 
+ unsigned long psyz_lseek(int fd, unsigned int offset, int flag) {
++    if (!find_file(fd)) { errno = EBADF; return (unsigned long)-1; }
+     return _lseek(fd, offset, flag);
+ }
+ 
+-int psyz_read(int fd, void* buf, unsigned int n) { return _read(fd, buf, n); }
++static int transfer_result(NativeFile* file, unsigned int bytes, int result) {
++    if (file->channel < 0 || !(file->flags & FASYNC) || bytes == 0) return result;
++    return Psyz_CardFileComplete(file->channel, bytes, result == bytes) ? 0 : -1;
++}
++
++static int valid_transfer(NativeFile* file, unsigned int bytes) {
++    if (file->channel < 0) return 1;
++    long offset = _tell(file->fd);
++    return !Psyz_CardFileBusy() && bytes % 128 == 0 && offset >= 0 &&
++        offset <= file->size && bytes <= (unsigned long)(file->size - offset);
++}
+ 
+-int psyz_write(int fd, const void* buf, unsigned int n) {
+-    return _write(fd, buf, n);
++int psyz_read(int fd, void* buffer, unsigned int bytes) {
++    NativeFile* file = find_file(fd);
++    if (!file) { errno = EBADF; return -1; }
++    if (!buffer || !valid_transfer(file, bytes)) {
++        errno = EINVAL;
++        return transfer_result(file, bytes, -1);
++    }
++    return transfer_result(file, bytes, _read(fd, buffer, bytes));
++}
++
++int psyz_write(int fd, const void* buffer, unsigned int bytes) {
++    NativeFile* file = find_file(fd);
++    if (!file) { errno = EBADF; return -1; }
++    if (!buffer || !valid_transfer(file, bytes)) {
++        errno = EINVAL;
++        return transfer_result(file, bytes, -1);
++    }
++    int result = _write(fd, buffer, bytes);
++    if (file->channel >= 0 && result >= 0 && _commit(fd) != 0) result = -1;
++    return transfer_result(file, bytes, result);
+ }
+ 
+ long psyz_ioctl(int fd, int com, int arg) {
+diff --git a/psyz/src/platform/psyz.c b/psyz/src/platform/psyz.c
+index fd8dca0..0842306 100644
+--- a/psyz/src/platform/psyz.c
++++ b/psyz/src/platform/psyz.c
+@@ -16,6 +16,39 @@
+ 
+ static int (*adjust_path_cb)(char* dst, const char* src, int maxlen) = NULL;
+ 
++#ifdef _WIN32
++static int encode_card_filename(char* dst, const char* src, int capacity) {
++    static const char hex[] = "0123456789ABCDEF";
++    size_t length = strlen(src);
++    int used = 0;
++    if (length > 20) {
++        return 0;
++    }
++    size_t stem = strcspn(src, ".");
++    int reserved = (stem == 3 && (!_strnicmp(src, "CON", 3) || !_strnicmp(src, "PRN", 3) ||
++        !_strnicmp(src, "AUX", 3) || !_strnicmp(src, "NUL", 3))) ||
++        (stem == 4 && (!_strnicmp(src, "COM", 3) || !_strnicmp(src, "LPT", 3)) &&
++         src[3] >= '1' && src[3] <= '9');
++    for (size_t i = 0; i < length; ++i) {
++        unsigned char value = (unsigned char)src[i];
++        int escape = value < 32 || value >= 127 || strchr("%<>:\"/\\|?*", value) ||
++            (i + 1 == length && (value == '.' || value == ' ')) || (reserved && i == 0);
++        if (used + (escape ? 3 : 1) >= capacity) {
++            return 0;
++        }
++        if (escape) {
++            dst[used++] = '%';
++            dst[used++] = hex[value >> 4];
++            dst[used++] = hex[value & 15];
++        } else {
++            dst[used++] = value;
++        }
++    }
++    dst[used] = 0;
++    return 1;
++}
++#endif
++
+ static void default_adjust_path(char* dst, const char* src, int maxlen) {
+     size_t len = strlen(src);
+     if (len >= 5 && src[0] == 'b' && src[1] == 'u' && src[4] == ':') {
+@@ -36,6 +69,11 @@ static void default_adjust_path(char* dst, const char* src, int maxlen) {
+             if (dst[5] == '\0' || dst[5] == '*') { // handles 'bu00:*'
+                 dst[5] = '\0';
+             }
++#ifdef _WIN32
++            else if (!encode_card_filename(dst + 5, src + 5, maxlen - 5)) {
++                dst[0] = 0;
++            }
++#endif
+         }
+     } else {
+         strncpy(dst, src, maxlen);
+@@ -43,32 +81,19 @@ static void default_adjust_path(char* dst, const char* src, int maxlen) {
+     }
+ }
+ 
+-static void truncate_filename(char* path) {
+-    // find the last path separator, then truncate it
+-    // memcard save names cannot exceed 20 characters (19 + null terminator)
+-    const int max_filename_len = 20;
+-    char* filename = path;
+-    char* p = path;
+-    while (*p) {
+-        if (*p == '/' || *p == '\\') {
+-            filename = p + 1;
+-        }
+-        p++;
+-    }
+-
+-    // truncate if filename exceeds max length
+-    size_t filename_len = strlen(filename);
+-    if (filename_len >= max_filename_len) {
+-        filename[max_filename_len - 1] = '\0';
+-    }
+-}
+-
+ void Psyz_AdjustPathCB(
+     int (*callback)(char* dst, const char* src, int maxlen)) {
+     adjust_path_cb = callback;
+ }
+ 
+ void Psyz_AdjustPath(char* dst, const char* src, int maxlen) {
++    if (!dst || maxlen <= 0) {
++        return;
++    }
++    if (!src || strlen(src) >= (size_t)maxlen) {
++        dst[0] = 0;
++        return;
++    }
+     int handled = adjust_path_cb ? adjust_path_cb(dst, src, maxlen) : -1;
+ #ifdef PLATFORM_IOS
+     if (handled < 0) {
+@@ -78,7 +103,6 @@ void Psyz_AdjustPath(char* dst, const char* src, int maxlen) {
+     if (handled < 0) {
+         default_adjust_path(dst, src, maxlen);
+     }
+-    truncate_filename(dst);
+ }
+ 
+ char* Psyz_JoinPath(char* left, const char* right, int maxlen) {
+diff --git a/psyz/src/psyz/libcard.c b/psyz/src/psyz/libcard.c
+index 97c2664..d7d8c53 100644
+--- a/psyz/src/psyz/libcard.c
++++ b/psyz/src/psyz/libcard.c
+@@ -3,6 +3,48 @@
+ #include <psyz/log.h>
+ #include <sys/stat.h>
+ #include "../internal.h"
++#ifdef _WIN32
++#include <direct.h>
++extern int Psyz_CardDirectoryStatus(long channel);
++#endif
++
++static unsigned int file_remaining;
++static int file_success, file_posted, file_callback_installed;
++static long last_chan;
++static PsyzVSyncCb previous_card_vsync;
++
++static void file_packet(void) {
++    file_posted = 0;
++    unsigned int spec = file_success ? EvSpIOE : EvSpERROR;
++    if (file_success) file_remaining -= 128;
++    else file_remaining = 0;
++    Psyz_KernelRaise(HwCARD, spec);
++    if (!file_remaining) Psyz_KernelRaise(SwCARD, spec);
++}
++
++static void card_frame(void) {
++    if (previous_card_vsync) previous_card_vsync();
++    if (file_remaining && !file_posted) {
++        file_posted = 1;
++        Psyz_KernelPost(file_packet);
++    }
++}
++
++int Psyz_CardFileBusy(void) { return file_remaining != 0; }
++
++int Psyz_CardFileComplete(long channel, unsigned int bytes, int success) {
++    if (file_remaining || (channel != 0 && channel != 16) || !bytes || bytes > 15 * 8192) {
++        return 0;
++    }
++    if (!file_callback_installed) {
++        previous_card_vsync = Psyz_SetVSyncCb(card_frame);
++        file_callback_installed = 1;
++    }
++    last_chan = channel;
++    file_success = success && bytes % 128 == 0;
++    file_remaining = file_success ? bytes : 128;
++    return 1;
++}
+ 
+ // 1:valid, 0:invalid
+ static inline int validate_chan(long chan) {
+@@ -18,8 +60,12 @@ static inline int validate_chan(long chan) {
+ }
+ 
+ void _bu_init(void) {
+-#ifdef _MSC_VER
+-    NOT_IMPLEMENTED;
++#ifdef _WIN32
++    for (int port = 0; port < 2; ++port) {
++        if (!Psyz_CardDirectoryStatus(port * 16)) {
++            ERRORF("memory card %d directory is inaccessible or exceeds 15 blocks", port + 1);
++        }
++    }
+ #elif __MINGW32__
+     mkdir("bu00");
+     mkdir("bu10");
+@@ -34,8 +80,6 @@ long _card_auto(long val) {
+     return val;
+ }
+ 
+-static long last_chan;
+-
+ // Cards live as host directories and are always plugged in, but there is no
+ // multi-tap, so its extra slots time out like an empty port.
+ static long card_op(unsigned int sw_desc, long chan) {
+@@ -44,6 +88,9 @@ static long card_op(unsigned int sw_desc, long chan) {
+     }
+     last_chan = chan;
+     unsigned int spec = (chan & 15) ? EvSpTIMOUT : EvSpIOE;
++#ifdef _WIN32
++    if (!(chan & 15) && !Psyz_CardDirectoryStatus(chan)) spec = EvSpERROR;
++#endif
+     if (sw_desc) {
+         Psyz_KernelRaise(sw_desc, spec);
+     }
+@@ -129,15 +176,21 @@ long _card_sector_write(long chan, long block, unsigned char* buf) {
+ }
+ 
+ long _card_write(long chan, long block, unsigned char* buf) {
+-    LOG_ONCE("raw sectors are not emulated, only the completion event");
+-    (void)block;
+-    (void)buf;
+-    return card_op(0, chan);
++    if (block == 0x3f && !buf) return card_op(0, chan);
++    ERRORF("raw memory card sector writes are unsupported by directory cards");
++    Psyz_KernelRaise(HwCARD, EvSpERROR);
++    return 0;
+ }
+ 
+ long _card_read(long chan, long block, unsigned char* buf) {
+-    LOG_ONCE("raw sectors are not emulated, only the completion event");
+-    (void)block;
+-    (void)buf;
+-    return card_op(0, chan);
++    if (block == 0 && buf && (chan == 0 || chan == 16)) {
++        memset(buf, 0, 128);
++        buf[0] = 'M';
++        buf[1] = 'C';
++        buf[127] = 'M' ^ 'C';
++        return card_op(0, chan);
++    }
++    ERRORF("raw memory card sector %ld is unsupported by directory cards", block);
++    Psyz_KernelRaise(HwCARD, EvSpERROR);
++    return 0;
+ }

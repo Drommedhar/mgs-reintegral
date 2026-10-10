@@ -1,0 +1,15 @@
+diff --git a/source/sound/sd_drv.c b/source/sound/sd_drv.c
+index 680b8e870..943f68789 100644
+--- a/source/sound/sd_drv.c
++++ b/source/sound/sd_drv.c
+@@ -107,6 +107,10 @@ void IntSdMain(void)
+         case 0x01FFFFFF:
+             sng_play_code = 0;
+             sng_off();
++#ifdef MGS_NATIVE
++            /* The explicit stop intentionally changes the mask checked below. */
++            song_end_last = song_end;
++#endif
+             printf("SongStop\n");
+             break;
+ 

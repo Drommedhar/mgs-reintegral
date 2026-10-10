@@ -1,0 +1,10 @@
+.lines -e
+bu /1 mgs_integral_native!MgsNativeReloadOverlay "ew mgs_integral_native!var_buf+a b2; ew mgs_integral_native!linkvarbuf+10 f448 59d8 cb44; ew mgs_integral_native!var_buf+2 800 0; .printf \"FIXTURE: story178, original s11g sub_E9FB incoming pose(-3000,23000,-13500), heading2048.\\n\"; gc"
+bu /1 mgs_integral_native!NewRope ".printf \"OBSERVE: original script constructs recovered rappel player.\\n\"; gc"
+bu /1 mgs_integral_native!NewHind ".printf \"OBSERVE: original script constructs recovered rappel helicopter.\\n\"; gc"
+bu /1 mgs_integral_native!s11d_rope_800C6834 ".printf \"OBSERVE: rappel arrival completed through original state controller.\\n\"; gc"
+bu /1 mgs_integral_native!s11d_rope_800C634C ".printf \"OBSERVE: original jump-input controller executes.\\n\"; gc"
+sxe -c "r;kv;q" av
+sxe -c "r;kv;q" dz
+g
+q

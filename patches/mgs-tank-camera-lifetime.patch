@@ -1,0 +1,67 @@
+diff --git a/source/overlays/s05a/kojo/m1e1act.c b/source/overlays/s05a/kojo/m1e1act.c
+index 86037266d..d0c4d6c70 100644
+--- a/source/overlays/s05a/kojo/m1e1act.c
++++ b/source/overlays/s05a/kojo/m1e1act.c
+@@ -164,6 +164,7 @@ extern Work *s05a_dword_800C362C;
+ extern int   s05a_dword_800C3630;
+ extern int   s05a_dword_800C3634;
+ extern int   s05a_dword_800C3638;
++extern void  s05a_ClearTankCameraCallbacks(void);
+ 
+ extern void GetHazard2(HZD_SEG *seg, HZD_FLR *flr, MATRIX *pTransform,
+                          SVECTOR *pMin, SVECTOR *pMax);
+@@ -671,6 +672,7 @@ void s05a_800D5E30(Work *work)
+ {
+     int i;
+ 
++    s05a_ClearTankCameraCallbacks();
+     GM_uTenageMotion = -1;
+     if (work->field_EDC) GV_DestroyActor(work->field_EDC);
+     GM_lpfnPlayerActControl = 0;
+diff --git a/source/overlays/s05a/kojo/m1e1came.c b/source/overlays/s05a/kojo/m1e1came.c
+index e5339aa64..98125ce36 100644
+--- a/source/overlays/s05a/kojo/m1e1came.c
++++ b/source/overlays/s05a/kojo/m1e1came.c
+@@ -80,6 +80,7 @@ void s05a_800E209C(VECTOR *out, VECTOR *in, int (*fn)());
+ VECTOR *s05a_800E2328(VECTOR *out, SVECTOR *cam, VECTOR *in, SVECTOR *lo, SVECTOR *hi);
+ void s05a_800E1448(Camera *actor);
+ void s05a_800E1A68(void);
++void s05a_ClearTankCameraCallbacks(void);
+ void s05a_800E1AA8(void);
+ void s05a_800E1C14(void);
+ void s05a_800E1D7C(void);
+@@ -150,6 +151,7 @@ void s05a_800E1448(Camera *actor)
+     listener = s05a_dword_800C362C;
+     if (listener == NULL || listener->field_D54 == 6)
+     {
++        s05a_ClearTankCameraCallbacks();
+         GV_DestroyActor((GV_ACT *)actor);
+         return;
+     }
+@@ -349,10 +351,24 @@ void s05a_800E1448(Camera *actor)
+     }
+ }
+ 
++void s05a_ClearTankCameraCallbacks(void)
++{
++    int i;
++
++    for (i = 0; i < 2; i++)
++    {
++        TGMCameraFunc callback = GM_Camera.callback[i];
++        if (callback == s05a_800E1AA8 || callback == s05a_800E1C14 ||
++            callback == s05a_800E1D7C || callback == s05a_800E1F0C)
++        {
++            GM_SetCameraCallbackFunc(i, NULL);
++            GM_Camera.flag &= ~(i == 0 ? 0x200 : 2);
++        }
++    }
++}
+ void s05a_800E1A68(void)
+ {
+-    GM_Camera.flag &= ~2;
+-    GM_SetCameraCallbackFunc(1, NULL);
++    s05a_ClearTankCameraCallbacks();
+     s05a_dword_800C38CC = 0;
+ }
+ void s05a_800E1AA8(void)

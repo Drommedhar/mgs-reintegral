@@ -1,0 +1,41 @@
+diff --git a/source/overlays/d18a/animal/snake18/native_00.c b/source/overlays/d18a/animal/snake18/native_00.c
+--- a/source/overlays/d18a/animal/snake18/native_00.c
++++ b/source/overlays/d18a/animal/snake18/native_00.c
+@@ -139,23 +139,25 @@
+     int base;
+     int diff;
+ 
++    base = Snake18WallDirection;
++    if (base < 0)
++    {
++        return state;
++    }
++
+     if (*Snake18WallFlags & 0x40)
+     {
+         return state;
+     }
+ 
+-    base = Snake18WallDirection;
+-    if (base >= 0)
+-    {
+-        diff = (state - base) & 0xFFF;
+-        if (diff < 0x400)
+-        {
+-            state = base + 0x400;
+-        }
+-        if (diff >= 0xC01)
+-        {
+-            state = base - 0x400;
+-        }
++    diff = (state - base) & 0xFFF;
++    if (diff < 0x400)
++    {
++        state = base + 0x400;
++    }
++    if (diff >= 0xC01)
++    {
++        state = base - 0x400;
+     }
+ 
+     return state;
