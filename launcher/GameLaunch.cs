@@ -37,6 +37,9 @@ namespace ReIntegral
                 "--disc-two", Quote(settings.DiscTwo), "--resolution", settings.Resolution,
                 "--stage", settings.Stage };
             if (settings.Widescreen) arguments.Add("--widescreen");
+            if (settings.TextureCorrection) arguments.Add("--texture-correction");
+            if (settings.GeometryPrecision) arguments.Add("--geometry-precision");
+            if (settings.DepthBuffer) arguments.Add("--depth-buffer");
             if (settings.Fullscreen) arguments.Add("--fullscreen");
             if (settings.DebugOverlay) arguments.Add("--debug-overlay");
             if (settings.BonusItems) arguments.Add("--bonus-items 1");

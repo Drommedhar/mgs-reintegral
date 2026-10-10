@@ -8,6 +8,7 @@
 #include "mgs_stages.h"
 #include "mgs_math.h"
 #include "mgs_invulnerability.h"
+#include "mgs_texture_correction.h"
 
 typedef unsigned int u_int;
 

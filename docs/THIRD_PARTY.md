@@ -41,6 +41,13 @@ PsyZ's [root license inventory](https://github.com/Xeeynamo/psyz/blob/6d9c5730c4
 
 SDL's [license](https://github.com/libsdl-org/SDL/blob/fa2c02bb6e21974a89ea9824bc53c9932abe5f9c/LICENSE.txt) is the zlib license. Its source tree also contains component-specific notices, including HIDAPI and YUV conversion code. The complete fetched tree retains those notices.
 
+The experimental `renderers/modern/sdl3_gpu.c`, `sdl3_draw.h` and `shaders/`
+are derived from PsyZ's MPL 2.0 platform renderer, including our cumulative
+patched baseline. Their location outside `vendor/` does not change that scope.
+[The module provenance](../renderers/modern/README.md#provenance-and-shader-builds)
+records the revision and patch boundary; shader bytecode is regenerated from
+the included GLSL. No DuckStation implementation code is included.
+
 The ESP32 branch is credited as reference material, particularly for native adaptation and the ISO9660/raw-sector extractor. It is not a verified Windows port and is not a substitute for the pinned FoxdieTeam/PsyZ build inputs. Its existence does not resolve rights in the recovered game source.
 
 The adapted PSn00bSDK `vlc2.c` component is MPL 2.0, credited to spicyjpeg; the adapted psxe `mdec.c` component is MIT, credited to Allkern (Lisandro Alarcón). The [movie patch](../patches/psyz-movies.patch) preserves notices and includes their license texts. These files are included by the patch rather than fetched as additional build checkouts. [MOVIE_VALIDATION.md](MOVIE_VALIDATION.md) records the adaptation and its limits.

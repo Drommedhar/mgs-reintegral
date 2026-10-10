@@ -7,6 +7,9 @@ param(
     [string]$BuildDirectory,
     [string]$RuntimeDirectory,
     [switch]$Widescreen,
+    [switch]$TextureCorrection,
+    [switch]$GeometryPrecision,
+    [switch]$DepthBuffer,
     [ValidatePattern('^[0-9]+x[0-9]+$')]
     [string]$Resolution,
     [switch]$Fullscreen,
@@ -206,6 +209,11 @@ if ($ReplayInput -or $ResumeInput) {
     $startup = $replayMetadata.identityData.startup
     if ($ReplayInput -and $replayMetadata.PSObject.Properties['presentation']) {
         $presentation = $replayMetadata.presentation
+        foreach ($option in @('TextureCorrection', 'GeometryPrecision', 'DepthBuffer')) {
+            if (-not $PSBoundParameters.ContainsKey($option) -and $presentation.PSObject.Properties[$option]) {
+                Set-Variable -Name $option -Value ([bool]$presentation.$option)
+            }
+        }
         if (-not $PSBoundParameters.ContainsKey('Widescreen')) { $Widescreen = [bool]$presentation.widescreen }
         if (-not $PSBoundParameters.ContainsKey('Fullscreen')) { $Fullscreen = [bool]$presentation.fullscreen }
         if (-not $PSBoundParameters.ContainsKey('Resolution') -and $presentation.resolution) {
@@ -289,6 +297,15 @@ $gameArguments = @('--disc', $Disc, '--stage', $Stage)
 if ($Widescreen) {
     $gameArguments += '--widescreen'
 }
+if ($TextureCorrection) {
+    $gameArguments += '--texture-correction'
+}
+if ($GeometryPrecision) {
+    $gameArguments += '--geometry-precision'
+}
+if ($DepthBuffer) {
+    $gameArguments += '--depth-buffer'
+}
 if ($PSBoundParameters.ContainsKey('Resolution')) {
     $gameArguments += @('--resolution', $Resolution)
 }
@@ -371,7 +388,7 @@ if ($RecordInput -or $ReplayInput) {
         -AutoCard ([bool]$AutoCard) `
         -MantisMemorySeed $mantisMemorySeed `
         -ModsRoot $ModsRoot -CheckpointPath $LoadCheckpoint `
-        -Presentation @{ widescreen = [bool]$Widescreen; resolution = $Resolution; fullscreen = [bool]$Fullscreen }
+        -Presentation @{ widescreen = [bool]$Widescreen; resolution = $Resolution; fullscreen = [bool]$Fullscreen; TextureCorrection = [bool]$TextureCorrection; GeometryPrecision = [bool]$GeometryPrecision; DepthBuffer = [bool]$DepthBuffer }
     $runtimeDirectory = $inputSession.RuntimeDirectory
     $inputFlag = if ($RecordInput) { '--record-input' } else { '--replay-input' }
     $gameArguments += @($inputFlag, $inputSession.InputPath, '--input-identity', $inputSession.Identity)
@@ -385,6 +402,7 @@ if ($RecordInput -or $ReplayInput) {
         identity = $inputSession.Identity; timing = $cadencePath; replayFast = [bool]$ReplayFast
         executableSha256 = (Get-FileHash -LiteralPath $executable -Algorithm SHA256).Hash
         widescreen = [bool]$Widescreen; resolution = $Resolution
+        TextureCorrection = [bool]$TextureCorrection; GeometryPrecision = [bool]$GeometryPrecision; DepthBuffer = [bool]$DepthBuffer
         fullscreen = [bool]$Fullscreen; debugOverlay = [bool]$DebugOverlay
     }
     $performance | ConvertTo-Json | Set-Content -LiteralPath $performancePath -Encoding utf8

@@ -59,7 +59,8 @@ add_executable(mgs-integral-native src/main.c src/mgs_disc.c src/mgs_memory.c sr
     src/mgs_threads.c src/mgs_gte.c src/mgs_math.c src/mgs_gpu.c src/mgs_mods.c src/mgs_sdk.c src/mgs_rotation.c src/mgs_sight.c src/mgs_capture.c src/mgs_probe.c src/mgs_dock_route.c src/mgs_cadence.c src/mgs_player.c src/mgs_pocket_device.c
     src/mgs_bonus_items.c src/mgs_invulnerability.c src/mgs_game_options.c src/mgs_input_movie.c src/mgs_input_log.c src/mgs_controller_ports.c src/mgs_mantis_memory.c src/mgs_checkpoint.c src/mgs_ending_probe.c
     src/mgs_completed_load_probe.c src/mgs_escape_route.c src/mgs_rex_probe.c src/mgs_liquid_probe.c
-    src/mgs_garage_route.c src/mgs_video.c src/mgs_visibility.c src/mgs_frame_timing.c)
+    src/mgs_garage_route.c src/mgs_video.c src/mgs_visibility.c src/mgs_frame_timing.c
+    src/mgs_texture_correction.c)
 target_include_directories(mgs-integral-native PRIVATE include "${MGS_NATIVE_ROOT}" "${MGS_NATIVE_ROOT}/include"
     "${CMAKE_CURRENT_BINARY_DIR}")
 target_link_libraries(mgs-integral-native PRIVATE mgs_game)
@@ -82,8 +83,29 @@ set_property(TARGET mgs-integral-native APPEND PROPERTY LINK_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/launcher/app.manifest")
 
 include(CTest)
+set(MGS_MODERN_RENDERER false)
+if(TARGET psyz_renderer)
+    get_target_property(mgs_modern_renderer psyz_renderer MGS_MODERN_RENDERER)
+    if(mgs_modern_renderer)
+        set(MGS_MODERN_RENDERER true)
+    endif()
+endif()
 add_subdirectory(launcher)
 if(BUILD_TESTING)
+    add_executable(mgs_texture_correction_test tests/mgs_texture_correction_test.c src/mgs_texture_correction.c)
+    target_include_directories(mgs_texture_correction_test PRIVATE include vendor/psyz/psyz/include)
+    target_compile_definitions(mgs_texture_correction_test PRIVATE __psyz)
+    target_compile_options(mgs_texture_correction_test PRIVATE -UNDEBUG)
+    add_test(NAME mgs_texture_correction_test COMMAND mgs_texture_correction_test)
+    if(mgs_modern_renderer)
+        add_executable(mgs_modern_gpu_test tests/mgs_modern_gpu_test.c)
+        target_link_libraries(mgs_modern_gpu_test PRIVATE psyz)
+        target_compile_options(mgs_modern_gpu_test PRIVATE -UNDEBUG)
+        foreach(scale IN ITEMS 1 4)
+            add_test(NAME mgs_modern_gpu_${scale}x_test COMMAND mgs_modern_gpu_test ${scale})
+            set_tests_properties(mgs_modern_gpu_${scale}x_test PROPERTIES ENVIRONMENT "SDL_VIDEODRIVER=offscreen" LABELS "gpu")
+        endforeach()
+    endif()
     add_executable(mgs_frame_timing_test tests/mgs_frame_timing_test.c src/mgs_frame_timing.c)
     target_include_directories(mgs_frame_timing_test PRIVATE include)
     target_compile_options(mgs_frame_timing_test PRIVATE -UNDEBUG)

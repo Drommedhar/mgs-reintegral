@@ -1,0 +1,97 @@
+--- a/source/libdg/trans.c
++++ b/source/libdg/trans.c
+@@ -32,6 +32,9 @@
+     int i, temp;
+     unsigned int scrpd_idx, scrpd_idx2;
+     unsigned char t6;
++#ifdef MGS_NATIVE
++    const void *projected;
++#endif
+ 
+     scrpd_idx = SCRPAD_ADDR;
+     t3 = *( int* )(scrpd_idx + 0x3F8);
+@@ -56,6 +59,9 @@
+         {
+             a2 = (a2 * 4) + scrpd_idx2;
+             temp = ((unsigned int*)a2)[0x80];
++#ifdef MGS_NATIVE
++            projected = (void *)a2;
++#endif
+             a2 = *( int* )a2;
+             num = num + temp;
+             stride++;
+@@ -71,10 +77,16 @@
+                 * (pack_ptr - 1 ) = (t3 + a2) - 4;
+             }
+ 
++#ifdef MGS_NATIVE
++            projected = (void *)(t3 + a2);
++#endif
+             a2 = *(int *)(t3 + a2);
+         }
+ 
+         *pack_ptr = a2;
++#ifdef MGS_NATIVE
++        MgsTextureCorrectionCopy(pack_ptr, projected);
++#endif
+         pack_ptr += 3;
+         vidx = ( vidx << ( t6 - a3 ) ) | ( vidx >> a3 );
+         a3 = a3 + 8;
+@@ -161,6 +173,12 @@
+ 
+         gte_stopz((int *)(SCRPAD_ADDR + 0x1f8));
+         gte_stsxy3_gt3(&packs->tag);
++#ifdef MGS_NATIVE
++        MgsTextureCorrectionCopy(&packs->x0, n0);
++        MgsTextureCorrectionCopy(&packs->x1, n1);
++        MgsTextureCorrectionCopy(&packs->x2, n2);
++        MgsTextureCorrectionCopy(&packs->x3, n3);
++#endif
+ 
+         area = *(int *)(scrpad_addr + 0x1f8);
+ 
+@@ -379,6 +397,9 @@
+             DG_TransVertices( vertices, model->n_verts );
+         }
+ 
++#ifdef MGS_NATIVE
++        MgsTextureCorrectionCapture(model->verts, model->n_verts, SPAD->xy);
++#endif
+         SPAD->bothface = model->flag & DG_MODEL_BOTHFACE;
+ 
+         packs = DG_WriteObjVertices( ( unsigned int * ) model->vindices, packs, obj->n_packs );
+--- a/source/libdg/divide.c
++++ b/source/libdg/divide.c
+@@ -338,6 +338,12 @@
+     //loc_800195F0
+     LCOPY2( &rvec[0].sxy, &pack->x0, &rvec[1].sxy, &pack->x1 );
+     LCOPY2( &rvec[3].sxy, &pack->x2, &rvec[4].sxy, &pack->x3 );
++#ifdef MGS_NATIVE
++    MgsTextureCorrectionProject(&pack->x0, (const SVECTOR *)&rvec[0].v);
++    MgsTextureCorrectionProject(&pack->x1, (const SVECTOR *)&rvec[1].v);
++    MgsTextureCorrectionProject(&pack->x2, (const SVECTOR *)&rvec[3].v);
++    MgsTextureCorrectionProject(&pack->x3, (const SVECTOR *)&rvec[4].v);
++#endif
+ 
+     SCOPYL2( &rvec[0].uv, &pack->u0, &rvec[1].uv, &pack->u1 );
+     SCOPYL2( &rvec[3].uv, &pack->u2, &rvec[4].uv, &pack->u3 );
+--- a/source/libdg/chanl.c
++++ b/source/libdg/chanl.c
+@@ -171,6 +171,7 @@
+     /* channels 1 and 2 are linked into channel 0 */
+ #ifdef MGS_NATIVE
+     MgsVideoBeginFrame(which);
++    MgsTextureCorrectionSelect(which);
+ #endif
+     DrawOTag( (OT_TYPE *)&DG_Chanls[ 0 ].env1[ which ] );
+ #ifdef MGS_NATIVE
+@@ -246,6 +247,9 @@
+     else
+     {
+         GV_ZeroMemory( DG_DivideBuffer, sizeof(DG_DivideBuffer) );
++#ifdef MGS_NATIVE
++        if (!DG_HikituriFlag) MgsTextureCorrectionBegin(which);
++#endif
+         func = DG_ChanlUnits;
+ 
+         if ( !DG_HikituriFlag )

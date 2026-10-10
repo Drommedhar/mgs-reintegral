@@ -1,5 +1,10 @@
 # Renderer replacement contract
 
+The [experimental modern module](../renderers/modern/README.md) now extends this
+boundary with projected model geometry, perspective-correct textures, subpixel
+positions and a D32 depth buffer. It is opt-in and keeps the regular backend as
+the rendering control.
+
 Recovered game actors and stage scripts submit graphics through the recovered
 `libdg`/PSY-Q layer. A renderer can be replaced at build time without editing
 those actors, the scheduler, resource loaders, save system, or audio mixer.
@@ -8,6 +13,13 @@ those actors, the scheduler, resource loaders, save system, or audio mixer.
 `psyz_renderer` library target that supplies PsyZ's drawing and platform/video
 endpoints. The regular `sdl3_gpu.c` and `sdl3_software.c` implementations are then
 excluded from PsyZ itself. Missing endpoints fail at link time.
+
+`Psyz_GpuConfigureGeometry` installs a synchronous projected-vertex callback and
+selects texture correction, geometry precision and depth testing independently.
+`Psyz_GpuResetGeometryDepth` begins a new frame's depth lifetime. Backends without
+these enhancements accept the all-disabled configuration and reject enabled
+requests; the regular and Godot backends implement that behavior. This remains
+a source interface, not a stable binary ABI.
 
 The included [reference module](../renderers/psyz-gpu/CMakeLists.txt) builds the
 existing patched renderer through this boundary:

@@ -19,8 +19,8 @@ See [alpha requirements, controls and limitations](docs/ALPHA.md).
 
 - **Regional resources:** support text and voice resources from more regions
   and editions, with clear compatibility checks and language selection.
-- **Godot rendering:** develop the replacement renderer while preserving
-  gameplay behavior and supporting custom graphics and mods.
+- **Modern rendering:** extend the experimental geometry/depth renderer while
+  preserving gameplay behavior and supporting custom graphics and mods.
 - **Modding tools:** extend resource overrides to standard image/model/audio
   formats, resized replacements and easier inspection/export workflows.
 - **Map and stage editing:** build an editor once resource and renderer
@@ -66,7 +66,9 @@ Use PowerShell 7 on Windows with Git, Python 3.11 or newer, and Visual Studio 20
 ./tools/build.ps1 -Configuration Debug -Target test
 ```
 
-The executable is `build/windows-x86-debug/mgs-integral-native.exe`. The Windows x86 target preserves the recovered program's 32-bit pointer and `long` assumptions; x64 is not currently supported.
+The executable is `build/windows-x86-debug/mgs-integral-native.exe`. The Windows x86 target preserves the recovered program's 32-bit pointer and `long` assumptions. An x64 port is deferred; the feasibility audit is retained locally.
+
+An [experimental modern renderer](renderers/modern/README.md) now provides optional perspective-correct model textures, subpixel geometry and a floating-point depth buffer. Build it in a separate directory with `-RendererModule renderers/modern`; its launcher exposes the three switches on the **Graphics** tab. The regular build remains the original renderer.
 
 The same graphical launcher is built alongside Debug and optimized executables.
 To reproduce an optimized package locally:

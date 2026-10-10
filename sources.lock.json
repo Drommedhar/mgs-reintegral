@@ -86,7 +86,8 @@
         "patches/mgs-elevator-guard-retirement.patch",
         "patches/mgs-cargo-guard-retirement.patch",
         "patches/mgs-auto-card.patch",
-        "patches/mgs-godot-scene-export.patch"
+        "patches/mgs-godot-scene-export.patch",
+        "patches/mgs-projected-geometry.patch"
       ]
     },
     {
@@ -115,7 +116,8 @@
         "patches/psyz-controller-ports.patch",
         "patches/psyz-live-adsr.patch",
         "patches/psyz-audio-output-buffer.patch",
-        "patches/psyz-godot-command-transport.patch"
+        "patches/psyz-godot-command-transport.patch",
+        "patches/psyz-projected-geometry.patch"
       ]
     },
     {

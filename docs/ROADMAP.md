@@ -20,10 +20,13 @@ point; the alpha's supported configuration is in [ALPHA.md](ALPHA.md).
 - Offer language selection where the supplied resources support it, while
   keeping scripts, timing, subtitles and spoken dialogue consistent.
 
-## Replace the rendering pipeline with Godot
+## Develop the modern renderer
 
-- Develop the experimental Godot renderer as a replacement for the native
-  rendering backend, preserving recovered gameplay behavior.
+- Validate the [experimental renderer](../renderers/modern/README.md), which now
+  provides perspective-correct textures, subpixel model geometry and per-pixel
+  depth testing. Extend coverage to remaining effects and campaign scenes.
+- Extend its geometry interface toward meshes and materials while preserving
+  recovered gameplay behavior and the original renderer as a comparison.
 - Support custom graphics and resource mods through clear renderer boundaries.
 - Improve rendering only where its behavior and compatibility can be tested.
 
@@ -45,7 +48,8 @@ binary plugin API or a completed modern mesh/material pipeline.
   main-campaign scope.
 - Keep host-specific code isolated so future platforms remain possible.
   Windows x86 is the supported initial target; x64 and other operating systems
-  need separate implementation and validation.
+  need separate implementation and validation. The x64 port is deferred, with
+  its feasibility audit retained locally.
 
 Track defects and proposed improvements in the
 [issue tracker](https://github.com/Drommedhar/mgs-reintegral/issues).

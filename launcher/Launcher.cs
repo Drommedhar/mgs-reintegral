@@ -14,6 +14,8 @@ namespace ReIntegral
         private readonly TextBox discOne = new TextBox(), discTwo = new TextBox();
         private readonly ComboBox resolution = new ComboBox(), mantis = new ComboBox();
         private readonly CheckBox wide = new CheckBox(), fullscreen = new CheckBox();
+        private readonly CheckBox textureCorrection = new CheckBox();
+        private readonly CheckBox geometryPrecision = new CheckBox(), depthBuffer = new CheckBox();
         private readonly CheckBox bonus = new CheckBox(), invulnerable = new CheckBox();
         private readonly CheckBox autoCard = new CheckBox(), overlay = new CheckBox();
         private readonly TextBox stage = new TextBox(), frames = new TextBox(), advanced = new TextBox();
@@ -66,6 +68,7 @@ namespace ReIntegral
             tabs.SetBounds(16, 202, 688, 365);
             Controls.Add(tabs);
             BuildDisplay();
+            BuildGraphics();
             BuildGameplay();
             BuildAdvanced();
             play.Text = "Save and play";
@@ -118,12 +121,24 @@ namespace ReIntegral
             DiscRow(page, discOne, 1, 16);
             DiscRow(page, discTwo, 2, 85);
             LabelAt(page, "Keep each CUE beside its matching BIN. No extraction or VR disc is needed.", 151);
-            LabelAt(page, "Output resolution", 193);
-            resolution.SetBounds(16, 220, 220, 28);
+            LabelAt(page, "Output resolution", 173);
+            resolution.SetBounds(16, 200, 220, 28);
             resolution.Items.AddRange(new object[] { "640x480", "1280x720", "1280x960", "1600x900", "1920x1080", "2560x1440" });
             page.Controls.Add(resolution);
-            CheckAt(page, wide, "Widescreen (expand the scene view)", 267);
-            CheckAt(page, fullscreen, "Fullscreen", 297);
+            CheckAt(page, wide, "Widescreen (expand the scene view)", 237);
+            CheckAt(page, fullscreen, "Fullscreen", 267);
+        }
+
+        private void BuildGraphics()
+        {
+            var page = Page("Graphics");
+            LabelAt(page, BuildInfo.ModernRenderer ? "Modern renderer — experimental enhancements" :
+                "These enhancements require the experimental modern renderer build.", 18);
+            CheckAt(page, textureCorrection, "Perspective-correct textures", 64);
+            CheckAt(page, geometryPrecision, "Subpixel geometry (reduce polygon jitter)", 104);
+            CheckAt(page, depthBuffer, "Depth buffer (per-pixel surface visibility)", 144);
+            LabelAt(page, "Applies to projected models. Screen effects keep their original rendering.", 206);
+            LabelAt(page, "Depth testing may change overlapping surfaces; compare with it off.", 242);
         }
 
         private static void CheckAt(Control parent, CheckBox field, string text, int y)
@@ -171,6 +186,9 @@ namespace ReIntegral
             discOne.Text = value.DiscOne; discTwo.Text = value.DiscTwo;
             resolution.Text = value.Resolution; wide.Checked = value.Widescreen;
             fullscreen.Checked = value.Fullscreen; bonus.Checked = value.BonusItems;
+            textureCorrection.Checked = value.TextureCorrection;
+            geometryPrecision.Checked = value.GeometryPrecision;
+            depthBuffer.Checked = value.DepthBuffer;
             invulnerable.Checked = value.Invulnerable; autoCard.Checked = value.AutoCard;
             overlay.Checked = value.DebugOverlay; mantis.Text = value.MantisMemory;
             stage.Text = value.Stage; frames.Text = value.Frames; advanced.Text = value.Advanced;
@@ -180,6 +198,8 @@ namespace ReIntegral
         {
             return new Settings { DiscOne = AbsolutePath(discOne.Text), DiscTwo = AbsolutePath(discTwo.Text),
                 Resolution = resolution.Text.Trim(), Widescreen = wide.Checked, Fullscreen = fullscreen.Checked,
+                TextureCorrection = textureCorrection.Checked,
+                GeometryPrecision = geometryPrecision.Checked, DepthBuffer = depthBuffer.Checked,
                 BonusItems = bonus.Checked, Invulnerable = invulnerable.Checked, AutoCard = autoCard.Checked,
                 DebugOverlay = overlay.Checked, MantisMemory = mantis.Text.Trim(), Stage = stage.Text.Trim(),
                 Frames = frames.Text.Trim(), Advanced = advanced.Text.Replace("\r", " ").Replace("\n", " ") };

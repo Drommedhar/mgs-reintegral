@@ -33,6 +33,52 @@ and its 600-VSync reload reached the Disc 2 entry corridor. Checkpoints restore
 map entries, not exact process snapshots. Original recordings and cards remain
 preserved; each checkpoint has adjacent provenance and validation JSON.
 
+## Modern renderer — 10 October 2026
+
+The user requested correction of affine texture warping, then expanded the
+scope to stable geometry and per-pixel depth as the foundation of our renderer.
+The [experimental modern module](renderers/modern/README.md) builds in
+`build/windows-x86-modern`; its launcher has independent, persisted switches
+for perspective-correct textures, subpixel geometry and depth testing.
+The normal build keeps the original renderer and rejects unsupported enhanced
+rendering requests explicitly. All three enhancements default off.
+
+Model vertices, including attached parent vertices and subdivided surfaces,
+carry float projected geometry alongside unchanged PS1 packets. Opaque models
+write reversed D32 depth; semitransparent models test without writing. HUD,
+framebuffer effects and untracked primitives retain their original drawing.
+This is an experimental model path, not a floating-point gameplay rewrite or
+a completed modern material/mesh engine. Whole-campaign visual acceptance of
+this new renderer remains outstanding.
+
+Validation: the modern build passes all 164 CTests; the reference build passes
+all 162. New tests check actual pixels at 1x and 4x for occlusion, depth reset,
+transparent depth reads, perspective UVs, missing metadata and subpixel edges.
+The metadata tests cover copied vertices, changed XY words, frame isolation,
+table growth and invalid projection inputs. CLI and launcher tests cover all
+three switches. The original 32-bit build guard is unchanged.
+
+With all three options enabled at 1280x720, real-disc checks reached the dock
+Codec and loaded the hot-PAL checkpoint after 600 VSyncs each. Captures show
+the frequency and PAL-room surfaces intact. The unskipped 5000-VSync New Game
+probe passed all three stage transitions and reached the dock Codec. Strict
+replay passed `native-clock-boot01` (596 samples / 600 VSyncs) and the recorded
+campaign segment `run-20261010-005349-602` (2804 samples / 2808 VSyncs, ending
+in `s14e`). An older `native-dock-01` recording fails at its first sample on
+both renderers (recorded VSync 5 versus current VSync 4); it is not evidence of
+a new renderer divergence. Local artifacts: `build/modern-validation/`.
+
+The vendor integration is exported as `mgs-projected-geometry.patch` and
+`psyz-projected-geometry.patch`; bootstrap verifies all 82 MGS and 23 PsyZ
+patches. Scoped aislop finds no errors or fixable warnings. It retains inherited
+renderer size/complexity warnings, the inherited `SetParam` parameter-count
+warning, a false positive for reachable `goto found` code in `chanl.c`, and a
+generated shader-array size warning. `cppcheck` and `clang-tidy` are unavailable.
+
+The user deferred x64 work. The audit script, detailed findings and compiler
+report remain local and excluded from Git. Production pointer guards remain
+active; no x64 executable has been linked or validated.
+
 ## Agreed prerelease scope — 10 October 2026
 
 The native project's release name is **Metal Gear Solid Re:Integral**, with
@@ -150,7 +196,8 @@ and is outside this main-campaign source audit.
   Evidence: `build/post-credits-20261010/rollback-pal.bmp` and adjacent log/movie.
   The unbuilt perspective-rendering prototype is saved only in that evidence
   directory's `baseline/` diffs and `vertex_depth.c.prototype`; the active
-  renderer remains unchanged. Perspective correction remains unfinished.
+  renderer remains unchanged. That prototype was not shipped; the new opt-in
+  modern renderer described above now supplies the geometry enhancements.
 
 - Added opt-in `-AutoCard` (`--auto-card 1`) with record/replay identity support.
   Original card comparisons can use an owned access card without equipping it;

@@ -30,6 +30,8 @@ u_short DG_ChanlTime[32];
 OT_TYPE DG_DivideBuffer[256];
 DG_CHANL DG_Chanls[3];
 
+void MgsTextureCorrectionBegin(int frame) { (void)frame; }
+
 int MgsVideoHalfWidth(void) { return half_width; }
 void DG_Clip(RECT *rect, int distance) { (void)rect; (void)distance; }
 long GetRCnt(long counter) { (void)counter; return 0; }

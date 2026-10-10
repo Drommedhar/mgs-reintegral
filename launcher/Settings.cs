@@ -14,6 +14,9 @@ namespace ReIntegral
         public string Resolution = "1280x720";
         public bool Widescreen = true;
         public bool Fullscreen;
+        public bool TextureCorrection;
+        public bool GeometryPrecision;
+        public bool DepthBuffer;
         public bool BonusItems;
         public bool Invulnerable;
         public bool AutoCard;

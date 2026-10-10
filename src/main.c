@@ -18,6 +18,7 @@
 #include "mgs_mantis_memory.h"
 #include "mgs_checkpoint.h"
 #include "mgs_video.h"
+#include "mgs_texture_correction.h"
 #include "mgs_game_options.h"
 #include "mgs_safety.h"
 #include "mgs_build.h"
@@ -30,7 +31,7 @@ typedef struct {
     const char *load_checkpoint, *save_checkpoint;
     int stage_explicit, stage_map, bonus_items, invulnerable;
     unsigned replay_tail_frames, mantis_memory_seed;
-    int replay_fast, debug_overlay, auto_card;
+    int replay_fast, debug_overlay, auto_card, texture_correction, geometry_precision, depth_buffer;
     MgsVideoOptions video;
 } StartupOptions;
 
@@ -341,6 +342,21 @@ static int ParseOptions(StartupOptions *options, int argc, char **argv)
             ++i;
             continue;
         }
+        if (strcmp(argv[i], "--geometry-precision") == 0) {
+            options->geometry_precision = 1;
+            ++i;
+            continue;
+        }
+        if (strcmp(argv[i], "--depth-buffer") == 0) {
+            options->depth_buffer = 1;
+            ++i;
+            continue;
+        }
+        if (strcmp(argv[i], "--texture-correction") == 0) {
+            options->texture_correction = 1;
+            ++i;
+            continue;
+        }
         if (strcmp(argv[i], "--fullscreen") == 0) {
             options->video.fullscreen = 1;
             ++i;
@@ -379,6 +395,7 @@ static void PrintUsage(FILE *stream)
           "Usage: mgs-integral-native --disc <Integral disc.cue> [options]\n"
           "  --version | --check-disc 1|2 <disc.cue> (no game boot)\n"
           "  --widescreen --resolution WIDTHxHEIGHT --fullscreen --debug-overlay\n"
+          "  --texture-correction --geometry-precision --depth-buffer (modern renderer)\n"
           "  --disc-two <Disc 2.cue> --mods-root <path> --bonus-items 0|1\n"
           "  --invulnerable 0|1\n"
           "  --auto-card 0|1\n"
@@ -424,6 +441,10 @@ int main(int argc, char **argv)
         return 2;
     if (!MgsVideoConfigure(&options.video))
         return 2;
+    if (!MgsTextureCorrectionConfigure(options.texture_correction, options.geometry_precision, options.depth_buffer)) {
+        fputs("These geometry options require the modern renderer build.\n", stderr);
+        return 2;
+    }
     active_options = &options;
     setvbuf(stdout, NULL, _IONBF, 0);
     MgsBonusItemsConfigure(options.bonus_items);

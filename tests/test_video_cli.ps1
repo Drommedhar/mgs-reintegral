@@ -87,6 +87,10 @@ if (-not $WrapperOnly) {
     }
     foreach ($options in @(
         @('--widescreen'),
+        @('--texture-correction'),
+        @('--geometry-precision'),
+        @('--depth-buffer'),
+        @('--texture-correction', '--geometry-precision', '--depth-buffer'),
         @('--fullscreen'),
         @('--widescreen', '--fullscreen'),
         @('--widescreen', '--resolution', '2560x1440', '--fullscreen'),

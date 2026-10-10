@@ -1,0 +1,32 @@
+--- a/psyz/include/psyz/gpu.h
++++ b/psyz/include/psyz/gpu.h
+@@ -11,6 +11,13 @@
+ #ifdef __cplusplus
+ extern "C" {
+ #endif
++
++/* Optional projected geometry, read synchronously when a packet is submitted.
++ * The callback returns zero when the XY word has no matching projection. */
++typedef struct { float x, y, depth; } PsyzProjectedVertex;
++typedef int (*PsyzGeometryCallback)(const void *xy, PsyzProjectedVertex *vertex);
++int Psyz_GpuConfigureGeometry(PsyzGeometryCallback callback, int textures, int precision, int depth);
++void Psyz_GpuResetGeometryDepth(void);
+ 
+ /**
+  * @brief Handler for application-defined GP0 commands.
+--- a/psyz/src/platform/sdl3_gpu.c
++++ b/psyz/src/platform/sdl3_gpu.c
+@@ -78,6 +78,13 @@
+ static SDL_Rect native_resolve_dirty;
+ static bool framebuffer_sampling;
+ static bool texture_screen_aligned;
++
++int Psyz_GpuConfigureGeometry(PsyzGeometryCallback callback, int textures, int precision, int depth) {
++    return callback || textures || precision || depth ? -1 : 0;
++}
++
++void Psyz_GpuResetGeometryDepth(void) {}
++
+ static unsigned internal_res = 1;
+ static unsigned set_internal_res = 1;
+ static SDL_GPUBuffer* vbuf = NULL;
