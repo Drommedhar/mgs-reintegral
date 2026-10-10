@@ -110,7 +110,21 @@ passes with long and short temp paths under Python 3.11 and 3.12. Python 3.12
 also passes the unpacked ZIP and UI checks using the shortened temp path.
 The workflow now saves verified dependencies before tests and uses pinned
 Node 24 Actions. Release/tag reuse is rejected before a publishing build.
-Hosted publication and download verification are pending the corrected run.
+The corrected [hosted run](https://github.com/Drommedhar/mgs-reintegral/actions/runs/38058089785)
+passed all **142 hosted CTests**, unpacked-package checks and UI startup, then
+published [**v0.1.0-alpha.1**](https://github.com/Drommedhar/mgs-reintegral/releases/tag/v0.1.0-alpha.1)
+from `0219c04da14c6e98b928ca736a08ea66ec851378`. The tag, package metadata and
+executable version agree. All four downloaded asset digests and all three ZIP
+checksums match. Dependency and Python caches are present for subsequent runs.
+
+The downloaded player ZIP also passed local Python 3.12 package/UI checks.
+Its executable reached the dock's English Codec and exited normally after
+600 VSyncs at 1280x720. Its import table contains only Windows system DLLs.
+Local download/boot evidence is under `build/github-alpha-1/`; no retail data,
+personal saves or replay archive was uploaded. Existing local history remains
+on `godot`, `native-main-before-alpha` and the other preserved branches; `main`
+tracks the new private repository's source-only history.
+
 Broader hardware and clean Windows installation acceptance remain user testing.
 
 ## Current handoff scope

@@ -1,15 +1,16 @@
 # RE:INTEGRAL roadmap
 
-This roadmap describes intended work, not a promise that a feature is already
-available or a commitment to delivery dates. The native main campaign is the
-starting point; the alpha's supported configuration is in [ALPHA.md](ALPHA.md).
+This roadmap separates delivered foundations from planned work. Future items
+have no committed delivery dates. The native main campaign is the starting
+point; the alpha's supported configuration is in [ALPHA.md](ALPHA.md).
 
-## Make the native release easy to use
+## Native alpha foundations
 
-- A straightforward prerequisite setup and reproducible Debug build.
-- A downloadable Windows build with a shared setup/settings launcher.
-- Persistent saves and configuration, useful logs, and reliable updates.
-- Broader testing of campaign branches, controllers, graphics hardware and
+- [x] Official-source prerequisite setup and a documented Debug build.
+- [x] A downloadable Windows build with a shared setup/settings launcher,
+  including gameplay options and additional command-line arguments.
+- [x] Saves and settings outside the installation folder, plus versioned logs.
+- [ ] Broader testing of campaign branches, controllers, graphics hardware and
   display settings, with fixes driven by reported defects.
 
 ## Expand language and edition support
