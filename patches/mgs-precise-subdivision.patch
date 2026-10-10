@@ -1,0 +1,58 @@
+--- a/source/libdg/divide.c
++++ b/source/libdg/divide.c
+@@ -321,6 +321,12 @@
+             rvec_temp[2] = rvec[1];
+             rvec_temp[6] = rvec[3];
+             rvec_temp[8] = rvec[4];
++#ifdef MGS_NATIVE
++            MgsTextureCorrectionCopy(&rvec_temp[0].sxy, &rvec[0].sxy);
++            MgsTextureCorrectionCopy(&rvec_temp[2].sxy, &rvec[1].sxy);
++            MgsTextureCorrectionCopy(&rvec_temp[6].sxy, &rvec[3].sxy);
++            MgsTextureCorrectionCopy(&rvec_temp[8].sxy, &rvec[4].sxy);
++#endif
+             return 1;
+         }
+     }
+@@ -339,10 +345,10 @@
+     LCOPY2( &rvec[0].sxy, &pack->x0, &rvec[1].sxy, &pack->x1 );
+     LCOPY2( &rvec[3].sxy, &pack->x2, &rvec[4].sxy, &pack->x3 );
+ #ifdef MGS_NATIVE
+-    MgsTextureCorrectionProject(&pack->x0, (const SVECTOR *)&rvec[0].v);
+-    MgsTextureCorrectionProject(&pack->x1, (const SVECTOR *)&rvec[1].v);
+-    MgsTextureCorrectionProject(&pack->x2, (const SVECTOR *)&rvec[3].v);
+-    MgsTextureCorrectionProject(&pack->x3, (const SVECTOR *)&rvec[4].v);
++    MgsTextureCorrectionCopy(&pack->x0, &rvec[0].sxy);
++    MgsTextureCorrectionCopy(&pack->x1, &rvec[1].sxy);
++    MgsTextureCorrectionCopy(&pack->x2, &rvec[3].sxy);
++    MgsTextureCorrectionCopy(&pack->x3, &rvec[4].sxy);
+ #endif
+ 
+     SCOPYL2( &rvec[0].uv, &pack->u0, &rvec[1].uv, &pack->u1 );
+@@ -398,6 +404,13 @@
+     DG_SetRVectorCode( &rvec[5] );
+     DG_SetRVectorDelta( &rvec[2], &rvec[8], &rvec[5] );
+     DG_SetRVectorDelta( &rvec[6], &rvec[0], &rvec[3] );
++#ifdef MGS_NATIVE
++    MgsTextureCorrectionMidpoint(&rvec[1].sxy, &rvec[0].sxy, &rvec[2].sxy);
++    MgsTextureCorrectionMidpoint(&rvec[7].sxy, &rvec[6].sxy, &rvec[8].sxy);
++    MgsTextureCorrectionMidpoint(&rvec[3].sxy, &rvec[0].sxy, &rvec[6].sxy);
++    MgsTextureCorrectionMidpoint(&rvec[5].sxy, &rvec[2].sxy, &rvec[8].sxy);
++    MgsTextureCorrectionMidpoint(&rvec[4].sxy, &rvec[1].sxy, &rvec[7].sxy);
++#endif
+ }
+ 
+ //todo: odd function requires do while hack, need to revisit
+@@ -478,6 +491,13 @@
+ 
+                 LCOPY2(  &pack->x0 , (void*)(SCRPAD_ADDR + 0x044) , &pack->x1 , (void*)(SCRPAD_ADDR + 0x06C) );
+                 LCOPY2(  &pack->x2 , (void*)(SCRPAD_ADDR + 0x0BC) , &pack->x3 , (void*)(SCRPAD_ADDR + 0x0E4) );
++#ifdef MGS_NATIVE
++                RVECTOREX *projected = GetDivideMem()->rvec;
++                MgsTextureCorrectionCopy(&projected[0].sxy, &pack->x0);
++                MgsTextureCorrectionCopy(&projected[2].sxy, &pack->x1);
++                MgsTextureCorrectionCopy(&projected[6].sxy, &pack->x2);
++                MgsTextureCorrectionCopy(&projected[8].sxy, &pack->x3);
++#endif
+                 SCOPYL2( &pack->u0 , (void*)(SCRPAD_ADDR + 0x03E) , &pack->u1 , (void*)(SCRPAD_ADDR + 0x066) );
+                 SCOPYL2( &pack->u2 , (void*)(SCRPAD_ADDR + 0x0B6) , &pack->u3 , (void*)(SCRPAD_ADDR + 0x0DE) );
+                 LCOPY2(  &pack->r0 , (void*)(SCRPAD_ADDR + 0x040) , &pack->r1 , (void*)(SCRPAD_ADDR + 0x068) );

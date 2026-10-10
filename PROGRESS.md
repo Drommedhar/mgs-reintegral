@@ -33,6 +33,48 @@ and its 600-VSync reload reached the Disc 2 entry corridor. Checkpoints restore
 map entries, not exact process snapshots. Original recordings and cards remain
 preserved; each checkpoint has adjacent provenance and validation JSON.
 
+## Character joint seams and PBR removal — 10 October 2026
+
+Removed the experimental PBR material/light/shadow implementation, its launcher
+controls, F9 toggle, authoring tools and vendor hooks at the user's request.
+The local dock launch script now uses original lighting with the three geometry
+options. The removed experiment is archived in ignored
+`build/pbr-removed-backup.zip`; existing local assets, recordings and saves remain
+preserved.
+
+The joint regression exercises the real `libdg` transform and packet writer:
+integer face culling drops a subpixel-wide face that the precise renderer can
+draw. Precision mode now evaluates face area from the same projected positions
+used by the renderer. Nonzero areas retain their sign when converted for the
+original ordering/subdivision metadata. Disabled precision and incomplete
+projection data keep the original decision. Exact parent-vertex copying remains
+unchanged. The integration is exported as `mgs-precise-face-culling.patch`.
+
+The user's intro screenshot reproduced a second cause on the character's back
+and arm in `opening`: subdivision projected rounded integer model midpoints,
+moving split vertices away from shared edges. It now copies precise endpoints
+through the subdivision scratchpad and computes depth-weighted fractional
+midpoints, including recursive splits. Invalid source metadata propagates as
+invalid. Original integer packets and subdivision decisions remain intact.
+This integration is exported as `mgs-precise-subdivision.patch`.
+
+Validation: both x86 builds compile. The culling/PBR changes passed all **166
+modern** and **162 reference** CTests; after the subdivision fix, all **166 modern**
+tests and the two relevant reference adapter/CLI tests pass. The 1x/4x pixel
+tests cover thin faces, winding, double-sided faces, stale metadata, parent-joint
+coordinates and identical coverage before/after recursive subdivision. Both
+pixel regressions failed before their respective fixes. Adapter tests cover
+unequal-depth midpoints, reversed edges and invalid metadata propagation.
+The 1500-VSync real-disc dock probe retains matching player movement counters.
+A 2500-VSync real-disc intro recording replays all 2496 inputs successfully;
+the reproduced back/arm slits are closed in the matching updated frame with
+all three geometry options enabled at 2560x1440. Captures are
+`build/intro-seams/baseline.bmp` and `build/intro-seams/after.bmp`; earlier dock
+evidence is `build/geometry-seams-*`. Bootstrap verifies **84 MGS / 23 PsyZ**
+patches. Scoped source/vendor aislop scans score 100 with no findings;
+`cppcheck` and `clang-tidy` remain unavailable. This confirms the reported intro
+shot, not whole-campaign visual acceptance of the modern renderer.
+
 ## Modern renderer — 10 October 2026
 
 The user requested correction of affine texture warping, then expanded the

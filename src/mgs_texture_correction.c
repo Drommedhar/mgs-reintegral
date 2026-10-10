@@ -1,6 +1,7 @@
 #include "mgs_texture_correction.h"
 #include <psyz/gpu.h>
 #include <psyz/gte.h>
+#include <math.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,6 +21,7 @@ typedef struct {
 static DepthFrame frames[2];
 static DepthFrame *current = &frames[0];
 static int correction_enabled;
+static int precision_enabled;
 
 static VertexDepth *FindSlot(DepthFrame *frame, const void *address)
 {
@@ -56,6 +58,7 @@ int MgsTextureCorrectionConfigure(int textures, int precision, int depth)
                                   textures, precision, depth) != 0)
         return 0;
     correction_enabled = enabled;
+    precision_enabled = precision;
     for (unsigned i = 0; i < 2; ++i) {
         free(frames[i].entries);
         frames[i] = (DepthFrame){0};
@@ -112,6 +115,18 @@ int MgsTextureCorrectionGet(const void *xy, PsyzProjectedVertex *vertex)
     return 1;
 }
 
+int MgsTextureCorrectionArea(const void *const xy[4], int original)
+{
+    if (!precision_enabled) return original;
+    PsyzProjectedVertex vertices[4];
+    for (int i = 0; i < 4; ++i)
+        if (!MgsTextureCorrectionGet(xy[i], &vertices[i])) return original;
+    float area = (vertices[1].x - vertices[0].x) * (vertices[2].y - vertices[0].y) -
+                 (vertices[1].y - vertices[0].y) * (vertices[2].x - vertices[0].x);
+    /* Preserve visible subpixel faces when the integer packet collapses to a line. */
+    return area > 0 ? (int)ceilf(area) : (int)floorf(area);
+}
+
 static PsyzProjectedVertex Project(const MATRIX *matrix, const SVECTOR *vertex)
 {
     float camera[3];
@@ -154,4 +169,18 @@ void MgsTextureCorrectionCopy(const void *destination, const void *source)
     PsyzProjectedVertex vertex = {0};
     MgsTextureCorrectionGet(source, &vertex);
     SetVertex(destination, vertex);
+}
+
+void MgsTextureCorrectionMidpoint(const void *destination, const void *first, const void *second)
+{
+    if (!correction_enabled) return;
+    PsyzProjectedVertex a, b, midpoint = {0};
+    if (MgsTextureCorrectionGet(first, &a) && MgsTextureCorrectionGet(second, &b)) {
+        double depth = (double)a.depth + b.depth;
+        /* A model-space midpoint projects with depth-weighted screen coordinates. */
+        midpoint.x = (float)((a.x * (double)a.depth + b.x * (double)b.depth) / depth);
+        midpoint.y = (float)((a.y * (double)a.depth + b.y * (double)b.depth) / depth);
+        midpoint.depth = (float)(depth * 0.5);
+    }
+    SetVertex(destination, midpoint);
 }

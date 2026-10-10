@@ -42,6 +42,16 @@ Camera matrices, animation and source model coordinates remain fixed-point;
 subpixel projection reduces raster snapping but is not a floating-point rewrite
 of the game's simulation or every stage effect.
 
+With subpixel geometry enabled, model face culling uses the same float projected
+positions as rasterization. Thin faces at character joints remain visible when
+their integer packet coordinates collapse to a line. Missing projection data
+and disabled precision retain the original culling decision.
+
+Subdivision copies these precise endpoints and computes depth-weighted
+midpoints, preserving fractional positions through recursive splits. This
+keeps shared edges aligned when neighboring faces use different subdivision
+levels instead of projecting rounded integer midpoints.
+
 The renderer uses three GPU pipelines:
 
 | Pass | Depth behavior | Interpolation |
@@ -58,8 +68,8 @@ The implementation follows SDL's [depth attachment](https://wiki.libsdl.org/SDL3
 and [pipeline depth state](https://wiki.libsdl.org/SDL3/SDL_GPUDepthStencilState)
 interfaces.
 
-This is an experimental model-rendering foundation. The game still culls and
-subdivides geometry with its original rules. Legacy effects without model
+This is an experimental model-rendering foundation. Object bounds and the
+decision to subdivide still follow the original rules. Legacy effects without model
 geometry retain their original path. Transparency remains sorted by the game,
 and depth testing can expose assumptions in overlapping surfaces or intentional
 ordering offsets. These limitations need scene review before enabling the
@@ -68,12 +78,17 @@ replacement meshes, a general scene graph, lighting or postprocessing.
 
 ## Validation
 
-`mgs_texture_correction_test` covers projection, copied vertices, stale XY,
-frame isolation, table growth and invalid near-plane inputs.
+`mgs_texture_correction_test` covers projection, copied vertices, unequal-depth
+and recursive midpoints, stale XY, frame isolation, table growth and invalid
+near-plane inputs.
 `mgs_modern_gpu_1x_test` and `mgs_modern_gpu_4x_test` read actual rendered pixels
 to check depth occlusion/reset, transparent depth reads, perspective UVs,
 whole-polygon handling of missing metadata and subpixel coverage. Existing GPU
 feedback, masks, widescreen and atlas tests also run against this module.
+`mgs_joint_geometry_1x_test` and `mgs_joint_geometry_4x_test` exercise the real
+model transform/packet writer and read rendered pixels for thin-face coverage,
+winding, double-sided faces, missing metadata, exact parent-joint linkage and
+identical coverage before/after subdivision at two recursion thresholds.
 
 See [the progress ledger](../../PROGRESS.md) for real-disc checks and current
 acceptance limits. The earlier completed campaign used the original renderer.

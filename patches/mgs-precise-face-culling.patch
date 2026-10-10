@@ -1,0 +1,13 @@
+--- a/source/libdg/trans.c
++++ b/source/libdg/trans.c
+@@ -181,6 +181,10 @@
+ #endif
+ 
+         area = *(int *)(scrpad_addr + 0x1f8);
++#ifdef MGS_NATIVE
++        const void *xy[4] = {&packs->x0, &packs->x1, &packs->x2, &packs->x3};
++        area = MgsTextureCorrectionArea(xy, area);
++#endif
+ 
+         if (area <= 0)
+         {

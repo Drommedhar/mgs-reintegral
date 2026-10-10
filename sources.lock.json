@@ -87,7 +87,9 @@
         "patches/mgs-cargo-guard-retirement.patch",
         "patches/mgs-auto-card.patch",
         "patches/mgs-godot-scene-export.patch",
-        "patches/mgs-projected-geometry.patch"
+        "patches/mgs-projected-geometry.patch",
+        "patches/mgs-precise-face-culling.patch",
+        "patches/mgs-precise-subdivision.patch"
       ]
     },
     {
