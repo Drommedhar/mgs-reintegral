@@ -33,6 +33,15 @@ and its 600-VSync reload reached the Disc 2 entry corridor. Checkpoints restore
 map entries, not exact process snapshots. Original recordings and cards remain
 preserved; each checkpoint has adjacent provenance and validation JSON.
 
+## Alpha 0.2 release preparation — 10 October 2026
+
+Version `0.2.0-alpha.1` builds the modern renderer with enhancements disabled by
+default, the joint/subdivision seam fixes, optional faster map loading, and the
+local regional-language importer. Release automation tests the asset-free suites
+and unpacked download before publishing. Tests requiring GPU readback run locally;
+the hosted runner excludes them. The accompanying source ZIP includes the modern
+renderer and its shader sources. Generated language packs remain excluded.
+
 ## Optional regional localization — 10 October 2026
 
 The launcher now provides **Languages → Import from discs…** with regional

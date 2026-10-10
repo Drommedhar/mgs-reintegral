@@ -75,6 +75,7 @@ def check_package(package: Path, ui: bool):
         version = run_engine(executable, ["--version"], directory)
         if info["version"] not in version or info["commit"][:12] not in version:
             raise AssertionError("Package and executable source identities differ")
+        check_sources(package, info["version"])
         run_engine(executable, ["--help"], directory)
         check_discs(executable, directory)
         check_importer(executable.parent, directory)
@@ -92,6 +93,23 @@ def check_package(package: Path, ui: bool):
     print(
         "Player package: version, Unicode paths, both discs, wrong discs, missing image, and read-only checks passed."
     )
+
+
+def check_sources(package: Path, version: str):
+    source = package.with_name(f"reintegral-{version}-mpl-source.zip")
+    with zipfile.ZipFile(source) as archive:
+        names = {name.replace("\\", "/") for name in archive.namelist()}
+        for required in (
+            "modern-renderer/sdl3_gpu.c",
+            "modern-renderer/sdl3_draw.h",
+            "modern-renderer/CMakeLists.txt",
+            "modern-renderer/shaders/psx.vert.glsl",
+            "modern-renderer/shaders/psx.frag.glsl",
+        ):
+            if required not in names:
+                raise AssertionError(
+                    f"Missing accompanying renderer source: {required}"
+                )
 
 
 def check_importer(application: Path, directory: Path):

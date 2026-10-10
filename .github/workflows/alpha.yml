@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version without v (for example 0.1.0-alpha.1)'
+        description: 'Version without v (for example 0.2.0-alpha.1)'
         required: true
-        default: '0.1.0-alpha.1'
+        default: '0.2.0-alpha.1'
         type: string
       publish:
         description: Publish the tested files as a prerelease
@@ -41,7 +41,7 @@ jobs:
         env:
           PUBLISH_RELEASE: ${{ inputs.publish }}
         run: |
-          if ($env:RELEASE_VERSION -notmatch '^\d+\.\d+\.\d+-alpha\.\d+$') { throw 'Use a version such as 0.1.0-alpha.1.' }
+          if ($env:RELEASE_VERSION -notmatch '^\d+\.\d+\.\d+-alpha\.\d+$') { throw 'Use a version such as 0.2.0-alpha.1.' }
           if ($env:PUBLISH_RELEASE -ne 'true') { exit 0 }
           $release = gh api "repos/$env:GITHUB_REPOSITORY/releases" --paginate --jq '.[].tag_name'
           if ($LASTEXITCODE -ne 0) { throw 'Cannot inspect existing releases.' }
@@ -66,7 +66,7 @@ jobs:
           ./tools/bootstrap.ps1
           ./tools/bootstrap.ps1 -Check
       - name: Build optimized game, symbols, launcher and tests
-        run: ./tools/build.ps1 -Configuration RelWithDebInfo -BuildDirectory build/alpha -Version $env:RELEASE_VERSION -Parallel 4
+        run: ./tools/build.ps1 -Configuration RelWithDebInfo -BuildDirectory build/alpha -RendererModule renderers/modern -Version $env:RELEASE_VERSION -Parallel 4
       - name: Cache verified build dependencies before tests
         if: steps.dependencies.outputs.cache-hit != 'true'
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -80,7 +80,7 @@ jobs:
         env:
           SDL_AUDIODRIVER: dummy
         run: |
-          & ./.tools/cmake-3.31.8/cmake-3.31.8-windows-x86_64/bin/ctest.exe --test-dir build/alpha --output-on-failure --timeout 60 -j 4 -E '^mgs_(gpu_|widescreen_gpu_)'
+          & ./.tools/cmake-3.31.8/cmake-3.31.8-windows-x86_64/bin/ctest.exe --test-dir build/alpha --output-on-failure --timeout 60 -j 4 -E '^mgs_(gpu_|widescreen_gpu_|modern_gpu_|joint_geometry_)'
           if ($LASTEXITCODE -ne 0) { throw 'CTest failed.' }
       - name: Package and test the unpacked download
         run: |

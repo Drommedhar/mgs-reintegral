@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)][string]$BuildDirectory,
-    [ValidatePattern('^[0-9]+\.[0-9]+\.[0-9]+(?:-[a-z0-9.]+)?$')][string]$Version = '0.1.0-alpha.1',
+    [ValidatePattern('^[0-9]+\.[0-9]+\.[0-9]+(?:-[a-z0-9.]+)?$')][string]$Version = '0.2.0-alpha.1',
     [string]$OutputDirectory = 'build/packages'
 )
 
@@ -63,9 +63,11 @@ New-Item -ItemType Directory -Path $sourceRoot | Out-Null
 foreach ($part in @('platform', 'psyz')) {
     Copy-Item -LiteralPath (Join-Path $project "vendor/psyz/psyz/src/$part") -Destination (Join-Path $sourceRoot $part) -Recurse
 }
+Copy-Item -LiteralPath (Join-Path $project 'renderers/modern') -Destination (Join-Path $sourceRoot 'modern-renderer') -Recurse
 @"
 RE:INTEGRAL $Version; source commit $commit
 Modified MPL-covered source is in the accompanying $sourceName release asset.
+It includes the platform runtime and modern renderer sources and shaders.
 It is available under MPL 2.0; see licenses/MPL-2.0.txt.
 Build scripts, pinned upstream revisions and all patches:
 https://github.com/Drommedhar/mgs-reintegral/tree/$commit

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.24)
-project(MGSIntegralNative VERSION 0.1.0 LANGUAGES C CXX)
-set(MGS_RELEASE_VERSION "0.1.0-alpha.1" CACHE STRING "Release version")
+project(MGSIntegralNative VERSION 0.2.0 LANGUAGES C CXX)
+set(MGS_RELEASE_VERSION "0.2.0-alpha.1" CACHE STRING "Release version")
 set(MGS_BUILD_COMMIT "local" CACHE STRING "Source commit")
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 configure_file(include/mgs_build.h.in mgs_build.h @ONLY)

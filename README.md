@@ -6,7 +6,8 @@
 
 ## Play the alpha
 
-Current prerelease: [**0.1.0-alpha.1**](https://github.com/Drommedhar/mgs-reintegral/releases/tag/v0.1.0-alpha.1).
+Alpha 0.2 build: **0.2.0-alpha.1**. See [Releases](https://github.com/Drommedhar/mgs-reintegral/releases)
+for published downloads.
 
 Download the `windows-x86.zip` from [Releases](https://github.com/Drommedhar/mgs-reintegral/releases),
 extract it and open **RE-INTEGRAL.exe**. The launcher asks for Integral Disc 1
@@ -15,7 +16,7 @@ It saves settings and memory cards under `%LOCALAPPDATA%\RE-INTEGRAL` so updates
 preserve them. No development tools or Python installation is needed to play.
 See [alpha requirements, controls and limitations](docs/ALPHA.md).
 
-Source builds also support optional [English and German language packs](docs/LANGUAGES.md)
+Alpha 0.2 also supports optional [English and German language packs](docs/LANGUAGES.md)
 imported from your own regional discs. Use **Languages → Import from discs…**;
 the bundled importer creates packs locally without a Python installation.
 Integral remains the gameplay base. Regional coverage is currently partial.
@@ -73,7 +74,7 @@ Use PowerShell 7 on Windows with Git, 64-bit Python 3.11 or newer, and Visual St
 
 The executable is `build/windows-x86-debug/mgs-integral-native.exe`. The Windows x86 target preserves the recovered program's 32-bit pointer and `long` assumptions. An x64 port is deferred; the feasibility audit is retained locally.
 
-An [experimental modern renderer](renderers/modern/README.md) now provides optional perspective-correct model textures, subpixel geometry and a floating-point depth buffer. Build it in a separate directory with `-RendererModule renderers/modern`; its launcher exposes the three switches on the **Graphics** tab. The regular build remains the original renderer.
+An [experimental modern renderer](renderers/modern/README.md) provides optional perspective-correct model textures, subpixel geometry and a floating-point depth buffer. Alpha 0.2 includes it with the enhancements disabled by default. Source builds select it with `-RendererModule renderers/modern`; its launcher exposes the three switches on the **Graphics** tab. A source build without that option retains the original renderer.
 
 The same graphical launcher is built alongside Debug and optimized executables.
 Its **Gameplay → Faster map loading (experimental)** option removes presentation
@@ -84,9 +85,9 @@ See [loading measurements and validation](docs/PERFORMANCE_DIAGNOSTICS.md#map-lo
 To reproduce an optimized package locally:
 
 ```powershell
-./tools/build.ps1 -Configuration RelWithDebInfo
+./tools/build.ps1 -Configuration RelWithDebInfo -RendererModule renderers/modern
 ./tools/package.ps1 -BuildDirectory build/windows-x86-relwithdebinfo
-./.venv/Scripts/python.exe -m tests.test_release build/packages/reintegral-0.1.0-alpha.1-windows-x86.zip --ui
+./.venv/Scripts/python.exe -m tests.test_release build/packages/reintegral-0.2.0-alpha.1-windows-x86.zip --ui
 ```
 
 GitHub Actions runs only through **Actions → Build alpha release → Run workflow**.

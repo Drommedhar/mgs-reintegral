@@ -6,7 +6,7 @@ param(
     [string]$RendererModule,
     [string]$BuildDirectory,
     [ValidatePattern('^[0-9]+\.[0-9]+\.[0-9]+(?:-[a-z0-9.]+)?$')]
-    [string]$Version = '0.1.0-alpha.1',
+    [string]$Version = '0.2.0-alpha.1',
     [switch]$ConfigureOnly,
     [ValidateRange(1, 128)]
     [int]$Parallel = [Environment]::ProcessorCount

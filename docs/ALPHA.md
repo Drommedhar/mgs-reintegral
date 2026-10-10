@@ -1,4 +1,18 @@
-# RE:INTEGRAL — first alpha
+# RE:INTEGRAL — 0.2.0-alpha.1
+
+This alpha adds optional graphics enhancements, faster map loading, and German
+or US English text/speech imported locally from your own discs.
+
+- **Graphics:** perspective-correct model textures, subpixel geometry and depth
+  testing are independently selectable. The character-joint seam fix is included.
+  The experimental PBR test has been removed.
+- **Loading:** optional faster map loading preserves geometry processing.
+- **Languages:** import and validate private language packs directly in the
+  launcher, with progress and cancellation. No packs or game data are distributed.
+
+Graphics enhancements and faster loading default to off. Existing saved settings
+are retained. Language coverage is partial; unmatched dialogue and movies use
+Integral's original resources.
 
 Download the `windows-x86.zip` asset, extract the entire folder, and open
 **RE-INTEGRAL.exe**. Keep the launcher beside `mgs-integral-native.exe`.
@@ -28,7 +42,8 @@ linked into the game. The executables are unsigned.
 1. Select both disc CUE files in **Discs and display**.
 2. Choose a resolution and enable widescreen/fullscreen as desired.
 3. Review **Gameplay** for optional bonus items, invulnerability, auto-card,
-   and Psycho Mantis memory profiles. Defaults leave gameplay aids disabled.
+   faster map loading and Psycho Mantis memory profiles. Defaults leave gameplay
+   aids disabled. **Graphics** contains the three optional rendering enhancements.
 4. Click **Save and play**. Disc identities are checked before the game starts.
 
 For optional German or US English text and speech, open **Languages → Import
@@ -82,7 +97,8 @@ when reporting a bug. Reopen the launcher to repair paths after moving discs.
 
 One main-campaign route was completed through credits on 10 October 2026.
 That does not establish coverage of all branches, optional modes, controllers
-or GPUs. This alpha focuses on installing and launching the native build.
+or GPUs. That playthrough used the original renderer; the optional graphics and
+language features have targeted checks and still need broader playtesting.
 Complete regional coverage, VR Missions, the replacement Godot renderer and
 broader mod formats remain future work; see the repository roadmap.
 
