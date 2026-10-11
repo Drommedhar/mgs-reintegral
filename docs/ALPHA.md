@@ -46,6 +46,12 @@ linked into the game. The executables are unsigned.
    aids disabled. **Graphics** contains the three optional rendering enhancements.
 4. Click **Save and play**. Disc identities are checked before the game starts.
 
+For 240p comparison recordings, select **320x240** and turn **Widescreen** off.
+This uses 1× internal rendering with the original 4:3 output. Turn off the three
+**Graphics** enhancements for a baseline comparison. Resolution does not set
+the frame rate; the developer **Frame limit** stops the game after a number of
+frames, so leave it at **0** for an ongoing recording.
+
 For optional German or US English text and speech, open **Languages → Import
 from discs…**, choose the regional release and its two images, then click
 **Import and use**. The launcher creates and checks a pack locally; no Python

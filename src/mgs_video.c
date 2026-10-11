@@ -25,7 +25,7 @@ int MgsVideoReferenceRequired(void)
 static int GodotWorldCommand(const u_long *words, int available, void *userdata)
 {
     (void)userdata;
-    if (available < 3 || words[1] >= words[2] || words[2] > 65536) return -1;
+    if (available < 3 || words[1] >= words[2] || words[2] > 65537 || (words[2] == 65537 && words[1] != 65536)) return -1;
     if (MgsGodotSceneEnabled()) MgsGodotWorldBegin(words[1], words[2]);
     return 3;
 }
@@ -115,6 +115,10 @@ int MgsVideoConfigure(const MgsVideoOptions *options)
         fputs("Widescreen aspect must be between 4:3 and 4:1.\n", stderr);
         return 0;
     }
+#ifdef MGS_GODOT_SCENE
+    /* Godot scales the output; the native transport keeps PS1 packet coordinates. */
+    scale = 1;
+#endif
     if (Psyz_VideoConfigureWindow(width, height, options->fullscreen) != 0 ||
         Psyz_VideoSetInternalResolution(scale) != 0) {
         fputs("Renderer cannot configure the requested output resolution.\n", stderr);
@@ -151,6 +155,11 @@ int MgsVideoHalfWidth(void)
     if (movie_active || codec_active || menu_stage)
         return 160;
     return (int)((160 * view_denominator + view_numerator - 1) / view_numerator);
+}
+
+float MgsVideoHorizontalScale(void)
+{
+    return MgsVideoReferenceRequired() ? 1.0f : (float)view_numerator / view_denominator;
 }
 
 int MgsVideoCapturesOutput(void)

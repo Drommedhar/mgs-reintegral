@@ -7,6 +7,7 @@ from pathlib import Path
 
 from godot_assets.formats import kmd, pcx, png
 from godot_assets.gltf import convert_model
+from godot_assets.maps import map_lights, map_models
 from list_assets import list_assets, read_at
 
 PROJECT = Path(__file__).resolve().parents[1]
@@ -20,7 +21,7 @@ def stage_payloads(stage_dir, stage):
     resources = {}
     with stage_dir.open("rb") as handle:
         for item in list_assets(stage_dir, stage):
-            if item.identity[-1] not in "kp":
+            if item.identity[-1] not in "kpgl":
                 continue
             payload = read_at(handle, item.offset, item.size, stage_dir.stat().st_size)
             if item.identity in resources and payload != resources[item.identity]:
@@ -74,7 +75,19 @@ def convert_stage(stage_dir, stage, output, shared_textures):
             **details,
         }
     print(f"{stage}: {len(assets)} converted assets", flush=True)
-    return assets, textures
+    script = resources.get("ea54.g")
+    models = map_models(script) if script is not None else []
+    for identity in models:
+        if stable_id(stage, identity) not in assets:
+            raise ValueError(
+                f"Map declaration references missing model {stage}/{identity}"
+            )
+    layout = {
+        "models": [stable_id(stage, identity) for identity in models],
+        "lights": map_lights(script, resources) if script is not None else [],
+        "scope": "startup-map-definitions",
+    }
+    return assets, textures, layout
 
 
 def prepare(content, output, stages):
@@ -95,13 +108,16 @@ def prepare(content, output, stages):
     if hashlib.sha256(source.read_bytes()).hexdigest() != expected:
         raise ValueError("STAGE.DIR differs from its disc import receipt")
     output.mkdir(parents=True, exist_ok=True)
-    assets, common = convert_stage(source, "init", output, {})
+    assets, common, _ = convert_stage(source, "init", output, {})
+    maps = {}
     for texture in common.values():
         texture["uri"] = "../init/" + texture["uri"]
     for stage in stages:
         if stage != "init":
-            converted, _ = convert_stage(source, stage, output, common)
+            converted, _, layout = convert_stage(source, stage, output, common)
             assets.update(converted)
+            if layout["models"]:
+                maps[stage] = layout
     manifest = {
         "schema": 1,
         "edition": "integral-j",
@@ -110,6 +126,7 @@ def prepare(content, output, stages):
         "stageDirSha256": expected,
         "coordinates": {"unitsPerMetre": 1000, "axes": ["x", "-y", "-z"]},
         "assets": assets,
+        "maps": maps,
     }
     (output / "catalog.json").write_text(
         json.dumps(manifest, indent=2) + "\n", encoding="utf-8"

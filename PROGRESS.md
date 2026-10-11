@@ -33,6 +33,771 @@ and its 600-VSync reload reached the Disc 2 entry corridor. Checkpoints restore
 map entries, not exact process snapshots. Original recordings and cards remain
 preserved; each checkpoint has adjacent provenance and validation JSON.
 
+## Puddle replacement removed - 12 October 2026
+
+The user rejected the reflective puddles in the running game. Removed the water
+snapshots, replacement planes/shader, reflection probes and custom ripple system.
+Restored the native RippleSurface actor and its original ripple effects. Fog in
+empty space and the repeated WORLD sorting fix remain. Protocol v13 rejects older
+renderer/runtime pairs. The user's mod ZIP is unchanged.
+
+Validation: rebuilt the native Godot executable; 22 targeted CTests and the
+Godot CPU/GPU suite pass, including original world effects and fog composition.
+The 1,800-frame real-disc dock probe loaded local-780062320.zip and completed
+normally on protocol v13. This is automated boot validation, not human acceptance.
+Logs: build/puddle-removal-build.log, build/puddle-removal-ctest.log,
+build/puddle-removal-godot-tests.log and build/godot-puddle-removal-boot/.
+Bootstrap verifies 93 MGS and 28 Psyz patches. The selected ZIP retains SHA256
+BF0DBC8F98FC3F14B19BCEEBF4CF0F416357AF1985856C37BBA882ECBB30B81D.
+Aislop score 100, no findings; cppcheck and clang-tidy are unavailable.
+
+## Fog in empty space and reflective shallow puddles � 12 October 2026
+
+**Superseded:** the puddle experiment below failed user acceptance and has been
+removed. The fog and ordering changes remain.
+
+Implemented protocol v12 and rebuilt `build/windows-x86-godot/RE-INTEGRAL.exe`:
+
+- A separate quarter-resolution background viewport renders the same camera's
+  environment fog/sky, including light-lit volumetric fog, without requiring geometry.
+  It is composed before native world packets. The main transparent viewport and HUD
+  ordering remain intact. Repeated sorting now removes previous WORLD markers before
+  insertion; regression tests cover empty/populated tables, both buffers and pause.
+- RippleSurface actors publish shallow regions and stable character contacts. A hazard
+  floor check distinguishes the five dock puddles from the deep pool. Native geometry,
+  collision, movement and trap behavior stay authoritative. Water bounds and texture
+  cutouts remain local original content; no retail files or coordinates were embedded
+  into distributed source or the user's mod.
+- Puddle planes use dielectric PBR reflections and outward normal ripples on entry and
+  every 0.28 metres of movement. Waves fade over 2.5 simulation seconds and pause with
+  the actor. Nearby puddles share local box-projected probes; movement/exit refreshes
+  are capped at 2 Hz. SSR cannot run on the transparent world viewport and is not
+  enabled. Reflections are approximate and can lag movement; off-camera geometry not
+  submitted by the native renderer can be absent. Planar reflections remain future work.
+- `patches/mgs-godot-puddles.patch` records the native actor hook. Bootstrap confirms
+  all 94 MGS and 28 Psyz patches. The selected ZIP's SHA256 remains
+  `BF0DBC8F98FC3F14B19BCEEBF4CF0F416357AF1985856C37BBA882ECBB30B81D`.
+
+Validation: 23 targeted CTests pass. The full Godot CPU/GPU suite, 19 Python asset/mod
+checks and GPU transport check pass in `build/godot-tests/2f8a7eb8c5b44873947ebaf92033b2a1`.
+The puddle fixture also verifies reflected-content refresh and expiry; the fog fixture
+checks empty-space fog, volumetric scene lights and native foreground preservation.
+Godot 4.8-dev7 emits a seven-texture reflection-atlas shutdown warning even in an empty
+stock-probe reproducer. The test runner reports this exact version-specific warning;
+other errors/leaks fail. Details are in `docs/GODOT_RENDERER_PLAN.md`.
+
+A real disc boot with the unchanged selected ZIP completed its dock movement probe
+and composed the modded world. At 2560x1440, 700 frames after warmup averaged 59.909 FPS,
+with p95/p99 16.6835 ms and one 21.4378 ms outlier. Therefore the strict no-hitch cadence
+check **failed**; this is not a claim of perfectly stable 60 FPS. Data:
+`build/godot-performance/fb4f66c74a7740b091be565ea873e95f/summary.json` and `timing.csv`.
+A local dock-scene render additionally exercised a real puddle cutout and its underside
+geometry. These are automated renderer checks, not a manual playthrough.
+
+Scoped Aislop score 100 with no findings. cppcheck and clang-tidy are unavailable.
+Human acceptance of fog boundaries, puddle appearance and motion remains open.
+
+## Emissive beacon glass, soft alarm spill and missing ripples — 11 October 2026
+
+The user confirmed the paired rotating red spots, requested emissive red glass and
+a gentle wide omni, and reported that ripples had disappeared. Native beacon
+activation now marks its glass assembly; only the transparent glass receives
+emission while active. Its opaque housing keeps ordinary lighting and shadows.
+The glass no longer casts opaque shadows across the beacon's lights. Each beacon
+adds one shadow-casting red omni (energy 0.35, range 6 m), sharing the first beam's
+lifetime and centered at the pivot. `EventLightTemplates/AlarmFill` is editable in
+the normal Inspector; existing ZIPs receive the default without changing authored
+templates. Protocol v11 carries the new fill-light kind and glass/activation flags.
+`mgs-godot-beacon-glow.patch` reproduces the native actor hooks.
+
+The ripple regression had three contributors. Godot already flips two-sided
+normals, so our second flip inverted back-facing ring lighting. Gamma conversion
+also crushed the native fade multiplier. Both are corrected. An actual dock scene
+replay then exposed transparent water writing depth before the rings, hiding most
+of them. Original transparent model color now blends without writing depth; a
+late colorless next pass retains the depth needed by world composition. Solid
+foreground meshes still occlude ripples. The prior fog-coverage fix remains.
+
+Validation: rebuilt `build/windows-x86-godot`, 21 relevant native CTests pass, and
+the complete CPU/GPU Godot suite plus 19 Python tests and the transport test pass
+(`build/godot-tests/854d4dce55bb4a579e6b3a76da6ff2f2`). GPU checks cover active/off
+glass emission with dark housing, all four event-light kinds and shadows,
+opposing spots with exactly one fill, legacy-template migration, both sides of
+ripples, linear fading, water overlap, foreground occlusion and fog. The real
+`local-780062320.zip` boot passed; its SHA256 remains
+`BF0DBC8F98FC3F14B19BCEEBF4CF0F416357AF1985856C37BBA882ECBB30B81D`.
+Local diagnostics render the actual dock ripple geometry and beacon glass; they
+are ignored development files, not an editor workflow or exported content.
+Human alarm/ripple acceptance and the previously deferred cutscene pacing remain
+unverified. Bootstrap verifies all 93 MGS and 28 Psyz patches. Aislop reports no
+findings; C/C++ engines `cppcheck` and `clang-tidy` are unavailable.
+
+## Godot side visibility, ripple fog and paired alarm spots — 11 October 2026
+
+The user's widescreen screenshots exposed a missed native/Godot ordering issue:
+`DG_SortChanlSystem` restored classic 4:3 gameplay bounds before publishing the
+Godot scene. The scene now receives render bounds before that restore, while
+gameplay still receives the classic bounds. A new Godot variant of the production
+visibility test failed before this fix and passes afterward, covering both edges
+at half-widths 214, 280 and 480 plus hidden/inactive groups. The earlier aspect
+tests established projection and framing, but did not cover this handoff order.
+
+The ripple rectangles have a reproducible fog failure: a completely faded
+additive quad still contributed fog color across its whole polygon. Four GPU
+checks failed with ordinary/volumetric fog and additive/quarter-additive blending.
+Factoring texture color and native fade into premultiplied coverage keeps the
+unfogged color and makes fog follow the ripple instead of the polygon. Invisible
+additive texels no longer write depth. These checks now pass alongside existing
+particle overlap, water depth, lighting and shadow tests. The existing 1 mm ripple
+depth bias is unchanged.
+
+Patrol beacons now register both native `pat_spt1` beam objects as red SpotLight3D
+instances, 180 degrees apart, with shadows. Rotation, activation, map membership
+and destruction follow the native objects. The Godot path suppresses beam meshes,
+wall-glow primitives and fullscreen alarm tint, preserving lamp housings, audio
+and actor state. `EventLightTemplates/AlarmSpot` exposes ordinary Godot properties;
+older ZIPs get its defaults without changing authored lights. Protocol v10 adds
+the alarm kind. Native patches are exported and pinned in `sources.lock.json`.
+
+Validation: the complete Godot development build succeeds; 21 scoped native,
+visibility, light and launcher CTests pass (`build/godot-visibility-alarm-ctest.log`);
+the Godot CPU/GPU suite, 19 asset/workspace Python tests and TCP readback pass
+(`build/godot-tests/5541d475163f48849e8ad83386fd8049`). The 1280x720 widescreen
+launcher check installs and boots the unchanged `local-780062320.zip`, confirms
+its overlay and world composition, and exits without renderer errors
+(`build/godot-visibility-alarm-boot`). A separate 3,600-VSync unskipped intro run
+followed animated cameras through d00a; it ended before the later dock Codec and
+therefore did not complete the intro probe. Active dock-alarm appearance and the
+user's exact moving ripple shot still need human confirmation; synthetic lighting
+tests are not a dock playthrough. Cutscene pacing remains deferred as requested.
+
+Bootstrap verifies all 92 MGS and 28 Psyz patches. Aislop reports score 100 with
+zero findings; cppcheck and clang-tidy are unavailable in this environment.
+The original selected ZIP still has SHA-256
+`bf0dbc8f98fc3f14b19bceebf4cf0f416357af1985856c37bba882ecbb30b81d`.
+
+## Godot widescreen selection — 11 October 2026
+
+The launcher disabled Widescreen for Godot and replaced the native resolution
+with 320x240, so selecting a wider output only changed the window. It now passes
+the selected resolution and Widescreen flag to the native video code. The Godot
+transport retains 1x packet coordinates while the renderer handles output
+resolution. The normal launcher checkbox is enabled; the command-line wrapper
+also supports `-Resolution 2560x1440 -Widescreen`.
+
+Protocol v9 adds horizontal projection scale to each scene snapshot. Godot
+expands the color and metadata cameras' horizontal field of view and viewport
+width together, preserving vertical framing and matching native culling,
+compatibility geometry and HUD transforms. Original-aspect mode remains 4:3;
+menus, Codec and movies retain native 4:3 presentation in widescreen mode.
+Rebuild the native executable together with the renderer. Existing mod ZIPs
+require no conversion, and the user's ZIP was used without modification.
+
+The game and launcher are rebuilt (`build/godot-aspect-build.log`,
+`build/godot-aspect-final-build.log`). Fifteen selected video, clipping and
+launcher CTests pass (`build/godot-aspect-ctest.log`). The Godot CPU/GPU suite,
+19 Python tests and protocol readback pass (`build/godot-aspect-tests.log`, run
+`495560d735754ac1a81c961003813c08`). Projection tests cover 4:3, 16:9, 21:9,
+4:1, returning to 4:3, extra horizontal visibility, unchanged vertical framing,
+metadata alignment and invalid scale rejection.
+
+Two 1,800-frame real launcher/disc boots with `local-780062320.zip` at
+1280x720 pass. Widescreen displays a 1280x720 game rectangle, horizontal scale
+0.75; original mode displays 960x720, scale 1.0. Both renderer logs are error-free,
+and the images were inspected (`build/godot-aspect-wide/render.png`,
+`build/godot-aspect-original/render.png`). Assertions against these real logs
+also reject an incorrect aspect selection (`build/godot-aspect-display-check.log`).
+This is scoped dock validation, not campaign-wide widescreen acceptance or a new
+performance benchmark. Cutscene pacing work remains deferred. Aislop reports
+zero findings (`build/godot-aspect-aislop.json`); cppcheck and clang-tidy remain
+unavailable. Repository whitespace and normal headless editor import checks pass.
+
+## Godot color precision and editable mod ZIPs — 11 October 2026
+
+Native fullscreen blend/framebuffer effects were rounding the composed Godot
+image back to 5-bit RGB. The Godot composition path now preserves floating-point
+color through those operations; native texture decoding and the standalone PS1
+renderer retain their original behavior. The locally supplied shader flag does
+not change protocol v8. `patches/psyz-godot-color-precision.patch` is in the lock
+file; bootstrap verifies all 90 MGS and 28 PsyZ patches
+(`build/godot-editing-bootstrap.log`). GPU regressions cover all four blend modes
+and framebuffer copies at native and scaled resolutions. The exact helicopter
+shot reported by the user has not been replayed for visual acceptance.
+
+The editor now offers **Open mod ZIP for editing…** and an active workspace
+picker. Imports restore the normal local disc references; reopening identical ZIP
+contents resumes the workspace without discarding edits. Changed archives get
+separate workspaces. Import validates paths, integrity and manifest references,
+and publishes the workspace only after extraction succeeds. Export uses a Save
+dialog with explicit overwrite confirmation and replaces the output only after
+success. The user's `local-780062320.zip` remains unchanged, SHA256
+`BF0DBC8F98FC3F14B19BCEEBF4CF0F416357AF1985856C37BBA882ECBB30B81D`.
+
+Model edit scenes expose original character rigs and parts in the normal Scene
+tree. Inspector material/transform changes are saved as sparse edits; original
+geometry, rigs and unchanged textures remain disc-backed and are excluded from
+export. Custom Mesh resources and compatible complete rigged models are supported.
+The catalog now includes textures, can list a selected model's texture IDs, and
+can assign PNG/WebP replacements in the active workspace. Original resources are
+marked to reject accidental export. Bone-contract changes and missing original
+mesh slots are rejected. Detailed vertex modeling and painting still use external
+tools. See `docs/GODOT_MODDING.md` for the workflow. Saving inactive map tabs also
+now preserves visibility and authored-child transforms without requiring those
+tabs to be inside the live editor tree.
+
+Validation: the Godot CPU/GPU suite, 19 Python tests and TCP readback pass
+(`build/godot-editing-tests.log`, run `859c5a206e7744cabe12b7f273049dfd`). Seven
+standalone SDL GPU CTests pass (`build/godot-color-native-ctest.log`); those tests
+require SDL rather than the Godot transport without a server. The final Godot
+game/launcher build and four geometry/light/launcher CTests pass
+(`build/godot-editing-final-build.log`, `build/godot-editing-final-ctest.log`).
+The final sparse-asset test and normal headless editor import pass
+(`build/godot-editing-final-authoring.log`, `build/godot-editing-final-editor.log`).
+
+An actual disc-backed guard with 16 parts and 23 texture IDs round-trips through
+the editor, and its exported material edit loads in a 900-frame launcher boot
+including the opening cinematic alias (`build/godot-editor-zip-boot.log`). The
+scripted editor workflow assertions pass, but its custom editor main loop emits
+Godot progress-dialog errors and requires terminating the owned test process;
+this is not a clean manual UI acceptance run. The ordinary editor import has no
+such errors. The separate SDFGI trial's short steady 1440p dock check measures
+59.940 FPS, P99 16.6835 ms, maximum 16.693 ms and zero frames more than 2 ms over
+budget (`build/godot-editing-performance.log`). This does not establish campaign
+performance; cutscene pacing work remains deferred. Aislop reports no findings;
+cppcheck and clang-tidy are unavailable, and its GLSL scan has no supported files.
+
+## Godot event lights and SDFGI trial — 11 October 2026
+
+Current-build handoff: the full `build/windows-x86-godot` build succeeds
+(`build/godot-current-build.log`); the native game and launcher were already
+current. The x64 GDExtension build also reports no pending work. Seven selected
+native/launcher CTests pass (`build/godot-current-ctest.log`), and the complete
+Godot CPU/GPU suite including the native extension, 13 Python tests and TCP
+readback passes (`build/godot-tests/2c65f32a8ba44331895f49cfa0b40b8e`).
+Start `build/windows-x86-godot/RE-INTEGRAL.exe`; it uses the current renderer
+project and its MBAO setting. Select the SDFGI trial ZIP below for SSIL-off
+bounced lighting. This is the local development build, configured as Debug.
+
+Protocol v8 now transfers the native temporary-light pool and weapon attachments.
+The original FAMAS flash animation and wall-impact spark actor already call
+`DG_SetTmpLight`; their positions, animated radii and lifetimes now drive
+shadow-casting Godot omni lights. Original soldier/DMO weapon glows were sprites;
+the corresponding `glight` and `famaslit` attachments now also drive shadow-casting
+spotlights down the barrel. Invisible/uninitialized attachments are omitted, and
+retired primitive addresses receive new light identities when reused. Native
+gameplay, animation and collision remain authoritative.
+
+Map scenes expose ordinary `TemporaryFlash` and `WeaponSpot` light nodes under
+the hidden `EventLightTemplates` group. Their Godot Inspector properties configure
+the spawned lights. Old packages use the same default templates. ZIP export now
+uses the manifest of the currently edited mod scene, including separate trial
+mods, instead of always exporting `mods/local`. Export still excludes original
+geometry, materials and local disc references.
+
+The requested SDFGI/SSIL-off trial is
+`build/mod-exports/local-780062320-sdfgi.zip`, authored in
+`renderers/godot/project/mods/sdfgi-trial/stages/s00a.tscn`. It derives from the
+user's `local-780062320.zip`; the original ZIP's SHA256 remains
+`BF0DBC8F98FC3F14B19BCEEBF4CF0F416357AF1985856C37BBA882ECBB30B81D`.
+The user's newer `mods/local` scene is preserved. The trial keeps the original
+lights/fog and enables SDFGI with four cascades, 0.25 m cells, occlusion, no sky
+input, energy 1 and bounce feedback 0.5. SSIL is off; SSAO stays on. Only opaque
+declared map geometry contributes static GI; animated actors receive GI without
+being voxelized, as do transparent effects. Custom mod geometry keeps its authored
+GI mode. There is no original-asset bake to package.
+
+Godot 4.8-dev7's project-wide
+`rendering/lights_and_shadows/multi_bounce_occlusion/enabled` is now true.
+Multi-bounce AO corrects the shading of SSAO/material AO; it still needs an AO
+source and works alongside SDFGI. Both editor and launcher-prepared projects use
+this setting. The pinned engine recognizes it; the trial reports SDFGI=true,
+SSIL=false and SSAO=true (`build/godot-mbao-settings.log`).
+
+Verification:
+
+- Native build and six selected CTests pass, including attachment transforms,
+  light lifetime/visibility, temporary-light encoding, zero-pose rejection and
+  launcher ZIP selection (`build/godot-event-ctest.log`). Bootstrap verifies all
+  90 MGS / 27 PsyZ patches; the new hooks are in
+  `patches/mgs-godot-event-lights.patch`.
+- Godot CPU/GPU, 13 Python conversion tests and fragmented TCP upload/readback
+  pass with MBAO enabled (`build/godot-tests/8133f4ec2ec24d3ab0a0e27c227dda84`).
+  Rendered event-light tests verify both omni and spot shadows. The actual
+  reference shader produces 10860 green bounce pixels in the SDFGI fixture and
+  illuminates the dynamic receiver with SSIL disabled. Scene save/export tests
+  preserve authored spotlight settings without shipping original geometry.
+- The real launcher/ZIP dock run at 2560×1440 averages 59.922 FPS across 700
+  measured frames after 1100 warm-up frames: P99 16.684 ms, maximum 18.539 ms,
+  zero frames exceeding native 59.94 Hz budget + 2 ms. Evidence:
+  `build/godot-performance/17443d139f374c9aa60aa48003b5244a`.
+  This is a short steady-dock check, not whole-game stable-60 acceptance.
+- A separate dock visual run reports two live native weapon lights and no
+  renderer errors (`build/godot-effects-s00a-4ac5f2e648fa4fa4991c94237a3285b3`).
+  A human gunfight/weapon-beam placement review is still pending. Screenshot
+  readback stalls are excluded from performance evidence.
+- Changed-project Aislop scores 100 with zero findings
+  (`build/godot-mbao-aislop.json`); cppcheck and clang-tidy are unavailable.
+  The four touched vendor files retain two nonfixable findings: the inherited
+  seven-parameter `SetParam`, and a false positive for `chanl.c`'s label after
+  `return`, which is reached by `goto` (`build/godot-event-vendor-aislop.json`).
+  No rules were disabled. The non-patch working diff passes whitespace checks.
+
+Remaining cutscene shadow-preparation hitches stay deferred at the user's
+request. Next acceptance is the user's lighting/mod workflow review with the
+trial ZIP; native muzzle/impact light placement also needs a live combat review.
+
+## Godot cinematic overrides and physical effects — 11 October 2026
+
+The requested `build/mod-exports/local-780062320.zip` is now the verification mod.
+Its archive and authored environment/lights remain unchanged. `d00a` inherits the
+`s00a` overlay and `d01a` inherits `s01a` unless an exact cinematic override exists.
+Model, texture, PBR and removal rules are remapped only when original resource
+hashes match. The live stage and native actors remain cinematic; visual overrides
+do not change gameplay, collision or cutscene timing.
+
+Protocol v7 transfers live water, ripples, bubble actors (including the three-texture
+opening DMO bubbles), breath/smoke, fog and casing quads to Godot. Original animation,
+UVs, fades and blend modes are retained. Supported transparent KMD surfaces also
+receive Godot lighting. Effects reuse meshes and geometry textures, blend without
+writing depth, then write depth in a colorless pass for native command composition.
+Ripples use a 1 mm depth bias above coplanar water; small ring normals no longer
+switch abruptly to a camera-facing fallback. GPU regressions cover overlapping
+particles, coplanar ripples from different camera angles, foreground occlusion,
+dynamic lighting/shadows, alpha/additive composition and animated fades.
+
+The guard's glowing waist was a separate ownership bug: `96b6.k` part 0 has two
+textureless, permanently collapsed faces. They sent the entire otherwise textured
+waist through the original baked-lighting renderer. Repeated-corner classification
+now keeps that part in Godot and discards only its empty surfaces. Indirect vertices
+with different bone references remain distinct; visible runtime-textured parts
+still use the command renderer. Native geometry and Godot mixed-surface tests pass.
+The elevator shot at frame 3300 confirms that the bright waist band is gone.
+
+Lit models now use Godot's face culling instead of discarding faces rejected by
+the original low-resolution projection. Such faces use prepared UVs rather than
+stale packet coordinates. Native actor/part visibility and visual removals still
+apply. The GPU regression renders a lit imported mesh with all native face flags
+culled; it remains visible and responds to a moving light. The subsequent animated
+intro and elevator wide shots are in
+`build/godot-effects-title-60f2dea1a0d1498099c8246d631499de` (frames 3000/3300).
+
+Stage textures and initial model materials prepare during loading. Effect batches
+reserve 1024 quads so growing bubble bursts reuse their mesh and geometry texture.
+Representative shader/skin formats warm up before native startup. The temporary
+viewport covers cube/dual-paraboloid omni, spot, directional and area lights;
+it is removed before play and does not change the mod's environment or lights.
+The actual dock ripple sequence at frames 1200–1212 expands and fades without
+partial-ring loss (`build/godot-effects-s00a-9a2b95fc523d4f0f95d1c0a8382c8f09`).
+
+Verification so far:
+
+- Native build and seven selected geometry/visibility/timing/video/launcher CTests
+  pass. The complete Godot CPU/GPU suite, 13 Python conversion tests and fragmented
+  TCP upload/readback check pass (`build/godot-all-light-tests.log`). Added GPU
+  checks verify moving skinned shadows under spot, directional and area lights,
+  in addition to the existing omni coverage; all pass.
+- Full title → New Game → `d00a` → `s00a` introduction runs to the dock Codec with
+  no post-title input. Visual evidence is in
+  `build/godot-effects-title-e69ab2af8507494c824b750b7937066b`.
+  Direct `--stage d00a` is only a static map diagnostic and does not start the DMO.
+- Bootstrap verifies all 89 MGS and 27 PsyZ patches. The effect hooks are reproduced
+  by `patches/mgs-godot-world-effects.patch`.
+- Changed-project Aislop: 100, zero findings. The nine-file vendor scan retains five
+  inherited nonfixable function-length/parameter-count warnings and one false
+  positive: `chanl.c`'s label after `return` is reached by a valid `goto`.
+  Applicable scans lack clang-format/cppcheck/clang-tidy. Rules remain enabled.
+
+The latest 1440p dock test through the real ZIP-selection/launcher path passes:
+59.940 FPS, P99 16.684 ms, maximum 16.701 ms, zero frames over budget + 2 ms in
+2500 measured samples (`build/godot-performance/d8062233f7344814bbc7489ecdffcfc5`).
+The latest full intro without screenshot readbacks averages 59.830 FPS, P99 16.706 ms,
+with 11 frames over budget + 2 ms and a 55.243 ms maximum across 3948 active DMO
+samples (`build/godot-effects-title-ab7b6a08147f4e54b0eaec49950ac940`).
+The cutscene still does not meet the requested stable-cadence acceptance.
+
+RenderingDevice timestamps locate the repeatable first camera-change hitch in
+Godot's omni shadow preparation: 35.531 ms CPU versus 1.135 ms GPU in that section
+(`build/godot-effects-title-9acc98a3fcb14d599a0143392b3b8a50`). This is outside the
+GDScript scene update and native command submission. Larger artificial shadow
+warm-ups reduced that first stall but worsened subsequent cadence, so they were
+discarded. Explicit drawing, a separate render thread and a D3D12 comparison did
+not improve pacing either; production keeps the existing Vulkan/Forward+ path.
+Resolving shadow preparation without changing authored lights remains open and is
+deferred at the user's request. Work continues on the Godot editor/mod workflow,
+including native muzzle/impact lights and weapon-mounted soldier spotlights.
+
+## Godot steady gameplay performance — 11 October 2026
+
+The user's minimum target is stable 60 FPS. The native NTSC clock remains 59.94 Hz;
+gameplay, authored lighting/shadows, PBR materials and output resolution are unchanged.
+Frame-by-frame measurements separated loading from steady gameplay. The initial
+1440p dock run still averaged 59.222 FPS after frame 1100, with P99 25.307 ms,
+maximum 40.789 ms and 31 frames over budget + 2 ms in 1301 samples
+(`build/godot-perf-baseline`).
+
+Fixed three sources of stalls:
+
+- Windows loopback sometimes delivered the first 196485 scene bytes immediately,
+  then waited 25–32 ms to deliver the remainder. Native writes now use 16 KiB chunks;
+  Godot drains available bytes in the same iteration. Protocol v6 and ordering remain
+  intact. The cadence CSV now measures bridge exchange time in `submit_us`.
+- Removed forced unbuffered native stdout. Redirected diagnostic/probe lines caused
+  repeatable 15–19 ms stalls on the game thread. Default buffered output is retained
+  and flushed by normal process exit.
+- Reused identical surface materials within each character, keyed by texture,
+  culling and lighting mode. Materials remain separate between actor palettes.
+  First model swaps no longer build duplicate materials for every mesh part.
+  Shadow visibility now sets the final casting mode directly instead of toggling
+  it off and back on for every snapshot.
+
+The real launcher/mod path with `build/mod-exports/local-474555866.zip`, Forward+
+and 2560×1440 measured **59.937 FPS, P99 16.685 ms, maximum 17.017 ms**, with zero
+frames over budget + 2 ms across 2500 measured VSyncs after the 1100-frame warmup.
+Evidence: `build/godot-performance/663878e8d98943c0bcad79e77b02622d/summary.json`,
+`timing.csv` and logs. Measurements use the existing dock probe, not a manual
+playthrough or a whole-campaign performance claim. Loading remains excluded.
+
+A longer confirmation run measured **59.938 FPS, P99 16.6835 ms, maximum
+16.9681 ms**, again with zero frames over budget + 2 ms, across 4900 measured
+VSyncs after the same warmup. It submitted 59,489 world composites, with the
+selected ZIP verified active. Evidence:
+`build/godot-performance/7d0477e44d754a7cb1e775a23c3e363c/summary.json` and adjacent
+logs/timing CSV. This is the rebuilt Debug native runtime with the pinned
+Godot 4.8-dev7 Forward+ Vulkan renderer on the local RX 9070 XT.
+
+`tools/test-godot-performance.ps1` installs a chosen ZIP into a private test project,
+uses the launcher path and records every VSync without screenshot readbacks. It
+reports percentiles and fails on slow frames or an average outside the native
+cadence tolerance. `MGS_CADENCE_ALL_FRAMES=1` enables buffered complete timing CSVs;
+normal slow-frame diagnostics remain available.
+
+Validation: native, launcher and mod test harness build targets pass; six selected
+frame-timing/video/visibility/launcher CTests pass. Godot CPU/GPU suite and 13 Python
+conversion tests pass, including a new fragmented 256 KiB upload/readback check,
+PBR lighting, imported-map lighting, characters casting shadows, 2D sampling and
+depth/order composition. Project Aislop scores 100 with no findings. The scoped
+PsyZ scan retains five inherited nonfixable file/function-size warnings;
+clang-format, cppcheck and clang-tidy are unavailable to the applicable scans.
+`git diff --check` passes. Bootstrap verifies all 88 MGS and 27 PsyZ patches,
+including `psyz-godot-exchange-timing.patch`.
+
+## Godot overlay, tiled images, legacy effects and pacing — 11 October 2026
+
+Rebuilt the Godot native executable with protocol v6. Native debug text (including
+FPS/frame/MAX and controller prompts) now reaches a Godot overlay. The launcher
+checkbox works, and `run-godot.ps1` accepts `-DebugOverlay`. Renderer counters
+report draw/world commands, copied MiB, CPU submission and scene-update time;
+these are not GPU timings.
+
+Scaled polygons now divide their pixel-center offsets by the render scale. The
+tiled-image GPU regression checks every scaled sample, and the real Konami logo
+has no central split (`build/godot-logo-fixed-000300.png`). Legacy shadow-textured
+models/FT4 shadow packets and static emitter halos are suppressed only in Godot
+3D mode. Actor behavior and other transparency/effects remain active. The user's
+existing `local.visuals` ZIP loads unchanged; authored lighting was not altered.
+
+DRAW now carries clipped batch bounds and texture/destination dependencies.
+Dirty-region snapshots avoid copies for opaque draws and ordinary WORLD passes;
+destination blends copy their bounds, while framebuffer feedback retains all
+required source writes. Dock copy samples fell from about 126 MiB to 6–14 MiB per
+rendered frame. Tests cover tiled rasterization, mask preservation, blending after
+skipped copies, uploads/moves, native readback and world detail.
+
+The 240 Hz Godot loop also delayed synchronous native requests. Buffered commands
+resume after completion, and the loop cap is now 1000 Hz; native VSync remains
+authoritative and the 3D viewports update only for new scenes. Matched 1800-VSync
+dock checks with the same ZIP/settings measured 50.56 versus 58.32 average FPS,
+584 versus 34 frames over budget + 2 ms. Evidence is under
+`build/godot-pace-s00a-{240,1000}`. Each includes startup, one screenshot readback,
+and eight empty audio refills; this is scoped timing evidence, not steady-state
+performance acceptance under an otherwise idle GPU. Loading stalls remain.
+
+Validation: CPU/GPU Godot suite and 13 Python conversion tests pass; five selected
+visibility/video/launcher CTests pass; real modded dock and startup-logo boots pass.
+Project Aislop has no errors/warnings. Scoped vendor scans retain six nonfixable
+file/function complexity warnings; optional C lint/format tools were unavailable.
+Bootstrap verifies 88 MGS and 26 Psyz patches. Pre-existing unexported presentation
+and Remix input hooks were preserved in separate `*-existing-*.patch` files so
+the pinned source stack reproduces the working tree; no new Remix behavior was added.
+
+## Runtime character and omni-light shadows — 11 October 2026
+
+Confirmed the user's game uses Vulkan / Forward+ at 2560x1440. Removed the
+runtime-only 2048 shadow atlas override; the world viewport now inherits the
+project's atlas size (4096), depth precision and quadrant subdivisions.
+
+Protocol v5 separates camera-visible parts from active shadow casters. Native
+camera bounds no longer hide geometry needed by omni shadow maps; inactive map
+groups, game-hidden actors, unused parts and mod removals still suppress it.
+Animated bone transforms continue to update offscreen. Original-color and PBR
+shadow passes ignore camera face visibility and retain prepared UVs when native
+face packets are absent. Replacement meshes retain authored Cast Shadow settings.
+The native backend is rebuilt; existing ZIPs need no re-export.
+
+Validation: GPU regression renders a skinned caster with no camera-submitted
+faces and absent live UVs, measures 1,365 shadow pixels in both material modes,
+checks animated shadow movement/removal, and checks two camera distances with
+13 competing omni lights. A guard from the real dock runtime (`96b6.k`) casts a
+1,071-pixel shadow in an isolated receiver check. The full Godot CPU/GPU suite,
+five targeted visibility/video/launcher CTests, and a 1,800-VSync modded disc boot
+pass. Evidence: `build/godot-shadows-suite.log`, `build/godot-shadows-boot/`,
+`build/godot-character-shadow-real.png` and its log. Aislop reports zero findings;
+cppcheck/clang-tidy are unavailable. Camera-route and performance acceptance
+remain with the user; the native build retains its existing getenv deprecation
+warning. No original assets were added to source or mod archives.
+
+## Godot launcher rendering and resolution — 11 October 2026
+
+Fixed the launcher starting Godot with scene rendering enabled while omitting
+that setting from the native process. The native runtime consequently kept
+drawing its original packets even though Godot reported the selected mod as
+loaded. Both processes now enable scene composition. The previous short ZIP
+boot checks stopped during Codec and did not establish visible mod application.
+
+The output resolution now also scales Godot's world and composition targets.
+Previously it only resized the window and enlarged the native image. A separate
+scaled VRAM target preserves mesh detail through HUD/effect composition, masks,
+uploads and moves; native texture/CLUT lookup and readback retain their original
+dimensions. `run-godot.ps1 -Resolution` uses the same path. The view remains 4:3.
+
+Rebuilt `build/windows-x86-godot/RE-INTEGRAL.exe`. Existing installed ZIPs and
+saved selections are preserved; restart the launcher to use the updated code.
+The user's actual selected package, `local-474555866.zip`, runs unchanged in a
+1,800-VSync dock check at selected resolution 2560x1440. The composed image at
+frame 1,200 shows its blue lights and fog; this is beyond the earlier Codec-only
+check. A second run with that installed ZIP disabled restores the original
+lighting, verifying the saved enable/disable selection reaches the renderer.
+Evidence: `build/godot-visible-mod-1440p/render.png`,
+`build/godot-disabled-mod-1440p/render.png` and adjacent logs.
+
+Validation: all three launcher CTests and the Godot CPU/GPU suite pass. The new
+GPU test distinguishes high-resolution detail inside 2,304 native pixel blocks
+and checks masks, composition, uploads/moves and unchanged native readback.
+The lighting test also covers assigning the runtime PBR shader after its texture
+parameters, matching production. Aislop reports zero findings; cppcheck and
+clang-tidy are unavailable. No gameplay or performance acceptance is claimed.
+
+## Godot mod ZIP launcher — 11 October 2026
+
+Added the missing user-facing installation flow: the Godot build's launcher
+has a Mods tab with a multi-select ZIP picker, enabled checkboxes and removal.
+Selections persist in settings; selecting another ZIP with the same mod ID
+updates that selection. Packages install privately without changing source ZIPs.
+The launcher prepares and imports a private runtime project containing only
+enabled packages, then starts the matched Godot/native pair. Unchecked native
+extensions and editor-local mods cannot leak into that project. Imports are
+cached by source/content hash. User saves stay in the existing launcher directory.
+
+ZIP validation rejects traversal, absolute/reserved paths, duplicate paths,
+symlinks, missing manifest resources and oversized archives. Failed installations
+use isolated staging; existing installations remain intact. This is available
+in the source Godot build with prepared disc content, not the published native
+alpha package. No new distribution of original assets is involved.
+
+Validation: launcher settings/import/mod CTests pass, including ZIP updates,
+invalid packages, persisted selections, disabling mods and import-cache
+invalidation. UI smoke renders confirm the Mods tab. The user's exported
+`local-476755079.zip` installs and loads its `s00a` overlay during a 900-VSync
+native/Godot disc boot. A second ZIP verifies automatic custom-PNG import and
+stage loading. The actual launcher checkboxes persist their state and its Save
+and play button completes a modded boot and clean shutdown. Evidence:
+`build/godot-zip-boot/logs`, `build/godot-zip-texture-boot/logs`,
+`build/godot-zip-ui-check.log`, `build/godot-zip-ui/launcher-4.png`.
+Aislop reports no findings; cppcheck/clang-tidy are unavailable. These are boot
+and UI checks, not gameplay or performance acceptance.
+
+## Direct disc maps in the Godot editor — 11 October 2026
+
+Fixed imported geometry ignoring authored lights: native KMD normals point
+inward because `libdg/pshade.c` lights them with vertex-minus-light vectors.
+The glTF converter now reverses those normals for Godot without changing face
+winding, positions, rigs or native vertex-color ordering. Rebuilt the local
+prepared cache; existing editor sessions must reopen their maps to load it.
+
+Validation: a synthetic KMD floor goes through the production converter and
+disc-map loader, then GPU tests exercise ordinary OmniLight3D lighting/movement,
+editor StandardMaterial3D, runtime PBR and shadow reception. Before the fix both
+materials produced zero illuminated pixels; afterward both produce 9,738, and an
+inverted-normal control still reproduces the failure. The CPU/GPU renderer suite
+passes (native GDExtension rebuild skipped; no native changes). Actual docks and
+helipad renders use the rebuilt geometry and original lights. Evidence:
+`build/godot-normals-suite.log`, `build/godot-normals-real.*`,
+`build/godot-original-lights-*.png`. No gameplay or performance acceptance claimed.
+
+Follow-up: map models/parts and original lights now appear in the native Godot
+Scene tree. Names carry model IDs; full IDs appear in tooltips. Removed the
+duplicate originals list and light/PBR/removal wrappers. Ordinary visibility or
+Delete/Undo records visual removals. Standard original-light Inspector edits are
+saved as property deltas. Editor save hooks exclude reference geometry and light
+defaults while preserving authored nodes, including nodes placed under originals.
+Duplicated original mesh parts retain provenance and are rejected by mod export.
+
+The prepared catalog now decodes the original `DG_LITS`/`DG_LIT` `.l` layout,
+selected through the recovered `GM_CreateMap`/`GM_SetMap` declarations. Docks has
+74 declared lights; helipad has 96. Both editor and renderer instantiate these
+as ordinary OmniLight3D nodes with shadows. Positions/RGB/range data are native;
+Godot radial attenuation approximates the original vertex-light function and
+box cutoff. Temporary actor lights are outside the static importer. New overlays
+no longer insert an invented starter lamp/fog environment; existing edits remain.
+
+Validation: actual editor Scene-tree items contain model/light IDs for both
+maps, selection works, ordinary edits save/reopen, and ZIP export excludes
+originals. Regression tests cover visibility/deletion/restoration, light deltas,
+runtime placement, nested authored nodes and rejection of copied retail meshes.
+CPU/GPU renderer checks pass. Evidence: `build/godot-native-editor-ui.*`,
+`build/godot-native-editor-tests.log`, `build/godot-original-lights-*.png`.
+
+The user rejected the F7-dependent map authoring workflow. MGS Visuals now has an
+**Open map** action that opens the local mod overlay and assembles its original
+reference directly from prepared disc assets. No running game is required.
+Preparation decodes top-level GCX startup `mapdef` and `map -d` declarations using
+the recovered loader's structure, rather than treating every model in a stage as
+map geometry. Docks uses two declared models (204 mesh parts); helipad uses one
+(122 base parts). Script-created/animated actors remain outside this static map
+importer's scope. The browser still exposes docks/helipad only.
+
+Editor references use textured, lit StandardMaterial3D materials with the
+model's face culling for inspection and authored light preview. Original geometry
+is excluded from saved mod scenes. The old screenshot's checkerboard
+error was reproduced: an embedded generated shader retained a raw `#include`
+that failed when the saved scene reopened. Generated shader variants now expand
+their shared source before assignment; the new map workflow does not use those
+live-frame shaders.
+
+The user's upside-down map report exposed a world/camera axis mix-up: native
+world Y points up (for example, `game/item.c` applies negative-Y gravity), while
+prepared renderer models use `(x,-y,-z)`. Map references now rotate into native
+Y-up editor space. New authored scenes identify their coordinate convention;
+the runtime converts their transforms on load. Opening older overlays migrates
+their authored transforms once without moving them in game or changing removal
+selectors. Existing exported overlays remain compatible. Coordinate regressions
+cover native placement, save/reload, nested lights, old-scene migration and
+unknown coordinate spaces. Docks/helipad renders and real editor save/export
+checks pass, as does the CPU/GPU renderer suite. Evidence:
+`build/godot-disc-map-upright-*.png`, `build/godot-upright-*.log`.
+
+Disc-backed renders and map parsing/assembly/export checks pass. The existing
+CPU/GPU renderer suite passes with the new map checks. A separate editor instance
+also exercised Open map for both stages, selection, part removal, light/object
+addition, saving and ZIP export; its saved overlays contain no original geometry.
+The glTF loader explicitly converts editor importer meshes into renderable nodes
+and loads local textures in memory, avoiding editor reimport attempts outside the
+project. Evidence is under ignored
+`build/godot-disc-map-*`. Original discs, existing local edits and old scenes are
+preserved. Performance has not been assessed.
+
+## Godot GDExtension, PBR and map overlays — 11 October 2026
+
+Implemented the user's follow-up requirements in the Godot process:
+
+- Native visual mod API v1 loads declared GDExtensions, checks their lifecycle
+  hooks and initialization result, exposes stage/camera/instance inspection and
+  emits stage/snapshot signals. A Windows x64 C++ example animates a shadow light.
+  `tools/build-godot-mod.ps1` builds it against godot-cpp pinned in the source lock;
+  the 32-bit gameplay executable is unchanged.
+- Original meshes can use albedo, normal, ORM and emission maps with metallic,
+  roughness and normal/emission factors. Godot-lit materials use specular GGX,
+  receive/cast dynamic shadows and retain native UV/visibility data. Normal
+  mapping derives tangents from the live UVs. Authored Standard/ORM/ShaderMaterial
+  overrides are preserved on replacement meshes.
+- MGS Visuals opens captured maps as unsaved local references, adds shadow lights
+  and PBR objects, and records object/part removals as stable asset/position rules.
+  Matched removals survive actor motion and model swaps. The user explicitly chose
+  visual removal only; collision/gameplay are unchanged. Compatibility-only
+  effects are outside the current scene-editing scope.
+- ZIP export follows custom-resource dependencies, makes resource paths portable,
+  excludes the local preview, and rejects embedded retail-derived scenes and
+  dependencies outside the mod folder. The generated map example contains only
+  IDs/edit instructions, one authored scene and two procedural PBR maps; its
+  exported ZIP is approximately 2.4 KB. Original models/albedos stay in the local
+  disc cache. Native extension binaries can be packaged separately.
+
+Validation: the pinned editor loads the plugin; the C++ DLL builds and loads;
+extension lifecycle, map packing/removal/export, manifest/rig and scene snapshot
+tests pass, including an exported/relocated native DLL and nested authored
+scene/script/material dependencies. Literal script `load()` paths are rejected
+with guidance to use `preload()`; dynamic dependency discovery remains unsupported.
+GPU tests prove moving lights/shadows, metallic and roughness response,
+normal/ORM/emission maps, while the existing protocol/composition and six asset
+conversion tests pass. Tests also reject retail-preview export and outside-folder
+dependencies. The scoped Aislop scan reports no findings on its supported files;
+GDScript/shaders are checked with Godot, and optional C++ lint engines are unavailable.
+
+The combined native extension + PBR map overlay passes all 1,446 recorded dock
+inputs / 1,450 VSyncs. A separately extracted package at a different path passes
+the same replay; logs confirm the native extension, stage override and removal.
+Screenshots show the added sphere and changed lighting/materials. Godot logs are
+error-free. Evidence: `build/godot-sdk-*`, `build/godot-tests/` and
+`build/mod-exports/map-overlay-demo-final.zip`. Performance remains unassessed
+while another game is running. Human authoring/playthrough and broader stage
+coverage remain distinct from these scoped automated checks.
+
+## Godot v4 renderer and visual mod workflow — 11 October 2026
+
+The user selected Godot as the primary renderer and modding SDK/editor direction.
+The roadmap and project instructions now reflect that choice. Remix Plus is
+preserved as a separate experiment with further integration work deferred.
+The recovered C runtime remains authoritative for gameplay and the native alpha
+remains the playable baseline.
+
+Completed the matched v4 consumer: live packet UV/ordering and face visibility,
+metadata camera and depth capture, original color quantization/dithering and
+STP masks, synchronized scene composition, and Godot-lit original materials.
+Custom foreground geometry uses its own depth rather than metadata belonging
+to background geometry. Material resolution follows native ownership, and
+missing textures on visible Godot parts are explicit errors. Retired models
+detach immediately; editor exports omit runtime metadata and compositors.
+
+The native Godot executable rebuilt in `build/windows-x86-godot`. Four native
+video/visibility CTests pass. The new `tools/test-godot.ps1` passes scene decoding,
+mod/rig contract, six asset conversion, GPU protocol and composition tests.
+The pinned headless editor imports the project without errors. Scoped Aislop
+reports no findings but scores no files: its installed engines do not cover
+the changed GDScript, shaders, PowerShell or documentation. Godot validates the
+scripts/shaders; this is not a 100/100 static-analysis claim.
+
+Real local-disc evidence:
+
+- No-input startup reaches the opening at 1,800 VSyncs without renderer errors.
+- The unskipped opening passes all 4,496 inputs / 4,500 VSyncs in scene and
+  command modes. Captures show aligned scenery/cameras with expected geometric
+  differences; particle/effect equivalence remains subject to visual review.
+- The dock mod replay passes 1,446 inputs / 1,450 VSyncs with replacement model,
+  checker textures and stage lighting active together, with no Godot errors.
+  Captures visibly confirm the replacements and stage preview export works.
+- Local asset preparation reproduces all 2,018 stable identities / 175 models.
+  Synthetic tests check resident IDs across stage changes and preview reloads.
+- A separate heliport checkpoint replay passes 2,996 inputs / 3,000 VSyncs,
+  including Codec and movement, in scene and command modes with no Godot errors.
+  Matched Codec captures and scene-mode gameplay were inspected. This does not
+  validate the dock-to-helipad transition.
+
+The historical Xbox route fails at inventory sample 3,606 / VSync 3,610 in both
+scene and command modes (expected `-178662692`, actual `1877702569`). No replay
+checks were weakened; this run cannot supply current transition acceptance.
+Performance remains unassessed because the user was running another game.
+Evidence is retained under `build/godot-v4-*` and `build/godot-tests/`.
+
+Next: current transition evidence, human visual review, effects migration and
+isolated frame-pacing measurements. Full campaign rendering and a stable public
+gameplay/audio/script SDK remain future work. See the
+[active integration milestone](docs/GODOT_RENDERER_PLAN.md#active-direction-11-october-2026).
+
+## Launcher 240p comparison preset — 11 October 2026
+
+The display dropdown now includes `320x240`, with a hint to disable widescreen
+for original 4:3 output and 1× internal rendering. The alpha instructions explain
+the comparison settings and distinguish the developer frame count from an FPS
+cap. The existing renderer already supports this mode; rendering and timing
+code are unchanged.
+
+The modern launcher compiled and its UI smoke check passed. All four scoped
+CTest suites passed: launcher settings, video CLI, resolution parsing and original
+aspect. Aislop reports 100/100 with no findings; formatting and lint engines have
+no support for the changed languages. The rebuilt launcher is under
+`build/windows-x86-modern/RE-INTEGRAL.exe`; the published download is unchanged.
+Next: record and assess the user's comparison footage.
+
 ## Alpha 0.2 published — 10 October 2026
 
 Published [0.2.0-alpha.1](https://github.com/Drommedhar/mgs-reintegral/releases/tag/v0.2.0-alpha.1)

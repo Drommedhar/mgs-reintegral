@@ -60,9 +60,20 @@ def draw_quad(peer, color, force=0, preserve=0):
     command(peer, 2, header + vertices + struct.pack("<6H", 0, 1, 2, 1, 3, 2))
 
 
+def check_fragmented_upload(peer):
+    pixels = bytes(range(256)) * 1024
+    region = struct.pack("<4i", 256, 128, 256, 256)
+    packet = struct.pack("<II", len(region) + len(pixels), 3) + region + pixels
+    peer.sendall(packet[:3])
+    for offset in range(3, len(packet), 8191):
+        peer.sendall(packet[offset : offset + 8191])
+    assert exchange(peer, 5, region) == pixels, "fragmented large upload/read ordering"
+
+
 def run(port):
     with socket.create_connection(("127.0.0.1", port), timeout=30) as peer:
-        exchange(peer, 1, struct.pack("<3I", 0x3152474D, 4, 20))
+        exchange(peer, 1, struct.pack("<3I", 0x3152474D, 13, 20))
+        command(peer, 11, b"FPS 60.0  FRAME 16.67 ms\nMAX 18.00 ms")
         command(peer, 8, struct.pack("<7i", 0, 0, 1024, 512, 248, 0, 0))
         command(peer, 8, struct.pack("<7i", 10, 10, 4, 4, 0, 248, 0))
         assert read_pixel(peer, 11, 11) == (0, 255, 0, 0), "regional clear"
@@ -78,9 +89,10 @@ def run(port):
         command(peer, 3, struct.pack("<4i", 80, 60, 1, 1) + bytes([8, 16, 24, 255]))
         command(peer, 4, struct.pack("<6i", 80, 60, 1, 1, 90, 70))
         assert read_pixel(peer, 90, 70) == (8, 16, 24, 255), "upload/move/readback"
+        check_fragmented_upload(peer)
         exchange(peer, 7, struct.pack("<7I", 1, 0, 0, 320, 240, 4, 3))
     print(
-        "Godot GPU: regional clear, triangle raster, mask, upload, move and readback passed"
+        "Godot GPU: regional clear, triangle raster, mask, fragmented upload, move and readback passed"
     )
 
 

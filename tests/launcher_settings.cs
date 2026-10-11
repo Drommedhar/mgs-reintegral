@@ -72,6 +72,13 @@ internal static class LauncherSettingsTest
             Stage = "s00a", Frames = "600", MantisMemory = "42",
             Advanced = "--capture \"C:\\frame capture.bmp\"" };
         string command = GameLaunch.Arguments(settings);
+        string godot = GameLaunch.Arguments(settings, true);
+        Require(godot.Contains("--resolution " + settings.Resolution) && godot.Contains("--widescreen") &&
+            !godot.Contains("--texture-correction") && !godot.Contains("--depth-buffer") && !godot.Contains("--fullscreen"),
+            "Godot launch received incompatible native display options");
+        settings.Widescreen = false;
+        Require(!GameLaunch.Arguments(settings, true).Contains("--widescreen"), "Godot ignored original-aspect selection");
+        settings.Widescreen = true;
         foreach (string flag in new[] { "--bonus-items 1", "--invulnerable 1", "--auto-card 1", "--debug-overlay",
             "--fullscreen", "--widescreen", "--texture-correction", "--geometry-precision", "--depth-buffer", "--fast-loading 1",
             "--stage s00a", "--frames 600", "--mantis-memory 42", settings.Advanced })

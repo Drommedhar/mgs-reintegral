@@ -3,7 +3,6 @@ render_mode unshaded, fog_disabled;
 
 #include "reference_packet.gdshaderinc"
 uniform sampler2D mask_texture : filter_nearest, repeat_disable;
-uniform bool quantize_color = true;
 varying flat float ordering_depth;
 
 void vertex() {

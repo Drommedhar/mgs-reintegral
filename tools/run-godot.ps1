@@ -12,8 +12,12 @@ param(
     [string]$LoadCheckpoint,
     [switch]$BonusItems,
     [switch]$Invulnerable,
+    [switch]$DebugOverlay,
     [switch]$Scene3D,
     [string[]]$Mods = @(),
+    [ValidatePattern('^[0-9]+x[0-9]+$')]
+    [string]$Resolution = '1280x960',
+    [switch]$Widescreen,
     [switch]$Build
 )
 
@@ -40,6 +44,8 @@ $previousReady = $env:MGS_GODOT_READY_FILE
 $previousAssets = $env:MGS_GODOT_ASSETS
 $previousScene = $env:MGS_GODOT_SCENE_VIEW
 $previousMods = $env:MGS_GODOT_MODS
+$previousRenderSize = $env:MGS_GODOT_RENDER_SIZE
+$env:MGS_GODOT_RENDER_SIZE = $Resolution
 $env:MGS_GODOT_MODS = ConvertTo-Json -InputObject @($Mods | ForEach-Object { (Resolve-Path -LiteralPath $_).Path.Replace('\', '/') }) -Compress
 $env:MGS_GODOT_ASSETS = if ($Scene3D) { Join-Path $projectDirectory '.local/godot-content' } else { '' }
 $env:MGS_GODOT_SCENE_VIEW = ([int][bool]$Scene3D).ToString()
@@ -51,7 +57,7 @@ $env:MGS_GODOT_READY_FILE = $readyFile
 $renderer = $null
 try {
     $renderer = Start-Process -FilePath $godot -ArgumentList @(
-        '--path', "`"$rendererProject`"", '--rendering-driver', 'vulkan'
+        '--path', "`"$rendererProject`"", '--rendering-driver', 'vulkan', '--resolution', $Resolution
     ) -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $logRoot 'godot.log') `
         -RedirectStandardError (Join-Path $logRoot 'godot.err')
     $deadline = [DateTime]::UtcNow.AddSeconds(30)
@@ -62,8 +68,8 @@ try {
         Start-Sleep -Milliseconds 100
     }
     Write-Host "[godot] Renderer logs: $logRoot"
-    $nativeArguments = @{ BuildDirectory = $buildDirectory; Frames = $Frames; Resolution = '320x240'
-        RuntimeDirectory = (Join-Path $projectDirectory '.local/godot-runtime'); DebugOverlay = $false }
+    $nativeArguments = @{ BuildDirectory = $buildDirectory; Frames = $Frames; Resolution = $Resolution; Widescreen = [bool]$Widescreen
+        RuntimeDirectory = (Join-Path $projectDirectory '.local/godot-runtime'); DebugOverlay = [bool]$DebugOverlay }
     if ($PSBoundParameters.ContainsKey('Stage')) { $nativeArguments.Stage = $Stage }
     foreach ($name in @('Probe', 'Capture', 'CaptureEvery', 'RecordInput', 'ReplayInput',
                         'LoadCheckpoint', 'BonusItems', 'Invulnerable')) {
@@ -80,4 +86,5 @@ finally {
     $env:MGS_GODOT_ASSETS = $previousAssets
     $env:MGS_GODOT_SCENE_VIEW = $previousScene
     $env:MGS_GODOT_MODS = $previousMods
+    $env:MGS_GODOT_RENDER_SIZE = $previousRenderSize
 }

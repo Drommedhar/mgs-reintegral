@@ -1,0 +1,231 @@
+diff --git a/source/anime/animconv/anime.c b/source/anime/animconv/anime.c
+index 578d66080..4e5430e0d 100644
+--- a/source/anime/animconv/anime.c
++++ b/source/anime/animconv/anime.c
+@@ -16,6 +16,11 @@
+ 
+ #define MAX_LOOP        4
+ #define MAX_SCRIPT      4
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_scene.h"
++#include "strcode.h"
++#endif
++
+ #define PRIM_TYPE       (DG_PRIM_RECTANGLE | DG_PRIM_POLY_FT4)
+ 
+ #define SCRIPT_RANDOM   0x80
+@@ -659,6 +664,10 @@ static int GetResources( Work *work, int map, ANIMATION *animation )
+     }
+ 
+     work->tex = DG_GetTexture( animation->tex );
++#ifdef MGS_GODOT_SCENE
++    if (animation->tex == PCX_SMOKE || animation->tex == PCX_PCH_FOG || animation->tex == PCX_MAGAZIN)
++        MgsGodotRegisterEffect(work->prim, animation->tex, 0, work->prim->prim_count);
++#endif
+ 
+     unit = work->unit;
+     pre = animation->pre_script;
+diff --git a/source/libdg/chanl.c b/source/libdg/chanl.c
+index 125c5e5bf..2fd223bc4 100644
+--- a/source/libdg/chanl.c
++++ b/source/libdg/chanl.c
+@@ -378,6 +378,10 @@ void DG_DequeuePrim( DG_PRIM *prim )
+     DG_CHANL *cp;
+     void **oque;
+ 
++#ifdef MGS_GODOT_SCENE
++    MgsGodotRemoveEffect(prim);
++#endif
++
+ #ifdef MGS_REMIX_SCENE
+     MgsRemixRemoveEffect(prim);
+ #endif
+diff --git a/source/libdg/sort.c b/source/libdg/sort.c
+index 045652252..363a2713f 100644
+--- a/source/libdg/sort.c
++++ b/source/libdg/sort.c
+@@ -104,7 +104,8 @@ void DG_SortChanl( DG_CHANL *chanl, int idx )
+         while (--prim_count >= 0)
+         {
+ #ifdef MGS_GODOT_SCENE
+-            if (MgsGodotSceneEnabled() && MgsGodotLegacyShadowPacket(prim, pPrim->type)) {
++            if (MgsGodotSceneEnabled() && (MgsGodotLegacyShadowPacket(prim, pPrim->type) ||
++                                         MgsGodotOwnsEffect(pPrim, pPrim->prim_count - prim_count - 1, prim))) {
+                 prim += prim_size;
+                 continue;
+             }
+diff --git a/source/okajima/bub_d_sn.c b/source/okajima/bub_d_sn.c
+index bfbc06c89..ff49b06da 100644
+--- a/source/okajima/bub_d_sn.c
++++ b/source/okajima/bub_d_sn.c
+@@ -1,4 +1,7 @@
+ #include "bub_d_sn.h"
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_scene.h"
++#endif
+ 
+ #include <sys/types.h>
+ #include <libgte.h>
+@@ -159,6 +162,9 @@ static int GetResources(Work *work, int where)
+ 
+     InitPacks(prim->packs[0], 4, tex);
+     InitPacks(prim->packs[1], 4, tex);
++#ifdef MGS_GODOT_SCENE
++    MgsGodotRegisterEffect(prim, tex->id, 0, prim->prim_count);
++#endif
+ 
+     prim = GM_MakePrim(DG_PRIM_RECTANGLE | DG_PRIM_POLY_FT4, 16, work->pos2, &work->rect2);
+ 
+@@ -178,6 +184,9 @@ static int GetResources(Work *work, int where)
+ 
+     InitPacks(prim->packs[0], 16, tex);
+     InitPacks(prim->packs[1], 16, tex);
++#ifdef MGS_GODOT_SCENE
++    MgsGodotRegisterEffect(prim, tex->id, 0, prim->prim_count);
++#endif
+ 
+     prim = GM_MakePrim(DG_PRIM_RECTANGLE | DG_PRIM_POLY_FT4, 16, work->pos3, &work->rect3);
+ 
+@@ -197,6 +206,9 @@ static int GetResources(Work *work, int where)
+ 
+     InitPacks(prim->packs[0], 16, tex);
+     InitPacks(prim->packs[1], 16, tex);
++#ifdef MGS_GODOT_SCENE
++    MgsGodotRegisterEffect(prim, tex->id, 0, prim->prim_count);
++#endif
+ 
+     iter1 = work->pos1;
+     iter2 = work->pos2;
+diff --git a/source/okajima/bubble_p.c b/source/okajima/bubble_p.c
+index 15b09facf..c909f342c 100644
+--- a/source/okajima/bubble_p.c
++++ b/source/okajima/bubble_p.c
+@@ -1,4 +1,7 @@
+ #include "bubble_p.h"
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_scene.h"
++#endif
+ 
+ #include <sys/types.h>
+ #include <libgte.h>
+@@ -166,6 +169,9 @@ static int CreatePacks(Work *work)
+ 
+     InitPack(packs0, tex);
+     InitPack(packs1, tex);
++#ifdef MGS_GODOT_SCENE
++    MgsGodotRegisterEffect(prim, tex->id, 0, 1);
++#endif
+ 
+     packs0++;
+     packs1++;
+@@ -178,6 +184,9 @@ static int CreatePacks(Work *work)
+ 
+     InitPack(packs0, tex);
+     InitPack(packs1, tex);
++#ifdef MGS_GODOT_SCENE
++    MgsGodotRegisterEffect(prim, tex->id, 1, 1);
++#endif
+ 
+     packs0++;
+     packs1++;
+@@ -190,6 +199,9 @@ static int CreatePacks(Work *work)
+ 
+     InitPack(packs0, tex);
+     InitPack(packs1, tex);
++#ifdef MGS_GODOT_SCENE
++    MgsGodotRegisterEffect(prim, tex->id, 2, 1);
++#endif
+ 
+     work->f80 = 128;
+     return 0;
+diff --git a/source/okajima/bubble_s.c b/source/okajima/bubble_s.c
+index 611e227ee..93b688ae9 100644
+--- a/source/okajima/bubble_s.c
++++ b/source/okajima/bubble_s.c
+@@ -1,4 +1,7 @@
+ #include "bubble_s.h"
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_scene.h"
++#endif
+ 
+ #include <sys/types.h>
+ #include <libgte.h>
+@@ -340,6 +343,9 @@ static int InitPrims(Work *work)
+         prim->raise = k500;
+ 
+         InitPacks(prim->packs[0], 1, tex);
++#ifdef MGS_GODOT_SCENE
++        MgsGodotRegisterEffect(prim, tex->id, 0, prim->prim_count);
++#endif
+         InitPacks(prim->packs[1], 1, tex);
+     }
+ 
+diff --git a/source/okajima/bubble_t.c b/source/okajima/bubble_t.c
+index bdd104640..0b1941575 100644
+--- a/source/okajima/bubble_t.c
++++ b/source/okajima/bubble_t.c
+@@ -1,4 +1,7 @@
+ #include "bubble_t.h"
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_scene.h"
++#endif
+ 
+ #include <sys/types.h>
+ #include <libgte.h>
+@@ -132,6 +135,9 @@ static int CreatePacks(Work *work)
+     prim->raise = 0;
+ 
+     InitPacks(prim->packs[0], 1, tex);
++#ifdef MGS_GODOT_SCENE
++    MgsGodotRegisterEffect(prim, tex->id, 0, prim->prim_count);
++#endif
+     InitPacks(prim->packs[1], 1, tex);
+ 
+     return 0;
+diff --git a/source/takabe/ripple.c b/source/takabe/ripple.c
+index 066723201..19f2d1b2d 100644
+--- a/source/takabe/ripple.c
++++ b/source/takabe/ripple.c
+@@ -1,4 +1,7 @@
+ #include "ripple.h"
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_scene.h"
++#endif
+ 
+ #include <sys/types.h>
+ #include <libgte.h>
+@@ -145,6 +148,9 @@ static int GetResources( Work *work, MATRIX* mat, int scale )
+     }
+ 
+     InitPacks( prim->packs[0], prim->packs[1], 8, tex );
++#ifdef MGS_GODOT_SCENE
++    MgsGodotRegisterEffect(prim, tex->id, 0, prim->prim_count);
++#endif
+     work->mat = *mat;
+     work->timer = 64;
+ 
+diff --git a/source/takabe/wsurface.c b/source/takabe/wsurface.c
+index 10b8e38f4..8c2a2980e 100644
+--- a/source/takabe/wsurface.c
++++ b/source/takabe/wsurface.c
+@@ -1,4 +1,7 @@
+ #include "wsurface.h"
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_scene.h"
++#endif
+ 
+ #include "mgstype.h"
+ #include "libdg/libdg.h"
+@@ -451,6 +454,12 @@ void *NewWaterSurface(int name, int where, int argc, char **argv)
+         work->map = where;
+         work->name = name;
+         work->f104 = 1;
++#ifdef MGS_GODOT_SCENE
++        MgsGodotRegisterEffect(work->prim, work->tex->id, 0, work->prim->prim_count);
++#endif
++#ifdef MGS_REMIX_SCENE
++        MgsRemixRegisterWater(work->prim);
++#endif
+     }
+ 
+     return (void *)work;

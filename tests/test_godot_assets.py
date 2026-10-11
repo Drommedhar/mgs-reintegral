@@ -9,6 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 from godot_assets.formats import Part, inflate, kmd, pcx
 from godot_assets.gltf import face_vertices, point, resolve_vertex
 from prepare_godot_assets import stable_id
+from tests.godot_geometry_fixture import floor_part
 
 
 def pcx_fixture(indices, palette):
@@ -19,6 +20,27 @@ def pcx_fixture(indices, palette):
 
 
 class AssetConversion(unittest.TestCase):
+    def test_native_normals_face_outward_in_gltf(self):
+        part = floor_part()
+        for flags, normal_index in ((0, 0), (0x10000, 0x80)):
+            part.flags = flags
+            part.normal_indices = bytes([normal_index]) * 4
+            vertices = face_vertices([part], 0, 0, [(0, 0, 0)], (2, 2), (0, 1))
+            for vertex in vertices:
+                self.assertEqual(vertex[-1], (0, -1, 0))
+            a, b, c = [vertex[0] for vertex in vertices[:3]]
+            ab, ac = [b[i] - a[i] for i in range(3)], [c[i] - a[i] for i in range(3)]
+            cross = (
+                ab[1] * ac[2] - ab[2] * ac[1],
+                ab[2] * ac[0] - ab[0] * ac[2],
+                ab[0] * ac[1] - ab[1] * ac[0],
+            )
+            self.assertGreater(sum(x * n for x, n in zip(cross, vertices[0][-1])), 0)
+        part.normals = [(0, 0, 0, 0)]
+        self.assertIsNone(
+            face_vertices([part], 0, 0, [(0, 0, 0)], (2, 2), (0, 1))[0][-1]
+        )
+
     def test_zero_is_transparent_but_stp_black_is_visible(self):
         palette = bytes([0, 0, 0, 1, 0, 0]) + bytes(762)
         width, height, rgba, mask, _ = pcx(pcx_fixture(bytes([0, 1]), palette))

@@ -52,6 +52,11 @@ static func load_model(path: String) -> Node3D:
 		return null
 	var document := GLTFDocument.new()
 	var state := GLTFState.new()
-	if document.append_from_file(path, state) != OK:
-		return null
-	return document.generate_scene(state) as Node3D
+	state.handle_binary_image_mode = GLTFState.HANDLE_BINARY_IMAGE_MODE_EMBED_AS_UNCOMPRESSED
+	var converter := GLTFDocumentExtensionConvertImporterMesh.new()
+	if Engine.is_editor_hint(): GLTFDocument.register_gltf_document_extension(converter)
+	var node: Node3D
+	if document.append_from_file(path, state) == OK:
+		node = document.generate_scene(state) as Node3D
+	if Engine.is_editor_hint(): GLTFDocument.unregister_gltf_document_extension(converter)
+	return node

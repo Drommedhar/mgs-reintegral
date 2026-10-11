@@ -4,6 +4,12 @@ This roadmap separates delivered foundations from planned work. Future items
 have no committed delivery dates. The native main campaign is the starting
 point; the alpha's supported configuration is in [ALPHA.md](ALPHA.md).
 
+As of 11 October 2026, Godot is the primary renderer and modding SDK/editor
+direction. The recovered C runtime remains responsible for gameplay, collision,
+animation, audio, saves and timing. Remix Plus is retained as a separate
+experiment; further integration work is deferred. The native alpha remains
+the playable baseline during this work.
+
 ## Native alpha foundations
 
 - [x] Official-source prerequisite setup and a documented Debug build.
@@ -20,27 +26,40 @@ point; the alpha's supported configuration is in [ALPHA.md](ALPHA.md).
 - Offer language selection where the supplied resources support it, while
   keeping scripts, timing, subtitles and spoken dialogue consistent.
 
-## Develop the modern renderer
+## Godot renderer
 
-- Validate the [experimental renderer](../renderers/modern/README.md), which now
-  provides perspective-correct textures, subpixel model geometry and per-pixel
-  depth testing. Extend coverage to remaining effects and campaign scenes.
-- Extend its geometry interface toward meshes and materials while preserving
-  recovered gameplay behavior and the original renderer as a comparison.
-- Support custom graphics and resource mods through clear renderer boundaries.
-- Improve rendering only where its behavior and compatibility can be tested.
+- [x] Complete protocol v4 scene decoding, metadata rendering and composition;
+  build and test a working pair in the separate Godot build directory.
+- Check no-input startup, the unskipped opening, docks, helipad, Codec and their
+  transitions against the native reference, including draw ordering and effects.
+- Migrate transparent meshes, live textures, palette effects and framebuffer
+  effects into appropriate Godot passes while retaining compatibility rendering
+  for behavior that has not yet been migrated and checked.
+- Measure frame pacing without diagnostic captures, then expand resolution,
+  widescreen and campaign coverage.
 
-The Godot prototype is currently paused and is not part of the native alpha.
-The existing renderer boundary is a source-level interface, not a stable
-binary plugin API or a completed modern mesh/material pipeline.
+The [Godot integration milestone](GODOT_RENDERER_PLAN.md#active-direction-11-october-2026)
+records the immediate work and acceptance criteria. Godot is not yet part of
+the native alpha. The alpha's [experimental renderer](../renderers/modern/README.md)
+remains available for existing users and comparison. Renderer transport and
+mod manifests are prototype contracts, not a stable public SDK.
 
-## Build practical modding tools
+## Deliver the Godot modding SDK and editor
 
-- Extend the current exact-length resource overrides to common image, model
-  and audio formats, including resized replacements.
-- Make resource inspection, export, replacement and validation easier.
-- Develop a map/stage editor after the underlying resource and renderer
-  interfaces are ready.
+- Build on the [MGS Visuals plugin](GODOT_MODDING.md): stable asset IDs,
+  model/texture overrides, rig validation and stage lighting scenes.
+- [x] Verify local disc preparation, stage preview export and in-game mesh,
+  texture and lighting replacements, with invalid-mod regression checks.
+- [x] Add native GDExtension lifecycle hooks, Godot PBR materials and dynamic
+  shadow lights, with compiled-extension and GPU tests.
+- [x] Author visual map overlays: inspect local originals, place lights/objects,
+  hide originals and export edits/custom assets without the captured map files.
+- Define versioned public manifests, compatibility rules, diagnostics and
+  asset-free examples once the renderer and authoring workflow are verified.
+- Expand resource inspection, export and replacement to audio and scripts;
+  define gameplay and collision editing through explicit native runtime APIs.
+- Expand visual map authoring into gameplay/collision editing on those native
+  interfaces. Current removals and additions affect visuals only.
 
 ## Broaden game and platform coverage
 

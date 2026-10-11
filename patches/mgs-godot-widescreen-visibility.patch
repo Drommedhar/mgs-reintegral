@@ -1,0 +1,16 @@
+diff --git a/source/libdg/chanl.c b/source/libdg/chanl.c
+index 54cd56686..1e235ee9f 100644
+--- a/source/libdg/chanl.c
++++ b/source/libdg/chanl.c
+@@ -286,10 +286,10 @@ void DG_SortChanlSystem( int which )
+         N_ChanlPerfMax = time - DG_ChanlTime;
+     }
+ #ifdef MGS_NATIVE
+-    MgsVisibilityEnd();
+ #ifdef MGS_GODOT_SCENE
+     MgsGodotCaptureScene(&DG_Chanls[1], which);
+ #endif
++    MgsVisibilityEnd();
+ #endif
+ }
+ 

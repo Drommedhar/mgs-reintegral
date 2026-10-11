@@ -1,8 +1,18 @@
 find_program(MGS_CSC csc.exe PATHS "$ENV{WINDIR}/Microsoft.NET/Framework/v4.0.30319" NO_DEFAULT_PATH REQUIRED)
+set(MGS_GODOT_ROOT "")
+if(TARGET psyz_renderer)
+    get_target_property(godot_renderer psyz_renderer MGS_GODOT_SCENE)
+    if(godot_renderer)
+        set(MGS_GODOT_ROOT "${PROJECT_SOURCE_DIR}")
+    endif()
+endif()
 configure_file(BuildInfo.cs.in BuildInfo.cs @ONLY)
 set(launcher_sources "${CMAKE_CURRENT_SOURCE_DIR}/Launcher.cs"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Launcher.Game.cs"
     "${CMAKE_CURRENT_SOURCE_DIR}/Settings.cs" "${CMAKE_CURRENT_SOURCE_DIR}/GameLaunch.cs"
     "${CMAKE_CURRENT_SOURCE_DIR}/LanguageImport.cs" "${CMAKE_CURRENT_SOURCE_DIR}/LanguageImportDialog.cs"
+    "${CMAKE_CURRENT_SOURCE_DIR}/ModPackage.cs" "${CMAKE_CURRENT_SOURCE_DIR}/ModsPanel.cs"
+    "${CMAKE_CURRENT_SOURCE_DIR}/GodotProject.cs" "${CMAKE_CURRENT_SOURCE_DIR}/GodotSession.cs"
     "${CMAKE_CURRENT_BINARY_DIR}/BuildInfo.cs")
 set(launcher_output "${CMAKE_BINARY_DIR}/RE-INTEGRAL.exe")
 file(TO_NATIVE_PATH "${launcher_output}" launcher_native_output)
@@ -11,8 +21,10 @@ file(TO_NATIVE_PATH "${PROJECT_SOURCE_DIR}/assets/branding/re-integral-logo.png"
 add_custom_command(OUTPUT "${launcher_output}"
     COMMAND "${MGS_CSC}" /nologo /target:winexe /platform:x86 /optimize+
         /reference:System.Windows.Forms.dll /reference:System.Drawing.dll /reference:System.Xml.dll
+        /reference:System.IO.Compression.dll /reference:System.Web.Extensions.dll
         /win32manifest:app.manifest "/resource:${launcher_logo},logo.png"
-        "/out:${launcher_native_output}" Launcher.cs Settings.cs GameLaunch.cs LanguageImport.cs LanguageImportDialog.cs "${launcher_build_info}"
+        "/out:${launcher_native_output}" Launcher.cs Launcher.Game.cs Settings.cs GameLaunch.cs LanguageImport.cs LanguageImportDialog.cs
+        ModPackage.cs ModsPanel.cs GodotProject.cs GodotSession.cs "${launcher_build_info}"
     DEPENDS ${launcher_sources} app.manifest "${PROJECT_SOURCE_DIR}/assets/branding/re-integral-logo.png"
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" VERBATIM)
 add_custom_target(reintegral_launcher ALL DEPENDS "${launcher_output}")
@@ -50,5 +62,16 @@ if(BUILD_TESTING)
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" VERBATIM)
     add_custom_target(reintegral_import_tests ALL DEPENDS "${import_test_output}")
     add_test(NAME launcher_import COMMAND "${import_test_output}")
+    set(mod_test_output "${CMAKE_BINARY_DIR}/reintegral_mod_tests.exe")
+    file(TO_NATIVE_PATH "${mod_test_output}" mod_test_native_output)
+    file(TO_NATIVE_PATH "${PROJECT_SOURCE_DIR}/tests/launcher_mods.cs" mod_test_source)
+    add_custom_command(OUTPUT "${mod_test_output}"
+        COMMAND "${MGS_CSC}" /nologo /target:exe /platform:x86 /reference:System.Xml.dll
+            /reference:System.IO.Compression.dll /reference:System.Web.Extensions.dll
+            "/out:${mod_test_native_output}" "${mod_test_source}" Settings.cs ModPackage.cs GodotProject.cs GodotSession.cs GameLaunch.cs
+        DEPENDS "${PROJECT_SOURCE_DIR}/tests/launcher_mods.cs" Settings.cs ModPackage.cs GodotProject.cs GodotSession.cs GameLaunch.cs
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" VERBATIM)
+    add_custom_target(reintegral_mod_tests ALL DEPENDS "${mod_test_output}")
+    add_test(NAME launcher_mods COMMAND "${mod_test_output}")
     add_test(NAME bundled_importer_help COMMAND "${importer_output}" --help)
 endif()

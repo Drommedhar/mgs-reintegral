@@ -163,7 +163,8 @@ def face_vertices(parts, part_index, face, origins, texture_size, color_layout):
             raise ValueError("KMD normal index out of range")
         normal = point(part.normals[normal_index])
         length = math.sqrt(sum(value * value for value in normal))
-        normal = tuple(value / length for value in normal) if length else None
+        # DG lighting uses vertex-minus-light vectors; KMD normals point inward.
+        normal = tuple(-value / length for value in normal) if length else None
         vertices.append(
             (position, uv, (owner, 0, 0, 0), (1, 0, 0, 0), shade_uv, normal)
         )

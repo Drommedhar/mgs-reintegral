@@ -1,0 +1,12 @@
+diff --git a/psyz/src/platform/sdl3_gpu.c b/psyz/src/platform/sdl3_gpu.c
+index fbba1bd..614d245 100644
+--- a/psyz/src/platform/sdl3_gpu.c
++++ b/psyz/src/platform/sdl3_gpu.c
+@@ -818,6 +818,7 @@ static void PlatformBackend_Present(void) {
+         presentation_height ? presentation_height : 3};
+     MgsGodotQueue(MGS_GODOT_DEBUG_TEXT, debug_text, (uint32_t)SDL_strlen(debug_text), NULL, 0);
+     MgsGodotExchange(MGS_GODOT_FRAME, frame, sizeof(frame), NULL, 0);
++    gpu_stats.last_submit_time_us = MgsGodotTakeExchangeTimeUs();
+     if (overlay_frame_cb) overlay_frame_cb();
+     finish_time = SDL_GetPerformanceCounter();
+     return;

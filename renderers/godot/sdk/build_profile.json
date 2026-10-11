@@ -1,0 +1,3 @@
+{
+  "enabled_classes": ["Node3D", "OmniLight3D", "OS"]
+}

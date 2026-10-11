@@ -14,7 +14,8 @@ enum MgsGodotCommand {
     MGS_GODOT_FRAME = 7,
     MGS_GODOT_CLEAR = 8,
     MGS_GODOT_SCENE_FRAME = 9,
-    MGS_GODOT_WORLD = 10
+    MGS_GODOT_WORLD = 10,
+    MGS_GODOT_DEBUG_TEXT = 11
 };
 
 bool MgsGodotConnect(void);
@@ -24,6 +25,7 @@ void MgsGodotQueue(uint32_t operation, const void *header, uint32_t header_bytes
 void MgsGodotExchange(uint32_t operation, const void *header, uint32_t header_bytes,
                       void *result, uint32_t result_bytes);
 unsigned MgsGodotButtons(void);
+double MgsGodotTakeExchangeTimeUs(void);
 bool MgsGodotQuitRequested(void);
 void MgsGodotWorldBegin(unsigned near_depth, unsigned far_depth);
 

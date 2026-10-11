@@ -1,0 +1,28 @@
+diff --git a/psyz/src/platform/sdl3_common.h b/psyz/src/platform/sdl3_common.h
+index 3144968..ba10d6e 100644
+--- a/psyz/src/platform/sdl3_common.h
++++ b/psyz/src/platform/sdl3_common.h
+@@ -711,7 +711,11 @@ static u_long keyb_p1[] = {
+     SDL_SCANCODE_LEFT,      // PAD_LEFT
+ };
+ static unsigned int PadRead_Keyboard(u_long* config, int config_len) {
++#ifdef PSYZ_REMIX_REMOTE
++    const bool* keyb = MgsRemixKeys();
++#else
+     const bool* keyb = SDL_GetKeyboardState(NULL);
++#endif
+     unsigned int r = 0;
+     for (int i = 0; i < config_len; i++) {
+         if (keyb[config[i]]) {
+@@ -993,9 +997,11 @@ static void PollEvents(void) {
+             if (event.key.scancode == SDL_SCANCODE_F6) {
+                 debug_show_vram ^= 1;
+             }
++#ifndef PSYZ_REMIX_REMOTE
+             if (event.key.scancode == SDL_SCANCODE_F4 && !event.key.repeat) {
+                 SetFullScreen(!is_fullscreen);
+             }
++#endif
+             break;
+ #endif
+         default:

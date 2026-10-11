@@ -3,12 +3,11 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Reflection;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace ReIntegral
 {
-    public sealed class Launcher : Form
+    public sealed partial class Launcher : Form
     {
         private readonly string dataDirectory, executable, settingsPath;
         private readonly TextBox discOne = new TextBox(), discTwo = new TextBox();
@@ -27,6 +26,10 @@ namespace ReIntegral
         private readonly object logLock = new object();
         private readonly TabControl tabs = new TabControl();
         private readonly FileStream instanceLock;
+        private readonly bool godotEnabled = !String.IsNullOrEmpty(BuildInfo.GodotRoot);
+        private ModsPanel mods;
+        private GodotSession godot;
+        private Settings activeSettings;
         private Process game;
         private StreamWriter log;
         private string activeArguments;
@@ -44,7 +47,7 @@ namespace ReIntegral
             instanceLock = new FileStream(Path.Combine(dataDirectory, "launcher.lock"), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
             executable = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "mgs-integral-native.exe");
             settingsPath = Path.Combine(dataDirectory, "settings.xml");
-            Text = "RE:INTEGRAL — " + BuildInfo.Version;
+            Text = "RE:INTEGRAL — " + BuildInfo.Version + (godotEnabled ? " — Godot" : "");
             Font = new Font("Segoe UI", 9F);
             AutoScaleMode = AutoScaleMode.Dpi;
             ClientSize = new Size(720, 665);
@@ -53,6 +56,8 @@ namespace ReIntegral
             StartPosition = FormStartPosition.CenterScreen;
             BuildLayout();
             LoadSettings(Settings.Load(settingsPath));
+            mods.Changed += delegate { Guard(SaveMods); };
+            mods.BusyChanged += delegate { play.Enabled = !mods.Busy && game == null && !validating; };
             timer.Interval = 400;
             timer.Tick += TickGame;
             timer.Start();
@@ -73,6 +78,8 @@ namespace ReIntegral
             BuildGraphics();
             BuildGameplay();
             BuildLanguages();
+            mods = new ModsPanel(dataDirectory, godotEnabled);
+            if (godotEnabled) Page("Mods").Controls.Add(mods);
             BuildAdvanced();
             play.Text = "Save and play";
             play.SetBounds(550, 580, 154, 34);
@@ -126,15 +133,22 @@ namespace ReIntegral
             LabelAt(page, "Keep each CUE beside its matching BIN. No extraction or VR disc is needed.", 151);
             LabelAt(page, "Output resolution", 173);
             resolution.SetBounds(16, 200, 220, 28);
-            resolution.Items.AddRange(new object[] { "640x480", "1280x720", "1280x960", "1600x900", "1920x1080", "2560x1440" });
+            resolution.Items.AddRange(new object[] { "320x240", "640x480", "1280x720", "1280x960", "1600x900", "1920x1080", "2560x1440" });
             page.Controls.Add(resolution);
             CheckAt(page, wide, "Widescreen (expand the scene view)", 237);
             CheckAt(page, fullscreen, "Fullscreen", 267);
+            LabelAt(page, "Widescreen uses the selected resolution's aspect. Turn it off for original 4:3.", 297);
         }
 
         private void BuildGraphics()
         {
             var page = Page("Graphics");
+            if (godotEnabled)
+            {
+                LabelAt(page, "Godot renderer — dynamic lighting, shadows and PBR materials", 18);
+                LabelAt(page, "Enable visual mods on the Mods tab.", 64);
+                return;
+            }
             LabelAt(page, BuildInfo.ModernRenderer ? "Modern renderer — experimental enhancements" :
                 "These enhancements require the experimental modern renderer build.", 18);
             CheckAt(page, textureCorrection, "Perspective-correct textures", 64);
@@ -233,6 +247,7 @@ namespace ReIntegral
             fastLoading.Checked = value.FastLoading;
             overlay.Checked = value.DebugOverlay; mantis.Text = value.MantisMemory;
             stage.Text = value.Stage; frames.Text = value.Frames; advanced.Text = value.Advanced;
+            mods.LoadMods(value.Mods);
         }
 
         private Settings ReadSettings()
@@ -245,7 +260,8 @@ namespace ReIntegral
                 BonusItems = bonus.Checked, Invulnerable = invulnerable.Checked, AutoCard = autoCard.Checked,
                 FastLoading = fastLoading.Checked,
                 DebugOverlay = overlay.Checked, MantisMemory = mantis.Text.Trim(), Stage = stage.Text.Trim(),
-                Frames = frames.Text.Trim(), Advanced = advanced.Text.Replace("\r", " ").Replace("\n", " ") };
+                Frames = frames.Text.Trim(), Advanced = advanced.Text.Replace("\r", " ").Replace("\n", " "),
+                Mods = mods.ReadMods() };
         }
 
         private static string AbsolutePath(string value)
@@ -256,120 +272,21 @@ namespace ReIntegral
         private void Save()
         {
             var settings = ReadSettings();
-            GameLaunch.Arguments(settings);
+            GameLaunch.Arguments(settings, godotEnabled);
             settings.Save(settingsPath);
             status.Text = "Settings saved in " + dataDirectory;
         }
 
-        private async Task Play()
+        private void SaveMods()
         {
-            validating = true;
-            play.Enabled = false;
-            tabs.Enabled = false;
-            status.Text = "Validating your discs and language packs…";
-            try
-            {
-                var settings = ReadSettings();
-                activeArguments = GameLaunch.Arguments(settings);
-                await GameLaunch.ValidateDisc(executable, settings.DiscOne, 1, dataDirectory);
-                await GameLaunch.ValidateDisc(executable, settings.DiscTwo, 2, dataDirectory);
-                await GameLaunch.ValidateLanguage(executable, settings.TextPack, dataDirectory);
-                if (settings.VoicePack != settings.TextPack)
-                    await GameLaunch.ValidateLanguage(executable, settings.VoicePack, dataDirectory);
-                settings.Save(settingsPath);
-                rapidRestarts = 0;
-                StartGame();
-            }
-            catch (Exception error)
-            {
-                status.Text = "Setup needs attention.";
-                MessageBox.Show(this, error.Message, "RE:INTEGRAL", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            finally
-            {
-                validating = false;
-                play.Enabled = game == null;
-                tabs.Enabled = game == null;
-            }
-        }
-
-        private void StartGame()
-        {
-            string path = Path.Combine(dataDirectory, "logs", DateTime.UtcNow.ToString("yyyyMMdd-HHmmss-fff") + ".log");
-            log = new StreamWriter(path, true) { AutoFlush = true };
-            log.WriteLine("RE:INTEGRAL " + BuildInfo.Version + " (" + BuildInfo.Commit + ")");
-            log.WriteLine(activeArguments);
-            game = new Process { StartInfo = GameLaunch.StartInfo(executable, activeArguments, dataDirectory) };
-            game.OutputDataReceived += WriteLog;
-            game.ErrorDataReceived += WriteLog;
-            try { game.Start(); }
-            catch { game.Dispose(); game = null; log.Dispose(); log = null; throw; }
-            game.BeginOutputReadLine();
-            game.BeginErrorReadLine();
-            started = DateTime.UtcNow;
-            play.Enabled = false;
-            tabs.Enabled = false;
-            status.Text = "Game running. Saves and logs are stored outside the installation folder.";
-        }
-
-        private void WriteLog(object sender, DataReceivedEventArgs args)
-        {
-            if (args.Data != null) lock (logLock) log.WriteLine(args.Data);
-        }
-
-        private void TickGame(object sender, EventArgs args)
-        {
-            if (smoke)
-            {
-                smoke = false;
-                using (var preview = new Bitmap(Width, Height))
-                {
-                    for (int index = 0; index < tabs.TabCount; ++index)
-                    {
-                        tabs.SelectedIndex = index;
-                        DrawToBitmap(preview, new Rectangle(0, 0, Width, Height));
-                        preview.Save(Path.Combine(dataDirectory, "launcher-" + index + ".png"));
-                    }
-                }
-                using (var dialog = new LanguageImportDialog(dataDirectory, discOne.Text, discTwo.Text))
-                {
-                    dialog.Show(this);
-                    using (var preview = new Bitmap(dialog.Width, dialog.Height))
-                    {
-                        dialog.DrawToBitmap(preview, new Rectangle(0, 0, dialog.Width, dialog.Height));
-                        preview.Save(Path.Combine(dataDirectory, "launcher-import.png"));
-                    }
-                    dialog.Close();
-                }
-                Close();
-                return;
-            }
-            if (game == null || !game.HasExited) return;
-            game.WaitForExit();
-            int code = game.ExitCode;
-            game.Dispose(); game = null;
-            log.Dispose(); log = null;
-            play.Enabled = true;
-            tabs.Enabled = true;
-            if (code == 75)
-            {
-                rapidRestarts = (DateTime.UtcNow - started).TotalSeconds > 5 ? 0 : rapidRestarts + 1;
-                if (rapidRestarts < 3) { Guard(StartGame); return; }
-            }
-            status.Text = code == 0 ? "Game closed. Ready to play again." : "Game exited with code " + code + ". Open logs for details.";
-            if (code != 0) MessageBox.Show(this, status.Text, "RE:INTEGRAL", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-        }
-
-        private void ClosingLauncher(object sender, FormClosingEventArgs args)
-        {
-            if (game == null && !validating) return;
-            args.Cancel = true;
-            MessageBox.Show(this, "Close the game before closing the launcher.", "RE:INTEGRAL");
+            var settings = Settings.Load(settingsPath);
+            settings.Mods = mods.ReadMods();
+            settings.Save(settingsPath);
         }
 
         private void ShowCommand()
         {
-            MessageBox.Show(this, GameLaunch.Quote(executable) + " " + GameLaunch.Arguments(ReadSettings()), "Launch command");
+            MessageBox.Show(this, GameLaunch.Quote(executable) + " " + GameLaunch.Arguments(ReadSettings(), godotEnabled), "Launch command");
         }
 
         private void ShowHelp()
@@ -401,6 +318,8 @@ namespace ReIntegral
         [STAThread]
         public static int Main(string[] args)
         {
+            AppContext.SetSwitch("Switch.System.IO.UseLegacyPathHandling", false);
+            AppContext.SetSwitch("Switch.System.IO.BlockLongPaths", false);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             try

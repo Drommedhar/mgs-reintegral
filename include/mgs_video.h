@@ -12,6 +12,7 @@ int MgsVideoParseResolution(const char *text, MgsVideoOptions *options);
 int MgsVideoConfigure(const MgsVideoOptions *options);
 int MgsVideoCapturesOutput(void);
 int MgsVideoHalfWidth(void);
+float MgsVideoHorizontalScale(void);
 int MgsVideoReferenceRequired(void);
 void MgsVideoExpandClip(short *minimum, short *maximum);
 void MgsVideoTagChannel(void *environment, int world);

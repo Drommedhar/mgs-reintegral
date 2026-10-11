@@ -1,5 +1,10 @@
 {
   "version": 1,
+  "godotCpp": {
+    "path": "vendor/godot-cpp",
+    "url": "https://github.com/godotengine/godot-cpp.git",
+    "commit": "714c9e2c165db2dcb7e6ea57e62a04204d3cfbfa"
+  },
   "repositories": [
     {
       "path": "vendor/mgs",
@@ -91,7 +96,14 @@
         "patches/mgs-precise-face-culling.patch",
         "patches/mgs-precise-subdivision.patch",
         "patches/mgs-loading-pacing.patch",
-        "patches/mgs-language-packs.patch"
+        "patches/mgs-language-packs.patch",
+        "patches/mgs-godot-legacy-effects.patch",
+        "patches/mgs-existing-presentation-hooks.patch",
+        "patches/mgs-godot-world-effects.patch",
+        "patches/mgs-godot-event-lights.patch",
+        "patches/mgs-godot-widescreen-visibility.patch",
+        "patches/mgs-godot-alarm-lights.patch",
+        "patches/mgs-godot-beacon-glow.patch"
       ]
     },
     {
@@ -122,7 +134,11 @@
         "patches/psyz-audio-output-buffer.patch",
         "patches/psyz-godot-command-transport.patch",
         "patches/psyz-projected-geometry.patch",
-        "patches/psyz-audio-output-suppression.patch"
+        "patches/psyz-audio-output-suppression.patch",
+        "patches/psyz-godot-draw-cost.patch",
+        "patches/psyz-existing-remote-input.patch",
+        "patches/psyz-godot-exchange-timing.patch",
+        "patches/psyz-godot-color-precision.patch"
       ]
     },
     {

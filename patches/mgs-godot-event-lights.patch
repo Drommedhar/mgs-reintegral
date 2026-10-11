@@ -1,0 +1,108 @@
+diff --git a/source/enemy/glight.c b/source/enemy/glight.c
+index 56e5c50b0..b1aee38e1 100644
+--- a/source/enemy/glight.c
++++ b/source/enemy/glight.c
+@@ -1,4 +1,7 @@
+ #include "glight.h"
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_scene.h"
++#endif
+ 
+ #include <sys/types.h>
+ #include <libgte.h>
+@@ -107,6 +110,10 @@ static int GetResources(Work *work, MATRIX *world, int **pvisible)
+     InitPacks(work->prim->packs[0], tex, 250);
+     InitPacks(work->prim->packs[1], tex, 200);
+ 
++#ifdef MGS_GODOT_SCENE
++    MgsGodotRegisterWeaponLight(work->prim);
++#endif
++
+     return 0;
+ }
+ 
+diff --git a/source/kojo/famaslit.c b/source/kojo/famaslit.c
+index 592c01615..921339557 100644
+--- a/source/kojo/famaslit.c
++++ b/source/kojo/famaslit.c
+@@ -11,6 +11,9 @@
+  */
+ 
+ #include "famaslit.h"
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_scene.h"
++#endif
+ 
+ #include <sys/types.h>
+ #include <libgte.h>
+@@ -125,6 +128,10 @@ void *NewFamasLight(MATRIX *world)
+ #undef PACK0
+ #undef PACK1
+ 
++#ifdef MGS_GODOT_SCENE
++    MgsGodotRegisterWeaponLight(prim);
++#endif
++
+     return (void *)lpAct;
+ }
+ 
+diff --git a/source/libdg/chanl.c b/source/libdg/chanl.c
+index 2fd223bc4..54cd56686 100644
+--- a/source/libdg/chanl.c
++++ b/source/libdg/chanl.c
+@@ -380,6 +380,7 @@ void DG_DequeuePrim( DG_PRIM *prim )
+ 
+ #ifdef MGS_GODOT_SCENE
+     MgsGodotRemoveEffect(prim);
++    MgsGodotRemoveWeaponLight(prim);
+ #endif
+ 
+ #ifdef MGS_REMIX_SCENE
+diff --git a/source/libdg/light.c b/source/libdg/light.c
+index 3d296f8ff..f95708adc 100644
+--- a/source/libdg/light.c
++++ b/source/libdg/light.c
+@@ -46,6 +46,43 @@ typedef struct {
+ static FIXLIGHT SECTION(".bss") fix_lights[ MAX_FIX_LIGHTS ];
+ static TLIGHT   SECTION(".bss") tlights[ 2 ];
+ 
++#ifdef MGS_GODOT_SCENE
++unsigned MgsGodotCopyTemporaryLights(void *destination, unsigned capacity)
++{
++    const TLIGHT *source = &tlights[~GV_Time & 1];
++    if ((unsigned)source->n_lights > capacity)
++    {
++        printf("Godot temporary light capacity exceeded\n");
++        exit(EXIT_FAILURE);
++    }
++    memcpy(destination, source->lights, source->n_lights * sizeof(DG_LIT));
++    return source->n_lights;
++}
++#endif
++
++#ifdef MGS_REMIX_SCENE
++unsigned MgsRemixCopyLights(void *output, unsigned capacity)
++{
++    DG_LIT *destination = output;
++    unsigned count = 0;
++    for (int group = 0; group <= MAX_FIX_LIGHTS; ++group)
++    {
++        const DG_LIT *source = group == MAX_FIX_LIGHTS ? tlights[~GV_Time & 1].lights : fix_lights[group].lights;
++        const int size = group == MAX_FIX_LIGHTS ? tlights[~GV_Time & 1].n_lights : fix_lights[group].n_lights;
++        for (int i = 0; i < size; ++i)
++        {
++            if (count == capacity)
++            {
++                printf("Remix scene light capacity exceeded\n");
++                exit(EXIT_FAILURE);
++            }
++            destination[count++] = source[i];
++        }
++    }
++    return count;
++}
++#endif
++
+ /*---------------------------------------------------------------------------*/
+ 
+ void DG_InitLightSystem( void )

@@ -2,6 +2,7 @@ extends Node
 
 const Renderer = preload("res://renderer.gd")
 const SceneView = preload("res://scene_view.gd")
+const ShaderWarmup = preload("res://shader_warmup.gd")
 const LIMIT = 64 * 1024 * 1024
 const KEYS = [KEY_W, KEY_E, KEY_Q, KEY_R, KEY_S, KEY_D, KEY_X, KEY_Z,
 	KEY_BACKSPACE, KEY_1, KEY_2, KEY_ENTER, KEY_UP, KEY_RIGHT, KEY_DOWN, KEY_LEFT]
@@ -26,19 +27,38 @@ var display_enabled := false
 var scene_status := Label.new()
 var world_viewport := SubViewport.new()
 var metadata_viewport := SubViewport.new()
+var background_viewport := preload("res://world_background.gd").new()
 var scene_enabled := false
 var scene_dirty := false
 var close_requested := false
+var debug_panel := PanelContainer.new()
+var debug_label := Label.new()
+var scene_update_ms := 0.0
 
 func _ready() -> void:
 	get_tree().auto_accept_quit = false
 	scene_enabled = OS.get_environment("MGS_GODOT_SCENE_VIEW") == "1"
-	world_viewport.size = Vector2i(580, 448)
+	var requested := OS.get_environment("MGS_GODOT_RENDER_SIZE")
+	var dimensions := requested.split("x")
+	if not requested.is_empty():
+		if dimensions.size() != 2 or not dimensions[0].is_valid_int() or not dimensions[1].is_valid_int():
+			fail("Invalid renderer resolution: " + requested)
+			return
+		var extent := Vector2i(int(dimensions[0]), int(dimensions[1]))
+		if extent.x < 320 or extent.y < 240 or extent.x > 2560 or extent.y > 1920:
+			fail("Unsupported renderer resolution: " + requested)
+			return
+		gpu.render_scale = clampi(ceili(minf(extent.x / 320.0, extent.y / 240.0)), 1, 8)
+	world_viewport.size = scene_view.render_extent(maxi(2, gpu.render_scale))
 	world_viewport.transparent_bg = true
 	world_viewport.own_world_3d = true
-	world_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS if scene_enabled else SubViewport.UPDATE_DISABLED
+	SceneView.configure_shadows(world_viewport, get_viewport())
+	world_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
 	add_child(world_viewport)
 	world_viewport.add_child(scene_view)
+	metadata_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	add_child(metadata_viewport)
+	add_child(background_viewport)
 	if scene_enabled:
 		var scene_error := scene_view.initialize()
 		if not scene_error.is_empty():
@@ -50,10 +70,14 @@ func _ready() -> void:
 		metadata_viewport.size = world_viewport.size
 		metadata_viewport.transparent_bg = true
 		metadata_viewport.world_3d = world_viewport.find_world_3d()
-		metadata_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
-		add_child(metadata_viewport)
 		metadata_viewport.add_child(scene_view.metadata_camera)
+		var metadata_compositor := Compositor.new()
+		metadata_compositor.compositor_effects = [gpu.metadata_depth]
+		scene_view.metadata_camera.compositor = metadata_compositor
 		gpu.metadata_texture = metadata_viewport.get_texture().get_rid()
+		background_viewport.initialize(world_viewport)
+		gpu.background_texture = background_viewport.get_texture().get_rid()
+		await ShaderWarmup.prepare(scene_view, get_viewport())
 	gpu.world_texture = world_viewport.get_texture().get_rid()
 	var port := int(OS.get_environment("MGS_GODOT_PORT"))
 	if port < 1024 or port > 65535:
@@ -78,6 +102,15 @@ func _ready() -> void:
 	scene_status.position = Vector2(8, 8)
 	scene_status.add_theme_color_override("font_color", Color.YELLOW)
 	add_child(scene_status)
+	debug_panel.position = Vector2(8, 8)
+	debug_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	debug_label.add_theme_color_override("font_color", Color.WHITE)
+	debug_label.add_theme_color_override("font_shadow_color", Color.BLACK)
+	debug_label.add_theme_constant_override("shadow_offset_x", 1)
+	debug_label.add_theme_constant_override("shadow_offset_y", 1)
+	debug_panel.add_child(debug_label)
+	debug_panel.hide()
+	add_child(debug_panel)
 	get_viewport().size_changed.connect(resize_screen)
 	resize_screen()
 	RenderingServer.call_on_render_thread(gpu.initialize.bind(renderer_ready))
@@ -87,7 +120,8 @@ func renderer_ready(target: RID, error: String) -> void:
 		fail(error)
 		return
 	texture.texture_rd_rid = target
-	print("MGS_GODOT_READY protocol=4 renderer=RenderingDevice")
+	print("MGS_GODOT_READY protocol=13 renderer=RenderingDevice")
+	print("MGS_RENDER_SIZE scale=%d world=%s output=%s" % [gpu.render_scale, world_viewport.size, get_viewport().get_visible_rect().size])
 	var ready_path := OS.get_environment("MGS_GODOT_READY_FILE")
 	if not ready_path.is_empty():
 		var ready := FileAccess.open(ready_path, FileAccess.WRITE)
@@ -127,9 +161,12 @@ func shutdown(exit_code: int) -> void:
 		return
 	shutting_down = true
 	set_process(false)
+	scene_view.mod_api.stop()
 	world_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
 	metadata_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	background_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
 	scene_view.camera.compositor = null
+	scene_view.metadata_camera.compositor = null
 	texture.texture_rd_rid = RID()
 	RenderingServer.call_on_render_thread(gpu.release.bind(get_tree().quit.bind(exit_code)))
 
@@ -144,23 +181,30 @@ func _process(_delta: float) -> void:
 	if peer.get_status() != StreamPeerTCP.STATUS_CONNECTED:
 		if connected_once:
 			print("MGS native runtime disconnected after %d frames" % frame_number)
+			print("MGS_WORLD_COMPOSITES %d" % gpu.world_composites)
 			shutdown(0)
 		return
-	var available := peer.get_available_bytes()
-	if available > LIMIT - incoming.size():
-		fail("Incoming command stream exceeds limit")
-		return
-	if available > 0:
-		var received := peer.get_data(available)
-		if received[0] != OK:
-			fail("Socket receive failed")
-			return
-		incoming.append_array(received[1])
+	if not receive_commands(): return
 	if not busy:
 		parse_commands()
 	scene_status.text = "Mesh preview · %s · %d instances · F6 game view" % [scene_view.scene_stage, scene_view.current_instances] if show_scene else ""
 
+func receive_commands() -> bool:
+	var available := peer.get_available_bytes()
+	while available > 0:
+		if available > LIMIT - incoming.size():
+			fail("Incoming command stream exceeds limit")
+			return false
+		var received := peer.get_data(available)
+		if received[0] != OK:
+			fail("Socket receive failed")
+			return false
+		incoming.append_array(received[1])
+		available = peer.get_available_bytes()
+	return true
+
 func parse_commands() -> void:
+	if shutting_down: return
 	var cursor := 0
 	while incoming.size() - cursor >= 8 and not busy:
 		var length := incoming.decode_u32(cursor)
@@ -173,10 +217,18 @@ func parse_commands() -> void:
 		var payload := incoming.slice(cursor + 8, cursor + 8 + length)
 		cursor += length + 8
 		if operation == 1:
-			if payload.size() != 12 or payload.decode_u32(0) != 0x3152474d or payload.decode_u32(4) != 4 or payload.decode_u32(8) != 20:
+			if payload.size() != 12 or payload.decode_u32(0) != 0x3152474d or payload.decode_u32(4) != 13 or payload.decode_u32(8) != 20:
 				fail("Incompatible native renderer protocol")
 				return
 			send_reply(1, PackedByteArray())
+		elif operation == 11:
+			if payload.size() > 255:
+				fail("Invalid debug text length")
+				return
+			debug_label.text = payload.get_string_from_utf8()
+			if debug_label.text.begins_with("FPS "):
+				debug_label.text += "\n" + gpu.last_stats + "\nSCENE CPU %.2f ms" % scene_update_ms
+			debug_panel.visible = not payload.is_empty()
 		elif operation == 9:
 			if not scene_enabled:
 				continue
@@ -209,6 +261,9 @@ func parse_commands() -> void:
 func submit_commands(batch: Array, operation: int, payload: PackedByteArray) -> void:
 	if scene_enabled and scene_dirty and batch.any(func(command): return command[0] == 10):
 		scene_dirty = false
+		background_viewport.render(scene_view.camera, world_viewport.size)
+		world_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+		metadata_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 		await RenderingServer.frame_post_draw
 	if not shutting_down:
 		RenderingServer.call_on_render_thread(gpu.execute.bind(batch, operation, payload, completed))
@@ -218,21 +273,31 @@ func completed(operation: int, payload: PackedByteArray, result: PackedByteArray
 		fail(error)
 		return
 	if operation == 9:
+		var started := Time.get_ticks_usec()
 		var scene_error := scene_view.update_scene(payload)
+		scene_update_ms = (Time.get_ticks_usec() - started) / 1000.0
 		if not scene_error.is_empty():
 			fail(scene_error)
 			return
+		var extent := scene_view.render_extent(maxi(2, gpu.render_scale))
+		if world_viewport.size != extent:
+			world_viewport.size = extent
+			metadata_viewport.size = extent
 		scene_dirty = true
 		busy = false
+		parse_commands.call_deferred()
 		return
 	if operation == 7:
 		display_enabled = payload.decode_u32(0) != 0
 		screen.visible = display_enabled
 		atlas.region = Rect2(payload.decode_u32(4), payload.decode_u32(8),
 			payload.decode_u32(12), payload.decode_u32(16))
+		atlas.region = Rect2(atlas.region.position * gpu.render_scale, atlas.region.size * gpu.render_scale)
 		aspect = float(payload.decode_u32(20)) / float(payload.decode_u32(24))
 		resize_screen()
 		frame_number += 1
+		if frame_number % 300 == 0:
+			print("MGS_RENDER_COST frame=%d %s SCENE CPU %.2f ms" % [frame_number, gpu.last_stats, scene_update_ms])
 		if frame_number == int(OS.get_environment("MGS_GODOT_QUIT_FRAME")):
 			request_close()
 		var capture_interval := int(OS.get_environment("MGS_GODOT_CAPTURE_EVERY"))
@@ -240,6 +305,7 @@ func completed(operation: int, payload: PackedByteArray, result: PackedByteArray
 			await capture_presentation(capture_interval > 0)
 	send_reply(operation, result)
 	busy = false
+	parse_commands.call_deferred()
 
 func capture_presentation(sequence: bool = false) -> void:
 	await RenderingServer.frame_post_draw
@@ -254,7 +320,10 @@ func capture_presentation(sequence: bool = false) -> void:
 		fail("Cannot save Godot presentation capture: " + error_string(result))
 	else:
 		print("MGS_GODOT_CAPTURE " + path)
+		print("MGS_GODOT_PRESENTATION " + JSON.stringify({"aspect": aspect,
+			"screen": [screen.size.x, screen.size.y], "world": [world_viewport.size.x, world_viewport.size.y]}))
 		print("MGS_GODOT_PROJECTION " + JSON.stringify(scene_view.projection_diagnostics()))
+		print("MGS_WORLD_COMPOSITES %d" % gpu.world_composites)
 		if scene_enabled and OS.get_environment("MGS_GODOT_CAPTURE_WORLD") == "1":
 			var world_result := world_viewport.get_texture().get_image().save_png(path.get_basename() + "-world.png")
 			if world_result != OK: fail("Cannot save world capture: " + error_string(world_result))

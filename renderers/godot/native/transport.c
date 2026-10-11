@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <SDL3/SDL_timer.h>
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -23,10 +24,12 @@ typedef int MgsSocket;
 #endif
 
 #define MGS_COMMAND_LIMIT (64u * 1024u * 1024u)
+#define MGS_SEND_CHUNK_BYTES (16u * 1024u)
 static MgsSocket connection = MGS_INVALID_SOCKET;
 static unsigned char *commands;
 static uint32_t command_bytes;
 static unsigned buttons;
+static Uint64 exchange_ns;
 
 static void Fail(const char *message) {
     fprintf(stderr, "Godot renderer: %s\n", message);
@@ -37,7 +40,8 @@ static void Fail(const char *message) {
 static void Transfer(void *buffer, uint32_t count, bool sending) {
     unsigned char *cursor = buffer;
     while (count) {
-        int size = (int)(count > INT_MAX ? INT_MAX : count);
+        const uint32_t limit = sending ? MGS_SEND_CHUNK_BYTES : INT_MAX;
+        int size = (int)(count > limit ? limit : count);
         int done = sending ? send(connection, (const char *)cursor, size, 0)
                            : recv(connection, (char *)cursor, size, 0);
         if (done <= 0) Fail("connection closed or timed out");
@@ -57,7 +61,7 @@ bool MgsGodotConnect(void) {
     }
     const uint32_t endian = 1;
     if (*(const unsigned char *)&endian != 1) {
-        fprintf(stderr, "Godot protocol v1 requires a little-endian host.\n");
+        fprintf(stderr, "Godot protocol requires a little-endian host.\n");
         return false;
     }
 #ifdef _WIN32
@@ -90,9 +94,9 @@ bool MgsGodotConnect(void) {
     }
     commands = malloc(MGS_COMMAND_LIMIT);
     if (!commands) Fail("cannot allocate command buffer");
-    const uint32_t hello[] = {0x3152474d, 4, 20};
+    const uint32_t hello[] = {0x3152474d, 13, 20};
     MgsGodotExchange(MGS_GODOT_HELLO, hello, sizeof(hello), NULL, 0);
-    fprintf(stderr, "Godot renderer connected: protocol 1, no native GPU device.\n");
+    fprintf(stderr, "Godot renderer connected: protocol 13, no native GPU device.\n");
     return true;
 }
 
@@ -108,6 +112,7 @@ void MgsGodotClose(void) {
     commands = NULL;
     command_bytes = 0;
     buttons = 0;
+    exchange_ns = 0;
 }
 
 void MgsGodotQueue(uint32_t operation, const void *header, uint32_t header_bytes,
@@ -131,6 +136,7 @@ void MgsGodotQueue(uint32_t operation, const void *header, uint32_t header_bytes
 
 void MgsGodotExchange(uint32_t operation, const void *header, uint32_t header_bytes,
                       void *result, uint32_t result_bytes) {
+    const Uint64 started = SDL_GetTicksNS();
     MgsGodotQueue(operation, header, header_bytes, NULL, 0);
     Transfer(commands, command_bytes, true);
     command_bytes = 0;
@@ -141,6 +147,13 @@ void MgsGodotExchange(uint32_t operation, const void *header, uint32_t header_by
     }
     buttons = reply[2];
     if (result_bytes) Transfer(result, result_bytes, false);
+    exchange_ns += SDL_GetTicksNS() - started;
+}
+
+double MgsGodotTakeExchangeTimeUs(void) {
+    const double elapsed = exchange_ns / 1000.0;
+    exchange_ns = 0;
+    return elapsed;
 }
 
 unsigned MgsGodotButtons(void) { return buttons & 0xffffu; }

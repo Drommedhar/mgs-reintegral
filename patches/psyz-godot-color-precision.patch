@@ -1,0 +1,29 @@
+diff --git a/psyz/src/platform/shaders/psx.frag.glsl b/psyz/src/platform/shaders/psx.frag.glsl
+index 3c9ebb7..50669e2 100644
+--- a/psyz/src/platform/shaders/psx.frag.glsl
++++ b/psyz/src/platform/shaders/psx.frag.glsl
+@@ -115,6 +115,24 @@ void main() {
+     if (preserveMasked != 0u && destination.a > 0.5) {
+         discard;
+     }
++    // Godot lighting retains its precision through native fades and feedback.
++    if ((samplingFlags & 32u) != 0u) {
++        vec3 foreground = modColor;
++        if (textureMode == 1u && (samplingFlags & 1u) != 0u) {
++            vec3 modulation = floor(vertexColor.rgb * 127.5 + 0.5) / 128.0;
++            foreground = texColor.rgb * modulation;
++        }
++        if (colorSemiTrans && isSemiTrans) {
++            uint abr = (tpage & 0x60u) >> 5u;
++            if (abr == 0u) foreground = (destination.rgb + foreground) * 0.5;
++            else if (abr == 1u) foreground = destination.rgb + foreground;
++            else if (abr == 2u) foreground = destination.rgb - foreground;
++            else foreground = destination.rgb + foreground * 0.25;
++        }
++        float mask = forceMask != 0u || texColor.a > 0.5 ? 1.0 : 0.0;
++        FragColor = vec4(clamp(foreground, 0.0, 1.0), mask);
++        return;
++    }
+     ivec3 foreground = ivec3(floor(modColor * 31.0 + 0.5));
+     if (colorSemiTrans && isSemiTrans) {
+         ivec3 background = ivec3(floor(destination.rgb * 31.0 + 0.5));

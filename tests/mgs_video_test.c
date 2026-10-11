@@ -96,6 +96,7 @@ static void CheckDefault(void)
     original = packet;
     assert(MgsVideoConfigure(&options));
     assert(!MgsVideoCapturesOutput() && MgsVideoHalfWidth() == 160);
+    assert(MgsVideoHorizontalScale() == 1.0f);
     CheckClip(-160, 159, -160, 159);
     MgsVideoTagChannel(&packet, 1);
     assert(memcmp(&packet, &original, sizeof(packet)) == 0);
@@ -115,6 +116,7 @@ static void CheckOriginalCanvas(const u_long *marker)
 {
     assert(texture_alignment);
     assert(MgsVideoHalfWidth() == 160);
+    assert(MgsVideoHorizontalScale() == 1.0f);
     CheckClip(-160, 159, -160, 159);
     MgsVideoBeginFrame(0);
     Expect(TRANSFORM, 1, 1, 160, 0);
@@ -151,6 +153,7 @@ static void CheckCodec(const u_long *marker)
     MgsVideoCodec(0);
     Expect(PRESENT, 2560, 1440, 224, 0);
     assert(MgsVideoHalfWidth() == 214);
+    assert(MgsVideoHorizontalScale() == 0.75f);
     CheckClip(-160, 159, -214, 213);
     MgsVideoBeginFrame(0);
     Expect(TRANSFORM, 3, 4, 160, 1);

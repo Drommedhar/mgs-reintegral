@@ -25,7 +25,7 @@ namespace ReIntegral
             return result.Append('\\', slashes * 2).Append('"').ToString();
         }
 
-        public static string Arguments(Settings settings)
+        public static string Arguments(Settings settings, bool godot = false)
         {
             ValidateDisplay(settings);
             uint frames;
@@ -37,10 +37,10 @@ namespace ReIntegral
                 "--disc-two", Quote(settings.DiscTwo), "--resolution", settings.Resolution,
                 "--stage", settings.Stage };
             if (settings.Widescreen) arguments.Add("--widescreen");
-            if (settings.TextureCorrection) arguments.Add("--texture-correction");
-            if (settings.GeometryPrecision) arguments.Add("--geometry-precision");
-            if (settings.DepthBuffer) arguments.Add("--depth-buffer");
-            if (settings.Fullscreen) arguments.Add("--fullscreen");
+            if (!godot && settings.TextureCorrection) arguments.Add("--texture-correction");
+            if (!godot && settings.GeometryPrecision) arguments.Add("--geometry-precision");
+            if (!godot && settings.DepthBuffer) arguments.Add("--depth-buffer");
+            if (!godot && settings.Fullscreen) arguments.Add("--fullscreen");
             if (settings.DebugOverlay) arguments.Add("--debug-overlay");
             if (settings.BonusItems) arguments.Add("--bonus-items 1");
             if (settings.Invulnerable) arguments.Add("--invulnerable 1");

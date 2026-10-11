@@ -26,6 +26,7 @@ static double minimum_frame_us;
 static PsyzAudioStats last_audio;
 static int menu_ready;
 static int hint_visible;
+static int record_all_frames;
 
 void MgsCadenceMenuReady(void)
 {
@@ -71,6 +72,8 @@ int MgsCadenceConfigure(const char *path, int overlay)
     }
     if (!path)
         return 1;
+    const char *all_frames = SDL_getenv("MGS_CADENCE_ALL_FRAMES");
+    record_all_frames = all_frames && SDL_strcmp(all_frames, "1") == 0;
     if (fopen_s(&output, path, "wb") != 0) {
         fprintf(stderr, "Cannot create cadence CSV: %s\n", path);
         return 0;
@@ -170,9 +173,10 @@ int MgsCadenceVSync(void)
         minimum_frame_us = stats.last_frame_time_us;
     if (stats.last_frame_time_us > maximum_frame_us)
         maximum_frame_us = stats.last_frame_time_us;
-    if (!MgsFrameTimingSlow(stats.last_frame_time_us, stats.target_frame_time_us))
+    int slow = MgsFrameTimingSlow(stats.last_frame_time_us, stats.target_frame_time_us);
+    slow_frames += slow;
+    if (!slow && !record_all_frames)
         return 1;
-    ++slow_frames;
     int result = fprintf(output,
         "%u,%llu,%s,%d,%d,%u,%d,%d,%u,%d,%d,%d,%d,%u,%d,%d,%d,%d,%d,%d,%.3f,%.3f,%u,%llu,%.3f,%u,%u,%u,%.3f,%d,%.3f\n",
         vsync, (SDL_GetTicksNS() - start_ns) / 1000, GM_GetArea(0), GV_Time,
@@ -184,7 +188,7 @@ int MgsCadenceVSync(void)
         stats.total_frames, stats.target_frame_time_us, audio.queued_frames,
         audio.empty_refills, audio.backlog_clears, audio.max_refill_gap_us, audio.paused,
         stats.last_submit_time_us);
-    if (result < 0 || fflush(output) != 0) {
+    if (result < 0 || (!record_all_frames && fflush(output) != 0)) {
         fputs("Cannot write cadence CSV.\n", stderr);
         return 0;
     }

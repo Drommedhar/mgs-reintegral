@@ -1,0 +1,51 @@
+diff --git a/source/okajima/pato_lmp.c b/source/okajima/pato_lmp.c
+index 759f75637..f45ff25c0 100644
+--- a/source/okajima/pato_lmp.c
++++ b/source/okajima/pato_lmp.c
+@@ -6,6 +6,9 @@
+ #include "libdg/libdg.h"
+ #include "libgcl/libgcl.h"
+ #include "game/game.h"
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_scene.h"
++#endif
+ 
+ typedef struct _PatoLmpPrims
+ {
+@@ -450,8 +453,13 @@ void PatrolLampAct_800D6678(Work *work)
+         if (work->field_193C == 1 && sp30 < 16384)
+         {
+             ot = DG_ChanlOTag(0);
+-            addPrim(ot, &work->field_20->tile[GV_Clock]);
+-            addPrim(ot, &work->field_20->tpage[GV_Clock]);
++#ifdef MGS_GODOT_SCENE
++            if (!MgsGodotSceneEnabled())
++#endif
++            {
++                addPrim(ot, &work->field_20->tile[GV_Clock]);
++                addPrim(ot, &work->field_20->tpage[GV_Clock]);
++            }
+             s00a_pato_lmp_800D5FC4(work);
+             if (work->field_1924 == work->field_1920)
+             {
+@@ -884,6 +892,9 @@ temp_label_end4:
+     }
+ 
+     prim->raise = prim_temp;
++#ifdef MGS_GODOT_SCENE
++    prim->type |= MGS_GODOT_LEGACY_GLOW;
++#endif
+ 
+     tex = DG_GetTexture(GV_StrCode(aPatlit));
+     if (!tex)
+@@ -918,6 +929,10 @@ temp_label_end4:
+         GM_InitObject(temp_s0_5, GV_StrCode(aPatSpt1), 0x16D, 0);
+         GM_ConfigObjectJoint(temp_s0_5);
+         GM_ConfigObjectLight(temp_s0_5, work->field_F64);
++#ifdef MGS_GODOT_SCENE
++        MgsGodotRegisterAlarmLight(temp_s0_4->objs);
++        MgsGodotRegisterAlarmLight(temp_s0_5->objs);
++#endif
+     }
+ 
+     prims = GV_Malloc(sizeof(PatoLmpPrims));

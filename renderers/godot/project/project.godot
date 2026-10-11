@@ -13,7 +13,7 @@ config_version=5
 config/name="MGS Integral — Godot renderer prototype"
 run/main_scene="res://main.tscn"
 config/features=PackedStringArray("4.8")
-run/max_fps=240
+run/max_fps=1000
 
 [display]
 
@@ -28,3 +28,4 @@ enabled=PackedStringArray("res://addons/mgs_editor/plugin.cfg")
 [rendering]
 
 environment/defaults/default_clear_color=Color(0, 0, 0, 1)
+lights_and_shadows/multi_bounce_occlusion/enabled=true

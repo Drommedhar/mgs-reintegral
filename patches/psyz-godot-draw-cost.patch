@@ -1,0 +1,56 @@
+diff --git a/psyz/src/platform/sdl3_gpu.c b/psyz/src/platform/sdl3_gpu.c
+index b4d0c4b..fbba1bd 100644
+--- a/psyz/src/platform/sdl3_gpu.c
++++ b/psyz/src/platform/sdl3_gpu.c
+@@ -816,6 +816,7 @@ static void PlatformBackend_Present(void) {
+         display_size.x, presentation_source_height ? presentation_source_height : SDL_min(set_disp_vert, display_size.y),
+         presentation_width ? presentation_width : 4,
+         presentation_height ? presentation_height : 3};
++    MgsGodotQueue(MGS_GODOT_DEBUG_TEXT, debug_text, (uint32_t)SDL_strlen(debug_text), NULL, 0);
+     MgsGodotExchange(MGS_GODOT_FRAME, frame, sizeof(frame), NULL, 0);
+     if (overlay_frame_cb) overlay_frame_cb();
+     finish_time = SDL_GetPerformanceCounter();
+@@ -2156,6 +2157,15 @@ static SDL_Rect ScaledBatchBounds(void) {
+     return clipped;
+ }
+ 
++#ifdef PSYZ_GODOT_REMOTE
++static bool BatchSamplesFramebuffer(void) {
++    if (!framebuffer_sampling) return false;
++    for (unsigned i = 0; i < n_vertices; ++i)
++        if ((vertex_buf[i].t & (TPAGE_NOTEXTURE | 0x100)) == 0x100) return true;
++    return false;
++}
++#endif
++
+ void Draw_FlushBuffer(void) {
+     if (n_vertices == 0) {
+         return;
+@@ -2163,6 +2173,11 @@ void Draw_FlushBuffer(void) {
+ #ifdef PSYZ_GODOT_REMOTE
+     const float remote_transform = frame_transform_bypass ? 1.0f : frame_scale_x;
+     const float remote_grid = GetDrawGridXScale();
++    const SDL_Rect remote_bounds = ScaledBatchBounds();
++    if (remote_bounds.w <= 0 || remote_bounds.h <= 0) {
++        Draw_ResetBuffer();
++        return;
++    }
+     struct {
+         uint32_t vertices, indices;
+         int32_t clip[4];
+@@ -2171,12 +2186,13 @@ void Draw_FlushBuffer(void) {
+         float scale;
+         uint32_t sampling;
+     } header = {n_vertices, n_indices,
+-        {scissor_rect.x, scissor_rect.y, scissor_rect.w, scissor_rect.h},
++        {remote_bounds.x, remote_bounds.y, remote_bounds.w, remote_bounds.h},
+         {(float)draw_offset.x, (float)draw_offset.y,
+          0.5f / (remote_grid * remote_transform), 0.5f, remote_grid * remote_transform,
+          draw_offset.x * (1.0f - remote_grid) * remote_transform + frame_centre_x * (1.0f - remote_transform), 0, 0},
+         force_mask_bit, preserve_masked, 1.0f,
+-        framebuffer_sampling | (texture_screen_aligned << 1)};
++        BatchSamplesFramebuffer() | (texture_screen_aligned << 1) |
++        (batch_reads_destination << 3) | (batch_has_texture << 4)};
+     _Static_assert(sizeof(Vertex) == 20 && sizeof(header) == 72, "Godot protocol layout");
+     unsigned char payload[MAX_VERTEX_COUNT * sizeof(Vertex) + MAX_INDEX_COUNT * sizeof(u16)];
+     memcpy(payload, vertex_buf, n_vertices * sizeof(Vertex));

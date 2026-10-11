@@ -22,19 +22,26 @@ Integral remains the gameplay base. Regional coverage is currently partial.
 
 ## Roadmap
 
+- **Godot renderer:** make Godot the primary rendering path, starting with a
+  working native/Godot pair and visual correctness in startup, docks, helipad
+  and Codec. The recovered C runtime continues to own gameplay.
+- **Godot modding SDK and editor:** develop the existing MGS Visuals plugin,
+  stable asset IDs, model/texture replacements and stage lighting overrides
+  into a supported authoring workflow. The prototype now includes GDExtension
+  hooks, PBR materials, shadow lights and visual map overlays with asset-free
+  edit packages. Gameplay/collision editing and broader resource APIs follow.
 - **Regional resources:** support text and voice resources from more regions
   and editions, with clear compatibility checks and language selection.
-- **Modern rendering:** extend the experimental geometry/depth renderer while
-  preserving gameplay behavior and supporting custom graphics and mods.
-- **Modding tools:** extend resource overrides to standard image/model/audio
-  formats, resized replacements and easier inspection/export workflows.
-- **Map and stage editing:** build an editor once resource and renderer
-  interfaces support it.
 - **Compatibility and coverage:** improve the native release from testing and
   bug reports; expand into VR Missions and future platform support.
 
-These are planned directions. The Godot prototype is paused and is not part of
-the native alpha. See the [detailed roadmap](docs/ROADMAP.md).
+Godot is the main development direction for rendering and modding. The matched
+v5 renderer and visual mod workflow are implemented; campaign coverage and visual
+acceptance remain in progress. It is not part of the native alpha. Run the source
+prototype with `./tools/run-godot.ps1 -Scene3D` after
+[preparing local content](docs/GODOT_MODDING.md#prepare-from-your-discs).
+Remix Plus is retained as a separate experiment. See the [detailed roadmap](docs/ROADMAP.md)
+and [Godot integration milestone](docs/GODOT_RENDERER_PLAN.md#active-direction-11-october-2026).
 
 **Looking for the recreated stage code? Open [STAGE_CODE.md](STAGE_CODE.md).** It
 links directly to the recovered C actors, scene logic, controls and source patches.

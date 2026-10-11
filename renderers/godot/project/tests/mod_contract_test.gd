@@ -57,5 +57,30 @@ func _initialize() -> void:
 	var error := registry.configure({"fixture": {"kind": "texture"}}, [directory.path_join("second.json"), directory.path_join("first.json")])
 	check(error.is_empty(), error)
 	check(registry.replacements.fixture.mod == "second", "CLI order overrode manifest priority")
+	var duplicate := Registry.new()
+	check(not duplicate.configure({"fixture": {"kind": "texture"}}, [directory.path_join("first.json"), directory.path_join("first.json")]).is_empty(), "Duplicate mod IDs accepted")
+	second.priority = first.priority
+	FileAccess.open(directory.path_join("second.json"), FileAccess.WRITE).store_string(JSON.stringify(second))
+	var tied := Registry.new()
+	error = tied.configure({"fixture": {"kind": "texture"}}, [directory.path_join("second.json"), directory.path_join("first.json")])
+	check(error.is_empty() and tied.replacements.fixture.mod == "second", "Equal-priority mods did not resolve by ID")
+	var unknown := Registry.new()
+	check(not unknown.configure({}, [directory.path_join("first.json")]).is_empty(), "Unknown replacement identity accepted")
+	var pbr := {"schema": 1, "id": "pbr", "materials": {"fixture": {"normal": "texture.png", "roughness": 0.3, "metallic": 0.8}}}
+	var pbr_path := directory.path_join("pbr.json")
+	FileAccess.open(pbr_path, FileAccess.WRITE).store_string(JSON.stringify(pbr))
+	var pbr_registry := Registry.new()
+	check(pbr_registry.configure({"fixture": {"kind": "texture"}}, [pbr_path]).is_empty(), "Valid PBR declaration rejected")
+	check(pbr_registry.materials.fixture.metallic == 0.8, "PBR factors were not retained")
+	pbr.materials.fixture.roughness = -0.1
+	FileAccess.open(pbr_path, FileAccess.WRITE).store_string(JSON.stringify(pbr))
+	check(not Registry.new().configure({"fixture": {"kind": "texture"}}, [pbr_path]).is_empty(), "Negative PBR roughness accepted")
+	pbr.materials.fixture = {"normal": "../texture.png"}
+	FileAccess.open(pbr_path, FileAccess.WRITE).store_string(JSON.stringify(pbr))
+	check(not Registry.new().configure({"fixture": {"kind": "texture"}}, [pbr_path]).is_empty(), "External PBR map accepted")
+	FileAccess.open(directory.path_join("native.gdextension"), FileAccess.WRITE).store_string("[configuration]\n")
+	var native := {"schema": 1, "id": "native", "extensions": [{"path": "native.gdextension", "class": "TestMod", "api_version": 2}]}
+	FileAccess.open(pbr_path, FileAccess.WRITE).store_string(JSON.stringify(native))
+	check(not Registry.new().configure({}, [pbr_path]).is_empty(), "Unsupported native mod API accepted")
 	print("MGS_MOD_CONTRACT_TEST failures=%d" % failures)
 	quit(1 if failures else 0)

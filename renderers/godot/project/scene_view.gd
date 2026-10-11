@@ -1,24 +1,44 @@
 extends Node3D
 
-const REFERENCE_SHADER = preload("res://reference.gdshader")
+const ReferenceMaterials = preload("res://reference_materials.gd")
 const ModelContract = preload("res://model_contract.gd")
+const ModelEdits = preload("res://model_edits.gd")
 const ModRegistry = preload("res://mod_registry.gd")
-var two_sided_shader := Shader.new()
+const VisualModAPI = preload("res://visual_mod_api.gd")
+const VisualRemovals = preload("res://visual_removals.gd")
+const MapCoordinates = preload("res://map_coordinates.gd")
+const MapLights = preload("res://map_lights.gd")
+const WorldEffects = preload("res://world_effects.gd")
+const EventLights = preload("res://event_lights.gd")
+var effects := WorldEffects.new()
+var event_lights := EventLights.new()
+var mod_api := VisualModAPI.new()
+var removals := VisualRemovals.new()
+var materials := ReferenceMaterials.new()
 var mods := ModRegistry.new()
 var stage_override: Node3D
+var original_lights: Node3D
+var map_definitions: Dictionary = {}
 var camera := Camera3D.new()
+var metadata_camera := Camera3D.new()
 var catalog: Dictionary
 var asset_root: String
 var templates: Dictionary = {}
-var textures: Dictionary = {}
 var instances: Dictionary = {}
+var prepared_instances: Dictionary = {}
 var scene_stage := ""
 var current_instances := 0
 var projection_distance := 320.0
+var horizontal_scale := 1.0
 var visible_mesh_parts := 0
 
+static func configure_shadows(viewport: Viewport, source: Viewport) -> void:
+	viewport.positional_shadow_atlas_size = source.positional_shadow_atlas_size
+	viewport.positional_shadow_atlas_16_bits = source.positional_shadow_atlas_16_bits
+	for quadrant in 4:
+		viewport.set_positional_shadow_atlas_quadrant_subdiv(quadrant, source.get_positional_shadow_atlas_quadrant_subdiv(quadrant))
+
 func initialize() -> String:
-	two_sided_shader.code = REFERENCE_SHADER.code.replace("unshaded, fog_disabled", "unshaded, fog_disabled, cull_disabled")
 	asset_root = OS.get_environment("MGS_GODOT_ASSETS")
 	if asset_root.is_empty():
 		return "Scene rendering requires a prepared asset catalog"
@@ -26,6 +46,7 @@ func initialize() -> String:
 	if not parsed is Dictionary or parsed.get("schema") != 1:
 		return "Invalid prepared MGS asset catalog"
 	catalog = parsed.assets
+	map_definitions = parsed.get("maps", {})
 	var mod_setting := OS.get_environment("MGS_GODOT_MODS")
 	var mod_paths = [] if mod_setting.is_empty() else JSON.parse_string(mod_setting)
 	if not mod_paths is Array:
@@ -33,16 +54,30 @@ func initialize() -> String:
 	var mod_error := mods.configure(catalog, mod_paths)
 	if not mod_error.is_empty():
 		return mod_error
+	var material_error := materials.initialize(catalog, mods, asset_root)
+	if not material_error.is_empty(): return material_error
 	for identity in mods.replacements:
-		if catalog[identity].kind == "texture":
-			var image := Image.load_from_file(mods.replacements[identity].path)
-			if image == null: return "Cannot decode replacement texture: " + identity
-			textures[identity] = ImageTexture.create_from_image(image)
+		if catalog[identity].kind == "texture" and materials.texture_for(identity, false) == null:
+			return "Cannot decode replacement texture: " + identity
 	camera.near = 0.01
 	camera.far = 250.0
 	camera.keep_aspect = Camera3D.KEEP_WIDTH
+	camera.cull_mask &= ~ReferenceMaterials.METADATA_LAYER
+	metadata_camera.near = camera.near
+	metadata_camera.far = camera.far
+	metadata_camera.keep_aspect = camera.keep_aspect
+	metadata_camera.cull_mask = ReferenceMaterials.METADATA_LAYER
+	metadata_camera.environment = Environment.new()
+	metadata_camera.environment.background_mode = Environment.BG_CLEAR_COLOR
 	add_child(camera)
+	add_child(effects)
+	event_lights.name = "EventLights"
+	add_child(event_lights)
 	camera.current = true
+	mod_api.name = "VisualMods"
+	add_child(mod_api)
+	var extension_error := mod_api.start(self, mods.extensions)
+	if not extension_error.is_empty(): return extension_error
 	for identity in catalog:
 		if catalog[identity].kind == "model" and load_template(identity) == null:
 			return "Model preparation or replacement validation failed: " + identity
@@ -75,7 +110,17 @@ func load_template(identity: String) -> Node3D:
 		return null
 	if mods.replacements.has(identity):
 		var replacement := ModelContract.load_model(mods.replacements[identity].path)
-		var error := "Cannot load replacement" if replacement == null else ModelContract.validate(node, replacement)
+		var error := "Cannot load replacement" if replacement == null else ""
+		if replacement != null and replacement.has_meta("mgs_model_reference"):
+			var source: String = replacement.get_meta("mgs_model_reference")
+			var edits = replacement.get_meta("mgs_part_edits", {})
+			replacement.free()
+			replacement = node.duplicate() as Node3D
+			if source != identity and (not catalog.has(source) or catalog[source].get("sha256", "").is_empty() or catalog[source].sha256 != catalog[identity].get("sha256")):
+				error = "Model reference does not match the original asset"
+			elif not edits is Dictionary: error = "Model part edits must be a dictionary"
+			else: error = ModelEdits.apply(replacement, edits)
+		if error.is_empty(): error = ModelContract.validate(node, replacement)
 		if not error.is_empty():
 			push_error(identity + ": " + error)
 			node.free()
@@ -88,13 +133,20 @@ func load_template(identity: String) -> Node3D:
 	return node
 
 func instantiate_model(identity: String) -> Dictionary:
+	if prepared_instances.has(identity):
+		var entry: Dictionary = prepared_instances[identity]
+		prepared_instances.erase(identity)
+		return entry
+	return create_model(identity)
+
+func create_model(identity: String) -> Dictionary:
 	if identity == "mgs/generated/lit_mdl":
 		var node := Node3D.new()
 		node.name = "lit_mdl_compatibility"
 		node.set_meta("mgs_asset_id", identity)
 		node.set_meta("renderer_layer", "compatibility")
 		add_child(node)
-		return {"node": node, "bones": {}, "meshes": [], "asset": identity}
+		return {"node": node, "bones": {}, "meshes": [], "metadata_meshes": [], "asset": identity}
 	var template := load_template(identity)
 	if template == null:
 		return {}
@@ -107,85 +159,113 @@ func instantiate_model(identity: String) -> Dictionary:
 			bones[skeleton.get_bone_name(bone)] = [skeleton, bone]
 	var height := maxi(1, ceili(float(catalog[identity].colorCount) / 256.0))
 	var shade_image := Image.create(256, height, false, Image.FORMAT_RGBA8)
-	shade_image.fill(Color(128.0 / 255.0, 128.0 / 255.0, 128.0 / 255.0, 1))
+	shade_image.fill(Color(0, 0, 0, 0))
+	var packet_image := Image.create(256, height, false, Image.FORMAT_RGBAF)
+	packet_image.fill(Color(0, 0, 0, 0))
 	var entry := {"node": node, "bones": bones, "meshes": node.find_children("mesh_*", "MeshInstance3D", true, false),
-		"asset": identity, "shade": ImageTexture.create_from_image(shade_image), "colors": PackedByteArray()}
-	resolve_stage_materials(entry)
+		"asset": identity, "shade": ImageTexture.create_from_image(shade_image), "colors": PackedByteArray(),
+		"packets": ImageTexture.create_from_image(packet_image), "packet_data": PackedByteArray(), "material_stages": {}, "surface_materials": {}, "transparent_parts": {}}
+	entry.shadow_modes = entry.meshes.map(func(mesh): return mesh.cast_shadow)
+	materials.add_metadata_meshes(entry)
+	for mesh in entry.meshes: mesh.hide()
+	for mesh in entry.metadata_meshes: mesh.hide()
 	return entry
 
-func stage_texture(legacy_id: String, definition_stage: String) -> Texture2D:
-	for stage in [scene_stage, definition_stage, "init"]:
-		var identity := "mgs/integral-j/disc1/stage/%s/%s.p" % [stage, legacy_id]
-		if textures.has(identity):
-			return textures[identity]
-		if catalog.has(identity):
-			var path: String = mods.replacements[identity].path if mods.replacements.has(identity) else asset_root.path_join(catalog[identity].path)
-			var image := Image.load_from_file(path)
-			if image == null:
-				push_error("Cannot read prepared texture " + identity)
-				return null
-			var texture := ImageTexture.create_from_image(image)
-			textures[identity] = texture
-			return texture
-	return null
-
-func resolve_stage_materials(entry: Dictionary) -> void:
-	var replaced := mods.replacements.has(entry.asset)
-	var original_lighting := true
-	if mods.stages.has(scene_stage): original_lighting = mods.stages[scene_stage].original_lighting
-	for mesh in entry.meshes:
-		for surface in mesh.mesh.get_surface_count():
-			var original := mesh.mesh.surface_get_material(surface) as StandardMaterial3D
-			if original == null:
-				continue
-			if replaced:
-				var material := original.duplicate() as StandardMaterial3D
-				material.shading_mode = BaseMaterial3D.SHADING_MODE_PER_PIXEL if mods.replacements[entry.asset].lighting == "lit" else BaseMaterial3D.SHADING_MODE_UNSHADED
-				mesh.set_surface_override_material(surface, material)
-				continue
-			var legacy_id := original.resource_name.get_slice("_", 0)
-			var texture := stage_texture(legacy_id, str(entry.asset).get_slice("/", 4))
-			if texture == null:
-				continue
-			if not original_lighting:
-				var material := original.duplicate() as StandardMaterial3D
-				material.shading_mode = BaseMaterial3D.SHADING_MODE_PER_PIXEL
-				material.albedo_texture = texture
-				material.albedo_color = Color.WHITE
-				mesh.set_surface_override_material(surface, material)
-				continue
-			var material := ShaderMaterial.new()
-			material.shader = two_sided_shader if original.cull_mode == BaseMaterial3D.CULL_DISABLED else REFERENCE_SHADER
-			material.set_shader_parameter("albedo_texture", texture)
-			material.set_shader_parameter("shade_texture", entry.shade)
-			mesh.set_surface_override_material(surface, material)
+func prepare_stage_models(stage: String) -> String:
+	for identity in prepared_instances.keys():
+		if str(identity).get_slice("/", 4) not in [stage, "init"]:
+			prepared_instances[identity].node.free()
+			prepared_instances.erase(identity)
+	for identity in templates:
+		if str(identity).get_slice("/", 4) not in [stage, "init"]: continue
+		if not materials.can_prepare_model(templates[identity], identity, stage): continue
+		if not prepared_instances.has(identity): prepared_instances[identity] = create_model(identity)
+		var entry: Dictionary = prepared_instances[identity]
+		if entry.is_empty(): return "Cannot prepare model " + identity
+		entry.node.show()
+		for mesh in entry.meshes: mesh.show()
+		var error := materials.apply(entry, stage)
+		entry.node.hide()
+		for mesh in entry.meshes: mesh.hide()
+		if not error.is_empty(): return error
+	return ""
 
 func change_stage(stage: String) -> String:
+	var material_error := materials.prepare_stage(stage)
+	if not material_error.is_empty(): return material_error
 	scene_stage = stage
+	if original_lights != null:
+		original_lights.free()
+		original_lights = null
 	if stage_override != null:
+		remove_child(stage_override)
 		stage_override.queue_free()
 		stage_override = null
-	if mods.stages.has(stage):
-		var packed := load(mods.stages[stage].path) as PackedScene
+	var definition := mods.stage_definition(stage)
+	if not definition.is_empty():
+		var packed := load(definition.path) as PackedScene
 		if packed == null: return "Cannot load stage override " + stage
 		stage_override = packed.instantiate() as Node3D
 		if stage_override == null: return "Stage override root must be Node3D"
+		var coordinate_error := MapCoordinates.validate(stage_override)
+		if not coordinate_error.is_empty():
+			stage_override.free()
+			stage_override = null
+			return coordinate_error
+		MapCoordinates.to_runtime(stage_override)
 		for child in stage_override.get_children():
 			if child.get_meta("mgs_editor_preview", false): child.free()
 		add_child(stage_override)
-		print("MGS_STAGE_OVERRIDE %s mod=%s" % [stage, mods.stages[stage].mod])
-	for instance in instances.values():
-		resolve_stage_materials(instance)
-	return ""
+		print("MGS_STAGE_OVERRIDE %s mod=%s source=%s" % [stage, definition.mod, mods.stage_source(stage)])
+	var light_overrides = stage_override.get_meta("mgs_light_overrides", {}) if stage_override != null else {}
+	var layout: Dictionary = map_definitions.get(stage, {})
+	var light_error := MapLights.validate(layout, light_overrides)
+	if not light_error.is_empty(): return light_error
+	original_lights = MapLights.create(layout, light_overrides)
+	original_lights.transform = MapCoordinates.ROTATION
+	add_child(original_lights)
+	var event_error := event_lights.configure(stage_override)
+	if not event_error.is_empty(): return event_error
+	var model_error := prepare_stage_models(stage)
+	if not model_error.is_empty(): return model_error
+	return removals.configure(stage_override, catalog, stage if mods.stage_source(stage) != stage else "")
 
 func stage_name(payload: PackedByteArray, offset: int) -> String:
 	var bytes := payload.slice(offset, offset + 8)
 	var end := bytes.find(0)
 	return bytes.slice(0, end if end >= 0 else 8).get_string_from_ascii()
 
+func remove_instance(id: int, preserve_removal: bool = false) -> void:
+	if not preserve_removal: removals.matches.erase(id)
+	instances[id].node.hide()
+	remove_child(instances[id].node)
+	instances[id].node.queue_free()
+	instances.erase(id)
+
+func set_part_visibility(entry: Dictionary, index: int, flags: int) -> void:
+	var mesh: MeshInstance3D = entry.meshes[index]
+	var static_map: bool = entry.asset in map_definitions.get(scene_stage, {}).get("models", [])
+	mesh.gi_mode = GeometryInstance3D.GI_MODE_STATIC if static_map and not flags & 4 else GeometryInstance3D.GI_MODE_DISABLED
+	var mode: int = entry.shadow_modes[index]
+	var casts := flags & 2 != 0 and mode != GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	if entry.get("alarm_glass", false) and flags & 4: casts = false
+	mesh.visible = flags & 1 != 0 or casts
+	mesh.cast_shadow = (mode if flags & 1 else GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY) if casts else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	if not entry.metadata_meshes.is_empty():
+		entry.metadata_meshes[index].visible = flags & 1 != 0
+	if flags & 1 and entry.node.visible:
+		visible_mesh_parts += 1
+
+func render_extent(scale: int) -> Vector2i:
+	return Vector2i(roundi(290.0 * scale / horizontal_scale), 224 * scale)
+
 func update_scene(payload: PackedByteArray) -> String:
-	if payload.size() < 64:
+	if payload.size() < 68:
 		return "Truncated scene header"
+	var next_scale := payload.decode_float(64)
+	if not is_finite(next_scale) or next_scale < 1.0 / 3.0 or next_scale > 1.0:
+		return "Invalid scene horizontal scale"
+	horizontal_scale = next_scale
 	if catalog.is_empty():
 		return ""
 	var next_stage := stage_name(payload, 0)
@@ -198,15 +278,19 @@ func update_scene(payload: PackedByteArray) -> String:
 	var projection := payload.decode_float(56)
 	if projection > 0:
 		projection_distance = projection
-		camera.fov = rad_to_deg(2.0 * atan(160.0 / projection))
+		camera.fov = rad_to_deg(2.0 * atan(160.0 / (projection * horizontal_scale)))
+	metadata_camera.transform = camera.transform
+	metadata_camera.fov = camera.fov
 	var count := payload.decode_u32(60)
-	var offset := 64
+	if count > 512: return "Scene instance count exceeds limit"
+	var offset := 68
 	var seen: Dictionary = {}
 	visible_mesh_parts = 0
 	for _index in count:
 		if payload.size() - offset < 32:
 			return "Truncated scene instance"
 		var id := payload.decode_u32(offset)
+		if id == 0 or seen.has(id): return "Invalid or duplicate scene instance ID"
 		var asset := payload.decode_u32(offset + 4)
 		var stage := stage_name(payload, offset + 8)
 		var flags := payload.decode_u32(offset + 16)
@@ -214,17 +298,21 @@ func update_scene(payload: PackedByteArray) -> String:
 		var visible_parts := payload.decode_u32(offset + 24)
 		var color_count := payload.decode_u32(offset + 28)
 		offset += 32
-		if parts > 256 or visible_parts > parts or payload.size() - offset < parts * 52:
+		if parts == 0 or parts > 256 or visible_parts > parts or payload.size() - offset < parts * 52:
 			return "Truncated scene bone palette"
 		var identity := "mgs/integral-j/disc1/stage/%s/%04x.k" % [stage, asset]
 		if asset & 0x80000000:
 			if asset != 0x80000001:
 				return "Unknown generated model kind"
 			identity = "mgs/generated/lit_mdl"
+			if color_count != 0: return "Generated model must not contain a lighting palette"
+		elif not catalog.has(identity) or color_count != int(catalog[identity].colorCount):
+			return "Scene lighting palette differs from prepared model: " + identity
+		if payload.size() - offset - parts * 52 < color_count * 20:
+			return "Truncated scene lighting or packet palette"
 		if instances.has(id) and instances[id].asset != identity:
 			print("MGS_SCENE_ASSET_CHANGE instance=%d %s -> %s" % [id, instances[id].asset, identity])
-			instances[id].node.queue_free()
-			instances.erase(id)
+			remove_instance(id, true)
 		if not instances.has(id):
 			var instance := instantiate_model(identity)
 			if instance.is_empty():
@@ -233,6 +321,8 @@ func update_scene(payload: PackedByteArray) -> String:
 			instance.node.set_meta("mgs_instance_id", id)
 			instances[id] = instance
 		var entry: Dictionary = instances[id]
+		entry.alarm_glass = flags & 0x40000 != 0
+		entry.alarm_active = flags & 0x20000 != 0
 		entry.node.visible = flags & 0x80 == 0
 		if asset & 0x80000000 and parts > 0:
 			entry.node.transform = camera.transform * matrix(payload, offset)
@@ -243,30 +333,47 @@ func update_scene(payload: PackedByteArray) -> String:
 				var transform := camera.transform * matrix(payload, offset + part * 52)
 				if absf(transform.basis.determinant()) > 0.001:
 					bone[0].set_bone_global_pose(bone[1], transform)
-		for mesh in entry.meshes:
+		for mesh_index in entry.meshes.size():
+			var mesh: MeshInstance3D = entry.meshes[mesh_index]
 			var part := str(mesh.name).trim_prefix("mesh_").to_int()
-			mesh.visible = part < parts and payload.decode_u32(offset + part * 52 + 48) != 0
-			if mesh.visible and entry.node.visible:
-				visible_mesh_parts += 1
+			var part_flags := payload.decode_u32(offset + part * 52 + 48) if part < parts else 0
+			if part_flags & ~7: return "Unknown scene part flags"
+			entry.transparent_parts[mesh_index] = bool(part_flags & 4)
+			set_part_visibility(entry, mesh_index, part_flags)
+		removals.apply(entry, id)
+		var material_error := materials.apply(entry, scene_stage)
+		if not material_error.is_empty(): return material_error
 		seen[id] = true
 		offset += parts * 52
-		if payload.size() - offset < color_count * 4:
-			return "Truncated scene lighting palette"
 		if color_count:
-			if color_count != int(catalog[identity].colorCount):
-				return "Scene lighting palette differs from prepared model: " + identity
 			var colors := payload.slice(offset, offset + color_count * 4)
 			if entry.colors != colors:
 				entry.colors = colors
 				colors.resize(entry.shade.get_width() * entry.shade.get_height() * 4)
 				entry.shade.update(Image.create_from_data(256, entry.shade.get_height(), false, Image.FORMAT_RGBA8, colors))
 		offset += color_count * 4
+		if color_count:
+			var packets := payload.slice(offset, offset + color_count * 16)
+			if entry.packet_data != packets:
+				entry.packet_data = packets
+				packets.resize(entry.packets.get_width() * entry.packets.get_height() * 16)
+				entry.packets.update(Image.create_from_data(256, entry.packets.get_height(), false, Image.FORMAT_RGBAF, packets))
+		offset += color_count * 16
 	for id in instances.keys():
 		if not seen.has(id):
-			instances[id].node.queue_free()
-			instances.erase(id)
+			remove_instance(id)
 	current_instances = seen.size()
-	return "" if offset == payload.size() else "Trailing scene data"
+	effects.transform = camera.transform
+	if payload.size() - offset < 4: return "Missing world effect count"
+	var effect_count := payload.decode_u32(offset)
+	var light_offset := offset + 4 + effect_count * WorldEffects.QUAD_BYTES
+	if effect_count > 65536 or light_offset > payload.size(): return "Invalid world effect payload"
+	var effect_error := effects.update_effects(payload.slice(offset, light_offset), 0, scene_stage, materials)
+	if not effect_error.is_empty(): return effect_error
+	var light_error := event_lights.update_lights(payload, light_offset)
+	if not light_error.is_empty(): return light_error
+	mod_api.publish_snapshot()
+	return ""
 
 func projection_diagnostics() -> Dictionary:
 	var maximum_error := 0.0
@@ -279,16 +386,20 @@ func projection_diagnostics() -> Dictionary:
 		var view := camera.transform.affine_inverse() * position
 		if view.z >= -0.01:
 			continue
-		var expected := Vector2(160 + projection_distance * view.x / -view.z,
+		var expected := Vector2(160 + projection_distance * horizontal_scale * view.x / -view.z,
 			112 - projection_distance * view.y * (58.0 / 64.0) / -view.z)
-		var actual := camera.unproject_position(position) * Vector2(320.0 / 580.0, 0.5)
+		var actual := camera.unproject_position(position) * Vector2(320, 224) / Vector2(camera.get_viewport().size)
 		maximum_error = maxf(maximum_error, expected.distance_to(actual))
 		checked += 1
 	return {"stage": scene_stage, "instances": current_instances, "godot_mesh_parts": visible_mesh_parts, "camera_fov": camera.fov,
-		"projection_distance": projection_distance, "checked_origins": checked, "max_projection_error_pixels": maximum_error}
+		"projection_distance": projection_distance, "horizontal_scale": horizontal_scale, "checked_origins": checked, "max_projection_error_pixels": maximum_error,
+		"godot_event_lights": event_lights.active_count}
 
 func snapshot_owner(node: Node, root: Node) -> void:
 	for child in node.get_children():
+		if child.get_meta("mgs_runtime_metadata", false):
+			child.free()
+			continue
 		child.owner = root
 		snapshot_owner(child, root)
 
@@ -316,7 +427,12 @@ func export_snapshot() -> String:
 	return ""
 
 func _exit_tree() -> void:
+	mod_api.stop()
+	if mod_api.get_parent() == null: mod_api.free()
 	if camera.get_parent() == null: camera.free()
+	if effects.get_parent() == null: effects.free()
+	if event_lights.get_parent() == null: event_lights.free()
+	if metadata_camera.get_parent() == null: metadata_camera.free()
 	for template in templates.values():
 		template.free()
 	templates.clear()

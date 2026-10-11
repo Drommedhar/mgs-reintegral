@@ -467,7 +467,6 @@ int main(int argc, char **argv)
         return 2;
     }
     active_options = &options;
-    setvbuf(stdout, NULL, _IONBF, 0);
     MgsBonusItemsConfigure(options.bonus_items);
     MgsInvulnerabilityConfigure(options.invulnerable);
     MgsGameOptionsConfigure(options.auto_card);
