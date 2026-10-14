@@ -1,0 +1,59 @@
+diff --git a/source/menu/radio.c b/source/menu/radio.c
+index b57dfaf..10f263a 100644
+--- a/source/menu/radio.c
++++ b/source/menu/radio.c
+@@ -18,6 +18,18 @@
+ #include "game/game.h"
+ #ifdef MGS_NATIVE
+ #include "mgs_video.h"
++/* Optional host enhancement: normal script execution, no clock acceleration.
++ * Only dialogue states use this; save/choice states retain original inputs. */
++static int ReiCodecTurboHeld(unsigned short status, int flags)
++{
++    static int enabled = -1;
++    if (enabled < 0)
++    {
++        const char *option = getenv("REI_CODEC_TURBO");
++        enabled = option && option[0] == '1' && option[1] == '\0';
++    }
++    return enabled && (status & PAD_TRIANGLE) && !(flags & 1);
++}
+ #endif
+ 
+ static SPRT             SECTION(".bss") gRadioNumberSprt_800bd9b0;
+@@ -1218,11 +1230,21 @@ skip_fading:
+         draw_radio_wait_mark(work, ot);
+         if ((pPad->release &
+              (PAD_UP | PAD_DOWN | PAD_LEFT | PAD_RIGHT | PAD_TRIANGLE | PAD_CROSS | PAD_SQUARE | PAD_CIRCLE)) &&
+-            work->field_212 == 0)
++            work->field_212 == 0
++#ifdef MGS_NATIVE
++            || (ReiCodecTurboHeld(pPad->status, work->field_218->field_18) && !(GV_Time % 6))
++#endif
++            )
+         {
+             menu_radio_codec_helper_helper8_80048044();
+             sub_80041118(work);
+             work->field_210_codec_state = 3;
++#ifdef MGS_NATIVE
++            /* State 3 reuses field_212 as a countdown, not a button mask.
++             * A held-button advance must not carry the debounce mask into it. */
++            if (ReiCodecTurboHeld(pPad->status, work->field_218->field_18))
++                work->field_212 = 0;
++#endif
+         }
+         if (!(pPad->status & work->field_212))
+         {
+@@ -1271,7 +1293,11 @@ skip_fading:
+         }
+         else
+         {
+-            if (!(pCharaStruct2->field_18 & 1) && (pPad->release & PAD_CROSS))
++            if (!(pCharaStruct2->field_18 & 1) && ((pPad->release & PAD_CROSS)
++#ifdef MGS_NATIVE
++                || ReiCodecTurboHeld(pPad->status, pCharaStruct2->field_18)
++#endif
++                ))
+             {
+                 menu_radio_codec_helper__helper13_800410E4(work, pCharaStruct2->field_C_pScript);
+                 dword_800ABAF8 = 8;

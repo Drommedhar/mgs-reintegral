@@ -19,7 +19,7 @@ namespace ReIntegral
         private readonly CheckBox geometryPrecision = new CheckBox(), depthBuffer = new CheckBox();
         private readonly CheckBox bonus = new CheckBox(), invulnerable = new CheckBox();
         private readonly CheckBox autoCard = new CheckBox(), overlay = new CheckBox();
-        private readonly CheckBox fastLoading = new CheckBox();
+        private readonly CheckBox fastLoading = new CheckBox(), codecTurbo = new CheckBox();
         private readonly TextBox stage = new TextBox(), frames = new TextBox(), advanced = new TextBox();
         private readonly Button play = new Button();
         private readonly Label status = new Label();
@@ -163,7 +163,8 @@ namespace ReIntegral
             mantis.Items.AddRange(new object[] { "off", "random" });
             page.Controls.Add(mantis);
             LabelAt(page, "Controller-port swap: F2 or press both sticks (L3 + R3).", 260);
-            LabelAt(page, "Bonus items persist in ordinary saves. Other options apply to this launch.", 295);
+            CheckAt(page, codecTurbo, "Hold Triangle to fast-forward Codec dialogue", 295);
+            LabelAt(page, "Bonus items persist in ordinary saves. Other options apply to this launch.", 335);
         }
 
         private void BuildAdvanced()
@@ -230,7 +231,7 @@ namespace ReIntegral
             geometryPrecision.Checked = value.GeometryPrecision;
             depthBuffer.Checked = value.DepthBuffer;
             invulnerable.Checked = value.Invulnerable; autoCard.Checked = value.AutoCard;
-            fastLoading.Checked = value.FastLoading;
+            fastLoading.Checked = value.FastLoading; codecTurbo.Checked = value.CodecTurbo;
             overlay.Checked = value.DebugOverlay; mantis.Text = value.MantisMemory;
             stage.Text = value.Stage; frames.Text = value.Frames; advanced.Text = value.Advanced;
         }
@@ -243,7 +244,7 @@ namespace ReIntegral
                 TextureCorrection = textureCorrection.Checked,
                 GeometryPrecision = geometryPrecision.Checked, DepthBuffer = depthBuffer.Checked,
                 BonusItems = bonus.Checked, Invulnerable = invulnerable.Checked, AutoCard = autoCard.Checked,
-                FastLoading = fastLoading.Checked,
+                FastLoading = fastLoading.Checked, CodecTurbo = codecTurbo.Checked,
                 DebugOverlay = overlay.Checked, MantisMemory = mantis.Text.Trim(), Stage = stage.Text.Trim(),
                 Frames = frames.Text.Trim(), Advanced = advanced.Text.Replace("\r", " ").Replace("\n", " ") };
         }
@@ -300,6 +301,7 @@ namespace ReIntegral
             log.WriteLine("RE:INTEGRAL " + BuildInfo.Version + " (" + BuildInfo.Commit + ")");
             log.WriteLine(activeArguments);
             game = new Process { StartInfo = GameLaunch.StartInfo(executable, activeArguments, dataDirectory) };
+            game.StartInfo.EnvironmentVariables["REI_CODEC_TURBO"] = codecTurbo.Checked ? "1" : "0";
             game.OutputDataReceived += WriteLog;
             game.ErrorDataReceived += WriteLog;
             try { game.Start(); }
