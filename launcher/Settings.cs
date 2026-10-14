@@ -23,6 +23,7 @@ namespace ReIntegral
         public bool Invulnerable;
         public bool AutoCard;
         public bool FastLoading;
+        public bool CodecTurbo = true;
         public bool DebugOverlay;
         public string MantisMemory = "off";
         public string Stage = "title";

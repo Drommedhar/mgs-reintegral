@@ -91,7 +91,8 @@
         "patches/mgs-precise-face-culling.patch",
         "patches/mgs-precise-subdivision.patch",
         "patches/mgs-loading-pacing.patch",
-        "patches/mgs-language-packs.patch"
+        "patches/mgs-language-packs.patch",
+        "patches/mgs-codec-turbo.patch"
       ]
     },
     {

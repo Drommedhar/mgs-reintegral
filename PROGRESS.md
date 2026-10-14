@@ -1047,3 +1047,15 @@ Remaining work includes runtime defects, connected campaign progression,
 revisits, bosses, save/load acceptance, movies and sound fidelity, disc switching,
 reaching the verified endings from connected campaign play. VR missions need separate recovery and validation. See the
 [stage inventory](docs/STAGE_RECOVERY.md) and [backend gaps](docs/BACKEND_GAPS.md).
+
+## Optional Codec fast advance
+
+Holding Triangle can interrupt skippable dialogue and advance waiting dialogue
+through native radio states. Unskippable blocks keep their guard; normal release
+inputs remain. Held advances use a six-frame cadence and clear the debounce mask
+before the state reuses it as a countdown. No game-clock acceleration is applied.
+The GUI defaults on with a persisted Gameplay opt-out; direct native launches
+require REI_CODEC_TURBO=1. A source-extracted CPU fixture checks off/unset/invalid
+modes, hold/release, skip flags, cadence, stream-stop calls and debounce clearing.
+Live Codec playability was reviewed in Reintegrated candidates; this upstream
+branch has not received a separate full-game playthrough.
