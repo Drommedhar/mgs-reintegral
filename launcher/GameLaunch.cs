@@ -25,9 +25,9 @@ namespace ReIntegral
             return result.Append('\\', slashes * 2).Append('"').ToString();
         }
 
-        public static string Arguments(Settings settings, bool godot = false)
+        public static string Arguments(Settings settings, bool godot = false, bool nativeGraphics = true)
         {
-            ValidateDisplay(settings);
+            DisplaySettings.Validate(settings);
             uint frames;
             if (!UInt32.TryParse(settings.Frames, NumberStyles.None, CultureInfo.InvariantCulture, out frames))
                 throw new ArgumentException("Frame limit must be a whole number; 0 means unlimited.");
@@ -37,9 +37,9 @@ namespace ReIntegral
                 "--disc-two", Quote(settings.DiscTwo), "--resolution", settings.Resolution,
                 "--stage", settings.Stage };
             if (settings.Widescreen) arguments.Add("--widescreen");
-            if (!godot && settings.TextureCorrection) arguments.Add("--texture-correction");
-            if (!godot && settings.GeometryPrecision) arguments.Add("--geometry-precision");
-            if (!godot && settings.DepthBuffer) arguments.Add("--depth-buffer");
+            if (!godot && nativeGraphics && settings.TextureCorrection) arguments.Add("--texture-correction");
+            if (!godot && nativeGraphics && settings.GeometryPrecision) arguments.Add("--geometry-precision");
+            if (!godot && nativeGraphics && settings.DepthBuffer) arguments.Add("--depth-buffer");
             if (!godot && settings.Fullscreen) arguments.Add("--fullscreen");
             if (settings.DebugOverlay) arguments.Add("--debug-overlay");
             if (settings.BonusItems) arguments.Add("--bonus-items 1");
@@ -54,18 +54,6 @@ namespace ReIntegral
             return String.Join(" ", arguments);
         }
 
-        private static void ValidateDisplay(Settings settings)
-        {
-            var match = Regex.Match(settings.Resolution, "^([0-9]{3,4})x([0-9]{3,4})$");
-            if (!match.Success) throw new ArgumentException("Resolution must use WIDTHxHEIGHT, such as 1920x1080.");
-            int width = Int32.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture);
-            int height = Int32.Parse(match.Groups[2].Value, CultureInfo.InvariantCulture);
-            if (width < 320 || width > 2560 || height < 240 || height > (settings.Widescreen ? 1792 : 1920))
-                throw new ArgumentException("This renderer supports up to 2560x1792 widescreen or 2560x1920 original aspect.");
-            if (settings.Widescreen && (width * 3 < height * 4 || width * 3 > height * 12))
-                throw new ArgumentException("Widescreen aspect ratio must be between 4:3 and 4:1.");
-        }
-
         private static void AddMantis(List<string> arguments, string value)
         {
             if (value == "off") return;
@@ -78,11 +66,20 @@ namespace ReIntegral
 
         public static ProcessStartInfo StartInfo(string executable, string arguments, string directory)
         {
-            return new ProcessStartInfo(executable, arguments) {
+            var start = new ProcessStartInfo(executable, arguments) {
                 WorkingDirectory = directory, UseShellExecute = false, CreateNoWindow = true,
                 RedirectStandardOutput = true, RedirectStandardError = true,
                 StandardOutputEncoding = Encoding.UTF8, StandardErrorEncoding = Encoding.UTF8
             };
+            var diagnostics = new List<string>();
+            foreach (string name in start.EnvironmentVariables.Keys)
+                if (name.StartsWith("MGS_GODOT_CAPTURE_", StringComparison.OrdinalIgnoreCase) ||
+                    name.StartsWith("MGS_BASELINE_", StringComparison.OrdinalIgnoreCase) ||
+                    name == "MGS_GODOT_DIAGNOSTIC_CAPTURE" || name == "MGS_GODOT_QUIT_FRAME")
+                    diagnostics.Add(name);
+            foreach (string name in diagnostics) start.EnvironmentVariables.Remove(name);
+            start.EnvironmentVariables["MGS_GODOT_PERFORMANCE_RUN"] = "1";
+            return start;
         }
 
         public static async Task ValidateDisc(string executable, string path, int number, string directory)

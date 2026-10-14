@@ -1,0 +1,209 @@
+--- a/source/libdg/bound.c
++++ b/source/libdg/bound.c
+@@ -391,13 +391,21 @@
+         {
+             objs = *queue++;
+ 
+-            if ( ( objs->flag & DG_FLAG_IRTEXTURE ) && objs->bound_mode != 0 )
++            if ( ( objs->flag & DG_FLAG_IRTEXTURE ) && ( objs->bound_mode != 0
++#ifdef MGS_GODOT_SCENE
++                 || MgsGodotRetainObjects( objs )
++#endif
++               ) )
+             {
+                 obj = objs->objs;
+ 
+                 for ( n_models = objs->n_models; n_models > 0; n_models-- )
+                 {
+-                    if ( obj->bound_mode != 0 ) SetThermalClut( obj, index );
++                    if ( obj->bound_mode != 0
++#ifdef MGS_GODOT_SCENE
++                         || MgsGodotRetainObjects( objs )
++#endif
++                       ) SetThermalClut( obj, index );
+                     obj++;
+                 }
+             }
+@@ -409,7 +417,11 @@
+         {
+             objs = *queue++;
+ 
+-            if ( ( objs->flag & DG_FLAG_IRTEXTURE ) && objs->bound_mode != 0 )
++            if ( ( objs->flag & DG_FLAG_IRTEXTURE ) && ( objs->bound_mode != 0
++#ifdef MGS_GODOT_SCENE
++                 || MgsGodotRetainObjects( objs )
++#endif
++               ) )
+             {
+                 obj = objs->objs;
+ 
+--- a/source/libdg/trans.c
++++ b/source/libdg/trans.c
+@@ -5,6 +5,9 @@
+ #include "libgv/libgv.h" // for GV_Clock
+ #ifdef MGS_NATIVE
+ #include "mgs_video.h"
++#endif
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_scene.h"
+ #endif
+ 
+ typedef struct _SCRATCH
+@@ -432,7 +435,11 @@
+     {
+         objs = *queue++;
+ 
+-        if (objs->bound_mode == 0)
++        if (objs->bound_mode == 0
++#ifdef MGS_GODOT_SCENE
++            && !MgsGodotRetainObjects(objs)
++#endif
++           )
+         {
+             continue;
+         }
+@@ -442,7 +449,11 @@
+ 
+         for (n_models = objs->n_models; n_models > 0; obj++, n_models--)
+         {
+-            if (obj->bound_mode == 0)
++            if (obj->bound_mode == 0
++#ifdef MGS_GODOT_SCENE
++                && !(MgsGodotRetainObjects(objs) && obj->packs[idx])
++#endif
++               )
+             {
+                 continue;
+             }
+--- a/source/takabe/libdg2.c
++++ b/source/takabe/libdg2.c
+@@ -7,6 +7,9 @@
+ #ifdef MGS_NATIVE
+ #include "mgs_video.h"
+ #include "mgs_visibility.h"
++#endif
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_scene.h"
+ #endif
+ 
+ // Modified versions of functions from libdg
+@@ -718,6 +721,9 @@
+         if (bound_mode
+ #ifdef MGS_NATIVE
+             || classic_mode
++#endif
++#ifdef MGS_GODOT_SCENE
++            || MgsGodotRetainObjects(objs)
+ #endif
+            )
+         {
+@@ -1049,12 +1055,20 @@
+         {
+             objs = *objs_list;
+             objs_list++;
+-            if (objs->flag & DG_FLAG_IRTEXTURE && objs->bound_mode)
++            if ((objs->flag & DG_FLAG_IRTEXTURE) && (objs->bound_mode
++#ifdef MGS_GODOT_SCENE
++                || MgsGodotRetainObjects(objs)
++#endif
++               ))
+             {
+                 obj = objs->objs;
+                 for (i2 = objs->n_models; i2 > 0; --i2)
+                 {
+-                    if (obj->bound_mode)
++                    if (obj->bound_mode
++#ifdef MGS_GODOT_SCENE
++                        || MgsGodotRetainObjects(objs)
++#endif
++                       )
+                     {
+                         s12c_800D59CC(obj, idx);
+                     }
+@@ -1069,7 +1083,11 @@
+         {
+             objs = *objs_list;
+             objs_list++;
+-            if (objs->flag & DG_FLAG_IRTEXTURE && objs->bound_mode)
++            if ((objs->flag & DG_FLAG_IRTEXTURE) && (objs->bound_mode
++#ifdef MGS_GODOT_SCENE
++                || MgsGodotRetainObjects(objs)
++#endif
++               ))
+             {
+                 obj = objs->objs;
+                 for (i2 = objs->n_models; i2 > 0; --i2)
+@@ -1464,7 +1482,11 @@
+     {
+         pObjs = *ppObjs++;
+ 
+-        if (!pObjs->bound_mode)
++        if (!pObjs->bound_mode
++#ifdef MGS_GODOT_SCENE
++            && !MgsGodotRetainObjects(pObjs)
++#endif
++           )
+         {
+             continue;
+         }
+@@ -1474,7 +1496,11 @@
+ 
+         for (models = pObjs->n_models; models > 0; pObj++, models--)
+         {
+-            if (!pObj->bound_mode)
++            if (!pObj->bound_mode
++#ifdef MGS_GODOT_SCENE
++                && !(MgsGodotRetainObjects(pObjs) && pObj->packs[idx])
++#endif
++               )
+             {
+                 continue;
+             }
+@@ -1886,6 +1912,7 @@
+     DG_OBJ   *obj;
+     int       n_models;
+     int       bound_index;
++    int       retained = 0;
+ 
+     gte_ldfcdir(0, 0, 0);
+ 
+@@ -1893,11 +1920,20 @@
+     for (n_objects = chanl->objs_index; n_objects > 0; n_objects--)
+     {
+         objs = *queue++;
+-        if (objs->bound_mode != 0)
++#ifdef MGS_GODOT_SCENE
++        retained = MgsGodotRetainObjects(objs);
++#endif
++        if (objs->bound_mode != 0 || retained)
+         {
+             if (objs->flag & DG_FLAG_SHADE)
+             {
+                 s = objs->objs[0].screen.t[2] / 256;
++                if (retained)
++                {
++                    /* Retained objects can lie behind the native camera or beyond its fog table. */
++                    if (s < 0) s = 0;
++                    if (s > 255) s = 255;
++                }
+                 s = 4096 - s12c_800DAA4C[s];
+                 gte_SetRotMatrix(objs->light);
+ 
+@@ -1926,7 +1962,7 @@
+                 obj = objs->objs;
+                 for (n_models = objs->n_models; n_models > 0; n_models--)
+                 {
+-                    if (obj->bound_mode != 0)
++                    if (obj->bound_mode != 0 || (retained && obj->packs[index]))
+                     {
+ #ifdef MGS_NATIVE
+                         DG_MulRotMatrix0(&obj->world, (MATRIX *)SCRPAD_ADDR);
+@@ -1948,7 +1984,7 @@
+                 obj = objs->objs;
+                 for (n_models = objs->n_models; n_models > 0; n_models--)
+                 {
+-                    if (obj->bound_mode != 0)
++                    if (obj->bound_mode != 0 || (retained && obj->packs[index]))
+                     {
+                         if (!(obj->bound_mode & 0x4))
+                         {

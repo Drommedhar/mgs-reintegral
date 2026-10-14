@@ -37,6 +37,8 @@ internal static class LauncherSettingsTest
         var value = Settings.Load(path);
         Require(!value.Invulnerable && !value.BonusItems && !value.AutoCard, "Gameplay aids must default off");
         Require(!value.FastLoading, "Experimental fast loading must default off");
+        Require(!value.GodotLegacyRendering, "Godot must default to full scene rendering");
+        Require(value.GodotSharpText, "Godot must default to sharp text");
         Require(!value.TextureCorrection && !value.GeometryPrecision && !value.DepthBuffer,
             "Experimental graphics must default off");
         value.DiscOne = "C:\\日本語\\disc 1.cue";
@@ -45,6 +47,8 @@ internal static class LauncherSettingsTest
         value.Advanced = "--mods-root \"C:\\my mods\"";
         value.Save(path);
         value.Fullscreen = true;
+        value.GodotLegacyRendering = true;
+        value.GodotSharpText = false;
         value.FastLoading = true;
         value.TextureCorrection = value.GeometryPrecision = value.DepthBuffer = true;
         value.Save(path);
@@ -54,6 +58,8 @@ internal static class LauncherSettingsTest
         Require(restored.TextureCorrection && restored.GeometryPrecision && restored.DepthBuffer,
             "Graphics settings did not round-trip");
         Require(restored.FastLoading, "Fast loading setting did not round-trip");
+        Require(restored.GodotLegacyRendering, "Legacy-through-Godot mode did not round-trip");
+        Require(!restored.GodotSharpText, "Original pixel font choice did not round-trip");
         Require(restored.TextPack == value.TextPack && restored.VoicePack == value.VoicePack,
             "Language selections did not round-trip");
         string languages = GameLaunch.Arguments(restored);
@@ -95,9 +101,27 @@ internal static class LauncherSettingsTest
     {
         string directory = Path.Combine(Path.GetTempPath(), "reintegral-settings-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(directory);
-        try { CheckQuoting(); CheckSettings(directory); CheckArguments(); }
+        try { CheckQuoting(); CheckSettings(directory); CheckArguments(); CheckCaptureIsolation(); }
         finally { Directory.Delete(directory, true); }
         Console.WriteLine("Launcher settings, Windows argument quoting and option checks passed.");
         return 0;
+    }
+
+    private static void CheckCaptureIsolation()
+    {
+        string[] keys = { "MGS_GODOT_CAPTURE_FRAME", "MGS_GODOT_CAPTURE_EVERY", "MGS_GODOT_CAPTURE_FILE",
+            "MGS_GODOT_DIAGNOSTIC_CAPTURE", "MGS_GODOT_QUIT_FRAME", "MGS_BASELINE_PROBE" };
+        foreach (string key in keys)
+        {
+            string previous = Environment.GetEnvironmentVariable(key);
+            try
+            {
+                Environment.SetEnvironmentVariable(key, "100");
+                var start = GameLaunch.StartInfo("fixture.exe", "", ".");
+                Require(!start.EnvironmentVariables.ContainsKey(key), "Normal play inherited " + key);
+                Require(start.EnvironmentVariables["MGS_GODOT_PERFORMANCE_RUN"] == "1", "Normal play allows capture");
+            }
+            finally { Environment.SetEnvironmentVariable(key, previous); }
+        }
     }
 }

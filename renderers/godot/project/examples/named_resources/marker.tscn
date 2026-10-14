@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="marker.gd" id="1"]
+
+[sub_resource type="SphereMesh" id="Marker"]
+radius = 0.25
+height = 0.5
+
+[node name="NamedResourceExample" type="Node3D"]
+metadata/mgs_stage = "s00a"
+metadata/mgs_coordinate_space = "native_y_up"
+
+[node name="Marker" type="MeshInstance3D" parent="."]
+position = Vector3(-6, 0.5, -5)
+mesh = SubResource("Marker")
+script = ExtResource("1")

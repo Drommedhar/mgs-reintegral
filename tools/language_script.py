@@ -3,7 +3,7 @@
 Layouts follow the recovered libgcl parser and menu/radiomes interpreter.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field, replace
 
 
 @dataclass(frozen=True)
@@ -11,6 +11,7 @@ class Node:
     code: int
     value: bytes = b""
     children: tuple = ()
+    offset: int = field(default=-1, compare=False)
 
     def shape(self):
         value = b"" if self.code in (7, 10, 0x102, 0x101) else self.value
@@ -26,8 +27,9 @@ class Node:
 
 
 class Reader:
-    def __init__(self, data, offset=0, end=None):
+    def __init__(self, data, offset=0, end=None, origin=0):
         self.data = data
+        self.origin = origin
         self.pos = offset
         self.end = len(data) if end is None else end
         if not 0 <= offset <= self.end <= len(data):
@@ -44,7 +46,8 @@ class Reader:
         return int.from_bytes(self.take(size), "big")
 
     def block(self, size):
-        return Reader(self.take(size))
+        origin = self.origin + self.pos
+        return Reader(self.take(size), origin=origin)
 
     def sequence(self, radio=False, depth=0):
         result = []
@@ -53,6 +56,10 @@ class Reader:
         return tuple(result)
 
     def gcl(self, depth=0):
+        offset = self.origin + self.pos
+        return replace(self.gcl_node(depth), offset=offset)
+
+    def gcl_node(self, depth):
         if depth > 64:
             raise ValueError("Script nesting exceeds 64 levels")
         code = self.number(1)

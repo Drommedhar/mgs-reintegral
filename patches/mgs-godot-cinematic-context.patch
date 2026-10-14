@@ -1,0 +1,74 @@
+--- a/source/kojo/demoexec.c
++++ b/source/kojo/demoexec.c
+@@ -27,6 +27,9 @@
+ #include "bullet/blast.h"
+ 
+ #include "demo.h"
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_cinematic.h"
++#endif
+ #include "common.h"
+ #include "kojo/m1e1.h"
+ #ifdef MGS_NATIVE
+@@ -293,6 +296,9 @@
+     DG_InvisibleObjs(lpAct->object.objs);
+ 
+     GM_GameStatus |= STATE_DEMO;
++#ifdef MGS_GODOT_SCENE
++    MgsGodotCinematicStart(lpAct, header->n_frames);
++#endif
+ #ifdef MGS_NATIVE
+     MgsCadenceDemoStart(header->n_frames);
+ #endif
+@@ -305,6 +311,9 @@
+     DMO_MDL    *model_file;
+     DEMO_MODEL *model;
+     int         i;
++#ifdef MGS_GODOT_SCENE
++    MgsGodotCinematicEnd(lpAct);
++#endif
+ #ifdef MGS_NATIVE
+     MgsCadenceDemoEnd();
+ #endif
+@@ -544,6 +553,9 @@
+     trans.vz = -DG_Chanl(0)->eye.t[2];
+ 
+     ApplyMatrixLV(&DG_Chanl(0)->eye_inv, &trans, (VECTOR *)DG_Chanl(0)->eye_inv.t);
++#ifdef MGS_GODOT_SCENE
++    MgsGodotCinematicApply(lpAct, data->frame);
++#endif
+ #ifdef MGS_NATIVE
+     MgsCadenceDemoApplied(data->frame, &(MgsCadenceCamera){
+         {data->eye_x, data->eye_y, data->eye_z},
+--- a/source/kojo/demothrd.c
++++ b/source/kojo/demothrd.c
+@@ -11,6 +11,9 @@
+  */
+ 
+ #include "demo.h"
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_cinematic.h"
++#endif
+ 
+ #include <stdio.h>
+ #include <libsn.h>
+@@ -53,6 +56,9 @@
+     lpAct->frame = -1;
+ 
+     GV_SetNamedActor(&lpAct->actor, &ActStream, &DieStream, "demothrd.c");
++#ifdef MGS_GODOT_SCENE
++    MgsGodotCinematicOpen(lpAct, 1);
++#endif
+ 
+     lpAct->map = GM_CurrentMap;
+     FS_StreamOpen();
+@@ -77,6 +83,9 @@
+     lpAct->frame = -1;
+ 
+     GV_SetNamedActor(&lpAct->actor, &ActFile, &DieFile, "demothrd.c");
++#ifdef MGS_GODOT_SCENE
++    MgsGodotCinematicOpen(lpAct, 0);
++#endif
+ 
+     lpAct->map = GM_CurrentMap;
+     FS_EnableMemfile(0, 0);

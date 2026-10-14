@@ -1,0 +1,24 @@
+diff --git a/source/main/main.c b/source/main/main.c
+index 92c8944ea..ecbeb2c82 100644
+--- a/source/main/main.c
++++ b/source/main/main.c
+@@ -16,6 +16,9 @@
+ #include "libhzd/libhzd.h"
+ #include "memcard/memcard.h"
+ #include "game/game.h"
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_display.h"
++#endif
+ 
+ unsigned int _ramsize = 0x200000; //  2MB RAM size
+ unsigned int _stacksize = 0x8000; // 32KB stack size
+@@ -118,6 +121,9 @@ static void Main( void )
+ 
+     for ( ;; )
+     {
++#ifdef MGS_GODOT_SCENE
++        MgsGodotDisplayTick();
++#endif
+         GV_ExecActorSystem();
+     }
+ }

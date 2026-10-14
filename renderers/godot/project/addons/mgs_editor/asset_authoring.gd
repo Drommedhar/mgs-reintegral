@@ -72,7 +72,7 @@ func texture_ids(identity: String, catalog: Dictionary, asset_root: String) -> A
 			if material == null: continue
 			var filename: String = material.resource_name.get_slice("_", 0) + ".p"
 			var texture := identity.get_base_dir().path_join(filename)
-			if not catalog.has(texture): texture = "mgs/integral-j/disc1/stage/init/" + filename
+			if not catalog.has(texture): texture = "/".join(identity.split("/").slice(0, 4)) + "/init/" + filename
 			if catalog.has(texture) and texture not in result: result.append(texture)
 	model.free()
 	return result

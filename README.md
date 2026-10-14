@@ -2,11 +2,21 @@
 
 ![RE:INTEGRAL logo](assets/branding/re-integral-logo.png)
 
-**Metal Gear Solid Re:Integral** is a Windows x86 source port of the original PlayStation *Metal Gear Solid Integral*, built from FoxdieTeam's recovered C and the PsyZ platform library. The immediate goal is a complete native rebuild; a map editor and broader asset tooling come later.
+**Metal Gear Solid Re:Integral** is a Windows x86 source port of the original PlayStation *Metal Gear Solid Integral*, built from FoxdieTeam's recovered C and the PsyZ platform library. The native runtime owns gameplay; the development Godot renderer and SDK provide editable maps, materials, effects and interfaces.
+
+## Player and mod creator documentation
+
+- **[Player guide](docs/PLAYER_GUIDE.md):** set up the Godot package, choose a renderer, install/update mod ZIPs, use the controls, back up saves and troubleshoot.
+- **[Mod creator guide](docs/MOD_CREATOR_GUIDE.md):** prepare your discs, make a first mod, edit original and custom visuals, test in the native game and export a portable ZIP. Includes moving objects, water and frost.
+- **[SDK quickstart](docs/SDK_QUICKSTART.md):** package entry points and the two guides. **[Technical reference](docs/GODOT_MODDING.md):** manifests, scripting and GDExtension APIs.
+
+These guides describe the development Godot SDK, including dev18. The native
+alpha below is a separate package. Godot campaign-wide fidelity and human
+playability acceptance remain in progress.
 
 ## Play the alpha
 
-Current prerelease: [**0.2.0-alpha.1**](https://github.com/Drommedhar/mgs-reintegral/releases/tag/v0.2.0-alpha.1).
+Native alpha: [**0.2.0-alpha.1**](https://github.com/Drommedhar/mgs-reintegral/releases/tag/v0.2.0-alpha.1).
 
 Download the `windows-x86.zip` from [Releases](https://github.com/Drommedhar/mgs-reintegral/releases),
 extract it and open **RE-INTEGRAL.exe**. The launcher asks for Integral Disc 1
@@ -35,10 +45,11 @@ Integral remains the gameplay base. Regional coverage is currently partial.
 - **Compatibility and coverage:** improve the native release from testing and
   bug reports; expand into VR Missions and future platform support.
 
-Godot is the main development direction for rendering and modding. The matched
-v5 renderer and visual mod workflow are implemented; campaign coverage and visual
-acceptance remain in progress. It is not part of the native alpha. Run the source
-prototype with `./tools/run-godot.ps1 -Scene3D` after
+Godot is the main development direction for rendering and modding. Development
+SDK packages include the launcher, editor and native gameplay host, with
+offline map previews, native testing and visual-mod ZIP export. Start with the
+[creator guide](docs/MOD_CREATOR_GUIDE.md) for the packaged workflow. Source
+developers can use `./tools/run-godot.ps1 -Scene3D` after
 [preparing local content](docs/GODOT_MODDING.md#prepare-from-your-discs).
 Remix Plus is retained as a separate experiment. See the [detailed roadmap](docs/ROADMAP.md)
 and [Godot integration milestone](docs/GODOT_RENDERER_PLAN.md#active-direction-11-october-2026).
@@ -204,7 +215,7 @@ Use an identity marked `Override=True` with `--export <identity> --output <desti
 
 For example, export a dock texture with `./.venv/Scripts/python.exe tools/list_assets.py --stage-dir .local/content/disc1/MGS/STAGE.DIR --stage s00a --export f072.p --output .local/mods/stages/s00a/f072.p`. Export refuses to overwrite an existing file. The current local validation copy retains the original texture bytes; it proves resource selection, not a visual edit.
 
-Only exact-length resources in their original formats are supported. Compiled stage programs (`.b`) cannot be overridden. Missing override files use the disc resource; malformed or incorrectly sized overrides are errors. Standard image/model importers, resource resizing, a map editor, and validated modded gameplay are future work.
+This native binary-resource interface accepts only exact-length resources in their original formats. Compiled stage programs (`.b`) cannot be overridden. Missing override files use the disc resource; malformed or incorrectly sized overrides are errors. For standard image/model imports and visual map editing, use the separate [Godot mod workflow](docs/MOD_CREATOR_GUIDE.md).
 
 ## Validation and provenance
 

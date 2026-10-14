@@ -1,0 +1,57 @@
+diff --git a/source/libdg/loader.c b/source/libdg/loader.c
+index 66082ba0a..54829ebad 100644
+--- a/source/libdg/loader.c
++++ b/source/libdg/loader.c
+@@ -6,6 +6,7 @@
+ #include "libdg.h"
+ #ifdef MGS_GODOT_SCENE
+ #include "mgs_godot_scene.h"
++#include "mgs_godot_sources.h"
+ #endif
+ #include "mgstype.h"
+ #include "libgv/libgv.h"
+@@ -98,6 +99,7 @@ int DG_LoadInitKmd( void *buf, int id )
+     }
+ #ifdef MGS_GODOT_SCENE
+     MgsGodotRegisterModel(def, id);
++    MgsGodotPublishModelSource(def, id);
+ #endif
+ #ifdef MGS_REMIX_SCENE
+     MgsRemixRegisterModel(def, id);
+@@ -363,6 +365,7 @@ int DG_LoadInitKmdar( void *buf, int id )
+ 
+ #ifdef MGS_GODOT_SCENE
+         MgsGodotRegisterModel(def, kmd->id);
++        MgsGodotPublishModelSource(def, kmd->id);
+ #endif
+ #ifdef MGS_REMIX_SCENE
+         MgsRemixRegisterModel(def, kmd->id);
+diff --git a/source/libfs/cdstage.c b/source/libfs/cdstage.c
+index 63fd15fa6..a13761631 100644
+--- a/source/libfs/cdstage.c
++++ b/source/libfs/cdstage.c
+@@ -11,6 +11,9 @@
+ #include "libdg/libdg.h"    // for DG_FrameRate
+ #include "libgv/libgv.h"    // for GV_xxxMemory
+ #include "sound/sd_cli.h"
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_sources.h"
++#endif
+ 
+ #ifdef MGS_NATIVE
+ #include "mgs_mods.h"
+@@ -394,8 +397,14 @@ static void LoadResource(void *data, int name, int size, int cache_mode)
+     {
+         exit(EXIT_FAILURE);
+     }
++#endif
++#ifdef MGS_GODOT_SCENE
++    MgsGodotBeginSource(data, name, size);
+ #endif
+     status = GV_LoadInit(data, name, cache_mode);
++#ifdef MGS_GODOT_SCENE
++    MgsGodotEndSource();
++#endif
+ #ifdef MGS_NATIVE
+     if (overridden && status <= 0)
+     {

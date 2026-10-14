@@ -1,0 +1,210 @@
+{
+  "format": "mgs.sdk.baseline.v1",
+  "recorded_utc": "2026-10-12T17:05:44.077974+00:00",
+  "branch": "feature/godot-renderer-sdk",
+  "head": "ef747b13123fd0d54534737979272dd0bf6b0774",
+  "inherited_changes": [
+    {
+      "status": " M",
+      "path": "AGENTS.md",
+      "sha256": "d2fe00643feb81018ce0914fcb5b2bd97fb8a7b7193a85040a3e636171b5f040"
+    },
+    {
+      "status": " M",
+      "path": "PROGRESS.md",
+      "sha256": "9fbcfedcb2aa3b88121f1663b942b4dea8853184ac619b5d55a1f83297dfbd61"
+    },
+    {
+      "status": " M",
+      "path": "docs/GODOT_RENDERER_PLAN.md",
+      "sha256": "23b177c065475929ae0a0e1e2ca09a762ab2b90986ee1487d5d626b22e6c8ccd"
+    },
+    {
+      "status": " M",
+      "path": "renderers/godot/project/depth_capture.gd",
+      "sha256": "b0a1234ec56ed7ee65e6e55e4d41254672749f7a013b3dd91722ba05ea4f60e3"
+    },
+    {
+      "status": " M",
+      "path": "renderers/godot/project/project.godot",
+      "sha256": "b1872a1abc7ab63a45f55116c7ac17a54f32db26650c9c7a21d6683090e3af08"
+    },
+    {
+      "status": " M",
+      "path": "renderers/godot/project/renderer.gd",
+      "sha256": "bd3be3de3305a39652189d25e7068045cb6e17ad7d9cb2a039df32b6d9d3cd7f"
+    },
+    {
+      "status": " M",
+      "path": "renderers/godot/project/runtime.gd",
+      "sha256": "4fc2af1a905bc127cb30124cfee8839f6a7abaa06ac08348b4516c28e43a4306"
+    },
+    {
+      "status": " M",
+      "path": "renderers/godot/project/scene_view.gd",
+      "sha256": "9f04b886e83081977f8ae95b909cafbadb178af9fc26ff34a7501a59029f8352"
+    },
+    {
+      "status": " M",
+      "path": "renderers/godot/project/shader_warmup.gd",
+      "sha256": "f468af5208ddd748518f370a45405138c5d3634de0dbd3910e04985ee55f6ce6"
+    },
+    {
+      "status": " M",
+      "path": "renderers/godot/project/tests/alarm_glass_test.gd",
+      "sha256": "a178fde7f440556ccc07fd9812446a0552a8fbcf49a37f6586c0f39f0227e4bb"
+    },
+    {
+      "status": " M",
+      "path": "renderers/godot/project/tests/character_shadow_test.gd",
+      "sha256": "2526295388a3ca85c3cc2824418c55f5280181fc24ae58eba795523af486e89c"
+    },
+    {
+      "status": " M",
+      "path": "renderers/godot/project/tests/depth_composition_test.gd",
+      "sha256": "5a28a4cf9f94120bb484223138ba3705fad616f7409a90f4f2bf08ca590f225a"
+    },
+    {
+      "status": " M",
+      "path": "renderers/godot/project/tests/event_lights_test.gd",
+      "sha256": "e4c4a26483ca0bffc80f2ef52cd7b0034e950bd3ae20d4b2e9537b815259b153"
+    },
+    {
+      "status": " M",
+      "path": "renderers/godot/project/tests/global_illumination_test.gd",
+      "sha256": "1ed843783e4cc6099cd02fb44be328934a90cd869d12ef3ceb1c3ad10dbd0beb"
+    },
+    {
+      "status": " M",
+      "path": "renderers/godot/project/tests/imported_lighting_test.gd",
+      "sha256": "d34371e294452c58fbac5262c22352f039a281d0ca5d6708353b975dc6678cf7"
+    },
+    {
+      "status": " M",
+      "path": "renderers/godot/project/tests/pbr_lighting_test.gd",
+      "sha256": "958fec0357f33124b5e1cd6c2865a365b155346c88fd7c9df6944096245ce0d3"
+    },
+    {
+      "status": " M",
+      "path": "renderers/godot/project/tests/resolution_test.gd",
+      "sha256": "7d0aa56ec75fad2ed94f7bf77df58a2a290f88aa7747476ddbe1b1531094c874"
+    },
+    {
+      "status": " M",
+      "path": "renderers/godot/project/tests/world_effects_test.gd",
+      "sha256": "11168d96e28a6d3b4864757083dc542f4b7205efcac16aaab2aca05a573ffb10"
+    },
+    {
+      "status": " M",
+      "path": "renderers/godot/project/world_background.gd",
+      "sha256": "a68eda6ee6c82f7b4d334243d4b5bca61ec7e3bcaed25d57233c29b0e56a83aa"
+    },
+    {
+      "status": " M",
+      "path": "renderers/godot/project/world_blit.gd",
+      "sha256": "c19de88c86316ff3d4981de61f35a73c0d2ee02a9be9836949ec2b3675e9b0b7"
+    },
+    {
+      "status": " M",
+      "path": "tools/test-godot.ps1",
+      "sha256": "4ba68c89731c0b7691b7e788e831db35f8e449dbbc1a14da2625cfa4426ec05d"
+    },
+    {
+      "status": "??",
+      "path": "docs/GODOT_SDK_MASTER_PLAN.html",
+      "sha256": "c9cf685173124d7fc1c4932d60f6e4ef33c2acfba478f00ffc96493545d7e6b8"
+    },
+    {
+      "status": "??",
+      "path": "docs/GODOT_SDK_PROGRESS.md",
+      "sha256": "b85dce660af0ef05a16ad414e48ee51a451279faf86b40f007255370e71acb20"
+    }
+  ],
+  "inherited_patch_sha256": "ec505133381f159da64961e7d296dbc3dfcc30b2f8a7c979db3acacb0248b8d9",
+  "tool_versions": {
+    "godot": "4.8.dev7.official.c971f93e7",
+    "cmake": "cmake version 3.31.8\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+    "ninja": "1.13.1",
+    "python": "Python 3.11.11"
+  },
+  "files": {
+    "sources.lock.json": {
+      "sha256": "b35b279400e2faef037db8dd975230fd52cb752311204b713f1eace347fb54ac",
+      "size": 6682
+    },
+    "requirements.txt": {
+      "sha256": "cc6f3fe1e8b0afdbcece4b0fe7e0f092d5d06f4a7d6133607a7a914fa9438ba8",
+      "size": 86
+    },
+    "renderers/godot/project/project.godot": {
+      "sha256": "b1872a1abc7ab63a45f55116c7ac17a54f32db26650c9c7a21d6683090e3af08",
+      "size": 1006
+    },
+    ".local/godot-content/catalog.json": {
+      "sha256": "9370ac06b174dbb9acc6e3cd359081d1c8feac649453e9586d8edaec73d4c444",
+      "size": 1083798
+    },
+    "build/mod-exports/local-780062320.zip": {
+      "sha256": "bf0dbc8f98fc3f14b19bceebf4cf0f416357af1985856c37bba882ecbb30b81d",
+      "size": 2822
+    },
+    "build/windows-x86-godot/mgs-integral-native.exe": {
+      "sha256": "0953611dc23ec49abbde4fb55b4a7e40a79cea60c2600fdb0101cfce73d9e63c",
+      "size": 9321472
+    },
+    "build/windows-x86-godot/RE-INTEGRAL.exe": {
+      "sha256": "1822d41be037e0bf03814914685c638a178c596447bb95ff351e5f71b652729b",
+      "size": 545792
+    },
+    "build/alpha-0.2-published/reintegral-0.2.0-alpha.1-windows-x86.zip": {
+      "sha256": "1390213568236529c8470198ee3155decff2aa7fa7f6ebdeff2945b7c98a94cb",
+      "size": 11955832
+    }
+  },
+  "local_discs": {
+    "disc1": {
+      "manifest_sha256": "a9ade10c238fbae6f26a92d613b71aef0e646a93a4c58b53b6ce3cdf465c4594",
+      "serial": "SLPM_862.47",
+      "image": {
+        "size": 719667312,
+        "sha256": "9b4c110591cc11126168612ce646d74c94478ef1ebb508509feb4ff0bb69a0e5"
+      },
+      "cue": {
+        "sha256": "c0fd7f9134ac3ba42a3b7f394e5724fd4e33f0eb3124e726c147f26bd9158fd3"
+      }
+    },
+    "disc2": {
+      "manifest_sha256": "9a4a0fdab30cb64e77cc54a399216572b45f82203f1de3f7ce84b6a07f90e36b",
+      "serial": "SLPM_862.48",
+      "image": {
+        "size": 745788624,
+        "sha256": "aa57800395cb552c1fe860832846e5ff4d8d050febdff1a8d3ed2936c849a339"
+      },
+      "cue": {
+        "sha256": "7f75d0f9d61bad4f3411a93d9fae50d8bf872d9d37120738ac25dd2851064883"
+      }
+    }
+  },
+  "legacy_archive_members": {
+    "reintegral-0.2.0-alpha.1-windows-x86/build-info.json": "bc0235fd2a566b3048f16a8dfa805c07ed8ba2632f12d1dab7f05ba21f5f0ce4",
+    "reintegral-0.2.0-alpha.1-windows-x86/mgs-integral-native.exe": "2cb3a8bc5c4f22e8670d5c4ba9ed5a17b3b91a2c04e21802b3f2cf4763cdffeb",
+    "reintegral-0.2.0-alpha.1-windows-x86/RE-INTEGRAL.exe": "568b77868a1f1bc605dbe6e0e25ca64ae7df83834b1310803b02351ac3bee2f0",
+    "reintegral-0.2.0-alpha.1-windows-x86/language-importer/build-info.json": "f29efe3657ed016f4bcfcb10c7905a44406c7a94f59f7e839555f2856d01ac4f"
+  },
+  "recipes": {
+    "godot": "./tools/build.ps1 -BuildDirectory build/windows-x86-godot -RendererModule renderers/godot/native -Target mgs-integral-native",
+    "legacy_current_source": "./tools/build.ps1 -Configuration RelWithDebInfo -BuildDirectory build/windows-x86-relwithdebinfo -Target mgs-integral-native",
+    "legacy_02": "Preserved published archive: build/alpha-0.2-published/reintegral-0.2.0-alpha.1-windows-x86.zip; use its build-info.json for release source provenance."
+  },
+  "post_build_files": {
+    "build/windows-x86-godot/mgs-integral-native.exe": {
+      "sha256": "6773a9ff80597897344f79aa124b8fa56aec0c6c8b1d4e42c0dc8a75973a168e",
+      "size": 9321472
+    },
+    "build/windows-x86-godot/reintegral_mod_tests.exe": {
+      "sha256": "3e764bf2240ec79d7cc08f3edef61683270d78f6206c916a695866e5ff48c8b4",
+      "size": 44032
+    }
+  },
+  "evidence_directory": "build/godot-sdk-m0"
+}

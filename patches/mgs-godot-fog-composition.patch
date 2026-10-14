@@ -1,0 +1,53 @@
+--- a/source/takabe/libdg2.c
++++ b/source/takabe/libdg2.c
+@@ -421,6 +421,20 @@
+     return buffer;
+ }
+ 
++#ifdef MGS_GODOT_SCENE
++static void GodotFogSortPrims(DG_PRIM *prim, int index, void (*callback)(void *, void *, int))
++{
++    int face;
++    char *packet = (char *)prim->packs[index];
++    for (face = 0; face < prim->prim_count; ++face, packet += prim->psize)
++    {
++        if (MgsGodotLegacyShadowPacket(packet, prim->type) ||
++            MgsGodotOwnsEffect(prim, face, packet)) continue;
++        s12c_800D4D8C((u_short *)packet, 1, prim->psize, callback);
++    }
++}
++#endif
++
+ void FogSortChanl_800D4E98(DG_CHANL *chanl, int idx)
+ {
+     SCRATCHPAD_UNK *scratch;
+@@ -455,6 +469,9 @@
+     {
+         prim = *queue++;
+         type = prim->type;
++#ifdef MGS_GODOT_SCENE
++        if (MgsGodotSceneEnabled() && (type & MGS_GODOT_LEGACY_GLOW)) continue;
++#endif
+ 
+         if (type & DG_PRIM_INVISIBLE)
+         {
+@@ -470,11 +487,19 @@
+         ((SCRATCHPAD_UNK *)SCRPAD_ADDR)->len = prim->raise;
+ 
+         type = (type + 1) & mask;
++#ifdef MGS_GODOT_SCENE
++        if (MgsGodotSceneEnabled())
++            GodotFogSortPrims(prim, idx, fog_prim_funcs_800C347C[type]);
++        else
++#endif
+         s12c_800D4D8C(prim->packs[idx], prim->prim_count, prim->psize,
+                       fog_prim_funcs_800C347C[type]);
+     }
+ 
+     gte_strgb_s0(*(void **)(SCRPAD_ADDR + 0x018));
++#ifdef MGS_GODOT_SCENE
++    MgsGodotSortWorld(chanl, idx);
++#endif
+ }
+ 
+ typedef	struct {

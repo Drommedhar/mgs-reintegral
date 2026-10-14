@@ -69,7 +69,9 @@ func run() -> void:
 	DirAccess.make_dir_recursive_absolute(directory)
 	var runtime := SceneView.new()
 	root.add_child(runtime)
-	runtime.catalog = {ASSET: {"kind": "model"}}
+	runtime.catalog = {ASSET: {"kind": "model", "colorCount": 0}}
+	runtime.templates[ASSET] = Node3D.new()
+	check(runtime.materials.initialize(runtime.catalog, runtime.mods, directory).is_empty(), "Cannot initialize coordinate fixture materials")
 	runtime.mods.stages = {"s00a": {"path": "", "mod": "coordinate.test"}}
 	var overlay := Node3D.new()
 	Coordinates.mark_editor(overlay)

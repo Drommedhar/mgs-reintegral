@@ -1,5 +1,9 @@
 # RE:INTEGRAL — 0.2.0-alpha.1
 
+This page describes the native 0.2.0-alpha.1 release. The separate Godot SDK
+development package includes its own player and mod creator guides; Godot
+features described there are not part of this native alpha download.
+
 This alpha adds optional graphics enhancements, faster map loading, and German
 or US English text/speech imported locally from your own discs.
 

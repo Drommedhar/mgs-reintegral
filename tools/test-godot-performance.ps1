@@ -27,6 +27,7 @@ $mean = ($times | Measure-Object -Average).Average
 $slow = @($times | Where-Object { $_ -gt $target + 2000 }).Count
 $summary = [ordered]@{
     resolution = $Resolution
+    widescreen = $true
     warmup_frames = $WarmupFrames
     measured_frames = $times.Count
     target_fps = [math]::Round(1000000 / $target, 3)

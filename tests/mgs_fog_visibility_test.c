@@ -17,6 +17,14 @@ static int half_width = 214;
 int DG_CurrentGroupID = 1;
 int s12c_800DA428 = 8, s12c_800DA430 = 20;
 short DG_ClipMin[2], DG_ClipMax[2];
+#ifdef MGS_GODOT_SCENE
+static int retain_objects;
+int MgsGodotRetainObjects(const DG_OBJS *objects)
+{
+    return retain_objects && !(objects->flag & DG_FLAG_INVISIBLE) &&
+        (!objects->group_id || (objects->group_id & DG_CurrentGroupID));
+}
+#endif
 #undef SCRPAD_ADDR
 #define SCRPAD_ADDR ((unsigned char *)scratch)
 
@@ -150,12 +158,58 @@ static void CheckClipping(void)
     CALCULATE_CLIPPING(vertices);
     assert(((unsigned char *)&vertices[128])[3] == 2);
 }
+#ifdef MGS_GODOT_SCENE
+static void CheckRetainedPackets(void)
+{
+    const int cases[][3] = {{220,230,256}, {-230,-220,256}, {-20,20,5120}, {-20,20,0}};
+    retain_objects = 1;
+    for (unsigned i = 0; i < sizeof(cases) / sizeof(cases[0]); ++i) {
+        Reset(cases[i][0], cases[i][1], cases[i][2]);
+        for (int frame = 0; frame < 20; ++frame) {
+            MgsVisibilityBegin(1);
+            FogBoundChanl_800D5500(&channel, frame & 1);
+            assert(fixture.group.bound_mode == 0);
+            for (int part = 0; part < 3; ++part) {
+                assert(fixture.models[part].packs[frame & 1]);
+                assert((fixture.models[part].bound_mode & 7) == 0);
+                assert(fixture.models[part].free_count == 8);
+            }
+            MgsVisibilityEnd();
+            assert(fixture.group.bound_mode == 0);
+        }
+        assert(allocations == 6);
+        fixture.group.flag |= DG_FLAG_INVISIBLE;
+        for (int frame = 0; frame < 20; ++frame) {
+            MgsVisibilityBegin(1);
+            FogBoundChanl_800D5500(&channel, frame & 1);
+            MgsVisibilityEnd();
+        }
+        for (int part = 0; part < 3; ++part)
+            assert(!fixture.models[part].packs[0] && !fixture.models[part].packs[1]);
+    }
+    Reset(220,230,256);
+    fixture.group.group_id = 2;
+    FogBoundChanl_800D5500(&channel, 0);
+    MgsVisibilityEnd();
+    assert(allocations == 0 && fixture.group.bound_mode == 0);
+    Reset(220,230,256);
+    fail_allocation = 1;
+    FogBoundChanl_800D5500(&channel, 0);
+    MgsVisibilityEnd();
+    assert(allocations == 3 && !fixture.models[0].packs[0]);
+    assert(fixture.models[1].packs[0] && fixture.group.bound_mode == 0);
+    retain_objects = 0;
+}
+#endif
 int main(void)
 {
     _set_error_mode(_OUT_TO_STDERR);
     assert(offsetof(TestGroup, models) == sizeof(DG_OBJS));
     CheckBounds();
     CheckFailures();
+#ifdef MGS_GODOT_SCENE
+    CheckRetainedPackets();
+#endif
     CheckClipping();
     puts("Fog preserves classic group visibility, render cache bits and wider vertex clipping");
     return 0;

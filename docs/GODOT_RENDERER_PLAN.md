@@ -1,5 +1,19 @@
 # Godot renderer migration
 
+## Expanded target, 12 October 2026
+
+The user now requires Godot to own all visual presentation, including UI,
+cinematic-only scenes, camera editing and dynamic actor attachments/events.
+Native gameplay remains authoritative for now; the default UI preserves the
+original layout as editable Godot Controls. The launcher must select Legacy
+0.2, Godot or community renderers. The user approved the plan and activated its
+implementation goal on 12 October. Start with the
+[granular execution ledger](GODOT_SDK_PROGRESS.md) for current tasks, dependencies,
+acceptance evidence and the next session's starting point. See the
+[complete HTML implementation plan](GODOT_SDK_MASTER_PLAN.html) for architecture,
+delivery sequence and acceptance gates. The sections below retain historical
+implementation evidence and contain superseded scope/version statements.
+
 ## Active direction, 11 October 2026
 
 The user selected Godot as the primary renderer and modding SDK/editor direction.

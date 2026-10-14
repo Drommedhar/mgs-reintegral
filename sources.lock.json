@@ -1,5 +1,17 @@
 {
   "version": 1,
+  "sdkTools": {
+    "python": {
+      "version": "3.13.16",
+      "url": "https://www.python.org/ftp/python/3.13.16/python-3.13.16-embed-amd64.zip",
+      "sha256": "97dae5274cc54867065e8d5a3226e48c35017ed332a0fdb0e27d5b5821961297"
+    },
+    "powershell": {
+      "version": "7.6.6",
+      "url": "https://github.com/PowerShell/PowerShell/releases/download/v7.6.6/PowerShell-7.6.6-win-x64.zip",
+      "sha256": "02fe458be20493fbdf43f61ea20610b811ee6c738ab1676c61b9cfcd1a33c860"
+    }
+  },
   "godotCpp": {
     "path": "vendor/godot-cpp",
     "url": "https://github.com/godotengine/godot-cpp.git",
@@ -103,7 +115,44 @@
         "patches/mgs-godot-event-lights.patch",
         "patches/mgs-godot-widescreen-visibility.patch",
         "patches/mgs-godot-alarm-lights.patch",
-        "patches/mgs-godot-beacon-glow.patch"
+        "patches/mgs-godot-beacon-glow.patch",
+        "patches/mgs-godot-model-sources.patch",
+        "patches/mgs-godot-elevator-actor.patch",
+        "patches/mgs-godot-cinematic-context.patch",
+        "patches/mgs-godot-independent-view.patch",
+        "patches/mgs-godot-fog-visibility.patch",
+        "patches/mgs-godot-fog-composition.patch",
+        "patches/mgs-remix-snow-registration.patch",
+        "patches/mgs-godot-world-snow.patch",
+        "patches/mgs-godot-world-lamps.patch",
+        "patches/mgs-godot-camouflage.patch",
+        "patches/mgs-godot-night-vision.patch",
+        "patches/mgs-godot-thermal-vision.patch",
+        "patches/mgs-godot-ir-beams.patch",
+        "patches/mgs-godot-goggles-ui.patch",
+        "patches/mgs-godot-status-bars.patch",
+        "patches/mgs-subtitle-state.patch",
+        "patches/mgs-godot-subtitles.patch",
+        "patches/mgs-radar-state.patch",
+        "patches/mgs-godot-radar.patch",
+        "patches/mgs-godot-inventory.patch",
+        "patches/mgs-godot-codec.patch",
+        "patches/mgs-godot-options.patch",
+        "patches/mgs-godot-save-ui.patch",
+        "patches/mgs-godot-title.patch",
+        "patches/mgs-godot-display.patch",
+        "patches/mgs-godot-options-actions.patch",
+        "patches/mgs-godot-title-actions.patch",
+        "patches/mgs-godot-codec-actions.patch",
+        "patches/mgs-godot-inventory-actions.patch",
+        "patches/mgs-godot-wall-actors.patch",
+        "patches/mgs-godot-deformation.patch",
+        "patches/mgs-godot-water-effect.patch",
+        "patches/mgs-godot-linked-shade-readiness.patch",
+        "patches/mgs-godot-surface-ripples.patch",
+        "patches/mgs-writable-smoke-scripts.patch",
+        "patches/mgs-godot-live-textures.patch",
+        "patches/mgs-godot-text-cards.patch"
       ]
     },
     {
@@ -138,7 +187,13 @@
         "patches/psyz-godot-draw-cost.patch",
         "patches/psyz-existing-remote-input.patch",
         "patches/psyz-godot-exchange-timing.patch",
-        "patches/psyz-godot-color-precision.patch"
+        "patches/psyz-godot-color-precision.patch",
+        "patches/psyz-godot-input-capture.patch",
+        "patches/psyz-godot-legacy-presentation.patch",
+        "patches/psyz-godot-water-effect.patch",
+        "patches/psyz-xa-predictor-rounding.patch",
+        "patches/psyz-godot-cadence-text-cards.patch",
+        "patches/psyz-loading-audio.patch"
       ]
     },
     {
@@ -167,5 +222,44 @@
       "commit": "5a2c7ee2be477bdde465654b5bf52de1275e1096",
       "checkoutRequired": false
     }
-  ]
+  ],
+  "presentationLoading": {
+    "author": "Irbif (u/Irbif)",
+    "post": "https://www.reddit.com/r/gaming/comments/p9725h/im_a_pixel_artist_i_made_this_animation_of_solid/",
+    "url": "https://i.redd.it/uz9pk3unlui71.gif",
+    "sha256": "045c6aa4a4f7713b3b94b0f497fc30387857169af2337c87146ce88de00331fe",
+    "generator": "tools/prepare_loading_animation.py",
+    "atlasSha256": "7177639c30a52b363d30ab84048e75b0d35c2c22b9ea196d05df2cd6a1af96d8",
+    "notice": "licenses/loading-animation/NOTICE.txt"
+  },
+  "presentationFonts": {
+    "fork": {
+      "url": "https://github.com/ImperishableNEET/mgs1-reintegrated",
+      "commit": "f83139e8f32ae14032bfe32a87dacb1c57cc559e"
+    },
+    "inputs": [
+      {
+        "url": "https://raw.githubusercontent.com/ImperishableNEET/mgs1-reintegrated/f83139e8f32ae14032bfe32a87dacb1c57cc559e/assets/fonts/mgs1-codec-gleeson.ttf",
+        "sha256": "eed89314c9ef961f38842f0533d496e6a4af28a93f10fa3f40ea964e550f9736"
+      },
+      {
+        "url": "https://raw.githubusercontent.com/ImperishableNEET/mgs1-reintegrated/f83139e8f32ae14032bfe32a87dacb1c57cc559e/tools/build_interface_font.py",
+        "sha256": "08b30850b024edc0bd33f9742ff59d5deff67ee9641342b680114ed9278da06a"
+      },
+      {
+        "url": "https://mirrors.ctan.org/fonts/tex-gyre.zip",
+        "archive_path": null,
+        "sha256": "1773c470f9e388e087b68e3426e115af2cd236845a7e05ceb25b2a503409a7a3"
+      },
+      {
+        "url": "https://mirrors.ctan.org/fonts/tex-gyre/opentype/texgyreheros-regular.otf",
+        "archive_path": "tex-gyre/opentype/texgyreheros-regular.otf",
+        "sha256": "6ae1a09d5a940367b7aaaa91ee8bd8a2c333bfe193e7096e23f931357d62081f"
+      }
+    ],
+    "licenses": "licenses/fonts/NOTICE.txt",
+    "generator": "tools/build_interface_font.py",
+    "generatorRequirements": "requirements-fonts.txt",
+    "generatedAtlasSha256": "5bca92a2076d111803717f425e5a900d69140a3bba1208168abfbdc9295f8d94"
+  }
 }

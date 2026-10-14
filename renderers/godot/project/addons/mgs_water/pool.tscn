@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" path="water_region.tscn" id="1"]
+
+[node name="Pool" instance=ExtResource("1")]
+volume_size = Vector3(8, 3, 6)
+absorption = Vector3(0.45, 0.12, 0.08)
+water_color = Color(0.025, 0.1, 0.12, 1)

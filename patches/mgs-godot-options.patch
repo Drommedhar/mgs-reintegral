@@ -1,0 +1,224 @@
+diff --git a/source/menu/menuman.c b/source/menu/menuman.c
+index 8f63bfb42..ed8a478ab 100644
+--- a/source/menu/menuman.c
++++ b/source/menu/menuman.c
+@@ -18,6 +18,7 @@
+ #include "mgs_godot_radar.h"
+ #include "mgs_godot_inventory.h"
+ #include "mgs_godot_codec.h"
++#include "mgs_godot_options.h"
+ #endif
+ 
+ static u_char SECTION(".bss") PrimBuffer[2][8192];
+@@ -200,6 +201,7 @@ void MENU_ResetSystem(void)
+     MgsGodotResetRadar();
+     MgsGodotResetInventory();
+     MgsGodotResetCodec();
++    MgsGodotResetOptions();
+ #elif defined(MGS_NATIVE)
+     MgsRadarBeginFrame(0, 0);
+ #endif
+diff --git a/source/onoda/option/opt.c b/source/onoda/option/opt.c
+index 622e8db72..cd2489bf2 100644
+--- a/source/onoda/option/opt.c
++++ b/source/onoda/option/opt.c
+@@ -10,6 +10,9 @@
+ #include "mts/mts_pad.h"
+ #include "font/font.h"
+ #include "game/game.h"
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_options.h"
++#endif
+ 
+ // FIXME: it's the same struct as in change.c (in change overlay)
+ typedef struct _Unknown
+@@ -62,6 +65,10 @@ typedef struct _Work
+     int      f2B58;
+     char     pad2[0x4];
+     int      f2B60;
++#ifdef MGS_GODOT_SCENE
++    uint32_t ui_textures[MGS_OPTIONS_ELEMENTS];
++    uint32_t ui_text_mask;
++#endif
+ } Work;
+ 
+ typedef struct _Unknown2
+@@ -110,6 +117,55 @@ static Unknown2 dword_800C3218[] =
+ signed char byte_800C338C[] = {-1, 0, 1, 0, 0, 1, 0, -1};
+ signed char byte_800C3394[] = {-1, 0, 1, 0, 0, 1, 0, -1};
+ 
++#ifdef MGS_GODOT_SCENE
++static void OptionsTexture(Work *work, const POLY_FT4 *poly, unsigned name)
++{
++    const POLY_FT4 *groups[] = {work->field_34, work->field_5D4, work->field_674, work->field_46C};
++    const unsigned sizes[] = {27, 4, 17, 9};
++    unsigned index = 0;
++    for (unsigned group = 0; group < 4; ++group)
++        for (unsigned item = 0; item < sizes[group]; ++item, ++index)
++            if (poly == &groups[group][item]) work->ui_textures[index] = name;
++}
++
++static void OptionsView(Work *work)
++{
++    MgsOptionsFrame frame = {.active = 1, .selection = work->f920, .animation = work->f2B58,
++        .vibration = work->f2B54, .test = work->f2B50, .controller_row = work->f29E4,
++        .controller_type = work->f29E8, .reverse = work->f29EC};
++    for (unsigned index = 0; index < 8; ++index) frame.values[index] = work->f924[index];
++    const POLY_FT4 *groups[] = {work->field_34, work->field_5D4, work->field_674, work->field_46C};
++    const int *layers[] = {work->f2A00, work->f2AFC, work->f2B0C, work->f2A6C};
++    const unsigned sizes[] = {27, 4, 17, 9};
++    MgsOptionsElement elements[MGS_OPTIONS_ELEMENTS];
++    unsigned index = 0;
++    for (unsigned group = 0; group < 4; ++group) {
++        for (unsigned item = 0; item < sizes[group]; ++item, ++index) {
++            const POLY_FT4 *poly = &groups[group][item];
++            unsigned r = poly->r0, g = poly->g0, b = poly->b0;
++            if (work->f920 == 11) {
++                r -= r * work->f2B58 / 16;
++                g -= g * work->f2B58 / 16;
++                b -= b * work->f2B58 / 16;
++            }
++            elements[index] = (MgsOptionsElement){.texture = work->ui_textures[index],
++                .x = poly->x0 + 160, .y = poly->y0 + 112,
++                .width = poly->x1 - poly->x0, .height = poly->y2 - poly->y0,
++                .rgb = r | (g << 8) | (b << 16), .layer = layers[group][item] / 256,
++                .blend = (poly->code & 2) ? 1 + ((poly->tpage >> 5) & 3) : 0};
++        }
++    }
++    MgsGodotOptionsView(frame, elements);
++    if (work->f920 == 0 || work->f920 == 11) return;
++    for (unsigned text = 0; text < MGS_OPTIONS_TEXTS; ++text) {
++        if (!(work->ui_text_mask & (1u << text))) continue;
++        const RECT *rect = &work->fEC4[text].rect;
++        MgsGodotOptionsText(text, (MgsSubtitleFrame){.active = 1, .visible = 1,
++            .x = rect->x, .y = rect->y, .width = rect->w, .height = rect->h}, work->kcb[text].cbuffer);
++    }
++}
++#endif
++
+ static void option_800C339C(Work *work, int index)
+ {
+     RECT rect;
+@@ -152,6 +208,9 @@ static void option_800C339C(Work *work, int index)
+     font_set_buffer(kcb, GV_AllocMemory(GV_NORMAL_MEMORY, font_get_buffer_size(kcb)));
+ 
+     font_set_color(kcb, 0, dword_800C3218[index].color, 0);
++#ifdef MGS_GODOT_SCENE
++    if (MgsGodotOwnsOptions()) return;
++#endif
+     font_clut_update(kcb);
+ }
+ 
+@@ -166,7 +225,14 @@ static void option_800C352C(Work *work, int index)
+     {
+         kcb = &work->kcb[index];
+ 
++#ifdef MGS_GODOT_SCENE
++        if (MgsGodotOwnsOptions()) MgsGodotOptionsBeginText(index, kcb->buffer);
++#endif
+         font_print_string(kcb, string);
++#ifdef MGS_GODOT_SCENE
++        if (MgsGodotOwnsOptions()) MgsTextLayoutEnd(kcb->cbuffer, kcb->row * 2, kcb->height);
++        else
++#endif
+         font_update(kcb);
+ 
+         work->fEC4[ index ].rect.w = kcb->max_width;
+@@ -295,6 +361,13 @@ static void option_800C3B3C(Work *work, int index, int color)
+ 
+     kcb = &work->kcb[ index ];
+     font_set_color( kcb, 0, color, 0 );
++#ifdef MGS_GODOT_SCENE
++    if (MgsGodotOwnsOptions()) {
++        if (color) work->ui_text_mask |= 1u << index;
++        else work->ui_text_mask &= ~(1u << index);
++        return;
++    }
++#endif
+     font_clut_update( kcb );
+ }
+ 
+@@ -348,6 +421,9 @@ static void option_800C3C74(Work *work)
+     poly_dst = work->field_24->packs[GV_Clock];
+ 
+     work->f2A00[20] = 0;
++#ifdef MGS_GODOT_SCENE
++    if (MgsGodotOwnsOptions()) { OptionsView(work); return; }
++#endif
+ 
+     for (i = 0; i < 27; poly_dst++, poly_src++, i++)
+     {
+@@ -570,6 +646,9 @@ static void option_800C4130(Work *work, OT_TYPE *ot)
+         break;
+     }
+ 
++#ifdef MGS_GODOT_SCENE
++    if (MgsGodotOwnsOptions()) return;
++#endif
+     option_800C3664(work, ot);
+ }
+ 
+@@ -912,6 +991,9 @@ static void option_800C4AE8(Work *work, int name, POLY_FT4 *poly)
+     DG_TEX *tex;
+     int     x, y, w, h;
+ 
++#ifdef MGS_GODOT_SCENE
++    if (MgsGodotOwnsOptions()) OptionsTexture(work, poly, (unsigned)name);
++#endif
+     tex = DG_GetTexture(name);
+ 
+     x = tex->off_x;
+@@ -2284,6 +2366,9 @@ static void Act(Work *work)
+             GM_Configuration |= GM_CONFIG_UNKNOWN_0010;
+             GCL_ExecProc(work->f91C, NULL);
+             GV_DestroyActor(&work->actor);
++#ifdef MGS_GODOT_SCENE
++            if (MgsGodotOwnsOptions()) return;
++#endif
+         }
+         break;
+     }
+@@ -2297,6 +2382,9 @@ static void Die(Work *work)
+     int   i;
+     void *buf;
+ 
++#ifdef MGS_GODOT_SCENE
++    if (MgsGodotOwnsOptions()) MgsGodotOptionsEnd();
++#endif
+     GM_FreePrim(work->field_24);
+     GM_FreePrim(work->field_2C);
+     GM_FreePrim(work->field_30);
+@@ -2346,6 +2434,9 @@ static void Init_Res(Work *work, int name, POLY_FT4 *poly, int x0, int y0, int x
+ 
+     InitPack(work, poly, x0, y0, x1, y1, abe);
+ 
++#ifdef MGS_GODOT_SCENE
++    if (MgsGodotOwnsOptions()) OptionsTexture(work, poly, (unsigned)name);
++#endif
+     tex = DG_GetTexture(name);
+     if (type == 0)
+     {
+@@ -2370,12 +2461,23 @@ static int GetResources(Work *work, int map)
+     POLY_FT4 *po;
+     int       i;
+ 
++#ifdef MGS_GODOT_SCENE
++    if (MgsGodotOwnsOptions()) MgsGodotOptionsBegin();
++#endif
+     GM_CurrentMap = map;
+ 
+     work->field_24 = GM_MakePrim(DG_PRIM_SORTONLY | DG_PRIM_POLY_FT4, 27, NULL, NULL);
+     work->field_28 = GM_MakePrim(DG_PRIM_SORTONLY | DG_PRIM_POLY_FT4, 9, NULL, NULL);
+     work->field_2C = GM_MakePrim(DG_PRIM_SORTONLY | DG_PRIM_POLY_FT4, 4, NULL, NULL);
+     work->field_30 = GM_MakePrim(DG_PRIM_SORTONLY | DG_PRIM_POLY_FT4, 17, NULL, NULL);
++#ifdef MGS_GODOT_SCENE
++    if (MgsGodotOwnsOptions()) {
++        DG_InvisiblePrim(work->field_24);
++        DG_InvisiblePrim(work->field_28);
++        DG_InvisiblePrim(work->field_2C);
++        DG_InvisiblePrim(work->field_30);
++    }
++#endif
+ 
+     po = work->field_34;
+     i = 0;

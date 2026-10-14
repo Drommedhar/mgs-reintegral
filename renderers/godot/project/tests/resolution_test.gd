@@ -10,6 +10,9 @@ func _initialize() -> void:
 	call_deferred("run")
 
 func run() -> void:
+	preload("res://scene_view.gd").configure_metadata(viewport)
+	if "--fsr2" in OS.get_cmdline_user_args():
+		preload("res://scene_view.gd").configure_rendering(viewport, root)
 	renderer.render_scale = 4
 	viewport.size = Vector2i(256, 256)
 	viewport.transparent_bg = true
@@ -19,7 +22,7 @@ func run() -> void:
 	viewport.add_child(camera)
 	camera.fov = 90
 	var compositor := Compositor.new()
-	compositor.compositor_effects = [renderer.depth_capture]
+	compositor.compositor_effects = renderer.depth_capture.effects()
 	camera.compositor = compositor
 	var quad := MeshInstance3D.new()
 	quad.mesh = QuadMesh.new()
@@ -38,7 +41,7 @@ func ready(target: RID, error: String) -> void:
 		failures.append(error)
 		finish()
 		return
-	if target != renderer.scaled.target: failures.append("Presentation did not select the scaled framebuffer")
+	if target != renderer.display_target(): failures.append("Presentation did not select the completed scaled frame")
 	await RenderingServer.frame_post_draw
 	await RenderingServer.frame_post_draw
 	RenderingServer.call_on_render_thread(check_render)
@@ -157,6 +160,20 @@ func check_render() -> void:
 		failures.append("Scaled presentation changed native readback dimensions/content")
 	print("MGS_RESOLUTION_DETAIL native_blocks_with_subpixel_detail=%d" % detailed)
 	check_tiles(rd)
+	resize_viewport.call_deferred()
+
+func resize_viewport() -> void:
+	viewport.size = Vector2i(192, 192)
+	await RenderingServer.frame_post_draw
+	await RenderingServer.frame_post_draw
+	RenderingServer.call_on_render_thread(check_resized_world)
+
+func check_resized_world() -> void:
+	command(8, ints([0, 0, 64, 64, 0, 0, 0]))
+	command(10, ints([0, 0, 64, 64, 1, 0, 0, 65536, 0, 0, 64, 64, 0]))
+	var data := renderer.rd.texture_get_data(renderer.scaled.target, 0)
+	var sample := pixel(data, 100, 100)
+	if sample[0] == 0 or sample[2] == 0: failures.append("Resized world lost its texture bindings")
 	finish.call_deferred()
 
 func check_color_precision(rd: RenderingDevice, original: PackedByteArray) -> void:

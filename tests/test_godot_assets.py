@@ -2,12 +2,14 @@
 
 import struct
 import sys
+import tempfile
+import json
 import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 from godot_assets.formats import Part, inflate, kmd, pcx
-from godot_assets.gltf import face_vertices, point, resolve_vertex
+from godot_assets.gltf import convert_model, face_vertices, point, resolve_vertex
 from prepare_godot_assets import stable_id
 from tests.godot_geometry_fixture import floor_part
 
@@ -20,6 +22,26 @@ def pcx_fixture(indices, palette):
 
 
 class AssetConversion(unittest.TestCase):
+    def test_null_faces_are_transparent_without_hiding_missing_textures(self):
+        part = floor_part()
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "fixture.gltf"
+            for texture in (0, 0x1234):
+                part.textures = (texture,)
+                result = convert_model("fixture", 1, [part], {}, path)
+                document = json.loads(path.read_text())
+                material = document["materials"][0]
+                self.assertEqual(result["surfaces"], 1)
+                self.assertEqual(result["colorCount"], 4)
+                if texture == 0:
+                    self.assertEqual(result["unresolvedTextures"], [])
+                    self.assertEqual(material["alphaMode"], "MASK")
+                    self.assertEqual(
+                        material["pbrMetallicRoughness"]["baseColorFactor"][3], 0
+                    )
+                else:
+                    self.assertEqual(result["unresolvedTextures"], ["1234"])
+
     def test_native_normals_face_outward_in_gltf(self):
         part = floor_part()
         for flags, normal_index in ((0, 0), (0x10000, 0x80)):
@@ -73,6 +95,9 @@ class AssetConversion(unittest.TestCase):
 
     def test_stage_namespace_disambiguates_legacy_hash(self):
         self.assertNotEqual(stable_id("s00a", "1234.k"), stable_id("s01a", "1234.k"))
+        self.assertNotEqual(
+            stable_id("s00a", "1234.k", 1), stable_id("s00a", "1234.k", 2)
+        )
         self.assertEqual(
             stable_id("s00a", "1234.k"), "mgs/integral-j/disc1/stage/s00a/1234.k"
         )

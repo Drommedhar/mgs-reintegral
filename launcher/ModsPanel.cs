@@ -10,6 +10,7 @@ namespace ReIntegral
         private readonly CheckedListBox list = new CheckedListBox();
         private readonly string dataDirectory;
         private readonly Label status = new Label();
+        private readonly Label description = new Label();
         private bool loading;
         public bool Busy { get; private set; }
         public event EventHandler Changed;
@@ -19,8 +20,8 @@ namespace ReIntegral
         {
             dataDirectory = directory;
             Dock = DockStyle.Fill;
-            var description = new Label { Text = supported ? "Add mod ZIPs, tick the ones you want, then Save and play." :
-                "Visual mod ZIPs require the Godot renderer launcher.", Left = 4, Top = 5, Width = 630, Height = 28 };
+            description.SetBounds(4, 5, 630, 28);
+            SetRenderer(supported);
             Controls.Add(description);
             list.SetBounds(4, 38, 630, 205);
             list.CheckOnClick = true;
@@ -47,6 +48,12 @@ namespace ReIntegral
             list.Items.Clear();
             foreach (var mod in mods) list.Items.Add(mod, mod.Enabled);
             loading = false;
+        }
+
+        public void SetRenderer(bool godot)
+        {
+            description.Text = godot ? "Add mod ZIPs, tick the ones you want, then Save and play." :
+                "Godot visual ZIPs are kept here but will not load with the selected renderer.";
         }
 
         public List<VisualMod> ReadMods()

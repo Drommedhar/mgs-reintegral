@@ -1,5 +1,6 @@
 #include "mgs_native.h"
 #include "mgs_godot_scene.h"
+#include "mgs_godot_coverage.h"
 #include "libdg/libdg.h"
 
 typedef struct { O_TAG; u_long code, near_depth, far_depth; } WorldMarker;
@@ -40,4 +41,5 @@ void MgsGodotSortWorld(DG_CHANL *channel, int buffer_index) {
     }
     if (far_depth) LinkWorldMarker(marker++, channel->ot[buffer_index] + 1, 0, far_depth);
     LinkWorldMarker(marker, channel->ot[buffer_index] + 256, 65536, 65537);
+    MgsGodotReportWorldCoverage(channel, buffer_index);
 }

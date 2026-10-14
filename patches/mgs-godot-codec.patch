@@ -1,0 +1,462 @@
+diff --git a/source/menu/menuman.c b/source/menu/menuman.c
+index e8bb85869..8f63bfb42 100644
+--- a/source/menu/menuman.c
++++ b/source/menu/menuman.c
+@@ -17,6 +17,7 @@
+ #include "mgs_godot_bars.h"
+ #include "mgs_godot_radar.h"
+ #include "mgs_godot_inventory.h"
++#include "mgs_godot_codec.h"
+ #endif
+ 
+ static u_char SECTION(".bss") PrimBuffer[2][8192];
+@@ -198,6 +199,7 @@ void MENU_ResetSystem(void)
+     MgsGodotResetBars();
+     MgsGodotResetRadar();
+     MgsGodotResetInventory();
++    MgsGodotResetCodec();
+ #elif defined(MGS_NATIVE)
+     MgsRadarBeginFrame(0, 0);
+ #endif
+diff --git a/source/menu/radio.c b/source/menu/radio.c
+index b57dfaf88..e0f4030a1 100644
+--- a/source/menu/radio.c
++++ b/source/menu/radio.c
+@@ -20,6 +20,10 @@
+ #include "mgs_video.h"
+ #endif
+ 
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_codec.h"
++#endif
++
+ static SPRT             SECTION(".bss") gRadioNumberSprt_800bd9b0;
+ char                    SECTION(".bss") gap_800BD9C4[ 12 ]; // TODO
+ static SPRT             SECTION(".bss") gRadioNumberSprt2_800bd9d0;
+@@ -147,6 +151,9 @@ void FadeCodecScreen(MenuWork *work, u_long *ot, int opacity)
+     TILE     *tile;
+     DR_TPAGE *tpage;
+ 
++#ifdef MGS_GODOT_SCENE
++    if (MgsGodotOwnsCodec() && work->field_210_codec_state != 12 && work->field_210_codec_state != 14) { MgsGodotCodecFrame()->fade = opacity; return; }
++#endif
+     NEW_PRIM(tile, work);
+ 
+     if (opacity > 255)
+@@ -408,6 +415,9 @@ void menu_RadioCall_helper_800403E4(void)
+     char *pixel_data;
+     RECT *pixel_rect;
+ 
++#ifdef MGS_GODOT_SCENE
++    if (MgsGodotOwnsCodec()) return;
++#endif
+     tim = GV_GetCache(GV_CacheID2("call", 'r'));
+ 
+     clut_rect.x = 960;
+@@ -720,6 +730,18 @@ void menu_radio_codec_helper_helper14_80040DC4(MenuWork *work, int param_2)
+     DR_STP   *stp;
+     MenuPrim *pGlue;
+ 
++#ifdef MGS_GODOT_SCENE
++    if (MgsGodotOwnsCodec()) {
++        MgsCodecFrame *frame = MgsGodotCodecFrame();
++        frame->active = work->field_210_codec_state != 11 && work->field_210_codec_state != 14;
++        frame->mode = work->field_210_codec_state;
++        frame->frequency = param_2;
++        frame->action = gCodecAction;
++        frame->signal = dword_800ABAF8;
++        frame->scanline = (GV_Time / 2) % 128;
++        return;
++    }
++#endif
+     if (work->field_210_codec_state != 11 && work->field_210_codec_state != 14)
+     {
+         pGlue = work->prim;
+@@ -754,6 +776,9 @@ void init_radio_message_board_80040F74(MenuWork *work)
+         KCB *ptr_local_kcb = &local_kcb;
+ 
+         GV_ZeroMemory(ptr_local_kcb, sizeof(KCB));
++#ifdef MGS_GODOT_SCENE
++        if (!MgsGodotOwnsCodec())
++#endif
+         ClearImage(&RADIO_MES_VRAM_POS_800AB630, 0, 0, 0);
+ 
+         font_init_kcb(ptr_local_kcb, &RADIO_MES_VRAM_POS_800AB630, 960, 510);
+@@ -765,6 +790,9 @@ void init_radio_message_board_80040F74(MenuWork *work)
+         font_set_color(ptr_local_kcb, 1, 0x3bef, 0);
+         font_set_color(ptr_local_kcb, 2, 0x3a4b, 0);
+         font_set_color(ptr_local_kcb, 3, 0x1094, 0);
++#ifdef MGS_GODOT_SCENE
++        if (!MgsGodotOwnsCodec())
++#endif
+         font_clut_update(ptr_local_kcb);
+ 
+         work->field_214_font = allocated_kcb;
+@@ -778,7 +806,16 @@ void menu_radio_codec_helper__helper13_800410E4(MenuWork *work, char *string)
+ {
+     KCB *kcb = work->field_214_font;
+     dword_800ABB04 = string;
++#ifdef MGS_GODOT_SCENE
++    if (MgsGodotOwnsCodec()) MgsGodotCodecBeginText(kcb->buffer);
++#endif
+     font_print_string(kcb, string);
++#ifdef MGS_GODOT_SCENE
++    if (MgsGodotOwnsCodec()) {
++        MgsTextLayoutEnd(kcb->cbuffer, kcb->row * 2, kcb->height);
++        return;
++    }
++#endif
+     font_update(kcb);
+ }
+ 
+@@ -787,6 +824,9 @@ void sub_80041118(MenuWork *work)
+     KCB *kcb = work->field_214_font;
+     dword_800ABB04 = NULL;
+     font_clear(kcb);
++#ifdef MGS_GODOT_SCENE
++    if (MgsGodotOwnsCodec()) return;
++#endif
+     font_update(kcb);
+ }
+ 
+@@ -801,6 +841,14 @@ int draw_radio_message(MenuWork *work, u_long *ot)
+     }
+ 
+     kcb = work->field_214_font;
++#ifdef MGS_GODOT_SCENE
++    if (MgsGodotOwnsCodec()) {
++        MgsGodotCodecText((MgsSubtitleFrame){.active=1, .visible=1, .x=(FRAME_WIDTH-kcb->max_width)/2,
++            .y=132, .width=252, .height=76, .text_width=kcb->max_width,
++            .character_spacing=kcb->c_skip, .line_spacing=kcb->l_skip});
++        return 1;
++    }
++#endif
+ 
+     NEW_PRIM(pPrim, work);
+ 
+@@ -862,6 +910,9 @@ int menu_radio_codec_helper_helper12_80041280(MenuWork *work, u_long *ot, GV_PAD
+     index = 0;
+     ypos = kcb->l_skip;
+ 
++#ifdef MGS_GODOT_SCENE
++    if (MgsGodotOwnsCodec()) MgsGodotCodecBeginText(kcb->buffer);
++#endif
+     font_clear(kcb);
+ 
+     GCL_SetArgTop(pMenuChara->field_C_pScript);
+@@ -904,6 +955,10 @@ int menu_radio_codec_helper_helper12_80041280(MenuWork *work, u_long *ot, GV_PAD
+         GM_SeSet2(0, 63, SE_MENU_CURSOR);
+     }
+ 
++#ifdef MGS_GODOT_SCENE
++    if (MgsGodotOwnsCodec()) MgsTextLayoutEnd(kcb->cbuffer, kcb->row * 2, kcb->height);
++    else
++#endif
+     font_update(kcb);
+ 
+     kcb->max_width = var_s7;
+@@ -923,6 +978,9 @@ void draw_radio_wait_mark(MenuWork *work, u_long *ot)
+     MenuPrim *pOtBuffer; // $v1
+     POLY_F3 *pPrim; // $a0
+ 
++#ifdef MGS_GODOT_SCENE
++    if (MgsGodotOwnsCodec()) { MgsGodotCodecFrame()->wait_mark = GV_Time % 16 >= 4; return; }
++#endif
+     if ( GV_Time % 16 >= 4 )
+     {
+         pOtBuffer = work->prim;
+@@ -982,6 +1040,9 @@ STATIC void menu_radio_codec_helper_8004158C(MenuWork *work, u_long *ot, GV_PAD
+     DR_TPAGE          *tpage2;
+     void              *subtitles;
+ 
++#ifdef MGS_GODOT_SCENE
++    if (MgsGodotOwnsCodec()) MgsGodotCodecFrame()->mode = work->field_210_codec_state;
++#endif
+     if (gCodecFadingStep == 0)
+     {
+         if (gCodecFadingCount == 0)
+@@ -1103,6 +1164,10 @@ skip_fading:
+             }
+ 
+             // Blink the "PRESS SELECT TO EXIT" text periodically
++#ifdef MGS_GODOT_SCENE
++            if (MgsGodotOwnsCodec()) MgsGodotCodecFrame()->exit_hint = GV_Time % 64 < 0x34;
++            else
++#endif
+             if (GV_Time % 64 < 0x34)
+             {
+                 MENU_Locate(0xA0, 0x82, 2);
+@@ -1465,6 +1530,13 @@ skip_fading:
+     }
+ 
+     draw_radio_message(work, ot);
++#ifdef MGS_GODOT_SCENE
++    if (MgsGodotOwnsCodec()) {
++        menu_radio_draw_face(work, work->field_218);
++        menu_radio_codec_helper_helper14_80040DC4(work, codec_freq_800AB638);
++        return;
++    }
++#endif
+ 
+     NEW_PRIM(tpage1, work);
+     setDrawTPage(tpage1, 1, 0, getTPage(0, 0, 960, 256));
+@@ -1597,11 +1669,19 @@ STATIC void menu_radio_update_80042198(MenuWork *work, u_long *ot)
+                     timer = (399 - gRadioIncomingCall_8009E708.field_2_timer) % 40;
+                     if (timer < 26 && timer % 13 < 8)
+                     {
++#ifdef MGS_GODOT_SCENE
++                        if (MgsGodotOwnsCodec()) {
++                            MgsGodotCodecFrame()->active = 1;
++                            MgsGodotCodecFrame()->incoming = 1;
++                        } else
++#endif
++                        {
+                         menu_radio_update_helper3_80040498(work->prim);
+                         MENU_Color(0xFF, 0xFF, 0xFF);
+                         MENU_Locate(0xA0, 0x3F, 2);
+                         MENU_Printf("PUSH SELECT");
+                         MENU_ResetText();
++                        }
+                     }
+                     if (timer == 0 &&
+                         (gRadioIncomingCall_8009E708.field_2_timer > 240 || gRadioIncomingCall_8009E708.field_8 != 0))
+diff --git a/source/menu/radiofacedraw.c b/source/menu/radiofacedraw.c
+index 4b9d0b6cf..7e9466a1b 100644
+--- a/source/menu/radiofacedraw.c
++++ b/source/menu/radiofacedraw.c
+@@ -9,6 +9,10 @@
+ #include "menu/menuman.h"
+ #include "mts/taskid.h"
+ 
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_codec.h"
++#endif
++
+ STATIC RECT rect_800AB6D8 = {1008, 432, 5, 20};
+ STATIC int  dword_800AB6E0 = 0;
+ 
+@@ -23,6 +27,9 @@ void sub_80048124()
+     PANEL_TEXTURE pPanelTex;
+     RECT          rect;
+ 
++#ifdef MGS_GODOT_SCENE
++    if (MgsGodotOwnsCodec()) return;
++#endif
+     menu_init_rpk_item_8003DDCC(&pPanelTex, 43, 42);
+     LoadImage(&rect_800AB6D8, pPanelTex.field_0_pixels);
+ 
+@@ -213,7 +220,11 @@ void menu_radio_draw_face_helper3_800487DC(menu_chara_struct *pStru, int idx)
+     _Static_assert(sizeof(mgs_main_ram) >= 0x10000 + 31 * 0x2000 + 0x1000 + 26 * 89 * 2,
+                    "Native RAM must cover the codec noise image");
+     /* The original memory-noise effect samples the managed native game arena. */
+-    LoadImage(&rect, (u_long *)(mgs_main_ram + 0x10000 + (rand() % 32) * 0x2000 + GV_Clock * 0x1000));
++    const void *noise = mgs_main_ram + 0x10000 + (rand() % 32) * 0x2000 + GV_Clock * 0x1000;
++#ifdef MGS_GODOT_SCENE
++    if (MgsGodotOwnsCodec()) { MgsGodotCodecImage(idx, 0, 0, 52, 89, noise); return; }
++#endif
++    LoadImage(&rect, (u_long *)noise);
+ #else
+     // TODO: the following code loads
+     // an image from a random area of the memory.
+@@ -238,6 +249,9 @@ void menu_radio_draw_face_helper4_80048868(MenuPrim *prim, menu_chara_struct_sub
+         coord = 54;
+     }
+ 
++#ifdef MGS_GODOT_SCENE
++    if (MgsGodotOwnsCodec()) { MgsGodotCodecFace(idx)->bracket = coord; return; }
++#endif
+     _NEW_PRIM(line_f4, prim);
+ 
+     LSTORE(0x1a1f13, &line_f4->r0);
+@@ -319,6 +333,13 @@ void menu_radio_draw_face_helper5_8004896C( MenuPrim *pPrim, menu_chara_struct_s
+         }
+     }
+ 
++#ifdef MGS_GODOT_SCENE
++    if (MgsGodotOwnsCodec()) {
++        *MgsGodotCodecFace(idx) = (MgsCodecFace){.x=x, .y=y, .width=w, .height=h, .visible=1,
++            .scanline=dword_800AB6E0, .previous_weight=pChara->field_A > 0 ? (pChara->field_A << 7) / pChara->field_C : 0};
++        return;
++    }
++#endif
+     radio_draw_face_frame( pPrim, x, y, w, h );
+ 
+     _NEW_PRIM( pTpage, pPrim );
+diff --git a/source/menu/radiomem.c b/source/menu/radiomem.c
+index 50863cfb8..bcc56824e 100644
+--- a/source/menu/radiomem.c
++++ b/source/menu/radiomem.c
+@@ -1,9 +1,14 @@
+ #include <stdio.h>
++#include <stdlib.h>
+ #include "mgstype.h"
+ #include "menuman.h"
+ #include "game/game.h"
+ #include "menu/radio.h"
+ 
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_codec.h"
++#endif
++
+ typedef struct RadioCodecStru_800ABB98
+ {
+     short       field_0_idx;
+@@ -85,6 +90,12 @@ void sub_8004D4A0(RadioCodecStru_800ABB98 *pStru)
+     char pad[32]; // unused stack...
+ 
+     kcb = pStru->field_c_kcb;
++#ifdef MGS_GODOT_SCENE
++    if (MgsGodotOwnsCodec()) {
++        font_set_color(kcb, 2, 0x1d05, 0);
++        MgsGodotCodecBeginText(kcb->buffer);
++    }
++#endif
+     font_clear(kcb);
+ 
+     field_2 = pStru->field_2;
+@@ -108,6 +119,9 @@ void sub_8004D4A0(RadioCodecStru_800ABB98 *pStru)
+         }
+     }
+ 
++#ifdef MGS_GODOT_SCENE
++    if (MgsGodotOwnsCodec()) { MgsTextLayoutEnd(kcb->cbuffer, kcb->row * 2, kcb->height); return; }
++#endif
+     font_update(kcb);
+ }
+ 
+@@ -170,6 +184,21 @@ void menu_radio_draw_mem(MenuWork *work, u_long *ot)
+ 
+     int temp;
+ 
++#ifdef MGS_GODOT_SCENE
++    if (MgsGodotOwnsCodec()) {
++        RadioCodecStru_800ABB98 *memory = stru_800ABB98;
++        MgsCodecFrame *frame = MgsGodotCodecFrame();
++        frame->memory = 1;
++        frame->memory_top = memory->field_2;
++        frame->memory_selected = memory->field_0_idx;
++        frame->memory_count = memory->field_4_count;
++        frame->memory_animation = work->field_212;
++        for (int slot=0; slot<8 && slot+memory->field_2<memory->field_4_count; ++slot)
++            MgsGodotCodecContact(slot, memory->field_10_array[slot+memory->field_2].freq);
++        MgsGodotCodecText((MgsSubtitleFrame){.active=1, .visible=1, .kind=1, .width=252, .height=76});
++        goto advance_memory;
++    }
++#endif
+     if ( (work->field_212 == 0) && ((GV_Time % 16) >= 5) )
+     {
+         if (stru_800ABB98->field_2 > 0)
+@@ -207,12 +236,12 @@ void menu_radio_draw_mem(MenuWork *work, u_long *ot)
+ 
+             pMemory = &pCodec->field_10_array[temp_s0 + i];
+ 
+-            sprintf(buffer, "%03d", pMemory->freq / 100);
++            snprintf(buffer, sizeof(buffer), "%03d", pMemory->freq / 100);
+             _menu_number_draw_string(pPrim, &config, buffer);
+ 
+             config.xpos = x + 46;
+ 
+-            sprintf(buffer, "%02d", pMemory->freq % 100);
++            snprintf(buffer, sizeof(buffer), "%02d", pMemory->freq % 100);
+             _menu_number_draw_string(pPrim, &config, buffer);
+ 
+             _NEW_PRIM(pTile, pPrim);
+@@ -339,6 +368,9 @@ void menu_radio_draw_mem(MenuWork *work, u_long *ot)
+     setLineF4(pLine2);
+     addPrim(ot, pLine2);
+ 
++#ifdef MGS_GODOT_SCENE
++advance_memory:
++#endif
+     if (word_800ABB9C != 0)
+     {
+         work->field_212 += word_800ABB9C;
+@@ -473,6 +505,10 @@ void MENU_SetRadioMesg( int freq, char *name )
+ 
+     contact = FindEntry( freq );
+     if ( contact == NULL ) contact = NextEntry();
++    if (contact == NULL || strlen(name) >= sizeof(contact->name)) {
++        fputs("Codec contact table is full or its name is too long.\n", stderr);
++        abort();
++    }
+ 
+     if ( strcmp( name, "clear" ) == 0 )
+     {
+@@ -482,7 +518,7 @@ void MENU_SetRadioMesg( int freq, char *name )
+     else
+     {
+         contact->freq = freq;
+-        strcpy( contact->name, name );
++        memcpy(contact->name, name, strlen(name) + 1);
+     }
+ 
+     menu_radio_compact_free_vars_8004D3D8();
+diff --git a/source/menu/radiotex.c b/source/menu/radiotex.c
+index 14294c755..d8dc9f577 100644
+--- a/source/menu/radiotex.c
++++ b/source/menu/radiotex.c
+@@ -7,6 +7,10 @@
+ #include "game/game.h"
+ #include "menu/menuman.h"
+ 
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_codec.h"
++#endif
++
+ STATIC RECT rect_800AB6C8 = {768, 256, 256, 4};
+ STATIC RECT rect_800AB6D0 = {896, 336, 64, 96};
+ 
+@@ -17,6 +21,9 @@ void sub_800469F0(menu_chara_struct *pStru)
+     short *pSaveText;
+     char  *pSaveTextCopy;
+ 
++#ifdef MGS_GODOT_SCENE
++    if (MgsGodotOwnsCodec()) { pStru->field_2C_pSaveText = NULL; return; }
++#endif
+     offsetImage2 = rect_800AB6C8.w * rect_800AB6C8.h * 2; // 16-bit per pixel
+     totalSize = offsetImage2 + rect_800AB6D0.w * rect_800AB6D0.h * 2;
+     pSaveText = (short *)GV_AllocMemory(GV_PACKET_MEMORY0, totalSize);
+@@ -37,6 +44,9 @@ void menu_radio_codec_helper_helper7_helper_80046A98(menu_chara_struct *pStru)
+     char *pSaveText;
+     int   imageSize;
+ 
++#ifdef MGS_GODOT_SCENE
++    if (MgsGodotOwnsCodec()) return;
++#endif
+     imageSize = rect_800AB6C8.w * rect_800AB6C8.h * 2; // 16-bit per pixel
+ 
+     LoadImage(&rect_800AB6C8, (u_long *)pStru->field_2C_pSaveText);
+@@ -59,6 +69,13 @@ void LoadFaceAnimImage_80046B10(face_anim_image *image, int idx)
+ {
+     RECT rect;
+ 
++#ifdef MGS_GODOT_SCENE
++    if (MgsGodotOwnsCodec()) {
++        MgsGodotCodecImage(idx, image->field_0_xpos, image->field_1_ypos,
++            image->field_2_width, image->field_3_height, image->field_4_image);
++        return;
++    }
++#endif
+     rect.x = idx * 32 + 960 + image->field_0_xpos / 2;
+     rect.y = image->field_1_ypos + 336;
+     rect.w = image->field_2_width / 2;
+@@ -71,6 +88,9 @@ void menu_radio_load_palette_80046B74(void *image, int idx)
+ {
+     RECT v3;
+ 
++#ifdef MGS_GODOT_SCENE
++    if (MgsGodotOwnsCodec()) { MgsGodotCodecPalette(idx, image); return; }
++#endif
+     v3 = rect_800AB6C8;
+     v3.h = 1;
+     v3.y += idx;
+@@ -82,6 +102,9 @@ void sub_80046BD8(int off)
+ {
+     RECT rect;
+ 
++#ifdef MGS_GODOT_SCENE
++    if (MgsGodotOwnsCodec()) { MgsGodotCodecBackup(off); return; }
++#endif
+     rect = rect_800AB6C8;
+     rect.y += off;
+     rect.h = 1;

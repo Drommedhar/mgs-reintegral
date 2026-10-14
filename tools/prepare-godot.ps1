@@ -8,6 +8,16 @@ $version = '4.8-dev7'
 $archiveHash = '560a08a239421b89e6c7532930bc78714fda12ef5cf10bc9586531c7c1a64ac2'
 $toolDirectory = Join-Path $projectDirectory ".tools/godot-$version"
 $executable = Join-Path $toolDirectory "Godot_v${version}_win64_console.exe"
+if (Test-Path -LiteralPath (Join-Path $projectDirectory 'sdk.json')) {
+    foreach ($path in @($executable, (Join-Path $projectDirectory 'renderers/godot/project/.generated/psx.vert.glsl'),
+        (Join-Path $projectDirectory 'renderers/godot/project/.generated/psx.frag.glsl'),
+        (Join-Path $projectDirectory 'renderers/godot/project/.generated/legacy-debug-font.bin'))) {
+        if (-not (Test-Path -LiteralPath $path)) { throw "SDK component is missing: $path. Extract a fresh SDK." }
+    }
+    $reported = & $executable --version
+    if ($LASTEXITCODE -ne 0 -or $reported.Trim() -ne '4.8.dev7.official.c971f93e7') { throw "Unexpected SDK Godot version: $reported" }
+    return
+}
 if (-not (Test-Path -LiteralPath $executable)) {
     $archive = Join-Path $projectDirectory ".tools/Godot_v${version}_win64.exe.zip"
     New-Item -ItemType Directory -Path (Split-Path $archive -Parent) -Force | Out-Null
@@ -34,4 +44,12 @@ if (-not $vertex.Contains('vec4(x, -y, 0.0, 1.0)')) {
 $vertex.Replace('vec4(x, -y, 0.0, 1.0)', 'vec4(x, y, 0.0, 1.0)') |
     Set-Content -LiteralPath (Join-Path $generated 'psx.vert.glsl') -Encoding utf8
 Copy-Item -LiteralPath (Join-Path $shaderRoot 'psx.frag.glsl') -Destination $generated -Force
+$fontHeader = Join-Path $projectDirectory 'vendor/psyz/external/SDL/src/render/SDL_render_debug_font.h'
+$font = Get-Content -LiteralPath $fontHeader -Raw
+$fontArray = [regex]::Match($font, '(?s)SDL_RenderDebugTextFontData\[\]\s*=\s*\{(.*?)\};').Groups[1].Value
+$fontArray = [regex]::Replace($fontArray, '(?s)/\*.*?\*/|//[^\r\n]*', '')
+$fontBytes = [byte[]]@([regex]::Matches($fontArray, '0x[0-9a-fA-F]{2}') | ForEach-Object { [Convert]::ToByte($_.Value.Substring(2), 16) })
+if ($fontBytes.Length -ne 190 * 8) { throw 'Pinned SDL debug font changed; review the Legacy overlay adapter.' }
+[IO.File]::WriteAllBytes((Join-Path $generated 'legacy-debug-font.bin'), $fontBytes)
+Copy-Item -LiteralPath $fontHeader -Destination $generated -Force
 Write-Host "[godot] Prepared $reportedVersion and pinned Psyz shaders."

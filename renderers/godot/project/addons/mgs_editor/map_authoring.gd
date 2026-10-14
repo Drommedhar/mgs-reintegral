@@ -5,12 +5,37 @@ const Removals = preload("res://visual_removals.gd")
 const Coordinates = preload("res://map_coordinates.gd")
 const Session = preload("res://addons/mgs_editor/map_session.gd")
 const MapLights = preload("res://map_lights.gd")
+const MapEnvironment = preload("res://map_environment.gd")
 const EventLightTemplates = preload("res://event_light_templates.gd")
+const MapComposition = preload("res://map_composition.gd")
+const MapSource = preload("res://map_source.gd")
+var error := ""
+
+func create_map(mods: RefCounted, content: RefCounted, stage: String, disc: int, clip: String = "") -> Node3D:
+	var composition := MapComposition.new()
+	var root := composition.load_stage(mods, content, stage, disc)
+	error = composition.error
+	if not error.is_empty(): return null
+	if root == null: root = Node3D.new()
+	var removals := Removals.new()
+	error = removals.configure(root, content.assets, stage)
+	if not error.is_empty():
+		root.free()
+		error = "%s: %s" % [mods.stage_source(stage, disc), error]
+		return null
+	root.name = stage + "_visuals"
+	root.set_meta("mgs_stage", stage)
+	root.set_meta("mgs_scene_source", MapSource.describe(content.for_disc(disc), stage, clip))
+	root.set_meta("mgs_preview_clip", clip)
+	root.set_meta("mgs_removals", removals.rules)
+	Coordinates.migrate_to_editor(root)
+	return root
 
 func attach_preview(root: Node3D, packed: PackedScene) -> void:
 	attach_reference(root, packed.instantiate() as Node3D)
 
 func attach_reference(root: Node3D, preview: Node3D, layout: Dictionary = {}) -> void:
+	MapEnvironment.attach(root)
 	EventLightTemplates.attach(root)
 	var previous_session := root.get_node_or_null("_MapSession")
 	if previous_session != null: previous_session.free()

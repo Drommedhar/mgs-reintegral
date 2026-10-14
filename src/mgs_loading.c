@@ -11,6 +11,9 @@ static PsyzVsyncMode previous_mode;
 static Uint64 started;
 static const char *loading_stage;
 
+int MgsLoadingActive(void) { return loading; }
+const char *MgsLoadingStage(void) { return loading ? loading_stage : ""; }
+
 int MgsLoadingConfigure(int enabled)
 {
     if (enabled && !Psyz_ClockDeterministic() && Psyz_ClockSetDeterministic(1) != 0)
@@ -28,11 +31,11 @@ void MgsLoadingBegin(const char *stage)
     loading = 1;
     loading_stage = stage;
     started = SDL_GetTicksNS();
+    Psyz_AudioSetLoading(1);
     if (!accelerated)
         return;
     previous_mode = Psyz_VideoGetVsyncMode();
-    if (Psyz_VideoSetVsyncMode(PSYZ_VSYNC_LIMITLESS) != 0 ||
-        Psyz_AudioSetOutputSuppressed(1) != 0) {
+    if (Psyz_VideoSetVsyncMode(PSYZ_VSYNC_LIMITLESS) != 0) {
         fputs("Cannot accelerate stage presentation.\n", stderr);
         exit(EXIT_FAILURE);
     }
@@ -45,8 +48,8 @@ void MgsLoadingEnd(void)
         exit(EXIT_FAILURE);
     }
     double milliseconds = (SDL_GetTicksNS() - started) / 1000000.0;
-    if (accelerated && (Psyz_VideoSetVsyncMode(previous_mode) != 0 ||
-                        Psyz_AudioSetOutputSuppressed(0) != 0)) {
+    Psyz_AudioSetLoading(0);
+    if (accelerated && Psyz_VideoSetVsyncMode(previous_mode) != 0) {
         fputs("Cannot restore stage presentation.\n", stderr);
         exit(EXIT_FAILURE);
     }

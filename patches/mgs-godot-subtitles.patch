@@ -1,0 +1,264 @@
+diff --git a/source/font/font.c b/source/font/font.c
+index 5391d47b9..7a8923128 100644
+--- a/source/font/font.c
++++ b/source/font/font.c
+@@ -10,6 +10,7 @@
+ #include "game/game.h"
+ #ifdef MGS_NATIVE
+ #include "mgs_language.h"
++#include "mgs_text_layout.h"
+ #endif
+ 
+ // This struct describes the structure of
+@@ -366,6 +367,11 @@ static void put_zenkaku_4bpp(char *buffer, int x, int y, int width, char *glyph)
+         temp_v1 = buffer + ((x + 5) / 2);
+         temp_a0 = temp_v1 + ((var_v1 - 1) * width);
+         temp_a1 = temp_t3 | 0x33;
++#ifdef MGS_NATIVE
++        MgsTextLayoutEmit(buffer, (MgsTextGlyph){.kind = MGS_TEXT_EMPHASIS,
++            .x = ((x + 5) / 2) * 2, .y = var_v1 - 1, .width = 2, .height = 2,
++            .color = font_color & 3}, NULL);
++#endif
+         *temp_a0 |= temp_a1;
+         temp_v1_2 = temp_v1 + (var_v1 * width);
+         *temp_v1_2 |= temp_a1;
+@@ -473,6 +479,17 @@ static void put_zenkaku_4bpp(char *buffer, int x, int y, int width, char *glyph)
+     }
+ }
+ 
++static void put_zenkaku_index(char *buffer, int x, int y, int width, int index)
++{
++    char *glyph = index > 0 ? zendata[index >> 12] + ((index & 0xFFF) - 1) * 36 : NULL;
++#ifdef MGS_NATIVE
++    MgsTextLayoutEmit(buffer, (MgsTextGlyph){.kind = glyph ? MGS_TEXT_FULL : MGS_TEXT_CLEAR,
++        .code = index > 0 ? index : 0, .x = x, .y = y + 1, .width = 12, .height = 12,
++        .color = font_color & 3, .source_size = glyph ? 36 : 0}, glyph);
++#endif
++    put_zenkaku_4bpp(buffer, x, y, width, glyph);
++}
++
+ // Observations about the font.res file used by the font library:
+ // Big Endian in memory, byte swapped at runtime in font_load().
+ // The file begins with an 8-byte 'header' that has two 32-bit words.
+@@ -517,6 +534,11 @@ static int put_hankaku_4bpp(char *buffer, int x, int y, int width, unsigned char
+ #endif
+         result = (glyph >> 24) & 0xF;
+         loops = 12;
++#ifdef MGS_NATIVE
++        MgsTextLayoutEmit(buffer, (MgsTextGlyph){.kind = MGS_TEXT_HALF, .code = code,
++            .x = x, .y = y + (glyph >> 28), .width = result, .height = 12,
++            .color = font_color & 3, .source_size = result * 3}, font_location);
++#endif
+ 
+         if (dword_800AB6B8)
+         {
+@@ -538,6 +560,11 @@ static int put_hankaku_4bpp(char *buffer, int x, int y, int width, unsigned char
+ 
+             glyph3 = (glyph2 << 2) | (glyph2 << 6);
+             glyph3 |= 0x33;
++#ifdef MGS_NATIVE
++            MgsTextLayoutEmit(buffer, (MgsTextGlyph){.kind = MGS_TEXT_EMPHASIS,
++                .x = ((x + shift) / 2) * 2, .y = y2 - 1, .width = 2, .height = 2,
++                .color = font_color & 3}, NULL);
++#endif
+ 
+             *location2 |= glyph3;
+ 
+@@ -597,6 +624,11 @@ static int put_hankaku_4bpp(char *buffer, int x, int y, int width, unsigned char
+         }
+ 
+         y2 = 18;
++#ifdef MGS_NATIVE
++        MgsTextLayoutEmit(buffer, (MgsTextGlyph){.kind = MGS_TEXT_DASH, .code = x & 1,
++            .x = x - (x & 1), .y = y + 5, .width = (x & 1) ? 20 : 18,
++            .height = 1, .color = font_color & 3}, NULL);
++#endif
+         shift = x % 2;
+ 
+         glyph6 = font_color & 0xFF;
+@@ -782,6 +814,11 @@ static int put_rubi(char *buffer, int x, int y, int width, int arg4)
+     rubiRes = &gRubiRes_800AB6B4[arg4];
+     rubiResPtr = &rubiRes->field_0;
+     rubiField0 = *rubiResPtr;
++#ifdef MGS_NATIVE
++    MgsTextLayoutEmit(buffer, (MgsTextGlyph){.kind = MGS_TEXT_RUBY, .code = arg4 + 1,
++        .x = x, .y = y + 1, .width = rubiField0, .height = 6,
++        .source_size = 9}, rubiRes->field_1);
++#endif
+ 
+     y++;
+     buffer_iter1 = buffer + x / 2 + y * width;
+@@ -981,8 +1018,6 @@ long font_draw_string(KCB *kcb, long xtop, long ytop, const char *string, long c
+     int next_code;
+     int ascii_closing_bracket = CODE('}');
+ 
+-    char *ptr;
+-
+     // Return if font.res hasn't been loaded
+     if (!dword_800ABB28)
+     {
+@@ -1277,15 +1312,7 @@ long font_draw_string(KCB *kcb, long xtop, long ytop, const char *string, long c
+         else
+         {
+             idx1 = get_zen_font_data(next_mdata);
+-            if (idx1 > 0)
+-            {
+-                ptr = zendata[idx1 >> 12] + ((idx1 & 0xFFF) - 1) * 36;
+-            }
+-            else
+-            {
+-                ptr = 0;
+-            }
+-            put_zenkaku_4bpp(font_buffer, x, y, width_info, ptr);
++            put_zenkaku_index(font_buffer, x, y, width_info, idx1);
+             coord = kcb->c_skip;
+             dx = coord + 0xC;
+         }
+@@ -1304,7 +1331,7 @@ long font_draw_string(KCB *kcb, long xtop, long ytop, const char *string, long c
+             {
+                 if (mdata & BACK_KINSOKU_MASK)
+                 {
+-                    put_zenkaku_4bpp(font_buffer, x, y, width_info, 0);
++                    put_zenkaku_index(font_buffer, x, y, width_info, 0);
+                     m = m2;
+                     dx = 0;
+                 }
+@@ -1330,16 +1357,7 @@ long font_draw_string(KCB *kcb, long xtop, long ytop, const char *string, long c
+                             else
+                             {
+                                 idx1 = get_zen_font_data(next_mdata);
+-                                if (idx1 > 0)
+-                                {
+-                                    ptr = zendata[idx1 >> 12] + ((idx1 & 0xFFF) - 1) * 36;
+-                                }
+-                                else
+-                                {
+-                                    ptr = 0;
+-                                }
+-
+-                                put_zenkaku_4bpp(font_buffer, x + dx, y, width_info, ptr);
++                                put_zenkaku_index(font_buffer, x + dx, y, width_info, idx1);
+                                 dx += 12;
+                             }
+                         }
+diff --git a/source/menu/jimaku.c b/source/menu/jimaku.c
+index ee474939f..795d5c03b 100644
+--- a/source/menu/jimaku.c
++++ b/source/menu/jimaku.c
+@@ -10,6 +10,9 @@
+ #include "mgs_language.h"
+ #include "mgs_subtitles.h"
+ #endif
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_subtitles.h"
++#endif
+ 
+ // here or jimctl.h?
+ typedef struct {
+@@ -73,44 +76,49 @@ void menu_jimaku_act( MenuWork *work, u_long *ot )
+ #ifdef MGS_NATIVE
+         PresentJimaku();
+ #endif
+-        if ( (JimState.field_1_type != 0) ||
+-            !(GM_Configuration & GM_CONFIG_CAPTION_OFF) )
++#ifdef MGS_GODOT_SCENE
++        if (!MgsGodotOwnsSubtitles())
++#endif
+         {
+-            NEW_PRIM(pSprt, work);
+-            LSTORE(0x808080, &pSprt->r0);
+-            LCOPY(&JimState.field_4_x, &pSprt->x0);
+-            LCOPY(&JimState.field_8_w, &pSprt->w);
+-            setClut(pSprt, 960, 510);
+-            setUV0(pSprt, 0, 0);
+-            setSprt(pSprt);
+-            addPrim(ot, pSprt);
+-
+-            for (i = 0; i < 8; i += 2)
++            if ( (JimState.field_1_type != 0) ||
++                !(GM_Configuration & GM_CONFIG_CAPTION_OFF) )
+             {
+-                NEW_PRIM(pSprt2, work);
+-                *pSprt2 = *pSprt;
+-                LSTORE(0x64000000, &pSprt2->r0);
+-                pSprt2->x0 += dword_8009E76C[i];
+-                pSprt2->y0 += dword_8009E76C[i + 1];
+-                addPrim(ot, pSprt2);
++                NEW_PRIM(pSprt, work);
++                LSTORE(0x808080, &pSprt->r0);
++                LCOPY(&JimState.field_4_x, &pSprt->x0);
++                LCOPY(&JimState.field_8_w, &pSprt->w);
++                setClut(pSprt, 960, 510);
++                setUV0(pSprt, 0, 0);
++                setSprt(pSprt);
++                addPrim(ot, pSprt);
++
++                for (i = 0; i < 8; i += 2)
++                {
++                    NEW_PRIM(pSprt2, work);
++                    *pSprt2 = *pSprt;
++                    LSTORE(0x64000000, &pSprt2->r0);
++                    pSprt2->x0 += dword_8009E76C[i];
++                    pSprt2->y0 += dword_8009E76C[i + 1];
++                    addPrim(ot, pSprt2);
++                }
+             }
+-        }
+ 
+-        if ( JimState.field_1_type == 1 )
+-        {
+-            config.color = 0x64C8C8C8;
+-            config.flags = 0x12;
+-            config.xpos = 160;
+-            config.ypos = 80;
+-
+-            _menu_number_draw_string2( work->prim, &config, "PAUSE" );
+-            pTile = menu_render_rect_8003DB2C( work->prim, 0, 0, FRAME_WIDTH, FRAME_HEIGHT, 0 );
+-            setSemiTrans(pTile, 1);
+-        }
++            if ( JimState.field_1_type == 1 )
++            {
++                config.color = 0x64C8C8C8;
++                config.flags = 0x12;
++                config.xpos = 160;
++                config.ypos = 80;
++
++                _menu_number_draw_string2( work->prim, &config, "PAUSE" );
++                pTile = menu_render_rect_8003DB2C( work->prim, 0, 0, FRAME_WIDTH, FRAME_HEIGHT, 0 );
++                setSemiTrans(pTile, 1);
++            }
+ 
+-        NEW_PRIM(pTpage, work);
+-        setDrawTPage(pTpage, 1, 0, getTPage(0, 0, 960, 256));
+-        addPrim(ot, pTpage);
++            NEW_PRIM(pTpage, work);
++            setDrawTPage(pTpage, 1, 0, getTPage(0, 0, 960, 256));
++            addPrim(ot, pTpage);
++        }
+ 
+         if ( JimState.field_2_timer == -1 )
+         {
+@@ -146,12 +154,20 @@ void menu_jimaku_act( MenuWork *work, u_long *ot )
+         y = (JimState.field_1_type == 1 ) ? 112 : 204;
+         pFont = &JimState.field_C_font;
+ 
++#ifdef MGS_NATIVE
++        MgsTextLayoutBegin(MgsSubtitlesPrepare(MgsLanguageText(JimState.field_38_str)), pFont->buffer);
++#endif
+         font_print_string( pFont, JimState.field_38_str );
+ #ifdef MGS_NATIVE
+-        MgsSubtitlesPrepare(MgsLanguageText(JimState.field_38_str));
++        MgsTextLayoutEnd(pFont->cbuffer, pFont->row * 2, pFont->height);
+ #endif
+-        font_update( pFont );
+-        font_clut_update( pFont );
++#ifdef MGS_GODOT_SCENE
++        if (!MgsGodotOwnsSubtitles())
++#endif
++        {
++            font_update( pFont );
++            font_clut_update( pFont );
++        }
+ 
+         JimState.field_8_w = 256;
+         JimState.field_38_str = NULL;

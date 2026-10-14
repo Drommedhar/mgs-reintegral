@@ -1,0 +1,57 @@
+[gd_scene load_steps=12 format=3]
+
+[ext_resource type="Script" path="water_region.gd" id="1"]
+[ext_resource type="Shader" path="surface.gdshader" id="2"]
+[ext_resource type="Shader" path="caustics.gdshader" id="3"]
+[ext_resource type="Shader" path="fog_transmission.gdshader" id="4"]
+[ext_resource type="Shader" path="fog_scattering.gdshader" id="5"]
+
+[sub_resource type="PlaneMesh" id="SurfaceMesh"]
+size = Vector2(8, 8)
+subdivide_width = 64
+subdivide_depth = 64
+
+[sub_resource type="QuadMesh" id="ReceiverMesh"]
+size = Vector2(2, 2)
+
+[sub_resource type="ShaderMaterial" id="SurfaceMaterial"]
+resource_local_to_scene = true
+render_priority = -10
+shader = ExtResource("2")
+
+[sub_resource type="ShaderMaterial" id="CausticMaterial"]
+resource_local_to_scene = true
+shader = ExtResource("3")
+
+[sub_resource type="ShaderMaterial" id="TransmissionMaterial"]
+resource_local_to_scene = true
+render_priority = 5
+shader = ExtResource("4")
+
+[sub_resource type="ShaderMaterial" id="ScatteringMaterial"]
+resource_local_to_scene = true
+render_priority = 6
+shader = ExtResource("5")
+
+[node name="WaterRegion" type="Node3D"]
+script = ExtResource("1")
+
+[node name="Surface" type="MeshInstance3D" parent="."]
+mesh = SubResource("SurfaceMesh")
+material_override = SubResource("SurfaceMaterial")
+cast_shadow = 0
+
+[node name="Caustics" type="MeshInstance3D" parent="."]
+mesh = SubResource("ReceiverMesh")
+material_override = SubResource("CausticMaterial")
+cast_shadow = 0
+
+[node name="Transmission" type="MeshInstance3D" parent="."]
+mesh = SubResource("ReceiverMesh")
+material_override = SubResource("TransmissionMaterial")
+cast_shadow = 0
+
+[node name="Scattering" type="MeshInstance3D" parent="."]
+mesh = SubResource("ReceiverMesh")
+material_override = SubResource("ScatteringMaterial")
+cast_shadow = 0

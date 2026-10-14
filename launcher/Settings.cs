@@ -20,6 +20,9 @@ namespace ReIntegral
     public sealed class Settings
     {
         public int Version = 1;
+        public string RendererId = "";
+        public bool GodotLegacyRendering;
+        public bool GodotSharpText = true;
         public string DiscOne = "";
         public string DiscTwo = "";
         public string TextPack = "";

@@ -35,6 +35,10 @@ func _initialize() -> void:
 func check_lifetime() -> void:
 	check(lights.update_lights(payload(1), 0).is_empty(), "Temporary light rejected")
 	var flash: Light3D = lights.instances[1].node
+	var visibility_changes := [0]
+	flash.visibility_changed.connect(func(): visibility_changes[0] += 1)
+	check(lights.update_lights(payload(1), 0).is_empty(), "Repeated light state rejected")
+	check(visibility_changes[0] == 0, "Unchanged light was removed and reinserted into the scene")
 	check(lights.update_lights(PackedInt32Array([0]).to_byte_array(), 0).is_empty(), "Empty lights rejected")
 	check(not flash.visible and lights.active_count == 0, "Expired flash kept lighting the scene")
 	check(lights.update_lights(payload(1, Vector3(2, 3, 4)), 0).is_empty(), "Reused native light slot rejected")
@@ -76,6 +80,9 @@ func check_lifetime() -> void:
 	check(lights.update_lights(PackedInt32Array([0]).to_byte_array(), 0).is_empty() and lights.instances.is_empty(), "Inactive alarm retained a light")
 
 func run() -> void:
+	viewport.scaling_3d_mode = Viewport.SCALING_3D_MODE_BILINEAR
+	viewport.use_taa = false
+	viewport.screen_space_aa = Viewport.SCREEN_SPACE_AA_DISABLED
 	viewport.size = Vector2i(192, 192)
 	viewport.own_world_3d = true
 	viewport.positional_shadow_atlas_size = 2048

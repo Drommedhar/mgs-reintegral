@@ -23,6 +23,7 @@
 #include "mgs_loading.h"
 #include "mgs_language.h"
 #include "mgs_safety.h"
+#include "mgs_crash.h"
 #include "mgs_build.h"
 
 extern int mgs_main(void);
@@ -451,7 +452,7 @@ int main(int argc, char **argv)
         PrintUsage(stderr);
         return 2;
     }
-    SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
+    MgsCrashInstall();
     if (!ValidateOutputPaths(&options, capture_path))
         return 2;
     if (!MgsLanguageConfigure(options.text_pack, options.voice_pack))

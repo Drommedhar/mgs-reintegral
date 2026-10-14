@@ -1,0 +1,191 @@
+diff --git a/source/menu/menuman.c b/source/menu/menuman.c
+index 5322e83a3..814444b48 100644
+--- a/source/menu/menuman.c
++++ b/source/menu/menuman.c
+@@ -11,9 +11,11 @@
+ #include "game/game.h"
+ #ifdef MGS_NATIVE
+ #include "mgs_subtitles.h"
++#include "mgs_radar.h"
+ #endif
+ #ifdef MGS_GODOT_SCENE
+ #include "mgs_godot_bars.h"
++#include "mgs_godot_scene.h"
+ #endif
+ 
+ static u_char SECTION(".bss") PrimBuffer[2][8192];
+@@ -193,6 +195,9 @@ void MENU_ResetSystem(void)
+ #endif
+ #ifdef MGS_GODOT_SCENE
+     MgsGodotResetBars();
++    MgsRadarBeginFrame(MgsGodotSceneEnabled());
++#elif defined(MGS_NATIVE)
++    MgsRadarBeginFrame(0);
+ #endif
+     if (menu_prim.next > menu_prim.end)
+     {
+diff --git a/source/menu/radar.c b/source/menu/radar.c
+index 82b646ed1..979a1e942 100644
+--- a/source/menu/radar.c
++++ b/source/menu/radar.c
+@@ -9,6 +9,7 @@
+ 
+ #ifdef MGS_NATIVE
+ #include <psyz/gte.h>
++#include "mgs_radar.h"
+ #endif
+ 
+ // getScratchAddr() but cast as a pointer to the specified type.
+@@ -142,6 +143,13 @@ void menu_draw_sight(MenuWork *work, u_long *ot, RADAR_SIGHT_PARAM *r_param, int
+     dir = GV_DiffDirU(r_param->dir, -r_param->range / 2);
+     GV_DirVec2(dir, len, &left);
+ 
++#ifdef MGS_NATIVE
++    MgsRadarSight sight = {
++        {{x - left.vx, left.vz + y}, {x, y}, {front.vx + x, front.vz + y},
++         {x - right.vx, right.vz + y}}, color & 0xffffff, fadeColor & 0xffffff
++    };
++    MgsRadarAddSight(&sight);
++#endif
+     NEW_PRIM(poly, work);
+ 
+     poly->x0 = x - left.vx;
+@@ -303,8 +311,15 @@ void menu_draw_radar(MenuWork *work, u_long *ot, int arg2)
+     xoff = (getScratchAddr2(SVECTOR, 0)->vx * scale) / 4096;
+     zoff = (getScratchAddr2(SVECTOR, 0)->vz * scale) / 4096;
+ 
++#ifdef MGS_NATIVE
++    MgsRadarShowMap();
++#endif
+     if ((GV_Time % 8) >= 2)
+     {
++#ifdef MGS_NATIVE
++        MgsRadarContact player = {.kind = MGS_RADAR_PLAYER, .color = 0xc8c8c8};
++        MgsRadarAddContact(&player);
++#endif
+         // Draw white dot for Snake in middle of radar
+         NEW_PRIM(pTile1, work);
+         LSTORE(0xC8C8C8, &pTile1->r0);
+@@ -332,12 +347,20 @@ void menu_draw_radar(MenuWork *work, u_long *ot, int arg2)
+ 
+             if ((radar_atr & RADAR_VISIBLE) && ((radar_atr & RADAR_ALL_MAP) || (control->map->index & GM_PlayerMap)))
+             {
++#ifdef MGS_NATIVE
++                MgsRadarContact contact = {.position = {x, z}, .actor_index = GM_N_WhereList - count,
++                    .attributes = radar_atr};
++#endif
+                 NEW_PRIM(pTile1_2, work);
+ 
+                 setXY0(pTile1_2, x, z);
+ 
+                 if (radar_atr & RADAR_NOISE)
+                 {
++#ifdef MGS_NATIVE
++                    contact.kind = MGS_RADAR_NOISE;
++                    contact.color = 0x80ff00;
++#endif
+                     LSTORE(0x80FF00, &pTile1_2->r0);
+                     setTile1(pTile1_2);
+                     addPrim(pTile1, pTile1_2);
+@@ -351,6 +374,9 @@ void menu_draw_radar(MenuWork *work, u_long *ot, int arg2)
+                         pTile1_2->x0 = x - new_var + rand() % 4;
+                         pTile1_2->y0 = z - new_var + rand() % 4;
+ 
++#ifdef MGS_NATIVE
++                        contact.noise[j] = (MgsRadarPoint){pTile1_2->x0, pTile1_2->y0};
++#endif
+                         LSTORE(0x64C800, &pTile1_2->r0);
+                         setTile1(pTile1_2);
+                         addPrim(pTile1, pTile1_2);
+@@ -389,6 +415,10 @@ void menu_draw_radar(MenuWork *work, u_long *ot, int arg2)
+ 
+                     if (cond1)
+                     {
++#ifdef MGS_NATIVE
++                        contact.kind = MGS_RADAR_NEAR_CONTACT;
++                        contact.color = 0x64ff;
++#endif
+                         LSTORE(0x64FF, &pTile1_2->r0);
+                         setTile1(pTile1_2);
+                         addPrim(ot, pTile1_2);
+@@ -403,11 +433,18 @@ void menu_draw_radar(MenuWork *work, u_long *ot, int arg2)
+                     }
+                     else
+                     {
++#ifdef MGS_NATIVE
++                        contact.kind = MGS_RADAR_OTHER_FLOOR;
++                        contact.color = 0xc8;
++#endif
+                         LSTORE(0xC8, &pTile1_2->r0);
+                         setTile1(pTile1_2);
+                         addPrim(pTile1, pTile1_2);
+                     }
+                 }
++#ifdef MGS_NATIVE
++                MgsRadarAddContact(&contact);
++#endif
+             }
+         }
+ 
+@@ -574,6 +611,12 @@ void menu_draw_radar(MenuWork *work, u_long *ot, int arg2)
+                 addPrim(ot2, pLine);
+                 gte_stbh(&pLine->x1);
+ 
++#ifdef MGS_NATIVE
++                MgsRadarWall wall = {{{pLine->x0, pLine->y0}, {pLine->x1, pLine->y1}},
++                    ot2 == prim ? ((*pWallFlags2 & 0x80) ? MGS_RADAR_SPECIAL_WALL : MGS_RADAR_WALL)
++                                : MGS_RADAR_OTHER_FLOOR_WALL, i};
++                MgsRadarAddWall(&wall);
++#endif
+                 pLine++;
+ 
+                 if ((void *)pLine > pLimit)
+@@ -974,6 +1017,9 @@ void menu_radar_draw_state(MenuWork *work, u_long *ot, int radarMode, int alertL
+ 
+     // Draw some horizontal lines with random width (never noticed them...).
+     randValue = (rand() << 16) | (rand());
++#ifdef MGS_NATIVE
++    MgsRadarSetNoise(randValue);
++#endif
+     for (i = 0; i < 52;)
+     {
+         NEW_PRIM(line, work);
+@@ -1084,6 +1130,16 @@ void draw_radar(MenuWork *work, u_long *ot)
+         }
+     }
+ 
++#ifdef MGS_NATIVE
++    MgsRadarFrame frame = {.active = 1, .mode = alertMode, .tick = GV_Time,
++        .x = work->radar.pos_x, .y = work->radar.pos_y, .scale = MENU_RadarScale,
++        .alert_level = alertLevel, .recovery_counter = work->radar.counter,
++        .console_x = cons_current_x_800AB4B4, .console_y = cons_current_y_800AB4B0};
++    if (gFn_radar_800AB48C) frame.mode = MGS_RADAR_CUSTOM;
++    else if (alertMode == ALERT_OFF && (GM_GameStatus & (STATE_CHAFF | STATE_JAMMING)))
++        frame.mode = MGS_RADAR_JAMMING;
++    MgsRadarPresent(frame);
++#endif
+     draw_radar_frame(work, ot);
+     addPrim(ot, &work->radar.org_env[GV_Clock]);
+ 
+diff --git a/source/overlays/s19b/menu/countdwn.c b/source/overlays/s19b/menu/countdwn.c
+index 6e017b6c7..e9609a4f3 100644
+--- a/source/overlays/s19b/menu/countdwn.c
++++ b/source/overlays/s19b/menu/countdwn.c
+@@ -3,6 +3,9 @@
+ #include "menu/radar.h"
+ #include "menu/radio.h"
+ #include "strcode.h"
++#ifdef MGS_NATIVE
++#include "mgs_radar.h"
++#endif
+ 
+ RadioUnknown s19b_dword_800C3258 = {
+     {{1, 0, 7, 2}, {0, 1, 2, 7}, {7, 1, 2, 7}, {1, 7, 7, 2}, {0, 9, 2, 6}, {7, 9, 2, 6}, {1, 14, 7, 2}},
+@@ -88,6 +91,7 @@ void s19b_countdwn_800C3C90(MenuWork *work, u_long *ordering_table)
+     int           group;
+     int           pulse;
+ 
++    MgsRadarSetCountdown(countdown_time);
+     if (countdown_time > 0 && --countdown_time == 0)
+     {
+         exec_countdown_proc();

@@ -9,7 +9,7 @@ namespace ReIntegral
 {
     public static class GodotProject
     {
-        public static string Prepare(string source, string dataDirectory, IEnumerable<VisualMod> mods)
+        public static string Prepare(string source, string dataDirectory, IEnumerable<VisualMod> mods, IProgress<string> progress = null)
         {
             var files = RuntimeFiles(source);
             var ids = new HashSet<string>(StringComparer.Ordinal);
@@ -22,18 +22,20 @@ namespace ReIntegral
                 foreach (string path in Directory.GetFiles(package, "*", SearchOption.AllDirectories))
                     files.Add("mods/" + mod.Package + "/" + path.Substring(package.Length + 1).Replace('\\', '/'), path);
             }
-            string key = Fingerprint(files);
+            string key = Fingerprint(files, progress);
             string destination = Path.Combine(dataDirectory, "godot-projects", key);
             if (Directory.Exists(destination)) return destination;
             string staging = Path.Combine(dataDirectory, "godot-projects", ".prepare-" + Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(staging);
             try
             {
+                int copied = 0;
                 foreach (var file in files)
                 {
                     string path = Path.Combine(staging, file.Key);
                     Directory.CreateDirectory(Path.GetDirectoryName(path));
                     File.Copy(file.Value, path);
+                    Report(progress, "Preparing mod files", ++copied, files.Count);
                 }
                 string config = Path.Combine(staging, "project.godot");
                 string text = File.ReadAllText(config);
@@ -51,21 +53,29 @@ namespace ReIntegral
                 throw new FileNotFoundException("Godot renderer project is missing: " + source);
             var files = new SortedDictionary<string, string>(StringComparer.Ordinal);
             foreach (string path in Directory.GetFiles(source)) files.Add(Path.GetFileName(path), path);
-            foreach (string shader in new[] { "psx.vert.glsl", "psx.frag.glsl" })
-                files.Add(".generated/" + shader, Path.Combine(source, ".generated", shader));
+            foreach (string generated in new[] { "psx.vert.glsl", "psx.frag.glsl", "legacy-debug-font.bin", "SDL_render_debug_font.h" })
+                files.Add(".generated/" + generated, Path.Combine(source, ".generated", generated));
             return files;
         }
 
-        private static string Fingerprint(SortedDictionary<string, string> files)
+        private static string Fingerprint(SortedDictionary<string, string> files, IProgress<string> progress)
         {
             var fingerprint = new StringBuilder("runtime-project-v1\n");
+            int checkedFiles = 0;
             foreach (var file in files)
             {
                 using (var stream = File.OpenRead(file.Value))
                     fingerprint.Append(file.Key).Append('\n').Append(ModPackage.Hash(stream)).Append('\n');
+                Report(progress, "Checking renderer and mod files", ++checkedFiles, files.Count);
             }
             using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(fingerprint.ToString())))
                 return ModPackage.Hash(stream);
+        }
+
+        private static void Report(IProgress<string> progress, string phase, int complete, int total)
+        {
+            if (progress != null && (complete == 1 || complete % 25 == 0 || complete == total))
+                progress.Report(phase + ": " + complete + " / " + total);
         }
 
         public static string[] Manifests(string project, IEnumerable<VisualMod> mods)

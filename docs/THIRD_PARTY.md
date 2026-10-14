@@ -121,6 +121,28 @@ clearance for public distribution.
 
 ## Tooling and local content
 
+The loading silhouette uses the Solid Snake pixel animation by **Irbif
+(u/Irbif)** from the [original Reddit post](https://www.reddit.com/r/gaming/comments/p9725h/im_a_pixel_artist_i_made_this_animation_of_solid/).
+All37 frames and their100ms timing are retained; Godot renders only their outline.
+The [artwork notice](../licenses/loading-animation/NOTICE.txt) records the source,
+hash and adaptation. This credit does not establish a redistribution grant;
+the artwork is outside the project's source-code license.
+
+The Godot presentation font sources are pinned under `presentationFonts` in
+`sources.lock.json`. Andrew Gleeson's MGS1 Codec font is CC BY-SA 4.0; the
+generated smoothed block atlas is an adaptation with the same attribution/share
+alike terms. Its generator is adapted from the MIT-licensed tooling in
+[ImperishableNEET/mgs1-reintegrated](https://github.com/ImperishableNEET/mgs1-reintegrated/tree/f83139e8f32ae14032bfe32a87dacb1c57cc559e).
+Scalable dialogue uses TeX Gyre Heros under the GUST Font License/LPPL. The SDK
+includes font sources, regeneration script, pinned Python requirements and
+[font notices](../licenses/fonts/NOTICE.txt). No retail font extraction is
+included in these distributable assets.
+
+That fork also supplied leads for writable smoke-script buffers and signed XA
+predictor rounding. Focused regression fixtures verified both corrections here;
+the corresponding vendor patches retain their existing source license scopes.
+No unrelated gameplay patch set was merged.
+
 `tools/toolchain.ps1` downloads the official Windows CMake 3.31.8 and Ninja 1.13.1 archives into `.tools` and verifies pinned SHA-256 values. Visual Studio/LLVM and the Windows SDK are discovered from an existing installation. Python dependencies are installed into `.venv` from `requirements.txt`; Jinja2 is pinned to 3.1.6 and MarkupSafe to 3.0.4. This is a source-version lock, not a complete byte-reproducible toolchain. The launcher uses Windows' .NET Framework and its C# compiler; no .NET installer is bundled.
 
 `tools/package.ps1` includes applicable notices and a separate archive of the

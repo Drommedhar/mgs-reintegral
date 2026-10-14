@@ -1,7 +1,22 @@
 #include "mgs_native.h"
 #include "mgs_godot_scene.h"
-#include "mgs_godot_geometry.h"
+#include "mgs_godot_context.h"
+#include "mgs_godot_ui.h"
+#include "mgs_godot_bars.h"
+#include "mgs_godot_subtitles.h"
+#include "mgs_godot_radar.h"
+#include "mgs_godot_inventory.h"
+#include "mgs_godot_inventory_actions.h"
+#include "mgs_godot_codec.h"
+#include "mgs_godot_codec_actions.h"
+#include "mgs_godot_options.h"
+#include "mgs_godot_save.h"
+#include "mgs_godot_title.h"
+#include "mgs_godot_palettes.h"
+#include "mgs_godot_actors.h"
+#include "mgs_godot_deformation.h"
 #include "mgs_stages.h"
+#include "mgs_safety.h"
 #include "mgs_video.h"
 #include "libdg/libdg.h"
 #include "transport.h"
@@ -15,13 +30,20 @@ enum { MODEL_LIMIT = 2048, INSTANCE_LIMIT = 512, PART_LIMIT = 256 };
 typedef struct {
     DG_DEF *definition;
     uint32_t identity;
+    uint32_t disc;
     char stage[8];
     unsigned char owner[PART_LIMIT];
 } Model;
 typedef struct {
     DG_OBJS *objects;
     uint32_t identity;
+    MgsGodotPalette colors, packets, deformation, textures;
+    int live_textures;
+    uint64_t deformation_version;
+    struct { uint32_t kind; float amount; uint32_t tint; } appearance;
 } Instance;
+
+static Instance *FindInstance(const DG_OBJS *objects);
 
 static Model models[MODEL_LIMIT];
 static Instance instances[INSTANCE_LIMIT];
@@ -35,6 +57,11 @@ int MgsGodotSceneEnabled(void) {
         enabled = setting && strcmp(setting, "1") == 0;
     }
     return enabled && !MgsVideoReferenceRequired();
+}
+
+int MgsGodotRetainObjects(const DG_OBJS *objects) {
+    return MgsGodotSceneEnabled() && !(objects->flag & DG_FLAG_INVISIBLE) &&
+        (!objects->group_id || (objects->group_id & DG_CurrentGroupID));
 }
 
 static void SceneFailure(const char *reason) {
@@ -61,6 +88,7 @@ void MgsGodotRegisterModel(DG_DEF *definition, unsigned identity) {
     if (!entry) SceneFailure("model catalog capacity exceeded");
     entry->definition = definition;
     entry->identity = identity & 0xffffu;
+    entry->disc = (uint32_t)MgsSafetyDiscNumber();
     StageName(entry->stage);
     if (definition->n_x_models > PART_LIMIT || definition->n_models < 1)
         SceneFailure("invalid registered model part count");
@@ -94,6 +122,10 @@ void MgsGodotRemoveInstance(DG_OBJS *objects) {
     MgsGodotRemoveAlarmLight(objects);
     for (unsigned i = 0; i < INSTANCE_LIMIT; ++i) {
         if (instances[i].objects == objects) {
+            MgsGodotRetirePalette(&instances[i].colors, instances[i].identity, 1);
+            MgsGodotRetirePalette(&instances[i].packets, instances[i].identity, 2);
+            MgsGodotRetirePalette(&instances[i].deformation, instances[i].identity, 3);
+            MgsGodotRetirePalette(&instances[i].textures, instances[i].identity, 4);
             instances[i].objects = NULL;
             return;
         }
@@ -106,6 +138,19 @@ static Model *FindModel(const DG_DEF *definition) {
     return NULL;
 }
 
+static uint32_t PublishDeformation(Instance *instance, uint32_t count) {
+    uint32_t size;
+    uint64_t version;
+    const float *deltas = MgsGodotDeformation(instance->objects->def, &size, &version);
+    if (!deltas) return 0;
+    if (size != count * 3 * sizeof(float)) SceneFailure("deformation corner count differs from model");
+    if (instance->deformation_version != version) {
+        MgsGodotPublishPalette(&instance->deformation, instance->identity, 3, deltas, size);
+        instance->deformation_version = version;
+    }
+    return instance->deformation.revision;
+}
+
 void MgsGodotRegisterGeneratedModel(DG_DEF *definition, unsigned kind) {
     if (kind != MGS_GODOT_GENERATED_LIGHT) SceneFailure("unknown generated model kind");
     MgsGodotRegisterModel(definition, 0);
@@ -113,12 +158,20 @@ void MgsGodotRegisterGeneratedModel(DG_DEF *definition, unsigned kind) {
     model->identity = 0x80000000u | kind;
 }
 
+unsigned MgsGodotModelIdentity(const DG_OBJS *objects) {
+    const Model *model = FindModel(objects->def);
+    if (!model) SceneFailure("model identity references an unregistered model");
+    return model->identity;
+}
+
 int MgsGodotOwnsPart(DG_OBJS *objects, int part, int buffer_index) {
     const Model *model = FindModel(objects->def);
     if (!model || part < 0 || part >= objects->def->n_x_models)
         SceneFailure("part ownership references an unregistered model");
     if (model->identity & 0x80000000u) return 0;
+    if (FindInstance(objects)->live_textures && MgsGodotSelectedMinor() < 33) return 0;
     if (MgsGodotLegacyPart(objects, part)) return 0;
+    if (MgsGodotHasCapability(8192) && FindInstance(objects)->appearance.kind) return 1;
     int linked = model->owner[part];
     const POLY_GT4 *packets = objects->objs[linked].packs[buffer_index];
     for (int count = 0; linked >= 0; ++count) {
@@ -126,10 +179,7 @@ int MgsGodotOwnsPart(DG_OBJS *objects, int part, int buffer_index) {
             SceneFailure("invalid live model chain");
         const DG_MDL *definition = &objects->def->models[linked];
         for (int face = 0; face < definition->n_faces; ++face) {
-            if (!definition->texids[face]) {
-                if (MgsGodotDegenerateFace(definition, face)) continue;
-                return 0;
-            }
+            if (!definition->texids[face]) continue;
             if (packets) {
                 const unsigned code = packets[face].code, page = packets[face].tpage;
                 if ((code & ~3u) != 0x3c || (page & 0x180) == 0x100 ||
@@ -173,11 +223,32 @@ static void MatrixFloats(float out[12], const MATRIX *matrix) {
     }
 }
 
-static uint32_t InstanceIdentity(const DG_OBJS *objects) {
+static Instance *FindInstance(const DG_OBJS *objects) {
     for (unsigned i = 0; i < INSTANCE_LIMIT; ++i)
-        if (instances[i].objects == objects) return instances[i].identity;
+        if (instances[i].objects == objects) return &instances[i];
     SceneFailure("queued object lacks an instance identity");
     return 0;
+}
+
+uint32_t MgsGodotGetInstanceId(DG_OBJS *objects) {
+    return FindInstance(objects)->identity;
+}
+
+void MgsGodotUseLiveTextures(DG_OBJS *objects) {
+    FindInstance(objects)->live_textures = 1;
+}
+
+void MgsGodotSetCamouflage(DG_OBJS *objects, float amount, unsigned tint) {
+    if (!(amount >= 0.0f && amount <= 1.0f)) SceneFailure("invalid camouflage transition");
+    Instance *instance = FindInstance(objects);
+    instance->appearance.kind = 1;
+    instance->appearance.amount = amount;
+    instance->appearance.tint = tint & 0xffffffu;
+}
+
+void MgsGodotClearCamouflage(DG_OBJS *objects) {
+    Instance *instance = FindInstance(objects);
+    memset(&instance->appearance, 0, sizeof(instance->appearance));
 }
 
 static void AppendScene(uint32_t *bytes, const void *data, uint32_t size) {
@@ -202,6 +273,7 @@ static POLY_GT4 *PartPackets(DG_OBJS *objects, const Model *model, int part, int
 static void AppendColors(uint32_t *bytes, DG_OBJS *objects, const Model *model, int buffer_index) {
     for (int part = 0; part < objects->def->n_x_models; ++part) {
         POLY_GT4 *pack = PartPackets(objects, model, part, buffer_index);
+        const int projected = objects->bound_mode && objects->objs[model->owner[part]].bound_mode;
         for (int face = 0; face < objects->def->models[part].n_faces; ++face) {
             unsigned char colors[16] = {0};
             if (pack) {
@@ -210,7 +282,7 @@ static void AppendColors(uint32_t *bytes, DG_OBJS *objects, const Model *model, 
                 memcpy(colors + 8, &pack->r3, 3);
                 memcpy(colors + 12, &pack->r2, 3);
                 for (int corner = 0; corner < 4; ++corner)
-                    colors[corner * 4 + 3] = (pack->tag & 0xffffu) ? 255 : 0;
+                    colors[corner * 4 + 3] = projected && (pack->tag & 0xffffu) ? 255 : 127;
                 if (pack->code & 1)
                     for (int corner = 0; corner < 4; ++corner)
                         memset(colors + corner * 4, 128, 3);
@@ -254,8 +326,69 @@ static int PartTransparent(DG_OBJS *objects, const Model *model, int part, int b
     return 0;
 }
 
+static uint32_t PublishLiveTextures(uint32_t *bytes, Instance *instance, const Model *model, int buffer_index) {
+    if (!instance->live_textures) return 0;
+    uint32_t start = *bytes;
+    DG_OBJS *objects = instance->objects;
+    for (int part = 0; part < objects->def->n_x_models; ++part) {
+        const DG_MDL *definition = &objects->def->models[part];
+        const POLY_GT4 *pack = PartPackets(objects, model, part, buffer_index);
+        for (int face = 0; face < definition->n_faces; ++face) {
+            float descriptors[4][4] = {{0}};
+            if (pack && definition->texids[face]) {
+                const unsigned char u[] = {pack->u0, pack->u1, pack->u3, pack->u2};
+                const unsigned char v[] = {pack->v0, pack->v1, pack->v3, pack->v2};
+                for (int corner = 0; corner < 4; ++corner) {
+                    descriptors[corner][0] = u[corner] + 0.5f;
+                    descriptors[corner][1] = v[corner] + 0.5f;
+                    descriptors[corner][2] = pack->tpage + 1;
+                    descriptors[corner][3] = pack->clut;
+                }
+            }
+            AppendScene(bytes, descriptors, sizeof(descriptors));
+            if (pack) ++pack;
+        }
+    }
+    uint32_t revision = MgsGodotPublishPalette(&instance->textures, instance->identity, 4, scene_data + start, *bytes - start);
+    *bytes = start;
+    return revision;
+}
+
+static void AppendPalettes(uint32_t *bytes, Instance *instance, const Model *model, uint32_t count, int buffer_index) {
+    if (!count) return;
+    uint32_t start = *bytes;
+    AppendColors(bytes, instance->objects, model, buffer_index);
+    AppendPackets(bytes, instance->objects, model, buffer_index);
+    uint32_t revisions[] = {
+        MgsGodotPublishPalette(&instance->colors, instance->identity, 1, scene_data + start, count * 4),
+        MgsGodotPublishPalette(&instance->packets, instance->identity, 2, scene_data + start + count * 4, count * 16)};
+    *bytes = start;
+    AppendScene(bytes, revisions, sizeof(revisions));
+    if (MgsGodotSelectedMinor() >= 32) {
+        uint32_t deformation = PublishDeformation(instance, count);
+        AppendScene(bytes, &deformation, sizeof(deformation));
+    }
+    if (MgsGodotSelectedMinor() >= 33) {
+        uint32_t textures = PublishLiveTextures(bytes, instance, model, buffer_index);
+        AppendScene(bytes, &textures, sizeof(textures));
+    }
+}
+
 void MgsGodotCaptureScene(DG_CHANL *channel, int buffer_index) {
-    if (MgsVideoReferenceRequired()) return;
+    MgsGodotPublishContext();
+    MgsGodotPublishUi();
+    MgsGodotPublishBars();
+    MgsGodotPublishSubtitles();
+    MgsGodotPublishRadar();
+    MgsGodotPublishInventory();
+    MgsGodotPublishInventoryActions();
+    MgsGodotPublishCodec();
+    MgsGodotPublishCodecActions();
+    MgsGodotPublishOptions();
+    MgsGodotPublishTitle();
+    MgsGodotPublishSaveUi();
+    MgsGodotPublishActors();
+    if (!MgsGodotSceneEnabled()) return;
     if (!MgsNativeResourceStage()) {
         if (channel->objs_index) SceneFailure("scene objects exist before stage initialization");
         return;
@@ -275,6 +408,7 @@ void MgsGodotCaptureScene(DG_CHANL *channel, int buffer_index) {
     uint32_t bytes = sizeof(header);
     for (int index = 0; index < channel->objs_index; ++index) {
         DG_OBJS *objects = channel->queue[index];
+        Instance *instance = FindInstance(objects);
         const Model *model = FindModel(objects->def);
         if (!model) SceneFailure("unregistered model definition");
         const unsigned parts = objects->def->n_x_models;
@@ -283,13 +417,15 @@ void MgsGodotCaptureScene(DG_CHANL *channel, int buffer_index) {
             uint32_t instance, asset;
             char stage[8];
             uint32_t flags, parts, visible_parts, color_count;
-        } object = {InstanceIdentity(objects), model->identity, {0}, objects->flag,
+        } object = {instance->identity, model->identity, {0}, objects->flag,
                     parts, objects->n_models, 0};
         if (!(model->identity & 0x80000000u))
             for (unsigned part = 0; part < parts; ++part)
                 object.color_count += objects->def->models[part].n_faces * 4u;
         memcpy(object.stage, model->stage, sizeof(object.stage));
         AppendScene(&bytes, &object, sizeof(object));
+        if (MgsGodotHasCapability(256)) AppendScene(&bytes, &model->disc, sizeof(model->disc));
+        if (MgsGodotHasCapability(8192)) AppendScene(&bytes, &instance->appearance, sizeof(instance->appearance));
         for (unsigned part = 0; part < parts; ++part) {
             struct { float matrix[12]; uint32_t flags; } state;
             const unsigned owner = model->owner[part];
@@ -301,21 +437,19 @@ void MgsGodotCaptureScene(DG_CHANL *channel, int buffer_index) {
                 !(objects->flag & DG_FLAG_INVISIBLE) &&
                 (!objects->group_id || (objects->group_id & DG_CurrentGroupID)) &&
                 MgsGodotOwnsPart(objects, part, buffer_index);
-            state.flags = active ? MGS_GODOT_PART_SHADOW : 0;
-            if (active && objects->bound_mode && objects->objs[owner].bound_mode)
-                state.flags |= MGS_GODOT_PART_VISIBLE;
+            state.flags = active ? MGS_GODOT_PART_SHADOW | MGS_GODOT_PART_VISIBLE : 0;
             if (active && PartTransparent(objects, model, part, buffer_index))
                 state.flags |= MGS_GODOT_PART_TRANSPARENT;
+            if (MgsGodotSelectedMinor() >= 35)
+                state.flags |= (uint32_t)(uint16_t)objects->objs[owner].raise << 16;
             AppendScene(&bytes, &state, sizeof(state));
         }
-        if (object.color_count) {
-            AppendColors(&bytes, objects, model, buffer_index);
-            AppendPackets(&bytes, objects, model, buffer_index);
-        }
+        AppendPalettes(&bytes, instance, model, object.color_count, buffer_index);
         ++header.count;
     }
     memcpy(scene_data, &header, sizeof(header));
     bytes += MgsGodotAppendEffects(channel, buffer_index, scene_data + bytes, sizeof(scene_data) - bytes);
     bytes += MgsGodotAppendLights(scene_data + bytes, sizeof(scene_data) - bytes);
-    MgsGodotQueue(MGS_GODOT_SCENE_FRAME, scene_data, bytes, NULL, 0);
+    MgsGodotQueue(MGS_GODOT_RETAINED_SCENE, scene_data, bytes, NULL, 0);
+    MgsGodotPaletteStatistics();
 }

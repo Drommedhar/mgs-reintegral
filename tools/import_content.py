@@ -219,13 +219,20 @@ def identify(disc: Disc, files: tuple[Entry, ...]) -> str:
     return serial
 
 
-def plan_import(source: Path) -> list[DiscPlan]:
-    cues = sorted(path for path in source.iterdir() if path.suffix.lower() == ".cue")
-    if len(cues) != len(EDITIONS):
-        raise ValueError("Expected exactly three CUE files: Integral discs 1, 2 and VR")
+def plan_import(source: Path, cues: list[Path] | None = None) -> list[DiscPlan]:
+    if cues is None:
+        cues = sorted(
+            path for path in source.iterdir() if path.suffix.lower() == ".cue"
+        )
+    if len(cues) not in (2, 3):
+        raise ValueError(
+            "Select Integral discs 1 and 2, optionally VR; use --cue when the folder contains other editions"
+        )
     plans = []
     serials = set()
     for cue in cues:
+        if cue.resolve().parent != source.resolve():
+            raise ValueError("Selected CUE files must be inside the source directory")
         if cue.is_symlink() or not cue.is_file():
             raise ValueError(f"CUE is not a regular file: {cue}")
         image = cue_image(cue)
@@ -237,6 +244,8 @@ def plan_import(source: Path) -> list[DiscPlan]:
             raise ValueError(f"Duplicate disc identity: {serial}")
         serials.add(serial)
         plans.append(DiscPlan(cue, image, serial, files))
+    if not {"SLPM_862.47", "SLPM_862.48"}.issubset(serials):
+        raise ValueError("Both Integral campaign discs 1 and 2 are required")
     return sorted(plans, key=lambda plan: plan.serial)
 
 
@@ -336,18 +345,18 @@ def extract_disc(plan: DiscPlan, output: Path) -> dict:
     }
 
 
-def import_content(source: Path, output: Path) -> dict:
+def import_content(source: Path, output: Path, cues: list[Path] | None = None) -> dict:
     source = source.resolve(strict=True)
     output = output.resolve()
     if not source.is_dir():
         raise ValueError(
-            "Source must be a directory containing the three BIN/CUE pairs"
+            "Source must be a directory containing the Integral BIN/CUE pairs"
         )
     if output.is_relative_to(source) or source.is_relative_to(output):
         raise ValueError("Output must be separate from the source directory")
     if output.exists():
         raise FileExistsError(f"Refusing existing output: {output}")
-    plans = plan_import(source)
+    plans = plan_import(source, cues)
     output.mkdir(parents=True, exist_ok=False)
     write_json(
         output / "incomplete.json", {"status": "incomplete", "source": str(source)}
@@ -373,9 +382,15 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument(
+        "--cue",
+        nargs="+",
+        type=Path,
+        help="Explicit campaign CUE files; VR is optional",
+    )
     options = parser.parse_args()
     try:
-        result = import_content(options.source, options.output)
+        result = import_content(options.source, options.output, options.cue)
     except (OSError, ValueError) as error:
         parser.exit(
             1,

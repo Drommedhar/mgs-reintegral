@@ -36,12 +36,39 @@ internal static class LauncherModsTest
 
     private static void CheckPackages(string directory)
     {
+        Require(!GodotSession.ProgressMessage("[   0% ] import | Importing Scene...").Contains("0%"),
+            "Monolithic GLB import is presented as stalled 0% progress");
+        Require(GodotSession.ProgressMessage("[  33% ] reimport | dock_remastered.glb") ==
+            "Importing assets (33%) — dock_remastered.glb", "Import file progress was discarded");
+        Require(GodotSession.ProgressMessage("\u001b[92m[   1% ] import | Running Custom Script...\u001b[0m") ==
+            "Importing scene — Running Custom Script...", "Nested colored import progress was lost");
+        Require(StartupProgress.Percentage("Importing scene — Importing Scene... [46s elapsed]") == null,
+            "Opaque scene work must animate without a fabricated percentage");
+        Require(StartupProgress.Percentage("Preparing mod files: 25 / 100") == 25 &&
+            StartupProgress.Percentage("Importing assets (33%) — dock.glb") == 33,
+            "Measured file progress did not reach the banner");
+        Require(StartupProgress.Percentage("Checking files: 0 / 0") == null &&
+            StartupProgress.Percentage("Checking files: 150 / 100") == 100 &&
+            StartupProgress.Percentage("Starting Godot scene rendering…") == null,
+            "Unknown or changed phases retained a stale progress value");
+        Require(GodotSession.ProgressMessage("MGS_LOAD_PROGRESS Disc 1: checking prepared assets 256 / 22739") ==
+            "Disc 1: checking prepared assets 256 / 22739", "Renderer verification progress was discarded");
+        Require(GodotSession.ProgressMessage("MGS_RENDER_COST frame=300") == null &&
+            GodotSession.ProgressMessage("[ DONE ] import") == null, "Ordinary logs replaced loading progress");
         using (var session = new GodotSession("", directory))
         {
             var start = GameLaunch.StartInfo("native.exe", "", directory);
             start.EnvironmentVariables["MGS_GODOT_SCENE_VIEW"] = "0";
             session.Configure(start);
             Require(start.EnvironmentVariables["MGS_GODOT_SCENE_VIEW"] == "1", "Native process never enabled Godot world composition");
+            string token = start.EnvironmentVariables["MGS_GODOT_SESSION_TOKEN"];
+            Require(token != null && token.Length == 32 && token.All(c => "0123456789abcdef".Contains(c)),
+                "Session token is not 128-bit hex");
+            var second = GameLaunch.StartInfo("native.exe", "", directory);
+            session.Configure(second);
+            Require(second.EnvironmentVariables["MGS_GODOT_SESSION_TOKEN"] == token, "Session token changed during configuration");
+            using (var other = new GodotSession("", directory)) other.Configure(second);
+            Require(second.EnvironmentVariables["MGS_GODOT_SESSION_TOKEN"] != token, "New session reused its predecessor's token");
         }
         string zip = Path.Combine(directory, "mod 日本語.zip");
         Archive(zip, "mod.json", Manifest, "stages/docks.tscn", "authored light");
@@ -76,13 +103,16 @@ internal static class LauncherModsTest
         File.WriteAllText(Path.Combine(source, "project.godot"), "config_version=5\n[editor_plugins]\nenabled=[\"editor\"]\n[rendering]\n");
         File.WriteAllText(Path.Combine(source, "runtime.gd"), "extends Node");
         File.WriteAllText(Path.Combine(source, "mods", "editor-only", "mod.json"), "do not load");
-        foreach (string shader in new[] { "psx.vert.glsl", "psx.frag.glsl" })
+        foreach (string shader in new[] { "psx.vert.glsl", "psx.frag.glsl", "legacy-debug-font.bin", "SDL_render_debug_font.h" })
             File.WriteAllText(Path.Combine(source, ".generated", shader), "shader");
         string project = GodotProject.Prepare(source, directory, mods);
+        Require(File.ReadAllText(Path.Combine(project, ".generated", "legacy-debug-font.bin")) == "shader", "Legacy font missing from runtime cache");
         Require(Directory.GetDirectories(Path.Combine(project, "mods")).Length == 1, "Disabled or editor mods leaked into runtime");
         Require(!File.ReadAllText(Path.Combine(project, "project.godot")).Contains("editor_plugins"), "Editor plugins enabled at runtime");
         Require(File.Exists(GodotProject.Manifests(project, mods).Single()), "Selected manifest missing");
         Require(project == GodotProject.Prepare(source, directory, mods), "Runtime import cache was not reused");
+        File.WriteAllText(Path.Combine(source, ".generated", "legacy-debug-font.bin"), "updated font");
+        Require(project != GodotProject.Prepare(source, directory, mods), "Font change reused stale runtime cache");
         mods[1].Enabled = false;
         string disabled = GodotProject.Prepare(source, directory, mods);
         Require(!Directory.Exists(Path.Combine(disabled, "mods")), "Disabling all mods still installed their code");
@@ -116,8 +146,8 @@ internal static class LauncherModsTest
             Stage = "s00a", Frames = "900", Resolution = "640x480", Widescreen = false };
         bool widescreenCheck = args[0] == "--widescreen-check";
         bool renderCheck = args[0] == "--render-check" || widescreenCheck;
-        settings.Widescreen = widescreenCheck;
         bool performanceCheck = args[0] == "--performance-check";
+        settings.Widescreen = widescreenCheck || performanceCheck;
         if (renderCheck || performanceCheck)
         {
             settings.Resolution = args[6];
@@ -148,6 +178,7 @@ internal static class LauncherModsTest
         settings.Save(Path.Combine(directory, "settings.xml"));
         using (var session = new GodotSession(root, directory))
         {
+            if (renderCheck) session.EnableDiagnosticCapture(1200, Path.Combine(directory, "render.png"), true);
             await session.Start(settings, new Progress<string>(Console.WriteLine));
             var start = GameLaunch.StartInfo(Path.Combine(root, "build/windows-x86-godot/mgs-integral-native.exe"),
                 GameLaunch.Arguments(settings, true), directory);
@@ -165,7 +196,7 @@ internal static class LauncherModsTest
                 File.WriteAllText(Path.Combine(directory, "logs", "native.log"), nativeLog);
                 Require(game.ExitCode == 0, "Modded native runtime failed");
                 Require(nativeLog.Contains("[native] stage=s00a"), "Docks were not loaded during the boot check");
-                if (widescreenCheck)
+                if (settings.Widescreen)
                     Require(nativeLog.Contains(settings.Resolution + " widescreen"), "Selected aspect did not reach the native runtime");
             }
         }

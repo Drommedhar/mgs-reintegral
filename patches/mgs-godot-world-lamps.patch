@@ -1,0 +1,24 @@
+diff --git a/source/game/lamp.c b/source/game/lamp.c
+index 217d85180..172a96d2d 100644
+--- a/source/game/lamp.c
++++ b/source/game/lamp.c
+@@ -11,6 +11,9 @@
+ #include "libgcl/libgcl.h"
+ #include "game/game.h"
+ #include "strcode.h"
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_scene.h"
++#endif
+ 
+ extern char *next_str_ptr;
+ 
+@@ -74,6 +77,9 @@ static void d11c_800C326C(Work *work, int textureId)
+                 }
+             }
+         }
++#ifdef MGS_GODOT_SCENE
++        MgsGodotRegisterLamp(prim, textureId);
++#endif
+         DG_VisiblePrim(prim);
+     }
+     else

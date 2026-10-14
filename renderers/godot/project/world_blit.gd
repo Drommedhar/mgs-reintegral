@@ -33,6 +33,8 @@ void main() {
     if (!backdrop && (depth < float(near_depth) || depth >= float(far_depth))) discard;
     if (backdrop) flags = 0u;
     vec4 source = backdrop ? texture(background, uv) : texture(world, uv);
+    // FSR2 replaces output alpha; preserve pre-resolve coverage for native composition.
+    if (!backdrop) source.a = texelFetch(scene_depth, depth_pixel, 0).g;
     if (source.a < 0.001 && max(max(source.r, source.g), source.b) < 0.001) discard;
     if (preserve_mask != 0u && texelFetch(destination, ivec2(gl_FragCoord.xy), 0).a > 0.5) discard;
     const int dither[16] = int[16](-4, 0, -3, 1, 2, -2, 3, -1, -3, 1, -4, 0, 3, -1, 2, -2);
@@ -94,8 +96,8 @@ func draw(framebuffer: RID, texture: RID, snapshot: RID, depth: RID,
 	var current_sources: Array[RID] = [current, snapshot, depth, metadata_source,
 		metadata_depth if metadata.is_valid() else depth,
 		RenderingServer.texture_get_rd_texture(background) if background.is_valid() else empty_metadata]
-	if current_sources != sources:
-		if uniforms.is_valid():
+	if current_sources != sources or not rd.uniform_set_is_valid(uniforms):
+		if rd.uniform_set_is_valid(uniforms):
 			rd.free_rid(uniforms)
 		sources = current_sources
 		var bindings: Array[RDUniform] = []
@@ -107,6 +109,7 @@ func draw(framebuffer: RID, texture: RID, snapshot: RID, depth: RID,
 			binding.add_id(sources[index])
 			bindings.append(binding)
 		uniforms = rd.uniform_set_create(bindings, shader, 0)
+		if not rd.uniform_set_is_valid(uniforms): return "World composition texture bindings are unavailable"
 	var list := rd.draw_list_begin(framebuffer)
 	rd.draw_list_bind_render_pipeline(list, pipeline)
 	rd.draw_list_bind_uniform_set(list, uniforms, 0)
@@ -121,6 +124,7 @@ func draw(framebuffer: RID, texture: RID, snapshot: RID, depth: RID,
 
 func release() -> void:
 	if rd != null:
-		for id in [uniforms, pipeline, shader, sampler, background_sampler, empty_metadata]:
+		if rd.uniform_set_is_valid(uniforms): rd.free_rid(uniforms)
+		for id in [pipeline, shader, sampler, background_sampler, empty_metadata]:
 			if id.is_valid():
 				rd.free_rid(id)

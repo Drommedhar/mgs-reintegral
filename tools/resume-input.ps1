@@ -66,7 +66,8 @@ function New-MgsResumeCache {
     $manifest = Join-Path $output 'prefix.json'
     $checkpoint = Join-Path $output 'checkpoint.mgssave'
     $log = Join-Path $output 'recovery.log'
-    $python = Join-Path $ProjectDirectory '.venv/Scripts/python.exe'
+    . (Join-Path $PSScriptRoot 'sdk-paths.ps1')
+    $python = Get-MgsPython $ProjectDirectory
     & $python (Join-Path $ProjectDirectory 'tools/prepare-input-resume.py') `
         $MoviePath --output $prefix --manifest $manifest | Out-Null
     if ($LASTEXITCODE -ne 0) { throw 'Could not prepare the recording map-entry prefix.' }

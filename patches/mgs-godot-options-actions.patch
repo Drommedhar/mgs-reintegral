@@ -1,0 +1,112 @@
+--- a/source/onoda/option/opt.c
++++ b/source/onoda/option/opt.c
+@@ -12,6 +12,7 @@
+ #include "game/game.h"
+ #ifdef MGS_GODOT_SCENE
+ #include "mgs_godot_options.h"
++#include "mgs_options_actions.h"
+ #endif
+ 
+ // FIXME: it's the same struct as in change.c (in change overlay)
+@@ -128,12 +129,18 @@
+             if (poly == &groups[group][item]) work->ui_textures[index] = name;
+ }
+ 
+-static void OptionsView(Work *work)
++static MgsOptionsFrame OptionsState(Work *work)
+ {
+     MgsOptionsFrame frame = {.active = 1, .selection = work->f920, .animation = work->f2B58,
+         .vibration = work->f2B54, .test = work->f2B50, .controller_row = work->f29E4,
+         .controller_type = work->f29E8, .reverse = work->f29EC};
+     for (unsigned index = 0; index < 8; ++index) frame.values[index] = work->f924[index];
++    return frame;
++}
++
++static void OptionsView(Work *work)
++{
++    MgsOptionsFrame frame = OptionsState(work);
+     const POLY_FT4 *groups[] = {work->field_34, work->field_5D4, work->field_674, work->field_46C};
+     const int *layers[] = {work->f2A00, work->f2AFC, work->f2B0C, work->f2A6C};
+     const unsigned sizes[] = {27, 4, 17, 9};
+@@ -1616,8 +1623,81 @@
+     work->f2B50 = 0;
+ }
+ 
++#ifdef MGS_GODOT_SCENE
++static void OptionsSelect(Work *work, unsigned target)
++{
++    if (work->f920 == 9) {
++        const RECT rects[] = {{-149,-70,88,12}, {-149,38,88,12}, {90,66,56,12}};
++        const RECT *rect = &rects[target];
++        work->f29E4 = target;
++        option_800C449C(work, rect->x, rect->y, rect->w, rect->h, 255, 1);
++    } else {
++        while (work->f920 != target) option_800C5150(work, target > work->f920 ? 1 : 0);
++    }
++}
++
++static void OptionsBack(Work *work)
++{
++    if (work->f920 == 7 || work->f920 == 9) {
++        option_800C5150(work, 3);
++        GM_SeSet2(0, 63, SE_MENU_EXIT);
++    } else {
++        SetGameOptionFlag(work);
++    }
++}
++
++static void OptionsSet(Work *work, unsigned target, unsigned value)
++{
++    OptionsSelect(work, target);
++    if (work->f920 == 9) {
++        if (target == 0) {
++            work->f29E8 = value;
++            option_800C4780(work);
++        } else {
++            work->f29EC = value;
++            option_800C4A6C(work);
++        }
++    } else {
++        if (work->f924[target] != value) option_800C4B68(work);
++        if (target == 5) work->f2B50 = 1;
++    }
++    GM_SeSet2(0, 63, SE_MENU_TOGGLE);
++}
++
++static int OptionsAction(Work *work)
++{
++    MgsOptionsAction action;
++    if (!MgsGodotOwnsOptions() || !MgsOptionsActionsTake(OptionsState(work), &action)) return 0;
++    switch (action.kind) {
++    case MGS_OPTIONS_SELECT:
++        OptionsSelect(work, action.target);
++        GM_SeSet2(0, 63, SE_MENU_CURSOR);
++        break;
++    case MGS_OPTIONS_SET:
++        OptionsSet(work, action.target, action.value);
++        break;
++    case MGS_OPTIONS_ACTIVATE:
++        OptionsSelect(work, action.target);
++        if (action.target == 10) SetGameOptionFlag(work);
++        else {
++            option_800C5150(work, 2);
++            GM_SeSet2(0, 63, SE_MENU_SELECT);
++        }
++        break;
++    case MGS_OPTIONS_BACK:
++        OptionsBack(work);
++        break;
++    }
++    MgsOptionsActionsComplete(MGS_OPTIONS_APPLIED);
++    return 1;
++}
++#endif
++
+ static void option_800C5950( Work *work )
+ {
++#ifdef MGS_GODOT_SCENE
++    if (OptionsAction(work)) return;
++#endif
+     int press  = work->pad->press;
+     int status = work->pad->status;
+ 

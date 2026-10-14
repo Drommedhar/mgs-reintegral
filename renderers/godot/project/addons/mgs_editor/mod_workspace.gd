@@ -8,12 +8,12 @@ var error := ""
 func manifest() -> Dictionary:
 	var path := root.path_join("mod.json")
 	if not FileAccess.file_exists(path):
-		return {"schema": 1, "id": "local.visuals", "priority": 100, "replacements": {}, "stages": {}}
+		return {"schema": 1, "id": "local.visuals", "priority": 100, "replacements": {}, "stages": {}, "materials": {}, "effects": {}, "appearances": {}, "postprocess": {}, "ui": {}, "resources": {}}
 	var data = JSON.parse_string(FileAccess.get_file_as_string(path))
 	if not data is Dictionary or data.get("schema") != 1:
 		error = "Invalid mod manifest: " + path
 		return {}
-	for field in ["replacements", "stages", "materials"]:
+	for field in ["replacements", "stages", "materials", "effects", "appearances", "postprocess", "ui", "resources"]:
 		if not data.get(field, {}) is Dictionary:
 			error = "Invalid manifest field: " + field
 			return {}
@@ -24,16 +24,48 @@ func save(data: Dictionary) -> bool:
 	if DirAccess.make_dir_recursive_absolute(root) != OK:
 		error = "Cannot create mod folder: " + root
 		return false
-	var file := FileAccess.open(root.path_join("mod.json"), FileAccess.WRITE)
+	var destination := root.path_join("mod.json")
+	var temporary := destination + ".tmp"
+	var file := FileAccess.open(temporary, FileAccess.WRITE)
 	if file == null:
 		error = "Cannot write mod manifest: " + root
 		return false
 	file.store_string(JSON.stringify(data, "\t") + "\n")
+	file.close()
+	var result := DirAccess.rename_absolute(temporary, destination)
+	if result != OK:
+		error = "Cannot replace mod manifest: " + error_string(result)
+		return false
 	return true
 
 func replacement_path(identity: String) -> String:
 	var data := manifest()
 	return Registry.asset_path(root, data.get("replacements", {}).get(identity, {}).get("path", ""))
+
+func register_resource(key: String, path: String, previous: String = "") -> bool:
+	var data := manifest()
+	if data.is_empty(): return false
+	var absolute := ProjectSettings.globalize_path(path).simplify_path()
+	var prefix := ProjectSettings.globalize_path(root).simplify_path().trim_suffix("/") + "/"
+	if not absolute.begins_with(prefix):
+		error = "Mod resources must be inside the active mod folder: " + root
+		return false
+	var entries: Dictionary = data.get("resources", {}).duplicate(true)
+	if key != previous and entries.has(key):
+		error = "A mod resource already uses this name: " + key
+		return false
+	entries.erase(previous)
+	entries[key] = {"path":absolute.trim_prefix(prefix)}
+	error = Registry.ModResources.validate(root, entries)
+	if not error.is_empty(): return false
+	data.resources = entries
+	return save(data)
+
+func remove_resource(key: String) -> bool:
+	var data := manifest()
+	if data.is_empty(): return false
+	if data.has("resources"): data.resources.erase(key)
+	return save(data)
 
 func register_replacement(identity: String, path: String) -> bool:
 	var data := manifest()

@@ -8,7 +8,7 @@ var instances: Dictionary = {}
 var active_count := 0
 
 func configure(overlay: Node3D) -> String:
-	var source := overlay.get_node_or_null(Templates.GROUP) if overlay != null else null
+	var source := Templates.find_in(overlay)
 	if source != null:
 		var error := Templates.validate(source)
 		if not error.is_empty(): return error
@@ -56,7 +56,6 @@ func update_lights(payload: PackedByteArray, offset: int) -> String:
 		if not error.is_empty(): return error
 	var seen := {}
 	active_count = 0
-	for entry in instances.values(): entry.node.hide()
 	for state in states:
 		seen[state.id] = true
 		var prototype := templates.get_node(NodePath(Templates.NAMES[state.kind])) as Light3D
@@ -70,12 +69,18 @@ func update_lights(payload: PackedByteArray, offset: int) -> String:
 		if state.kind in [2, 3]:
 			var direction: Vector3 = state.direction.normalized()
 			basis = Basis.looking_at(direction, Vector3.RIGHT if absf(direction.y) > 0.99 else Vector3.UP)
-		light.transform = Transform3D(basis, state.position) * prototype.transform
-		if state.kind == 1: light.omni_range = minf(state.range, prototype.omni_range)
+		var pose := Transform3D(basis, state.position) * prototype.transform
+		if light.transform != pose: light.transform = pose
+		if state.kind == 1:
+			var radius := minf(state.range, prototype.omni_range)
+			if light.omni_range != radius: light.omni_range = radius
 		light.visible = prototype.visible
 		if light.visible: active_count += 1
 	for id in instances.keys():
-		if id <= 8 or seen.has(id): continue
+		if seen.has(id): continue
+		if id <= 8:
+			instances[id].node.hide()
+			continue
 		instances[id].node.free()
 		instances.erase(id)
 	return ""

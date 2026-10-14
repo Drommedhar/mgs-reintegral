@@ -53,6 +53,7 @@ static func prepare(scene: Node3D, source: Viewport) -> void:
 	viewport.size = Vector2i(64, 64)
 	viewport.own_world_3d = true
 	viewport.transparent_bg = true
+	preload("res://scene_view.gd").configure_rendering(viewport, source)
 	viewport.positional_shadow_atlas_size = 512
 	viewport.positional_shadow_atlas_16_bits = source.positional_shadow_atlas_16_bits
 	viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
@@ -67,6 +68,7 @@ static func prepare(scene: Node3D, source: Viewport) -> void:
 		materials.metadata_two_sided, materials.pbr.SHADER, materials.pbr.two_sided, materials.empty_surface.shader]
 	shaders.append_array([materials.TRANSPARENT_DEPTH_SHADER, materials.depth_two_sided])
 	shaders.append_array(materials.transparent_shaders.values())
+	shaders.append(materials.object_appearance.template.shader)
 	var white := texture(Color.WHITE)
 	var packet := texture(Color(0.5, 0.5, 3000, 1))
 	var formats: Dictionary = {}
@@ -79,15 +81,15 @@ static func prepare(scene: Node3D, source: Viewport) -> void:
 			for shader in shaders: add_mesh(root, instance, shader, white, packet)
 	var effects := WorldEffects.new()
 	root.add_child(effects)
-	var batch := effects.create_batch(16, white, white)
 	var points := PackedFloat32Array()
 	for point in [Vector3(-1, 1, -2), Vector3(1, 1, -2), Vector3(-1, -1, -2), Vector3(1, -1, -2)]:
 		points.append_array([point.x, point.y, point.z, 0, 0.5, 0.5, 1, 1, 1, 2, 0, 0])
 	points.resize(WorldEffects.DATA_WIDTH * 4)
-	batch.data.update(Image.create_from_data(WorldEffects.DATA_WIDTH, 1, false, Image.FORMAT_RGBAF, points.to_byte_array()))
-	for material in [batch.material, batch.depth]:
-		material.set_shader_parameter("albedo_texture", white)
-		material.set_shader_parameter("quad_count", 1)
-	batch.material.set_shader_parameter("mask_texture", white)
+	for identity in [""] + materials.effect_materials.definitions.keys():
+		var pair: Array[ShaderMaterial] = materials.effect_materials.pair(identity, WorldEffects.SHADER, WorldEffects.DEPTH_SHADER)
+		var batch := effects.create_batch(16, white, white, pair)
+		batch.data.update(Image.create_from_data(WorldEffects.DATA_WIDTH, 1, false, Image.FORMAT_RGBAF, points.to_byte_array()))
+		for material in [batch.material, batch.depth]:
+			material.set_shader_parameter("quad_count", 1)
 	for _frame in 4: await RenderingServer.frame_post_draw
 	viewport.free()

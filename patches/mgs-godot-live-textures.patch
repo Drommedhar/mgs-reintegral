@@ -1,0 +1,24 @@
+diff --git a/source/takabe/optxtscn.c b/source/takabe/optxtscn.c
+index 1a3a8bb53..c70a4c75c 100644
+--- a/source/takabe/optxtscn.c
++++ b/source/takabe/optxtscn.c
+@@ -9,6 +9,9 @@
+ #include "libdg/libdg.h"
+ #include "game/game.h"
+ #include "takabe/thing.h"
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_scene.h"
++#endif
+ 
+ typedef struct OpTxtScnUnk
+ {
+@@ -275,6 +278,9 @@ int OptxtscnGetResources_800CD080(Work *work)
+         tex->off_y = work->field_24[i].field_8.y;
+         tex->w = work->field_24[i].field_8.w * 4 - 1;
+         tex->h = work->field_24[i].field_8.h - 1;
++#ifdef MGS_GODOT_SCENE
++        MgsGodotUseLiveTextures(objs);
++#endif
+     }
+ 
+     work->field_4C_light[0].t[0] = 0x800;

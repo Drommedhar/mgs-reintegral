@@ -1,0 +1,22 @@
+diff --git a/source/takabe/wt_view.c b/source/takabe/wt_view.c
+index 09ff08f7c..2935df4cb 100644
+--- a/source/takabe/wt_view.c
++++ b/source/takabe/wt_view.c
+@@ -177,7 +177,7 @@ static void Act(Work *work)
+         SetPriority(priority, 0, 1);
+         addPrim(&ot[0xFF], priority);
+ #ifdef MGS_NATIVE
+-        MgsVideoSetDrawMode(&work->prims->clear_mode[GV_Clock][0], MGS_VIDEO_CANVAS);
++        MgsVideoSetDrawMode(&work->prims->clear_mode[GV_Clock][0], MGS_VIDEO_WATER_CANVAS);
+         addPrim(&ot[0xFF], &work->prims->clear_mode[GV_Clock][0]);
+ #endif
+ 
+@@ -509,7 +509,7 @@ static void WaterViewDraw(Work *work)
+ 
+     addPrim(ot, &work->prims->tpage[GV_Clock]);
+ #ifdef MGS_NATIVE
+-    MgsVideoSetDrawMode(&work->prims->effect_mode[GV_Clock][0], MGS_VIDEO_CANVAS);
++    MgsVideoSetDrawMode(&work->prims->effect_mode[GV_Clock][0], MGS_VIDEO_WATER_CANVAS);
+     addPrim(ot, &work->prims->effect_mode[GV_Clock][0]);
+ #endif
+ 

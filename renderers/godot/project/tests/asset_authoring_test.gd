@@ -5,6 +5,7 @@ const Workspace = preload("res://addons/mgs_editor/mod_workspace.gd")
 const Export = preload("res://addons/mgs_editor/mod_export.gd")
 const Contract = preload("res://model_contract.gd")
 const SceneView = preload("res://scene_view.gd")
+const DiscMap = preload("res://addons/mgs_editor/disc_map.gd")
 const ASSET = "mgs/integral-j/disc1/stage/s00a/1234.k"
 const TEXTURE = "mgs/integral-j/disc1/stage/s00a/abcd.p"
 var failures := 0
@@ -59,7 +60,7 @@ func run() -> void:
 	check(not path.is_empty(), authoring.error)
 	var overlay := Contract.load_model(path)
 	root.add_child(overlay)
-	var catalog := {ASSET: {"kind": "model", "path": "original.tscn", "colorCount": 4}, TEXTURE: {"kind": "texture", "path": "source.png"}}
+	var catalog := {ASSET: {"kind": "model", "path": "original.tscn", "colorCount": 4, "parts": 1}, TEXTURE: {"kind": "texture", "path": "source.png"}}
 	var session := authoring.attach_model(overlay, catalog, directory)
 	check(session != null and authoring.error.is_empty(), authoring.error)
 	var mesh: MeshInstance3D = overlay.get_node("LocalModelReference/mesh_000")
@@ -81,6 +82,18 @@ func run() -> void:
 	check(loaded != null and Contract.validate(original, loaded).is_empty(), "Model edits broke the original animation rig")
 	check(is_equal_approx(loaded.get_node("mesh_000").get_active_material(0).roughness, 0.27), "Runtime ignored edited material")
 	check(is_equal_approx(loaded.get_node("mesh_000").position.x, 0.1), "Runtime ignored edited transform")
+	var map_loader := DiscMap.new()
+	var map := map_loader.load_map(directory, {"assets": catalog, "maps": {"s00a": {"models": [ASSET]}}}, "s00a", workspace.root.path_join("mod.json"))
+	check(map != null, map_loader.error)
+	if map != null:
+		root.add_child(map)
+		await process_frame
+		var preview := map.get_child(0).get_node("mesh_000")
+		var preview_material: Material = preview.get_active_material(0)
+		check(preview.transform == loaded.get_node("mesh_000").transform, "Editor/runtime model transforms differ")
+		check(is_equal_approx(preview_material.roughness, loaded.get_node("mesh_000").get_active_material(0).roughness), "Editor/runtime edited materials differ")
+		check(preview.mesh.get_meta("mgs_retail_derived", false), "Shared model composition lost original provenance")
+		map.free()
 	var zip := directory.path_join("edited.zip")
 	check(Export.new().export_mod(workspace.root.path_join("mod.json"), zip).is_empty(), "Sparse character edit was not exportable")
 	check(Export.new().export_mod(workspace.root.path_join("mod.json"), zip, true).is_empty(), "Explicit ZIP overwrite failed")

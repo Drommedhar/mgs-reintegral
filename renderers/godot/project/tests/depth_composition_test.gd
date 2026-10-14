@@ -29,6 +29,9 @@ func quad(color: Color, position: Vector3, extent: float) -> void:
 	meshes.append(node)
 
 func run() -> void:
+	preload("res://scene_view.gd").configure_metadata(viewport)
+	if "--fsr2" in OS.get_cmdline_user_args():
+		preload("res://scene_view.gd").configure_rendering(viewport, root)
 	viewport.size = Vector2i(64, 64)
 	viewport.transparent_bg = true
 	viewport.own_world_3d = true
@@ -39,7 +42,7 @@ func run() -> void:
 	camera.near = 0.01
 	camera.far = 250
 	var compositor := Compositor.new()
-	compositor.compositor_effects = [renderer.depth_capture]
+	compositor.compositor_effects = renderer.depth_capture.effects()
 	camera.compositor = compositor
 	quad(Color.RED, Vector3(-0.7, 0, -2), 0.8)
 	quad(Color.BLUE, Vector3(1.4, 0, -4), 1.6)
@@ -63,7 +66,7 @@ func check_composition() -> void:
 	var rd := RenderingServer.get_rendering_device()
 	var depths := rd.texture_get_data(renderer.depth_capture.texture, 0)
 	for sample in [[21, 2000.0], [43, 4000.0]]:
-		var measured := depths.decode_float((32 * 64 + sample[0]) * 4)
+		var measured := depths.decode_float((32 * 64 + sample[0]) * 8)
 		if absf(measured - sample[1]) > 1:
 			failures.append("Linear scene depth %s, expected %s" % [measured, sample[1]])
 	var commands := [
@@ -99,6 +102,7 @@ func image_texture(color: Color, format: Image.Format = Image.FORMAT_RGBA8) -> I
 	return ImageTexture.create_from_image(image)
 
 func check_metadata() -> void:
+	preload("res://scene_view.gd").configure_metadata(metadata_viewport)
 	metadata_viewport.size = viewport.size
 	metadata_viewport.transparent_bg = true
 	metadata_viewport.world_3d = viewport.find_world_3d()
@@ -197,6 +201,37 @@ func checked_custom_geometry(_operation: int, _payload: PackedByteArray, pixels:
 func checked_hidden_face(_operation: int, _payload: PackedByteArray, pixels: PackedByteArray, error: String) -> void:
 	if not error.is_empty(): failures.append(error)
 	elif pixels != PackedByteArray([0, 255, 0, 0]): failures.append("Hidden native face still contributed world pixels")
+	await check_transparency()
+
+func check_transparency() -> void:
+	quad(Color.RED, Vector3(0, 0, -2), 0.8)
+	var material := ShaderMaterial.new()
+	material.shader = Shader.new()
+	material.shader.code = "shader_type spatial; render_mode unshaded, depth_draw_always; void fragment() { ALBEDO = vec3(1.0, 0.0, 0.0); ALPHA = 0.5; }"
+	meshes.back().material_override = material
+	for _frame in 8: await RenderingServer.frame_post_draw
+	RenderingServer.call_on_render_thread(renderer.execute.bind([
+		[8, payload([0, 0, 64, 64, 0, 0, 248])],
+		[10, payload([0, 0, 64, 64, 0, 0, 0, 65536, 0, 0, 64, 64])]],
+		5, payload([32, 32, 1, 1]), checked_transparency))
+
+func checked_transparency(_operation: int, _payload: PackedByteArray, pixels: PackedByteArray, error: String) -> void:
+	if not error.is_empty(): failures.append(error)
+	elif pixels[0] < 150 or absi(pixels[2] - 128) > 2:
+		failures.append("Temporal resolve lost transparent surface coverage over native blue: " + str(pixels))
+	quad(Color.BLUE, Vector3(0, 0, -3), 1.2)
+	for _frame in 8: await RenderingServer.frame_post_draw
+	RenderingServer.call_on_render_thread(renderer.execute.bind([
+		[8, payload([0, 0, 64, 64, 0, 248, 0])],
+		[10, payload([0, 0, 64, 64, 0, 0, 0, 65536, 0, 0, 64, 64])]],
+		5, payload([32, 32, 1, 1]), checked_opaque_coverage))
+
+func checked_opaque_coverage(_operation: int, _payload: PackedByteArray, pixels: PackedByteArray, error: String) -> void:
+	if not error.is_empty(): failures.append(error)
+	elif pixels[0] < 150 or pixels[1] > 1 or pixels[2] < 150:
+		failures.append("Transparent-over-opaque coverage leaked the native green background: " + str(pixels))
+	meshes.pop_back().queue_free()
+	meshes.pop_back().queue_free()
 	await check_background()
 
 func check_background() -> void:
@@ -210,6 +245,8 @@ func check_background() -> void:
 	root.add_child(background)
 	background.initialize(viewport)
 	background.render(camera, viewport.size)
+	if background.camera.cull_mask != 0:
+		failures.append("Plain background must not render scene light shadows")
 	renderer.background_texture = background.get_texture().get_rid()
 	await RenderingServer.frame_post_draw
 	await RenderingServer.frame_post_draw
@@ -241,9 +278,21 @@ func checked_background(_operation: int, _payload: PackedByteArray, pixels: Pack
 		background.render(camera, viewport.size)
 		await RenderingServer.frame_post_draw
 	var image := background.get_texture().get_image()
+	if background.camera.cull_mask != background.LIGHT_LAYER:
+		failures.append("Volumetric background lost its scene lights")
 	var color := image.get_pixel(image.get_width() / 2, image.get_height() / 2)
 	if color.r < 0.1 or color.r < color.g * 2:
 		failures.append("Background volumetric fog must receive scene lights: " + str(color))
+	camera.environment = null
+	viewport.find_world_3d().environment = environment
+	background.render(camera, viewport.size)
+	if background.camera.cull_mask != background.LIGHT_LAYER:
+		failures.append("Inherited world fog lost its scene lights")
+	environment.volumetric_fog_enabled = false
+	environment.sky = Sky.new()
+	background.render(camera, viewport.size)
+	if background.camera.cull_mask != background.LIGHT_LAYER:
+		failures.append("Sky background lost its scene lights")
 	finish()
 
 func finish() -> void:
@@ -255,5 +304,5 @@ func finish() -> void:
 
 func done() -> void:
 	for failure in failures: push_error(failure)
-	if failures.is_empty(): print("PASS: depth, clipping, packet ordering, STP, dithering, live UVs, custom geometry and face visibility")
+	if failures.is_empty(): print("PASS: depth, clipping, packet ordering, STP, dithering, live UVs, custom geometry, face visibility and transparency")
 	quit(0 if failures.is_empty() else 1)

@@ -40,7 +40,8 @@ void SetPriority(DR_PRIO *packet, int pbc, int pbw)
 { setlen(packet, 1); packet->code[0] = 0xe6000000 | pbc | (pbw << 1); }
 void MgsVideoSetDrawMode(void *packet, int mode)
 {
-    assert(mode >= MGS_VIDEO_HUD && mode <= MGS_VIDEO_CANVAS);
+    assert((mode >= MGS_VIDEO_HUD && mode <= MGS_VIDEO_CANVAS) || mode == MGS_VIDEO_WATER_CANVAS);
+    if (mode == MGS_VIDEO_WATER_CANVAS) mode = MGS_VIDEO_CANVAS;
     setlen(packet, wide);
     ((DR_TPAGE *)packet)->code[0] = 0xf3000000 | mode;
 }

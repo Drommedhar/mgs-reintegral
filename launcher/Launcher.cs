@@ -2,14 +2,13 @@ using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Reflection;
 using System.Windows.Forms;
 
 namespace ReIntegral
 {
     public sealed partial class Launcher : Form
     {
-        private readonly string dataDirectory, executable, settingsPath;
+        private readonly string dataDirectory, settingsPath;
         private readonly TextBox discOne = new TextBox(), discTwo = new TextBox();
         private readonly TextBox textPack = new TextBox(), voicePack = new TextBox();
         private readonly ComboBox resolution = new ComboBox(), mantis = new ComboBox();
@@ -26,9 +25,8 @@ namespace ReIntegral
         private readonly object logLock = new object();
         private readonly TabControl tabs = new TabControl();
         private readonly FileStream instanceLock;
-        private readonly bool godotEnabled = !String.IsNullOrEmpty(BuildInfo.GodotRoot);
         private ModsPanel mods;
-        private GodotSession godot;
+        private IRendererSession godot;
         private Settings activeSettings;
         private Process game;
         private StreamWriter log;
@@ -45,9 +43,8 @@ namespace ReIntegral
             Directory.CreateDirectory(dataDirectory);
             Directory.CreateDirectory(Path.Combine(dataDirectory, "logs"));
             instanceLock = new FileStream(Path.Combine(dataDirectory, "launcher.lock"), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
-            executable = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "mgs-integral-native.exe");
             settingsPath = Path.Combine(dataDirectory, "settings.xml");
-            Text = "RE:INTEGRAL — " + BuildInfo.Version + (godotEnabled ? " — Godot" : "");
+            Text = "RE:INTEGRAL — " + BuildInfo.Version;
             Font = new Font("Segoe UI", 9F);
             AutoScaleMode = AutoScaleMode.Dpi;
             ClientSize = new Size(720, 665);
@@ -67,19 +64,15 @@ namespace ReIntegral
 
         private void BuildLayout()
         {
-            var logo = new PictureBox { Left = 16, Top = 0, Width = 688, Height = 190, SizeMode = PictureBoxSizeMode.Zoom, BackColor = Color.FromArgb(25, 28, 30) };
-            using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("logo.png"))
-            using (var source = Image.FromStream(stream)) logo.Image = new Bitmap(source);
-            logo.Disposed += delegate { logo.Image.Dispose(); };
-            Controls.Add(logo);
+            BuildBanner();
             tabs.SetBounds(16, 202, 688, 365);
             Controls.Add(tabs);
             BuildDisplay();
             BuildGraphics();
             BuildGameplay();
             BuildLanguages();
-            mods = new ModsPanel(dataDirectory, godotEnabled);
-            if (godotEnabled) Page("Mods").Controls.Add(mods);
+            mods = new ModsPanel(dataDirectory, true);
+            Page("Mods").Controls.Add(mods);
             BuildAdvanced();
             play.Text = "Save and play";
             play.SetBounds(550, 580, 154, 34);
@@ -88,9 +81,6 @@ namespace ReIntegral
             AddButton(Controls, "Save settings", 16, 580, delegate { Guard(Save); });
             AddButton(Controls, "Open logs", 154, 580, delegate { Guard(delegate { OpenFolder("logs"); }); });
             AddButton(Controls, "Open save folder", 292, 580, delegate { Guard(delegate { OpenFolder(""); }); });
-            status.SetBounds(16, 617, 688, 20);
-            status.Text = "Ready. Your original disc images remain read-only.";
-            Controls.Add(status);
             var notice = new Label { Text = "Unofficial project; not affiliated with or endorsed by Konami", Left = 16, Top = 642, Width = 688 };
             Controls.Add(notice);
         }
@@ -133,29 +123,11 @@ namespace ReIntegral
             LabelAt(page, "Keep each CUE beside its matching BIN. No extraction or VR disc is needed.", 151);
             LabelAt(page, "Output resolution", 173);
             resolution.SetBounds(16, 200, 220, 28);
-            resolution.Items.AddRange(new object[] { "320x240", "640x480", "1280x720", "1280x960", "1600x900", "1920x1080", "2560x1440" });
+            resolution.Items.AddRange(DisplaySettings.Resolutions);
             page.Controls.Add(resolution);
             CheckAt(page, wide, "Widescreen (expand the scene view)", 237);
             CheckAt(page, fullscreen, "Fullscreen", 267);
             LabelAt(page, "Widescreen uses the selected resolution's aspect. Turn it off for original 4:3.", 297);
-        }
-
-        private void BuildGraphics()
-        {
-            var page = Page("Graphics");
-            if (godotEnabled)
-            {
-                LabelAt(page, "Godot renderer — dynamic lighting, shadows and PBR materials", 18);
-                LabelAt(page, "Enable visual mods on the Mods tab.", 64);
-                return;
-            }
-            LabelAt(page, BuildInfo.ModernRenderer ? "Modern renderer — experimental enhancements" :
-                "These enhancements require the experimental modern renderer build.", 18);
-            CheckAt(page, textureCorrection, "Perspective-correct textures", 64);
-            CheckAt(page, geometryPrecision, "Subpixel geometry (reduce polygon jitter)", 104);
-            CheckAt(page, depthBuffer, "Depth buffer (per-pixel surface visibility)", 144);
-            LabelAt(page, "Applies to projected models. Screen effects keep their original rendering.", 206);
-            LabelAt(page, "Depth testing may change overlapping surfaces; compare with it off.", 242);
         }
 
         private static void CheckAt(Control parent, CheckBox field, string text, int y)
@@ -248,6 +220,9 @@ namespace ReIntegral
             overlay.Checked = value.DebugOverlay; mantis.Text = value.MantisMemory;
             stage.Text = value.Stage; frames.Text = value.Frames; advanced.Text = value.Advanced;
             mods.LoadMods(value.Mods);
+            godotMode.SelectedIndex = value.GodotLegacyRendering ? 1 : 0;
+            sharpText.Checked = value.GodotSharpText;
+            LoadRenderers(value.RendererId);
         }
 
         private Settings ReadSettings()
@@ -261,7 +236,8 @@ namespace ReIntegral
                 FastLoading = fastLoading.Checked,
                 DebugOverlay = overlay.Checked, MantisMemory = mantis.Text.Trim(), Stage = stage.Text.Trim(),
                 Frames = frames.Text.Trim(), Advanced = advanced.Text.Replace("\r", " ").Replace("\n", " "),
-                Mods = mods.ReadMods() };
+                RendererId = SelectedRenderer.Id, GodotLegacyRendering = godotMode.SelectedIndex == 1,
+                GodotSharpText = sharpText.Checked, Mods = mods.ReadMods() };
         }
 
         private static string AbsolutePath(string value)
@@ -272,7 +248,7 @@ namespace ReIntegral
         private void Save()
         {
             var settings = ReadSettings();
-            GameLaunch.Arguments(settings, godotEnabled);
+            SelectedRenderer.Arguments(settings);
             settings.Save(settingsPath);
             status.Text = "Settings saved in " + dataDirectory;
         }
@@ -286,12 +262,14 @@ namespace ReIntegral
 
         private void ShowCommand()
         {
-            MessageBox.Show(this, GameLaunch.Quote(executable) + " " + GameLaunch.Arguments(ReadSettings(), godotEnabled), "Launch command");
+            SelectedRenderer.RequireAvailable();
+            MessageBox.Show(this, GameLaunch.Quote(SelectedRenderer.Executable) + " " + SelectedRenderer.Arguments(ReadSettings()), "Launch command");
         }
 
         private void ShowHelp()
         {
-            using (var process = Process.Start(GameLaunch.StartInfo(executable, "--help", dataDirectory)))
+            SelectedRenderer.RequireAvailable();
+            using (var process = Process.Start(GameLaunch.StartInfo(SelectedRenderer.Executable, "--help", dataDirectory)))
             {
                 string help = process.StandardOutput.ReadToEnd();
                 string error = process.StandardError.ReadToEnd();

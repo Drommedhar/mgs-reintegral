@@ -1,0 +1,93 @@
+diff --git a/source/menu/jimaku.c b/source/menu/jimaku.c
+index 8b9791cad..ee474939f 100644
+--- a/source/menu/jimaku.c
++++ b/source/menu/jimaku.c
+@@ -6,6 +6,10 @@
+ #include "libdg/libdg.h"
+ #include "libgcl/libgcl.h"
+ #include "game/game.h"
++#ifdef MGS_NATIVE
++#include "mgs_language.h"
++#include "mgs_subtitles.h"
++#endif
+ 
+ // here or jimctl.h?
+ typedef struct {
+@@ -29,6 +33,23 @@ void *SECTION(".sbss") MENU_JimakuTextBody;
+ 
+ signed char dword_8009E76C[] = {-1, 0, 1, 0, 0, 1, 0, -1};
+ 
++#ifdef MGS_NATIVE
++static void PresentJimaku(void)
++{
++    MgsSubtitlesPresent((MgsSubtitleFrame){
++        .active = 1,
++        .visible = JimState.field_1_type != 0 || !(GM_Configuration & GM_CONFIG_CAPTION_OFF),
++        .kind = JimState.field_1_type,
++        .timer = JimState.field_2_timer,
++        .x = JimState.field_4_x, .y = JimState.field_6_y,
++        .width = JimState.field_8_w, .height = JimState.field_A_h,
++        .text_width = (unsigned char)JimState.field_C_font.max_width,
++        .character_spacing = JimState.field_C_font.c_skip,
++        .line_spacing = JimState.field_C_font.l_skip
++    });
++}
++#endif
++
+ void menu_jimaku_act( MenuWork *work, u_long *ot )
+ {
+     TextConfig config;
+@@ -49,6 +70,9 @@ void menu_jimaku_act( MenuWork *work, u_long *ot )
+ 
+     if ( JimState.field_0_active == 1 )
+     {
++#ifdef MGS_NATIVE
++        PresentJimaku();
++#endif
+         if ( (JimState.field_1_type != 0) ||
+             !(GM_Configuration & GM_CONFIG_CAPTION_OFF) )
+         {
+@@ -123,6 +147,9 @@ void menu_jimaku_act( MenuWork *work, u_long *ot )
+         pFont = &JimState.field_C_font;
+ 
+         font_print_string( pFont, JimState.field_38_str );
++#ifdef MGS_NATIVE
++        MgsSubtitlesPrepare(MgsLanguageText(JimState.field_38_str));
++#endif
+         font_update( pFont );
+         font_clut_update( pFont );
+ 
+@@ -151,6 +178,9 @@ STATIC void menu_jimaku_init_helper(KCB *kcb)
+ 
+ void menu_jimaku_init(MenuWork *work)
+ {
++#ifdef MGS_NATIVE
++    MgsSubtitlesReset();
++#endif
+     menu_jimaku_init_helper(&JimState.field_C_font);
+ }
+ 
+diff --git a/source/menu/menuman.c b/source/menu/menuman.c
+index 244d1f8a7..5322e83a3 100644
+--- a/source/menu/menuman.c
++++ b/source/menu/menuman.c
+@@ -9,6 +9,9 @@
+ #include "libdg/libdg.h"
+ #include "libgcl/libgcl.h"
+ #include "game/game.h"
++#ifdef MGS_NATIVE
++#include "mgs_subtitles.h"
++#endif
+ #ifdef MGS_GODOT_SCENE
+ #include "mgs_godot_bars.h"
+ #endif
+@@ -185,6 +188,9 @@ void menu_radio_update_helper2_80038A7C(void)
+ 
+ void MENU_ResetSystem(void)
+ {
++#ifdef MGS_NATIVE
++    MgsSubtitlesBeginFrame();
++#endif
+ #ifdef MGS_GODOT_SCENE
+     MgsGodotResetBars();
+ #endif

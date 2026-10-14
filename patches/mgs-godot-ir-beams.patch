@@ -1,0 +1,24 @@
+diff --git a/source/takabe/ir_cens.c b/source/takabe/ir_cens.c
+index ef47a3643..6c6562db7 100644
+--- a/source/takabe/ir_cens.c
++++ b/source/takabe/ir_cens.c
+@@ -8,6 +8,9 @@
+ #include "game/game.h"
+ #include "takabe/thing.h"
+ #include "strcode.h"
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_scene.h"
++#endif
+ 
+ typedef struct _Work
+ {
+@@ -511,6 +514,9 @@ int IrCensGetResources_800DA418(Work *work, int name, int map)
+ 
+     IrCens_800D97E8(work->prim->packs[0], tex, 0);
+     IrCens_800D97E8(work->prim->packs[1], tex, 0);
++#ifdef MGS_GODOT_SCENE
++    MgsGodotRegisterBeam(prim, tex->id);
++#endif
+ 
+     IrCens_800D9C7C(work, &work->fB0, 8000);
+ 

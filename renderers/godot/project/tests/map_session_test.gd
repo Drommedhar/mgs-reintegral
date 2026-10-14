@@ -89,6 +89,10 @@ func run() -> void:
 	Coordinates.mark_editor(overlay)
 	root.add_child(overlay)
 	Authoring.new().attach_reference(overlay, fixture(), LAYOUT)
+	var environment: Environment = overlay.get_node("MapEnvironment").environment
+	check(environment.ambient_light_source == Environment.AMBIENT_SOURCE_COLOR and environment.ambient_light_color == Color(0.6, 0.6, 0.6), "Imported map has no default ambient environment")
+	environment.ambient_light_color = Color(0.4, 0.5, 0.7)
+	environment.ambient_light_energy = 0.85
 	var templates := overlay.get_node("EventLightTemplates")
 	check(templates.get_node("WeaponSpot") is SpotLight3D, "Weapon light template missing from Scene tree")
 	templates.get_node("WeaponSpot").spot_angle = 31.0
@@ -105,9 +109,18 @@ func run() -> void:
 	root.add_child(restored)
 	Authoring.new().attach_reference(restored, fixture(), LAYOUT)
 	check(restored.get_node("OriginalLights/1234_l_000").light_energy == 2.25, "Reopening lost original light edits")
+	check(restored.find_children("*", "WorldEnvironment", true, false).size() == 1, "Reopening duplicated the authored environment")
+	check(restored.get_node("MapEnvironment").environment.ambient_light_color == environment.ambient_light_color, "Reopening replaced edited ambient color")
 	var runtime := SceneView.new()
 	root.add_child(runtime)
-	runtime.catalog = {ASSET: {"kind": "model"}}
+	var model := fixture()
+	for child in model.find_children("*", "", true, false): child.owner = model
+	var model_scene := PackedScene.new()
+	check(model_scene.pack(model) == OK and ResourceSaver.save(model_scene, directory.path_join("original.tscn")) == OK, "Cannot save model preparation fixture")
+	model.free()
+	runtime.asset_root = directory
+	runtime.catalog = {ASSET: {"kind": "model", "path":"original.tscn", "colorCount":4}}
+	check(runtime.materials.initialize(runtime.catalog, runtime.mods, directory).is_empty(), "Cannot initialize map fixture materials")
 	runtime.map_definitions = {"s00a": LAYOUT}
 	runtime.mods.stages = {"s00a": {"path": path, "mod": "test.session"}}
 	check(runtime.change_stage("s00a").is_empty(), "Runtime rejected original light edits")
@@ -115,6 +128,9 @@ func run() -> void:
 	var light := runtime.original_lights.get_node("1234_l_000")
 	check(light.global_position == Vector3(4, -5, -6) and light.light_energy == 2.25, "Runtime light differs from the edited light")
 	check(runtime.stage_override.get_node("UserLight").global_position == Vector3(5, 6, 7), "Runtime lost authored node parented under a reference")
+	check(runtime.default_environment == null, "Runtime added a second environment over the authored one")
+	check(runtime.stage_override.get_node("MapEnvironment").environment.ambient_light_color == environment.ambient_light_color, "Runtime lost authored ambient color")
+	check(is_equal_approx(runtime.stage_override.get_node("MapEnvironment").environment.ambient_light_energy, 0.85), "Runtime lost authored ambient energy")
 	check_cutscene(runtime, path)
 	check(not MapLights.validate(LAYOUT, {"missing": {"visible": false}}).is_empty(), "Unknown light selector accepted")
 	check(not MapLights.validate(LAYOUT, {"1234.l/000": {"omni_range": 0}}).is_empty(), "Invalid light override accepted")

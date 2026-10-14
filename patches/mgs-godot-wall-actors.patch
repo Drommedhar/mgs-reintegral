@@ -1,0 +1,49 @@
+diff --git a/source/enemy/wall.c b/source/enemy/wall.c
+index 22a719fcd..e1c013319 100644
+--- a/source/enemy/wall.c
++++ b/source/enemy/wall.c
+@@ -11,6 +11,10 @@
+ #include "libgcl/libgcl.h"
+ #include "game/game.h"
+ #include "strcode.h"
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_actors.h"
++#include "mgs_godot_scene.h"
++#endif
+ 
+ /*---------------------------------------------------------------------------*/
+ 
+@@ -119,6 +123,11 @@ static void Act(Work *work)
+     CheckMessage(work);
+     SetVisibility(work);
+     SetLighting(work);
++#ifdef MGS_GODOT_SCENE
++    MgsGodotWallSample sample = {{work->position.vx, work->position.vy, work->position.vz},
++        GV_Time, !(work->object.objs->flag & DG_FLAG_INVISIBLE)};
++    MgsGodotWallUpdate(work, &sample);
++#endif
+ 
+     if (GM_CheckMessage(&work->actor, work->name, HASH_KILL))
+     {
+@@ -128,6 +137,9 @@ static void Act(Work *work)
+ 
+ static void Die(Work *work)
+ {
++#ifdef MGS_GODOT_SCENE
++    MgsGodotActorRemove(work);
++#endif
+     printf("destroy\n");
+ 
+     work->object.objs->flag = FLAG_UNLIT;
+@@ -293,6 +305,11 @@ void *NewWallGcl(int name, int where, int argc, char **argv)
+         }
+ 
+         work->name = name;
++#ifdef MGS_GODOT_SCENE
++        MgsGodotActorBinding binding = {MgsGodotGetInstanceId(work->object.objs),
++            work->object.objs->def->n_x_models, name, where};
++        MgsGodotWallCreate(work, &binding);
++#endif
+     }
+ 
+     return (void *)work;

@@ -57,7 +57,9 @@ func model() -> Node3D:
 	arrays[Mesh.ARRAY_BONES] = bones
 	arrays[Mesh.ARRAY_WEIGHTS] = weights
 	arrays[Mesh.ARRAY_TEX_UV] = uvs
-	arrays[Mesh.ARRAY_TEX_UV2] = uvs
+	var palette_uvs := PackedVector2Array()
+	for _vertex in uvs.size(): palette_uvs.append(Vector2(0.5 / 256.0, 0.5))
+	arrays[Mesh.ARRAY_TEX_UV2] = palette_uvs
 	mesh.mesh = ArrayMesh.new()
 	mesh.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 	var material := StandardMaterial3D.new()
@@ -107,6 +109,9 @@ func check_light_type(light: Light3D) -> void:
 	light.free()
 
 func run() -> void:
+	viewport.scaling_3d_mode = Viewport.SCALING_3D_MODE_BILINEAR
+	viewport.use_taa = false
+	viewport.screen_space_aa = Viewport.SCREEN_SPACE_AA_DISABLED
 	viewport.size = Vector2i(256, 256)
 	viewport.own_world_3d = true
 	SceneView.configure_shadows(viewport, root)
@@ -173,6 +178,23 @@ func run() -> void:
 		var empty := await frame()
 		update(2, 0, distance)
 		check(darker(empty, await frame()) > 30, "Omni shadow vanished with camera distance and competing lights")
+	await check_offaxis_model()
 	viewport.free()
 	print("MGS_CHARACTER_SHADOW_TEST failures=%d" % failures)
 	quit(1 if failures else 0)
+
+func check_offaxis_model() -> void:
+	var data := snapshot(3, 8)
+	for corner in 4:
+		data[155 + corner * 4] = 127
+		data.encode_float(168 + corner * 16, 0.75)
+		data.encode_float(172 + corner * 16, 0.75)
+	for original in [true, false]:
+		scene.mods.stages[""] = {"original_lighting": original}
+		scene.instances[1].material_stages.clear()
+		check(scene.update_scene(data).is_empty(), "Off-axis animated model rejected")
+		scene.camera.position = Vector3(8, 1, 4)
+		scene.camera.look_at(Vector3(8, 1, 0))
+		lamp.position = Vector3(8, 2, 3)
+		var pixel := (await frame()).get_pixel(128, 128)
+		check(pixel.get_luminance() > 0.2, "Model outside native frustum lost its face or live UVs: %s" % pixel)

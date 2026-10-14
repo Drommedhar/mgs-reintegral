@@ -1,0 +1,22 @@
+[gd_scene load_steps=2 format=3]
+
+[sub_resource type="Environment" id="Environment_intro"]
+resource_local_to_scene = true
+ambient_light_source = 2
+ambient_light_color = Color(0.6, 0.6, 0.6, 1)
+ambient_light_energy = 1.25
+ambient_light_sky_contribution = 0.0
+reflected_light_source = 1
+
+[node name="IntroDocksLighting" type="Node3D"]
+metadata/mgs_coordinate_space = "native_y_up"
+
+[node name="MapEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_intro")
+
+[node name="IntroLamp" type="OmniLight3D" parent="."]
+position = Vector3(2, 2, 1)
+light_color = Color(1, 0.65, 0.3, 1)
+light_energy = 0.75
+omni_range = 4.0
+shadow_enabled = true

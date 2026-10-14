@@ -217,6 +217,38 @@ class ImportTests(unittest.TestCase):
                 importer.import_content(source, output)
             self.assertFalse(output.exists())
 
+    def test_campaign_pair_selection_ignores_unselected_cues(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            source = Path(temporary) / "source"
+            source.mkdir()
+            identities = {}
+            cues = []
+            for serial in ("SLPM_862.47", "SLPM_862.48"):
+                image, digest = write_fixture(source, serial)
+                identities[serial] = (importer.EDITIONS[serial][0], digest)
+                cues.append(image.with_suffix(".cue"))
+            (source / "another-edition.cue").write_text(
+                "Not selected", encoding="utf-8"
+            )
+            with (
+                patch.dict(importer.EDITIONS, identities),
+                redirect_stdout(io.StringIO()),
+            ):
+                result = importer.import_content(
+                    source, source.parent / "content", cues
+                )
+                self.assertEqual(
+                    [disc["disc"] for disc in result["discs"]], ["disc1", "disc2"]
+                )
+                with self.assertRaisesRegex(ValueError, "Both Integral"):
+                    other, other_hash = write_fixture(source, "SLPM_862.49")
+                    with patch.dict(
+                        importer.EDITIONS, {"SLPM_862.49": ("disc3", other_hash)}
+                    ):
+                        importer.plan_import(
+                            source, [cues[0], other.with_suffix(".cue")]
+                        )
+
     def test_duplicate_identity_is_rejected_before_output(self):
         with tempfile.TemporaryDirectory() as temporary:
             source = Path(temporary)

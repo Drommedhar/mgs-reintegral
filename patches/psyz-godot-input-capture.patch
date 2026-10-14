@@ -1,0 +1,14 @@
+diff --git a/psyz/src/platform/sdl3_common.h b/psyz/src/platform/sdl3_common.h
+index ba10d6e..0cfb180 100644
+--- a/psyz/src/platform/sdl3_common.h
++++ b/psyz/src/platform/sdl3_common.h
+@@ -901,6 +901,9 @@ void Psyz_PadsPoll(void) {
+     for (int port = 0; port < 2; port++) {
+         BuildPadFrame(
+             port, Psyz_PadsSetKind(port, 0, PSYZ_CTRL_QUERY_KIND), frame);
++#ifdef PSYZ_GODOT_REMOTE
++        MgsGodotFilterPad((unsigned)port, (unsigned char *)frame);
++#endif
+         Psyz_PadsSet(port, frame, sizeof(frame));
+     }
+ }

@@ -29,7 +29,8 @@ func configure(overlay: Node3D, catalog: Dictionary, variant_stage: String = "")
 			if (not tolerance is float and not tolerance is int) or not is_finite(tolerance) or tolerance <= 0:
 				return "Map removal tolerance must be positive and finite"
 		var resolved: Dictionary = rule.duplicate()
-		resolved.asset = ModRegistry.variant_asset(catalog, rule.asset, variant_stage)
+		# Whole-model visibility follows the map variant; part indices require identical geometry.
+		resolved.asset = ModRegistry.variant_asset(catalog, rule.asset, variant_stage, part != -1)
 		rules.append(resolved)
 	return ""
 

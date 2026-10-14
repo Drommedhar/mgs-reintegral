@@ -1,0 +1,67 @@
+@tool
+extends RefCounted
+
+const ELEMENTS = [
+	["BackgroundLeft", "op_back_l", Rect2(0,0,160,224), 0],
+	["BackgroundRight", "op_back_r", Rect2(160,0,160,224), 0],
+	["BackgroundRepeat", "op_back_l", Rect2(320,0,160,224), 0],
+	["BackgroundCrop", "op_back_l", Rect2(0,0,320,500), 1],
+	["OverlayLeft", "op_back_l", Rect2(0,0,320,224), 1],
+	["OverlayRight", "op_back_r", Rect2(0,0,320,224), 1],
+	["OverlayRepeat", "op_back_l", Rect2(0,0,320,224), 1],
+	["Logo", "op_title", Rect2(48,10,230,60), 1],
+	["Copyright", "op_copy", Rect2(72,208,176,7), 0],
+	["Snake", "op_snake_cut", Rect2(102,36,116,181), 1],
+	["Eyes", "op_eye_open", Rect2(130,115,50,12), 1],
+	["PortraitFrame", "op_snake_waku", Rect2(82,13,156,214), 1],
+	["PressStart", "op_p_start", Rect2(80,182,160,8), 0],
+	["NewGameTransition", "op_n_game", Rect2(122,182,1,8), 0],
+	["LoadGameTransition", "op_l_game", Rect2(122,182,1,8), 0],
+	["OptionsTransition", "op_option", Rect2(134,182,1,8), 0],
+	["SelectDifficulty", "op_sellevel", Rect2(74,27,172,12), 1],
+	["Warning", "op_warning", Rect2(122,182,1,8), 0],
+	["KonamiLeft", "op_konami_l", Rect2(0,0,160,224), 0],
+	["KonamiRight", "op_konami_r", Rect2(160,0,160,224), 0],
+	["KcejLeft", "op_kcej_l", Rect2(0,0,160,224), 0],
+	["KcejRight", "op_kcej_r", Rect2(160,0,160,224), 0],
+	["SpecialBackgroundLeft", "sp_back_l", Rect2(0,0,160,224), 0],
+	["SpecialBackgroundRight", "sp_back_r", Rect2(160,0,160,224), 0],
+	["SpecialHeading", "sp_special", Rect2(110,18,100,13), 1],
+	["SpecialHeadingGlow", "sp_special", Rect2(110,18,100,13), 1],
+	["Previous", "sp_pre", Rect2(80,59,160,8), 1],
+	["Exit", "sp_exit", Rect2(132,158,56,12), 1],
+	["Album", "sp_album", Rect2(136,79,48,8), 1],
+	["Demo", "sp_demo", Rect2(108,99,104,8), 1],
+	["Radar", "sp_radar", Rect2(118,123,84,12), 1],
+	["RadarOn", "sp_on_w", Rect2(51,123,40,12), 1],
+	["RadarOff", "sp_off", Rect2(216,123,48,12), 1],
+	["RadarLine", "sp_line", Rect2(91,128,27,2), 1],
+	["DemoHeading", "demo_demo", Rect2(104,18,112,12), 1],
+	["DemoA", "demo_ra", Rect2(132,70,56,6), 1],
+	["DemoB", "demo_rb", Rect2(132,113,56,6), 1],
+	["CreditsC", "demo_roll_c", Rect2(132,116,56,6), 1],
+	["CreditsD", "demo_roll_d", Rect2(132,116,56,6), 1],
+	["SinglePlayer", "d3_sp_1p_mode", Rect2(90,59,140,8), 1],
+	["TopLeft", "cur_lu", Rect2(160,112,1,1), 1],
+	["TopRight", "cur_ru", Rect2(160,112,1,1), 1],
+	["BottomLeft", "cur_ld", Rect2(160,112,1,1), 1],
+	["BottomRight", "cur_rd", Rect2(160,112,1,1), 1],
+	["Top", "cur_u", Rect2(160,112,1,1), 1],
+	["Bottom", "cur_d", Rect2(160,112,1,1), 1],
+	["Left", "cur_l", Rect2(160,112,1,1), 1],
+	["Right", "cur_r", Rect2(160,112,1,1), 1],
+	["Center", "cur_c", Rect2(160,112,1,1), 1],
+	["NewGame", "op_n_game", Rect2(122,182,76,8), 1],
+	["LoadGame", "op_l_game", Rect2(120,182,80,8), 1],
+	["Options", "op_option", Rect2(134,182,52,8), 1],
+	["Briefing", "op_brf", Rect2(128,182,64,8), 1],
+	["Special", "op_special", Rect2(130,182,60,8), 1],
+	["VrTraining", "op_vr", Rect2(116,182,88,8), 1],
+]
+
+const TEXTURES = ["cur_c", "cur_d", "cur_l", "cur_ld", "cur_lu", "cur_r", "cur_rd", "cur_ru", "cur_u", "d3_sp_1p_mode", "demo_demo", "demo_ra", "demo_rb", "demo_roll_c", "demo_roll_d", "op_back_l", "op_back_r", "op_brf", "op_copy", "op_eye_close", "op_eye_half", "op_eye_open", "op_kcej_l", "op_kcej_r", "op_konami_l", "op_konami_r", "op_l_game", "op_n_game", "op_option", "op_p_start", "op_sellevel", "op_snake_cut", "op_snake_waku", "op_special", "op_title", "op_vr", "op_warning", "sp_album", "sp_back_l", "sp_back_r", "sp_demo", "sp_exit", "sp_line", "sp_off", "sp_off_w", "sp_on", "sp_on_w", "sp_pre", "sp_radar", "sp_special"]
+
+static func texture_id(name: String) -> int:
+	var value := 0
+	for byte in name.to_ascii_buffer(): value = (((value << 5) | (value >> 11)) + byte) & 65535
+	return value

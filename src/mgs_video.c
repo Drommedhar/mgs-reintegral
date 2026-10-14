@@ -15,6 +15,7 @@ static unsigned view_numerator = 1, view_denominator = 1;
 static int widescreen, frame_active, frame_centre, capture_output, movie_active;
 static int codec_active, menu_stage;
 static unsigned output_width, output_height;
+static int output_fullscreen;
 
 int MgsVideoReferenceRequired(void)
 {
@@ -85,9 +86,16 @@ static int SetChannelTransform(int mode)
 static int VideoCommand(const u_long *words, int available, void *userdata)
 {
     (void)userdata;
-    if (available < 1 || (words[0] & 0x00ffffffu) > MGS_VIDEO_BACKGROUND)
+    if (available < 1 || (words[0] & 0x00ffffffu) > MGS_VIDEO_TEXT_CARD)
         return -1;
-    if (frame_active && !SetChannelTransform((int)(words[0] & 0x00ffffffu)))
+    int mode = (int)(words[0] & 0x00ffffffu);
+#ifdef MGS_GODOT_SCENE
+    MgsGodotWaterEffect(mode == MGS_VIDEO_WATER_CANVAS);
+    MgsGodotTextCard(mode == MGS_VIDEO_TEXT_CARD);
+#endif
+    if (mode == MGS_VIDEO_WATER_CANVAS) mode = MGS_VIDEO_CANVAS;
+    if (mode == MGS_VIDEO_TEXT_CARD) mode = MGS_VIDEO_HUD;
+    if (frame_active && !SetChannelTransform(mode))
         return -1;
     return 1;
 }
@@ -127,6 +135,7 @@ int MgsVideoConfigure(const MgsVideoOptions *options)
     capture_output = 1;
     output_width = width;
     output_height = height;
+    output_fullscreen = options->fullscreen;
     widescreen = options->widescreen;
     if (widescreen) {
         unsigned divisor = GreatestCommonDivisor(4 * height, 3 * width);
@@ -147,6 +156,31 @@ int MgsVideoConfigure(const MgsVideoOptions *options)
     printf("[video] %ux%u %s, %ux internal rendering%s.\n", width, height,
            widescreen ? "widescreen" : "original aspect", scale,
            options->fullscreen ? ", fullscreen" : "");
+    return 1;
+}
+
+MgsVideoOptions MgsVideoGetOptions(void)
+{
+    return (MgsVideoOptions){output_width ? output_width : 320,
+                            output_height ? output_height : 240, widescreen, output_fullscreen};
+}
+
+int MgsVideoSetProjection(unsigned width, unsigned height, int wide)
+{
+    if (!capture_output || width < 320 || width > 2560 || height < 240 ||
+        height > (wide ? 1792u : 1920u) || (wide != 0 && wide != 1) ||
+        (wide && (width * 3 < height * 4 || width * 3 > height * 12))) return 0;
+    MgsVideoEndFrame();
+    int original = MgsVideoReferenceRequired();
+    unsigned present_width = wide ? (original ? 4 : width) : 0;
+    unsigned present_height = wide ? (original ? 3 : height) : 0;
+    if (Psyz_VideoSetPresentation(present_width, present_height, wide ? FRAME_HEIGHT : 0) != 0) return 0;
+    unsigned divisor = wide ? GreatestCommonDivisor(4 * height, 3 * width) : 1;
+    view_numerator = wide ? 4 * height / divisor : 1;
+    view_denominator = wide ? 3 * width / divisor : 1;
+    output_width = width;
+    output_height = height;
+    widescreen = wide;
     return 1;
 }
 

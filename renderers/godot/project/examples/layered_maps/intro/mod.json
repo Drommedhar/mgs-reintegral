@@ -1,0 +1,8 @@
+{
+  "schema": 1,
+  "id": "sdk.layered-maps.intro",
+  "priority": 10,
+  "stages": {
+    "disc1/d00a": { "scene": "map.tscn" }
+  }
+}

@@ -36,6 +36,8 @@ static func apply(model: Node3D, edits: Dictionary) -> String:
 			if not surface is int or surface < 0 or surface >= mesh.mesh.get_surface_count(): return "Invalid model surface index"
 			var change = edit.surfaces[surface]
 			var material: Material = mesh.get_active_material(surface)
+			if change is Dictionary and not material is BaseMaterial3D:
+				material = mesh.mesh.surface_get_material(surface)
 			if change is Material:
 				material = change
 			elif change is Dictionary and material is BaseMaterial3D:

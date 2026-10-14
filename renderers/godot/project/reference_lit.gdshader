@@ -2,10 +2,11 @@ shader_type spatial;
 render_mode diffuse_burley, specular_schlick_ggx;
 
 #include "reference_packet.gdshaderinc"
+#include "reference_order.gdshaderinc"
 
-uniform sampler2D normal_texture : hint_normal, filter_linear_mipmap, repeat_disable;
-uniform sampler2D orm_texture : filter_linear_mipmap, repeat_disable;
-uniform sampler2D emission_texture : source_color, filter_linear_mipmap, repeat_disable;
+uniform sampler2D normal_texture : hint_normal, filter_linear_mipmap_anisotropic, repeat_disable;
+uniform sampler2D orm_texture : filter_linear_mipmap_anisotropic, repeat_disable;
+uniform sampler2D emission_texture : source_color, filter_linear_mipmap_anisotropic, repeat_disable;
 uniform bool has_normal = false;
 uniform bool has_orm = false;
 uniform bool has_emission = false;
@@ -16,12 +17,17 @@ uniform float emission_energy : hint_range(0.0, 16.0) = 1.0;
 uniform float alarm_emission = 0.0;
 
 void vertex() {
+    POSITION = native_ordered_position(VERTEX, MODELVIEW_MATRIX, PROJECTION_MATRIX);
+    vec4 live = live_descriptor(UV2);
+    live_uv = live.xy;
+    live_page = int(live.z) - 1;
+    live_clut = int(live.w);
     face_visible = texture(shade_texture, UV2).a;
-    if (face_visible > 0.5) UV = texture(packet_texture, UV2).xy;
+    if (face_visible > 0.0) UV = texture(packet_texture, UV2).xy;
 }
 
 void fragment() {
-    vec4 texel = texture(albedo_texture, UV);
+    vec4 texel = reference_texel(UV);
     if (texel.a < 0.5) discard;
     ALBEDO = decode_display_color(texel.rgb);
     vec3 orm = has_orm ? texture(orm_texture, UV).rgb : vec3(1.0);

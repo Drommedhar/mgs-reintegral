@@ -2,7 +2,11 @@
 extends RefCounted
 
 const GROUP = "EventLightTemplates"
+const PATH_META = "mgs_event_light_templates_path"
 const NAMES = {1: "TemporaryFlash", 2: "WeaponSpot", 3: "AlarmSpot", 4: "AlarmFill"}
+
+static func find_in(overlay: Node3D) -> Node:
+	return overlay.get_node_or_null(overlay.get_meta(PATH_META, NodePath(GROUP))) if overlay != null else null
 
 static func create_alarm() -> SpotLight3D:
 	var alarm := SpotLight3D.new()
@@ -66,8 +70,9 @@ static func create() -> Node3D:
 	return group
 
 static func attach(overlay: Node3D) -> bool:
-	if overlay.has_node(GROUP):
-		return add_missing_alarms(overlay.get_node(GROUP), overlay)
+	var existing := find_in(overlay)
+	if existing != null:
+		return add_missing_alarms(existing, overlay)
 	var group := create()
 	overlay.add_child(group)
 	group.owner = overlay

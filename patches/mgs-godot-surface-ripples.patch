@@ -1,0 +1,13 @@
+diff --git a/source/takabe/ripple.c b/source/takabe/ripple.c
+index 19f2d1b..460f388 100644
+--- a/source/takabe/ripple.c
++++ b/source/takabe/ripple.c
+@@ -149,7 +149,7 @@ static int GetResources( Work *work, MATRIX* mat, int scale )
+ 
+     InitPacks( prim->packs[0], prim->packs[1], 8, tex );
+ #ifdef MGS_GODOT_SCENE
+-    MgsGodotRegisterEffect(prim, tex->id, 0, prim->prim_count);
++    MgsGodotRegisterRipple(prim, tex->id);
+ #endif
+     work->mat = *mat;
+     work->timer = 64;

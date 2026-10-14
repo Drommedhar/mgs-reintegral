@@ -24,7 +24,7 @@ func fixture(path: String) -> void:
 	skeleton.reset_bone_pose(0)
 	var image := Image.create(2, 2, false, Image.FORMAT_RGBA8)
 	image.fill(Color(0.2, 0.4, 0.6))
-	for index in 2:
+	for index in 3:
 		var mesh := MeshInstance3D.new()
 		mesh.name = "mesh_%03d" % index
 		mesh.position = Vector3(2, -3, -5)
@@ -32,6 +32,9 @@ func fixture(path: String) -> void:
 		var material := StandardMaterial3D.new()
 		material.albedo_texture = ImageTexture.create_from_image(image)
 		material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		if index == 2:
+			material.resource_name = "0000"
+			material.albedo_texture = null
 		mesh.material_override = material
 		source.add_child(mesh)
 		mesh.owner = source
@@ -57,6 +60,8 @@ func run() -> void:
 	check(material.cull_mode == BaseMaterial3D.CULL_BACK, "Map import changed the original face culling")
 	check(actor.get_child(0).get_bone_global_pose(0).is_equal_approx(Transform3D.IDENTITY), "Map did not use the native one-piece transform")
 	check(not actor.get_node("mesh_001").visible, "Alternate geometry is drawn with its base part")
+	var empty: StandardMaterial3D = actor.get_node("mesh_002").get_active_material(0)
+	check(empty.albedo_color.a == 0 and empty.transparency == BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR, "Null-texture surface is visible or rejected")
 	var overlay := Node3D.new()
 	Coordinates.mark_editor(overlay)
 	root.add_child(overlay)

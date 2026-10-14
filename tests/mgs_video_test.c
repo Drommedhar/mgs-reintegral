@@ -14,6 +14,7 @@ static void *command_userdata;
 static const u_long *pending;
 static int framebuffer_sampling;
 static int texture_alignment;
+static int reject_presentation;
 
 static int Record(int kind, unsigned a, unsigned b, int c, int d)
 {
@@ -27,7 +28,7 @@ int Psyz_VideoConfigureWindow(unsigned w, unsigned h, int full)
 int Psyz_VideoSetInternalResolution(unsigned scale)
 { return Record(SCALE, scale, 0, 0, 0); }
 int Psyz_VideoSetPresentation(unsigned w, unsigned h, unsigned rows)
-{ return Record(PRESENT, w, h, (int)rows, 0); }
+{ Record(PRESENT, w, h, (int)rows, 0); return reject_presentation; }
 int Psyz_GpuSetFrameTransform(unsigned n, unsigned d, int centre, int clip)
 { return Record(TRANSFORM, n, d, centre, clip); }
 int Psyz_GpuSetFramebufferSampling(int enabled)
@@ -169,13 +170,22 @@ static void CheckEffects(void)
     MgsVideoSetDrawMode(&hud, MGS_VIDEO_HUD);
     MgsVideoSetDrawMode(&world, MGS_VIDEO_WORLD);
     MgsVideoSetDrawMode(&background, MGS_VIDEO_BACKGROUND);
+    DR_TPAGE water = {0}, card = {0};
+    MgsVideoSetDrawMode(&water, MGS_VIDEO_WATER_CANVAS);
+    MgsVideoSetDrawMode(&card, MGS_VIDEO_TEXT_CARD);
     assert(getlen(&canvas) == 1 && canvas.code[0] == 0xf3000002);
     for (int which = 0; which < 2; ++which) {
         int centre = 160 + which * 320;
         MgsVideoBeginFrame(which);
         Expect(TRANSFORM, 3, 4, centre, 1);
+        assert(command_handler(card.code, 1, command_userdata) == 1);
+        assert(!framebuffer_sampling && texture_alignment);
+        Expect(TRANSFORM, 3, 4, centre, 1);
         assert(command_handler(canvas.code, 1, command_userdata) == 1);
         assert(framebuffer_sampling);
+        Expect(TRANSFORM, 1, 1, centre, 0);
+        assert(command_handler(water.code, 1, command_userdata) == 1);
+        assert(framebuffer_sampling && texture_alignment);
         Expect(TRANSFORM, 1, 1, centre, 0);
         assert(command_handler(world.code, 1, command_userdata) == 1);
         assert(!framebuffer_sampling);
@@ -267,7 +277,7 @@ static void CheckWide(void)
 {
     struct { DR_ENV packet; unsigned canary; } storage = {0};
     DR_ENV hud = {0};
-    u_long malformed = 0xf3000004;
+    u_long malformed = 0xf3000006;
     storage.canary = 0x6a173be9;
     setaddr(&storage.packet, 0x12345678);
     setlen(&storage.packet, 14);
@@ -326,6 +336,33 @@ static void CheckWide(void)
     assert(memcmp(&tagged, &storage.packet, sizeof(tagged)) == 0);
 }
 
+static void CheckLive(void)
+{
+    assert(MgsVideoSetProjection(1280, 720, 1));
+    Expect(PRESENT, 1280, 720, 224, 0);
+    assert(MgsVideoHalfWidth() == 214);
+    assert(MgsVideoSetProjection(640, 480, 0));
+    Expect(PRESENT, 0, 0, 0, 0);
+    assert(MgsVideoHalfWidth() == 160 && MgsVideoHorizontalScale() == 1.0f);
+    MgsVideoOptions options = MgsVideoGetOptions();
+    assert(options.width == 640 && options.height == 480 && !options.widescreen);
+    assert(!MgsVideoSetProjection(319, 480, 0));
+    assert(!MgsVideoSetProjection(640, 480, 2));
+    assert(!MgsVideoSetProjection(640, 720, 1));
+    reject_presentation = 1;
+    assert(!MgsVideoSetProjection(1920, 1080, 1));
+    Expect(PRESENT, 1920, 1080, 224, 0);
+    assert(MgsVideoGetOptions().width == 640 && MgsVideoHalfWidth() == 160);
+    reject_presentation = 0;
+    MgsVideoCodec(1);
+    assert(MgsVideoSetProjection(1920, 1080, 1));
+    Expect(PRESENT, 4, 3, 224, 0);
+    assert(MgsVideoHalfWidth() == 160);
+    MgsVideoCodec(0);
+    Expect(PRESENT, 1920, 1080, 224, 0);
+    assert(MgsVideoHalfWidth() == 214);
+}
+
 int main(int argc, char **argv)
 {
     assert(argc == 2);
@@ -338,7 +375,7 @@ int main(int argc, char **argv)
         else if (!strcmp(mode, "original")) options.widescreen = 0;
         else if (!strcmp(mode, "oversize")) options.width = 7680;
         else if (!strcmp(mode, "aspect")) options = (MgsVideoOptions){320, 720, 1, 0};
-        else assert(!strcmp(mode, "wide") || !strcmp(mode, "capacity"));
+        else assert(!strcmp(mode, "wide") || !strcmp(mode, "capacity") || !strcmp(mode, "live"));
         int rejected = !strcmp(mode, "oversize") || !strcmp(mode, "aspect");
         assert(MgsVideoConfigure(&options) == !rejected);
         if (!rejected) {
@@ -354,6 +391,7 @@ int main(int argc, char **argv)
             Expect(TRANSFORM, 1, 1, 0, 0);
             Expect(REGISTER, 0xf3, 0, 0, 0);
             if (!strcmp(mode, "wide")) CheckWide();
+            if (!strcmp(mode, "live")) CheckLive();
             if (!strcmp(mode, "original")) CheckOriginalOutput();
             if (!strcmp(mode, "capacity")) {
                 DR_ENV packet = {0};

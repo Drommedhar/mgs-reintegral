@@ -66,6 +66,9 @@ func fixture() -> void:
 	mesh.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 	mesh.mesh.surface_set_material(1, empty)
 	model.add_child(mesh)
+	var skeleton := Skeleton3D.new()
+	skeleton.add_bone("part_000")
+	model.add_child(skeleton)
 	scene.templates[ASSET] = model
 
 func _initialize() -> void:
@@ -74,7 +77,75 @@ func _initialize() -> void:
 func run() -> void:
 	fixture()
 	var data := snapshot()
+	var loading := data.slice(0, 68)
+	loading.encode_u32(60, 0)
+	loading.append_array(PackedInt32Array([0, 0]).to_byte_array())
+	check(SceneView.empty_loading_snapshot(loading), "Valid empty native loading snapshot was not deferred")
+	check(not SceneView.empty_loading_snapshot(data), "Visible native snapshot was deferred")
+	var invalid_loading := loading.duplicate()
+	invalid_loading.encode_u32(68, 1)
+	check(not SceneView.empty_loading_snapshot(invalid_loading), "World effects were discarded during loading")
+	invalid_loading = loading.duplicate()
+	invalid_loading.encode_float(64, NAN)
+	check(not SceneView.empty_loading_snapshot(invalid_loading), "Invalid loading projection bypassed validation")
+	check(scene.update_scene(loading).is_empty() and not scene.world_ready, "Empty loading scene enabled the authored world")
+	data.encode_u32(148, 0)
+	check(scene.update_scene(data).is_empty() and not scene.world_ready, "Loaded but hidden native parts enabled the authored world")
+	data.encode_u32(148, 3)
+	data.encode_u32(84, 0x200)
 	check(scene.update_scene(data).is_empty(), "Valid v9 scene rejected")
+	check(scene.world_ready, "First native visible part did not release authored presentation")
+	check(scene.update_scene(loading).is_empty() and scene.world_ready, "Temporary native culling hid a ready authored map")
+	check(scene.update_scene(data).is_empty(), "Cannot restore native scene after loading fixture")
+	check(scene.instances[1].thermal, "Native IR model flag did not reach the thermal source state")
+	data.encode_u32(84, 0)
+	check(scene.update_scene(data).is_empty() and not scene.instances[1].thermal, "Removed native IR flag stayed active")
+	scene.native_ordering = true
+	for raise in [-1000, 500, 0]:
+		data.encode_u32(148, 3 | ((raise & 0xffff) << 16))
+		check(scene.update_scene(data).is_empty(), "Signed native layer order rejected")
+		for mesh in scene.instances[1].meshes:
+			check(is_equal_approx(float(mesh.get_instance_shader_parameter("native_depth_bias")), raise * 0.000002), "Native layer order did not reach color mesh")
+		for mesh in scene.instances[1].metadata_meshes:
+			check(is_equal_approx(float(mesh.get_instance_shader_parameter("native_depth_bias")), raise * 0.000002), "Native layer order did not reach metadata mesh")
+	scene.native_ordering = false
+	check_presentation_camera(data)
+	var palettes := preload("res://retained_palettes.gd").new()
+	palettes.session_id = "abcdef0123456789abcdef0123456789".hex_decode()
+	for kind in [1, 2]:
+		var bytes := data.slice(152, 168) if kind == 1 else data.slice(168, 232)
+		var resource := PackedInt32Array([1, 1, kind, 0, 1, bytes.size()]).to_byte_array()
+		resource.append_array(palettes.session_id)
+		resource.append_array(bytes)
+		check(palettes.apply(resource).is_empty(), "Retained fixture resource rejected")
+	var retained := data.slice(0, 152)
+	retained.append_array(PackedInt32Array([1, 1]).to_byte_array())
+	retained.append_array(data.slice(232))
+	check(scene.update_scene(retained, palettes).is_empty(), "Retained scene rejected")
+	check(scene.instances[1].colors == data.slice(152, 168) and scene.instances[1].packet_data == data.slice(168, 232), "Retained scene differs from full snapshot")
+	retained.encode_u32(152, 2)
+	check(not scene.update_scene(retained, palettes).is_empty(), "Missing resource revision accepted")
+	palettes.deformation_supported = true
+	var extended := data.slice(0, 152)
+	extended.append_array(PackedInt32Array([1, 1, 0]).to_byte_array())
+	extended.append_array(data.slice(232))
+	check(scene.update_scene(extended, palettes).is_empty(), "Undeformed protocol32 model rejected")
+	extended.encode_u32(160, 1)
+	check(not scene.update_scene(extended, palettes).is_empty(), "Missing deformation revision accepted")
+	palettes.live_textures_supported = true
+	var live_bytes := PackedByteArray()
+	for corner in 4:
+		live_bytes.append_array(PackedFloat32Array([corner + 0.5, 0.5, 1, 0]).to_byte_array())
+	var live_resource := PackedInt32Array([1, 1, 4, 0, 1, live_bytes.size()]).to_byte_array()
+	live_resource.append_array(palettes.session_id)
+	live_resource.append_array(live_bytes)
+	check(palettes.apply(live_resource).is_empty(), "Live texture fixture rejected")
+	var live_scene := data.slice(0, 152)
+	live_scene.append_array(PackedInt32Array([1, 1, 0, 1]).to_byte_array())
+	live_scene.append_array(data.slice(232))
+	check(scene.update_scene(live_scene, palettes).is_empty(), "Live texture scene rejected")
+	check(scene.update_scene(live_scene, palettes).is_empty(), "Repeated live texture scene rejected")
+	check(palettes.resolve(1, 4, 1, 64) == live_bytes, "GPU texture padding changed retained resource")
 	if scene.instances.has(1):
 		var entry: Dictionary = scene.instances[1]
 		check(entry.asset == ASSET, "Definition-stage identity changed")
@@ -112,6 +183,7 @@ func run() -> void:
 		for index in 4:
 			data[index] = "s01a".unicode_at(index)
 		check(scene.update_scene(data).is_empty(), "Stage transition rejected")
+		check(not scene.world_ready, "Stage transition retained prior world readiness")
 		check(scene.instances[1].node == entry.node and entry.asset == ASSET, "Resident asset was replaced across stages")
 		check(entry.packet_data.decode_float(0) == 0.75, "Live UV change was frozen")
 		check(not entry.meshes[0].visible and not entry.metadata_meshes[0].visible, "Compatibility ownership did not hide both meshes")
@@ -168,6 +240,41 @@ func run() -> void:
 	empty.encode_u32(60, 0)
 	empty.append_array(PackedInt32Array([0, 0]).to_byte_array())
 	check(scene.update_scene(empty).is_empty() and scene.instances.is_empty(), "Absent instance was retained")
+	scene.disc_identity = true
+	var scoped := data.slice(0, 100)
+	scoped.append_array(PackedInt32Array([1]).to_byte_array())
+	scoped.append_array(data.slice(100))
+	scene.current_disc = 2
+	scene.materials.current_disc = 2
+	check(scene.update_scene(scoped).is_empty() and scene.instances[1].asset == ASSET, "Resident model was reassigned to the current disc")
+	var second := ASSET.replace("/disc1/", "/disc2/")
+	scene.catalog[second] = scene.catalog[ASSET].duplicate()
+	scene.templates[second] = scene.templates[ASSET].duplicate()
+	scoped.encode_u32(100, 2)
+	check(scene.update_scene(scoped).is_empty() and scene.instances[1].asset == second, "Disc-specific model identity did not change")
+	scoped.encode_u32(100, 3)
+	check(not scene.update_scene(scoped).is_empty(), "Invalid scene disc accepted")
 	print("MGS_SCENE_SNAPSHOT_TEST failures=%d" % failures)
 	scene.free()
 	quit(1 if failures else 0)
+
+func check_presentation_camera(data: PackedByteArray) -> void:
+	var rig := Camera3D.new()
+	scene.add_child(rig)
+	rig.position = Vector3(10, 2, 5)
+	rig.fov = 90
+	rig.near = 0.2
+	rig.far = 100
+	rig.h_offset = 0.1
+	var before: Vector3 = scene.instances[1].bones.part_000[0].get_bone_global_pose(0).origin
+	var native_near := scene.camera.near
+	check(scene.mod_api.register_presentation_camera(rig).is_empty(), "Cannot register camera rig")
+	check(scene.update_scene(data).is_empty(), "Camera rig snapshot rejected")
+	check(scene.camera.global_transform == rig.global_transform and scene.camera.fov == 90, "Native snapshot overwrote presentation camera")
+	check(scene.metadata_camera.transform == scene.camera.transform and is_equal_approx(scene.metadata_camera.near, 0.2) and is_equal_approx(scene.metadata_camera.h_offset, 0.1), "Metadata camera differs from presentation view")
+	check(scene.effects.transform == Transform3D.IDENTITY, "Authored camera changed native effect coordinates")
+	check(scene.instances[1].bones.part_000[0].get_bone_global_pose(0).origin == before, "Authored camera moved native geometry")
+	scene.mod_api.unregister_presentation_camera(rig)
+	check(scene.update_scene(data).is_empty(), "Returning to native camera failed")
+	check(scene.camera.transform == Transform3D.IDENTITY and scene.camera.near == native_near and scene.camera.h_offset == 0, "Camera release retained authored transform/lens")
+	rig.free()

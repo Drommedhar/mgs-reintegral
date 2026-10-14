@@ -22,6 +22,13 @@ static DG_DEF definition;
 static TestGroup fixture;
 #ifdef MGS_GODOT_SCENE
 static int captured_group, captured_model[3], capture_calls;
+static int retain_objects;
+
+int MgsGodotRetainObjects(const DG_OBJS *objects)
+{
+    return retain_objects && !(objects->flag & DG_FLAG_INVISIBLE) &&
+        (!objects->group_id || (objects->group_id & DG_CurrentGroupID));
+}
 
 void MgsGodotCaptureScene(DG_CHANL *channel, int index)
 {
@@ -144,6 +151,7 @@ static void reset(int flags, int left, int right)
     half_width = 214;
 #ifdef MGS_GODOT_SCENE
     capture_calls = 0;
+    retain_objects = 0;
 #endif
 }
 
@@ -281,6 +289,29 @@ static void check_godot_sides_and_hidden_groups(void)
 }
 #endif
 
+#ifdef MGS_GODOT_SCENE
+static void check_independent_packets(void)
+{
+    for (int width = 160; width <= 480; width += 160) {
+        reset(DG_FLAG_BOUND | DG_FLAG_GBOUND, 900, 1000);
+        half_width = width;
+        retain_objects = 1;
+        expected_group = expected_model = 0;
+        for (int frame = 0; frame < 20; ++frame) DG_SortChanlSystem(0);
+        assert(allocations == 3 && releases == 0);
+        assert(fixture.group.bound_mode == 0 && fixture.models[0].bound_mode == 0);
+        assert(captured_group == 0 && captured_model[0] == 0);
+        fixture.group.flag |= DG_FLAG_INVISIBLE;
+        for (int frame = 0; frame < 8; ++frame) DG_SortChanlSystem(0);
+        assert(releases == 3);
+        fixture.group.flag &= ~DG_FLAG_INVISIBLE;
+        fixture.group.group_id = 2;
+        DG_SortChanlSystem(0);
+        assert(allocations == 3);
+    }
+}
+#endif
+
 int main(void)
 {
 #ifdef _WIN32
@@ -294,6 +325,7 @@ int main(void)
     check_growth();
 #ifdef MGS_GODOT_SCENE
     check_godot_sides_and_hidden_groups();
+    check_independent_packets();
 #endif
     puts("Widescreen rendering preserves classic gameplay visibility");
     return 0;

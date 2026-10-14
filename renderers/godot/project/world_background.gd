@@ -9,6 +9,9 @@ func initialize(source: SubViewport) -> void:
 	camera = Camera3D.new()
 	world_3d = source.find_world_3d()
 	transparent_bg = false
+	scaling_3d_mode = Viewport.SCALING_3D_MODE_BILINEAR
+	use_taa = false
+	screen_space_aa = Viewport.SCREEN_SPACE_AA_DISABLED
 	render_target_update_mode = SubViewport.UPDATE_DISABLED
 	camera.cull_mask = LIGHT_LAYER
 	add_child(camera)
@@ -29,7 +32,14 @@ func render(source: Camera3D, extent: Vector2i) -> void:
 	camera.fov = source.fov
 	camera.size = source.size
 	camera.frustum_offset = source.frustum_offset
+	camera.h_offset = source.h_offset
+	camera.v_offset = source.v_offset
 	camera.near = source.near
 	camera.far = source.far
 	camera.environment = source.environment
+	camera.attributes = source.attributes
+	var environment := source.environment
+	if environment == null: environment = world_3d.environment
+	if environment == null: environment = world_3d.fallback_environment
+	camera.cull_mask = LIGHT_LAYER if environment != null and (environment.volumetric_fog_enabled or environment.sky != null) else 0
 	render_target_update_mode = SubViewport.UPDATE_ONCE

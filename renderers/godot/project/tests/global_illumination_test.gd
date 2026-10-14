@@ -31,6 +31,9 @@ func _initialize() -> void:
 	call_deferred("run")
 
 func run() -> void:
+	viewport.scaling_3d_mode = Viewport.SCALING_3D_MODE_BILINEAR
+	viewport.use_taa = false
+	viewport.screen_space_aa = Viewport.SCREEN_SPACE_AA_DISABLED
 	viewport.size = Vector2i(160, 160)
 	viewport.own_world_3d = true
 	viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS

@@ -1,0 +1,66 @@
+diff --git a/source/anime/effect/socom.c b/source/anime/effect/socom.c
+--- a/source/anime/effect/socom.c
++++ b/source/anime/effect/socom.c
+@@ -77,7 +77,8 @@
+ 
+ /*---------------------------------------------------------------------------*/
+ 
+-static const char anim_data_800CC1CC[] = {
++/* AN_Unknown_800D70E4 updates RGB/decay instructions before each spawn. */
++static char anim_data_800CC1CC[] = {
+     0x00,0x6b,0x04,0x00, 0x0b,0x00,0x22,0x00, 0x3e,0x00,0x5a,0x08, 0xff,0xff,0xff,0x0c,
+     0x00,0x07,0x01,0xff, 0x0a,0x00,0xc8,0x00, 0xc8,0x08,0xf0,0xf0, 0xf0,0x02,0x00,0x01,
+     0x0d,0x0f,0x08,0xff, 0xff,0xff,0x0a,0x01, 0x90,0x01,0x90,0x0c, 0x00,0x07,0x01,0xff,
+@@ -100,7 +101,7 @@
+     400,                        // size_h
+     0,                          // v
+     NULL,                       // pre_script
+-    (char *)anim_data_800CC1CC  // script
++    anim_data_800CC1CC          // script
+ };
+ 
+ /*---------------------------------------------------------------------------*/
+diff --git a/source/anime/effect/smoke3.c b/source/anime/effect/smoke3.c
+--- a/source/anime/effect/smoke3.c
++++ b/source/anime/effect/smoke3.c
+@@ -57,7 +57,8 @@
+ 
+ /*---------------------------------------------------------------------------*/
+ 
+-static const char s13a_dword_800E3280[] = {
++/* AN_Unknown_800DC6AC patches the RGB and decay instructions. */
++static char s13a_dword_800E3280[] = {
+     0x00,0x25,0x01,0x00, 0x05,0x08,0xff,0xff, 0xff,0x0c,0x00,0x05, 0x01,0xff,0x0a,0x00,
+     0x32,0x00,0x32,0x02, 0x00,0x01,0x0d,0x0c, 0x00,0x0a,0x01,0xff, 0x0a,0x00,0x64,0x00,
+     0x64,0x08,0xf4,0xf4, 0xf4,0x02,0x00,0x01, 0x0d,0x0f
+@@ -75,7 +76,7 @@
+     300,                        // size_h
+     0,                          // v
+     NULL,                       // pre_script
+-    (char *)s13a_dword_800E3280 // script
++    s13a_dword_800E3280         // script
+ };
+ 
+ /*---------------------------------------------------------------------------*/
+diff --git a/source/anime/effect/smoke_ln.c b/source/anime/effect/smoke_ln.c
+--- a/source/anime/effect/smoke_ln.c
++++ b/source/anime/effect/smoke_ln.c
+@@ -221,7 +221,8 @@
+ 
+ /*---------------------------------------------------------------------------*/
+ 
+-static const char d16e_dword_800D2BF8[] = {
++/* AN_Smoke_800CE2C4 customizes this script's RGB and decay bytes. */
++static char d16e_dword_800D2BF8[] = {
+     0x00,0xbb,0x04,0x00, 0x0b,0x00,0x36,0x00, 0x66,0x00,0x96,0x08, 0xff,0xff,0xff,0x01,
+     0xfe,0x0c,0x00,0x0f, 0x0a,0x00,0x32,0x00, 0x32,0x01,0xff,0x02, 0x00,0x01,0x0d,0x0c,
+     0x00,0x1e,0x01,0xff, 0x02,0x00,0x01,0x0d, 0x0c,0x00,0x0f,0x01, 0xff,0x08,0xf0,0xf0,
+@@ -249,7 +250,7 @@
+     500,                        // size_h
+     0,                          // v
+     NULL,                       // pre_script
+-    (char *)d16e_dword_800D2BF8 // script
++    d16e_dword_800D2BF8         // script
+ };
+ 
+ /*---------------------------------------------------------------------------*/

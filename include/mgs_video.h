@@ -6,10 +6,13 @@ typedef struct {
     int widescreen, fullscreen;
 } MgsVideoOptions;
 
-enum { MGS_VIDEO_HUD, MGS_VIDEO_WORLD, MGS_VIDEO_CANVAS, MGS_VIDEO_BACKGROUND };
+enum { MGS_VIDEO_HUD, MGS_VIDEO_WORLD, MGS_VIDEO_CANVAS, MGS_VIDEO_BACKGROUND,
+       MGS_VIDEO_WATER_CANVAS, MGS_VIDEO_TEXT_CARD };
 
 int MgsVideoParseResolution(const char *text, MgsVideoOptions *options);
 int MgsVideoConfigure(const MgsVideoOptions *options);
+MgsVideoOptions MgsVideoGetOptions(void);
+int MgsVideoSetProjection(unsigned width, unsigned height, int widescreen);
 int MgsVideoCapturesOutput(void);
 int MgsVideoHalfWidth(void);
 float MgsVideoHorizontalScale(void);

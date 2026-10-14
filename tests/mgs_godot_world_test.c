@@ -6,6 +6,7 @@
 typedef struct { O_TAG; u_long code, near_depth, far_depth; } Packet;
 static int enabled = 1;
 int MgsGodotSceneEnabled(void) { return enabled; }
+void MgsGodotReportWorldCoverage(DG_CHANL *channel, int buffer) { (void)channel; (void)buffer; }
 
 static void Clear(OT_TYPE *table) {
     for (unsigned i = 0; i < 257; ++i) {

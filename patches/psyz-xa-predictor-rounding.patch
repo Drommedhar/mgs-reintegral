@@ -1,0 +1,13 @@
+diff --git a/psyz/src/psyz/libcd.c b/psyz/src/psyz/libcd.c
+--- a/psyz/src/psyz/libcd.c
++++ b/psyz/src/psyz/libcd.c
+@@ -529,7 +529,8 @@
+     for (int j = 0; j < 28; j++) {
+         const unsigned char byte = blk[16 + sub + j * 4];
+         const int t = s4((byte >> (nibble * 4)) & 0x0F);
+-        const int s = (t * (1 << shift)) + (((*prev) * f0 + (*prev2) * f1 + 32) / 64);
++        // XA rounds the signed predictor with an arithmetic shift, not division.
++        const int s = (t * (1 << shift)) + (((*prev) * f0 + (*prev2) * f1 + 32) >> 6);
+         dst[j * stride] = clamp16(s);
+         *prev2 = *prev;
+         *prev = s;

@@ -1,0 +1,880 @@
+{
+  "font": "MGS1 Codec recreation by Andrew Gleeson (2025)",
+  "source": "https://gleeson.itch.io/mgs1-fonts",
+  "license": "CC BY-SA 4.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "changes": "ASCII 32..126 rasterized from vector outlines at 8x native coverage; top bearing removed. Original block letterforms retained. Selected monotone single-pixel diagonal staircases replaced by straight edges; endpoints, glyph bounds and font advances preserved.",
+  "smoothed_diagonals": [
+    "N",
+    "M",
+    "K",
+    "Z",
+    "/",
+    "X",
+    "Y",
+    "W"
+  ],
+  "bearing_adjustments_logical_pixels": {
+    "1": -1
+  },
+  "source_sha256": "eed89314c9ef961f38842f0533d496e6a4af28a93f10fa3f40ea964e550f9736",
+  "atlas_sha256": "5bca92a2076d111803717f425e5a900d69140a3bba1208168abfbdc9295f8d94",
+  "format": "RGBA PNG; white with alpha coverage; ASCII 32..126; 16 columns; 128x112 cells",
+  "logical_ink_box": [
+    8,
+    6
+  ],
+  "pillow_version": "12.3.0",
+  "entries": [
+    {
+      "ascii": 32,
+      "ink_bounds": null
+    },
+    {
+      "ascii": 33,
+      "ink_bounds": [
+        0,
+        0,
+        24,
+        48
+      ]
+    },
+    {
+      "ascii": 34,
+      "ink_bounds": [
+        0,
+        0,
+        40,
+        24
+      ]
+    },
+    {
+      "ascii": 35,
+      "ink_bounds": [
+        0,
+        0,
+        56,
+        48
+      ]
+    },
+    {
+      "ascii": 36,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        56
+      ]
+    },
+    {
+      "ascii": 37,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 38,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 39,
+      "ink_bounds": [
+        0,
+        0,
+        16,
+        24
+      ]
+    },
+    {
+      "ascii": 40,
+      "ink_bounds": [
+        0,
+        0,
+        32,
+        48
+      ]
+    },
+    {
+      "ascii": 41,
+      "ink_bounds": [
+        0,
+        0,
+        32,
+        48
+      ]
+    },
+    {
+      "ascii": 42,
+      "ink_bounds": [
+        0,
+        0,
+        40,
+        32
+      ]
+    },
+    {
+      "ascii": 43,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 44,
+      "ink_bounds": [
+        0,
+        32,
+        16,
+        56
+      ]
+    },
+    {
+      "ascii": 45,
+      "ink_bounds": [
+        0,
+        16,
+        64,
+        32
+      ]
+    },
+    {
+      "ascii": 46,
+      "ink_bounds": [
+        0,
+        32,
+        16,
+        48
+      ]
+    },
+    {
+      "ascii": 47,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 48,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 49,
+      "ink_bounds": [
+        16,
+        0,
+        48,
+        48
+      ]
+    },
+    {
+      "ascii": 50,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 51,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 52,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 53,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 54,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 55,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 56,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 57,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 58,
+      "ink_bounds": [
+        0,
+        0,
+        16,
+        48
+      ]
+    },
+    {
+      "ascii": 59,
+      "ink_bounds": [
+        0,
+        0,
+        16,
+        56
+      ]
+    },
+    {
+      "ascii": 60,
+      "ink_bounds": [
+        0,
+        0,
+        40,
+        48
+      ]
+    },
+    {
+      "ascii": 61,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 62,
+      "ink_bounds": [
+        0,
+        0,
+        40,
+        48
+      ]
+    },
+    {
+      "ascii": 63,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 64,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 65,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 66,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 67,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 68,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 69,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 70,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 71,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 72,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 73,
+      "ink_bounds": [
+        0,
+        0,
+        24,
+        48
+      ]
+    },
+    {
+      "ascii": 74,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 75,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 76,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 77,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 78,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 79,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 80,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 81,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 82,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 83,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 84,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 85,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 86,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 87,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 88,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 89,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 90,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 91,
+      "ink_bounds": [
+        0,
+        0,
+        32,
+        48
+      ]
+    },
+    {
+      "ascii": 92,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 93,
+      "ink_bounds": [
+        0,
+        0,
+        32,
+        48
+      ]
+    },
+    {
+      "ascii": 94,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        24
+      ]
+    },
+    {
+      "ascii": 95,
+      "ink_bounds": [
+        0,
+        32,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 96,
+      "ink_bounds": [
+        8,
+        0,
+        40,
+        16
+      ]
+    },
+    {
+      "ascii": 97,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 98,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 99,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 100,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 101,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 102,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 103,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 104,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 105,
+      "ink_bounds": [
+        0,
+        0,
+        24,
+        48
+      ]
+    },
+    {
+      "ascii": 106,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 107,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 108,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 109,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 110,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 111,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 112,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 113,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 114,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 115,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 116,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 117,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 118,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 119,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 120,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 121,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 122,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        48
+      ]
+    },
+    {
+      "ascii": 123,
+      "ink_bounds": [
+        0,
+        0,
+        48,
+        48
+      ]
+    },
+    {
+      "ascii": 124,
+      "ink_bounds": [
+        0,
+        0,
+        16,
+        56
+      ]
+    },
+    {
+      "ascii": 125,
+      "ink_bounds": [
+        0,
+        0,
+        48,
+        48
+      ]
+    },
+    {
+      "ascii": 126,
+      "ink_bounds": [
+        0,
+        0,
+        64,
+        40
+      ]
+    }
+  ]
+}
