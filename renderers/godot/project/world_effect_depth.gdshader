@@ -5,6 +5,7 @@ render_mode blend_premul_alpha, depth_draw_always, cull_disabled, unshaded, fog_
 uniform bool thermal_pass = false;
 
 void fragment() {
+    if ((surface_flags & 128) != 0) discard;
     if ((surface_flags & 16) != 0 && !FRONT_FACING) discard;
     vec4 texel = effect_sample(UV);
     if (effect_discard(texel, UV)) discard;

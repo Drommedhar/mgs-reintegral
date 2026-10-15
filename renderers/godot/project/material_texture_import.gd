@@ -34,11 +34,15 @@ func use_texture(texture: Texture2D) -> String:
 func inspect_material(material: BaseMaterial3D) -> void:
 	if material.texture_filter < BaseMaterial3D.TEXTURE_FILTER_NEAREST_WITH_MIPMAPS: return
 	use_texture(material.albedo_texture)
+	if material.heightmap_enabled: use_texture(material.heightmap_texture)
 	var normal := use_texture(material.normal_texture) if material.normal_enabled else ""
 	if not normal.is_empty(): textures[normal].normal = true
 	var roughness := use_texture(material.orm_texture if material is ORMMaterial3D else material.roughness_texture)
-	if roughness.is_empty() or normal.is_empty(): return
 	var channel: int = BaseMaterial3D.TEXTURE_CHANNEL_GREEN if material is ORMMaterial3D else material.roughness_texture_channel
+	pair_roughness(roughness, normal, channel)
+
+func pair_roughness(roughness: String, normal: String, channel: int) -> void:
+	if roughness.is_empty() or normal.is_empty(): return
 	var pair := {"source":normal, "channel":channel + 2}
 	if textures[roughness].has("pair") and textures[roughness].pair != pair:
 		textures[roughness].conflict = true
@@ -53,8 +57,8 @@ func configure() -> PackedStringArray:
 			error = "Cannot read texture import settings: " + path
 			return changed
 		var before := config.encode_to_text()
-		config.set_value("params", "mipmaps/generate", true)
 		var properties: Dictionary = textures[path]
+		config.set_value("params", "mipmaps/generate", true)
 		if properties.get("normal", false) and config.get_value("params", "compress/normal_map", 0) == 0:
 			config.set_value("params", "compress/normal_map", 1)
 		if properties.has("pair") and not properties.get("conflict", false):

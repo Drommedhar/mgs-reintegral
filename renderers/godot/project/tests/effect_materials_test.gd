@@ -7,6 +7,7 @@ const Export = preload("res://addons/mgs_editor/mod_export.gd")
 const Effects = preload("res://effect_materials.gd")
 const WorldEffects = preload("res://world_effects.gd")
 const TEXTURE = "mgs/integral-j/disc1/stage/s00a/1234.p"
+const FOOTPRINT = "mgs/integral-j/disc1/stage/s00a/dc55.p"
 var failures := 0
 
 func check(condition: bool, message: String) -> void:
@@ -43,6 +44,9 @@ func run() -> void:
 	var lamp := authoring.open_material(workspace, TEXTURE)
 	check(lamp != null, "Cannot create textured effect override")
 	var catalog := {TEXTURE:{"kind":"texture", "sha256":"matching"}, TEXTURE.replace("s00a", "d00a"):{"kind":"texture", "sha256":"matching"}}
+	var footprint := authoring.open_material(workspace, FOOTPRINT)
+	check(footprint != null and "blend_sub" in footprint.shader.code, "Footprint authoring lost subtractive material")
+	catalog[FOOTPRINT] = {"kind":"texture", "sha256":"footprint"}
 	var registry := Registry.new()
 	check(registry.configure(catalog, [workspace.root.path_join("mod.json")]).is_empty(), "Valid effect manifest rejected")
 	check(registry.effects.has(TEXTURE.replace("s00a", "d00a")), "Matching cinematic effect did not inherit override")
@@ -56,7 +60,7 @@ func run() -> void:
 	var zip := ZIPReader.new()
 	check(zip.open(archive) == OK, "Cannot open effect ZIP")
 	var files := Array(zip.get_files()).filter(func(path): return not path.ends_with("/"))
-	check(files.size() == 12, "Effect ZIP dependencies missing or unexpected")
+	check(files.size() == 17, "Effect ZIP dependencies missing or unexpected")
 	var installed := workspace.root.path_join("installed")
 	for file in files:
 		var path := installed.path_join(str(file))
@@ -67,6 +71,7 @@ func run() -> void:
 	check(reopened.configure(catalog, [installed.path_join("mod.json")]).is_empty(), "Reopened effect manifest rejected")
 	var loaded := Effects.new()
 	check(loaded.initialize(reopened.effects).is_empty(), "Relocated shaders/includes failed to load")
+	check("blend_sub" in loaded.definitions[FOOTPRINT].material.shader.code, "Footprint ZIP lost subtractive shader")
 	var restored: ShaderMaterial = loaded.definitions[Effects.SNOW].material
 	check(restored.get_shader_parameter("beam_width") == 3.5 and is_equal_approx(restored.get_shader_parameter("beam_heat"), 0.6), "ZIP reopening lost beam width/heat")
 	check(restored.get_shader_parameter("custom_texture").get_image().get_pixel(0, 0).a == 0.0, "ZIP reopening lost PNG alpha")

@@ -415,6 +415,16 @@ regions and omit those eight quads only if one accepts it. Unowned rings and oth
 effects keep their original path. A new snapshot replaces the accepted native rings;
 it does not spawn an additional disturbance each frame.
 
+SDK26 adds effect blend flag128 for native footprint floor quads (`asiato`,
+`asiato2`, `demoasi`, texture `dc55`). The packet layout remains15.35. These
+explicitly registered effects may carry subtractive blend3; other subtractive
+and framebuffer primitives retain their compatibility path. Native placement,
+left/right UV orientation, eligibility, fade and destruction remain authoritative.
+Godot uses a subtractive material with a2mm camera-facing depth bias and no
+colorless depth write, preserving the receiving surface's depth. This is a
+floor quad, not a projection onto replacement geometry at a different height.
+The Effects editor creates a matching editable/exportable footprint material.
+
 They receive lights/shadows when the selected stage overlay disables original
 lighting. Transparent original KMD parts use the same blend convention, with their
 normal/PBR maps retained. Opaque parts keep their opaque shader and shadow path.

@@ -59,7 +59,7 @@ void vertex() {
     UV = uv_color.xy;
     shade = vec3(uv_color.zw, color_blend.x);
     blend_mode = int(color_blend.y) & 7;
-    surface_flags = int(color_blend.y) & 56;
+    surface_flags = int(color_blend.y) & ~7;
     vec4 view = MODELVIEW_MATRIX * vec4(VERTEX, 1.0);
     view.z += point.w;
     POSITION = PROJECTION_MATRIX * view;

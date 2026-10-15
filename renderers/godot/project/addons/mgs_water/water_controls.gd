@@ -8,6 +8,7 @@ const PARAMETERS = {
 	"waves/speed": ["Surface", "wave_speed"],
 	"surface/roughness": ["Surface", "roughness"],
 	"surface/refraction_amount": ["Surface", "refraction_strength"],
+	"surface/intersection_fade_distance": ["Surface", "intersection_fade_distance"],
 	"reflections/steps": ["Surface", "reflection_steps"],
 	"reflections/ray_distance": ["Surface", "reflection_distance"],
 	"reflections/thickness": ["Surface", "reflection_thickness"],

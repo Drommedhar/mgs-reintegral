@@ -223,6 +223,25 @@ if(BUILD_TESTING)
     target_compile_definitions(mgs_godot_effects_test PRIVATE __psyz)
     target_compile_options(mgs_godot_effects_test PRIVATE -UNDEBUG)
     add_test(NAME mgs_godot_effects_test COMMAND mgs_godot_effects_test)
+    execute_process(COMMAND "${Python3_EXECUTABLE}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/tests/prepare_footprint_effect_test.py"
+        --output "${CMAKE_CURRENT_BINARY_DIR}"
+        COMMAND_ERROR_IS_FATAL ANY)
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
+        tests/prepare_footprint_effect_test.py vendor/mgs/source/enemy/asiato.c
+        vendor/mgs/source/enemy/asiato2.c vendor/mgs/source/enemy/demoasi.c)
+    foreach(footprint_kind RANGE 0 2)
+        add_executable(mgs_footprint_effect_${footprint_kind}_test
+            tests/mgs_footprint_effect_test.c src/mgs_godot_effects.c)
+        target_include_directories(mgs_footprint_effect_${footprint_kind}_test PRIVATE
+            "${CMAKE_CURRENT_BINARY_DIR}" include vendor/mgs/source
+            vendor/mgs/source/include vendor/psyz/psyz/include)
+        target_compile_definitions(mgs_footprint_effect_${footprint_kind}_test PRIVATE
+            __psyz MGS_NATIVE INTEGRAL MGS_GODOT_SCENE FOOTPRINT_KIND=${footprint_kind})
+        target_compile_options(mgs_footprint_effect_${footprint_kind}_test PRIVATE -UNDEBUG)
+        add_test(NAME mgs_footprint_effect_${footprint_kind}_test
+            COMMAND mgs_footprint_effect_${footprint_kind}_test)
+    endforeach()
     foreach(sensor_target mgs_ir_sensor_test mgs_godot_ir_sensor_test)
         add_executable(${sensor_target} tests/mgs_ir_sensor_test.c src/mgs_godot_effects.c)
         target_include_directories(${sensor_target} PRIVATE include vendor/mgs/source vendor/mgs/source/include vendor/psyz/psyz/include)

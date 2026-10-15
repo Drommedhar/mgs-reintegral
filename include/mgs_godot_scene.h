@@ -30,6 +30,7 @@ int MgsGodotLegacyShadowPacket(const void *packet, int type);
 void MgsGodotSortWorld(struct _DG_CHANL *channel, int buffer_index);
 void MgsGodotRegisterEffect(struct _DG_PRIM *prim, unsigned texture, int first_face, int face_count);
 void MgsGodotRegisterRipple(struct _DG_PRIM *prim, unsigned texture);
+void MgsGodotRegisterFootprint(struct _DG_PRIM *prim, unsigned texture);
 void MgsGodotRegisterLamp(struct _DG_PRIM *prim, unsigned texture);
 void MgsGodotRegisterBeam(struct _DG_PRIM *prim, unsigned texture);
 void MgsGodotRemoveEffect(struct _DG_PRIM *prim);

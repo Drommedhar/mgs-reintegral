@@ -1,6 +1,7 @@
 extends Node3D
 
 const SHADER = preload("res://world_effect.gdshader")
+const FOOTPRINT_SHADER = preload("res://world_footprint.gdshader")
 const DEPTH_SHADER = preload("res://world_effect_depth.gdshader")
 const QUAD_BYTES = 196
 const DATA_WIDTH = 192
@@ -133,7 +134,8 @@ func update_effects(payload: PackedByteArray, offset: int, stage: String, materi
 			if textures[0] == null or textures[1] == null:
 				return "Cannot load world effect texture " + identity
 			if batches.has(identity): batches[identity].node.free()
-			var pair: Array[ShaderMaterial] = materials.effect_materials.pair(identity, SHADER, DEPTH_SHADER)
+			var color_shader: Shader = FOOTPRINT_SHADER if int(bytes.decode_float(36)) & 128 else SHADER
+			var pair: Array[ShaderMaterial] = materials.effect_materials.pair(identity, color_shader, DEPTH_SHADER)
 			batches[identity] = create_batch(maxi(INITIAL_CAPACITY, nearest_po2(quads)), textures[0], textures[1], pair)
 			batches[identity].material.set_shader_parameter("screen_sized", identity == SNOW)
 			batches[identity].depth.set_shader_parameter("screen_sized", identity == SNOW)

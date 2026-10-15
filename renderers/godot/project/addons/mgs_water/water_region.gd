@@ -133,7 +133,8 @@ func begin_native_ripples() -> void:
 	ripples.native_widths.clear()
 
 func native_ripple(center: Vector3, radius: float, width: float, strength: float) -> bool:
-	if not accepts_surface_point(center) or ripples.native_rings.size() >= RippleState.LIMIT: return false
+	if not accepts_surface_point(center): return false
+	if ripples.native_rings.size() >= RippleState.LIMIT: return true
 	var point := to_local(center)
 	var scale_xz := maxf(global_basis.x.length(), global_basis.z.length())
 	ripples.native_rings.append(Vector4(point.x, point.z, radius / scale_xz, strength * 0.12))

@@ -152,7 +152,8 @@
         "patches/mgs-godot-surface-ripples.patch",
         "patches/mgs-writable-smoke-scripts.patch",
         "patches/mgs-godot-live-textures.patch",
-        "patches/mgs-godot-text-cards.patch"
+        "patches/mgs-godot-text-cards.patch",
+        "patches/mgs-godot-footprints.patch"
       ]
     },
     {

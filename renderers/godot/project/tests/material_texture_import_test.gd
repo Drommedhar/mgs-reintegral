@@ -31,11 +31,16 @@ func _initialize() -> void:
 	material.normal_enabled = true
 	material.normal_texture = texture("normal")
 	material.orm_texture = texture("orm")
+	material.heightmap_enabled = true
+	material.heightmap_texture = texture("height")
 	var imports := Imports.new()
 	imports.inspect(material)
-	check(imports.configure().size() == 3 and imports.error.is_empty(), "Used textures were not configured")
+	check(imports.configure().size() == 4 and imports.error.is_empty(), "Used textures including POM height were not configured")
 	check(imports.configure().is_empty(), "Repeated import changed configured textures")
 	var config := ConfigFile.new()
+	config.load(material.heightmap_texture.resource_path + ".import")
+	check(config.get_value("params", "mipmaps/generate"), "POM height mipmaps missing")
+	check(config.get_value("params", "compress/normal_map") == 0 and config.get_value("params", "roughness/mode") == 0, "Height map received normal or roughness filtering")
 	config.load(material.orm_texture.resource_path + ".import")
 	check(config.get_value("params", "roughness/mode") == 3, "ORM roughness did not select green")
 	check(config.get_value("params", "roughness/src_normal") == material.normal_texture.resource_path, "Normal pairing lost")

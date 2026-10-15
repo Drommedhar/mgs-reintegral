@@ -171,7 +171,8 @@ shared custom material. Keep texture mipmaps enabled for detailed surfaces;
 very sharp normal maps, roughness maps and tiny bright details can shimmer in
 motion. Evaluate them in a native run at the intended output resolution.
 
-SDK22 prepares mipmaps for textures used by mipmapped 3D materials. It also
+The SDK prepares mipmaps for textures used by mipmapped 3D materials, including
+enabled POM height maps. It also
 enables normal-map mip filtering and pairs roughness textures with their normal
 maps where that relationship is unambiguous. ORM materials use the green
 roughness channel. This runs when a mod scene/model is opened, saved or imported
@@ -184,6 +185,25 @@ in Godot's Import dock: the SDK cannot infer arbitrary shader parameter usage.
 Filtering reduces distant detail flicker; very smooth surfaces and tiny bright
 features may still need material tuning. It does not add geometry or remove
 your normal-map detail at close range.
+
+For relief on opaque custom surfaces, assign a grayscale texture under a
+StandardMaterial3D's **Height → Texture**, enable Height and **Deep Parallax**,
+then tune Scale and the layer counts. White represents raised areas. Keep
+height textures inside the mod so scene/material dependencies include them in
+the exported ZIP. POM changes surface shading; native collision and the mesh
+silhouette remain unchanged. Avoid large depth values on thin or cutout surfaces.
+
+The docks POM variant uses editable surface overrides in
+`docks_test/dock_remastered_pom.tscn`, with materials and height maps under
+`docks_test/pom/`. Open that inherited scene to edit a shared surface material.
+Its revised ComfyUI-generated maps use the color textures to identify structural
+relief: flat faces, mortar joints, panel recesses, braces and bolts. Surface
+grain, stains and painted markings stay out of the height maps; the original
+normal maps retain their fine detail. The generation record is included as
+`height-generation.json`. Both docks variants use the same
+materials, with 8–24 parallax layers and Scale values of0.3–1.0 on most surfaces.
+Featureless surfaces keep Height disabled; a flat surface needs no parallax
+texture or ray-marching work.
 
 Original files remain reference material only. Export checks known original
 content and dependencies, including embedded GLB/glTF data. Renaming an extracted
@@ -270,6 +290,14 @@ See the [snow volume guide](GODOT_SNOW.md) for collision sources, original-snow
 replacement, performance and the standalone example.
 
 ## UI, effects, cameras and multiple mods
+
+Original wet footprints now follow the native player, actor and cinematic
+footprint lifetimes in full Godot. Select the original `asiato` / `dc55` texture
+in Assets, then use **Asset tools → Edit texture's effect material** to edit
+its subtractive material or supply a replacement texture. Keep its subtractive
+shader when changing appearance. The original
+quad stays at the native floor height; moving a mod floor significantly away
+from that height requires corresponding presentation placement work.
 
 Open UI and effect entries from their grouped browsers, then edit ordinary
 Controls, materials and resources. Open cinematic clips from the expanded map

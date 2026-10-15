@@ -19,6 +19,7 @@ uniform float wave_speed : hint_range(0.0, 5.0, 0.01) = 1.0;
 uniform float geometry_footprint = 0.0;
 uniform float roughness : hint_range(0.02, 1.0) = 0.13;
 uniform float refraction_strength : hint_range(0.0, 0.1) = 0.018;
+uniform float intersection_fade_distance : hint_range(0.0, 2.0, 0.01) = 0.2;
 uniform int reflection_steps : hint_range(0, 64) = 24;
 uniform float reflection_distance : hint_range(1.0, 100.0) = 20.0;
 uniform float reflection_thickness : hint_range(0.01, 2.0) = 0.25;
@@ -32,6 +33,24 @@ uniform vec3 bottom_color : source_color = vec3(0.3, 0.32, 0.3);
 uniform float bottom_depth : hint_range(0.01, 2.0) = 0.12;
 uniform vec2 bottom_tile_size = vec2(2.0, 2.0);
 varying vec3 water_position;
+
+bool opaque_sample(vec2 uv, float depth) {
+    return depth > 0.000001 && all(greaterThanEqual(uv, vec2(0.0))) && all(lessThanEqual(uv, vec2(1.0)));
+}
+
+float reflection_coverage(vec2 uv, vec3 hit, mat4 projection_inverse) {
+    vec2 radius = vec2(exp2(roughness * 4.0)) / vec2(textureSize(scene_depth, 0));
+    float coverage = 1.0;
+    for (int corner = 0; corner < 4; corner++) {
+        vec2 offset = vec2((corner & 1) == 0 ? -1.0 : 1.0, (corner & 2) == 0 ? -1.0 : 1.0);
+        vec2 sample_uv = uv + offset * radius;
+        float depth = textureLod(scene_depth, sample_uv, 0.0).r;
+        if (!opaque_sample(sample_uv, depth)) { return 0.0; }
+        vec3 point = water_view_position(sample_uv, depth, projection_inverse);
+        coverage *= 1.0 - smoothstep(reflection_thickness, reflection_thickness * 2.0, abs(point.z - hit.z));
+    }
+    return coverage;
+}
 
 void vertex() {
     water_position = (water_inverse * MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
@@ -54,23 +73,27 @@ vec4 trace_reflection(vec3 origin, vec3 direction, mat4 projection, mat4 project
         float depth = textureLod(scene_depth, uv, 0.0).r;
         vec3 opaque = water_view_position(uv, depth, projection_inverse);
         float gap = opaque.z - point.z;
-        if (depth > 0.000001 && gap >= 0.0) {
+        if (opaque_sample(uv, depth) && gap >= 0.0) {
             float low = previous;
             float high = distance;
             for (int refine = 0; refine < 5; refine++) {
                 float middle = (low + high) * 0.5;
                 vec3 sample_point = origin + direction * middle;
                 uv = water_project(sample_point, projection);
-                opaque = water_view_position(uv, textureLod(scene_depth, uv, 0.0).r, projection_inverse);
-                if (opaque.z > sample_point.z) { high = middle; } else { low = middle; }
+                depth = textureLod(scene_depth, uv, 0.0).r;
+                opaque = water_view_position(uv, depth, projection_inverse);
+                if (opaque_sample(uv, depth) && opaque.z > sample_point.z) { high = middle; } else { low = middle; }
             }
             point = origin + direction * high;
             uv = water_project(point, projection);
-            opaque = water_view_position(uv, textureLod(scene_depth, uv, 0.0).r, projection_inverse);
+            depth = textureLod(scene_depth, uv, 0.0).r;
+            if (!opaque_sample(uv, depth)) { return vec4(0.0); }
+            opaque = water_view_position(uv, depth, projection_inverse);
             gap = opaque.z - point.z;
             float confidence = water_edge_fade(uv) * (1.0 - smoothstep(reflection_thickness * 0.5, reflection_thickness, abs(gap)));
             confidence *= 1.0 - smoothstep(reflection_distance * 0.7, reflection_distance, high);
             confidence *= 1.0 - smoothstep(reflection_view_distance * 0.7, reflection_view_distance, length(origin));
+            confidence *= reflection_coverage(uv, opaque, projection_inverse);
             return vec4(textureLod(scene_color, uv, roughness * 4.0).rgb, confidence);
         }
         previous = distance;
@@ -92,17 +115,20 @@ void fragment() {
     NORMAL = FRONT_FACING ? normal : -normal;
     float depth = textureLod(scene_depth, SCREEN_UV, 0.0).r;
     vec3 opaque = water_view_position(SCREEN_UV, depth, INV_PROJECTION_MATRIX);
+    bool has_opaque = opaque_sample(SCREEN_UV, depth);
     float separation = max(-opaque.z + VERTEX.z, 0.0);
     vec2 refracted_uv = SCREEN_UV + NORMAL.xy * refraction_strength * smoothstep(0.0, 0.4, separation);
-    vec3 refracted = water_view_position(refracted_uv, textureLod(scene_depth, refracted_uv, 0.0).r, INV_PROJECTION_MATRIX);
-    float guard = water_edge_fade(refracted_uv) * step(refracted.z, VERTEX.z - 0.01);
+    float refracted_depth = textureLod(scene_depth, refracted_uv, 0.0).r;
+    vec3 refracted = water_view_position(refracted_uv, refracted_depth, INV_PROJECTION_MATRIX);
+    float guard = opaque_sample(refracted_uv, refracted_depth) ? water_edge_fade(refracted_uv) * step(refracted.z, VERTEX.z - 0.01) : 0.0;
     refracted_uv = mix(SCREEN_UV, refracted_uv, guard);
-    refracted = water_view_position(refracted_uv, textureLod(scene_depth, refracted_uv, 0.0).r, INV_PROJECTION_MATRIX);
+    refracted_depth = textureLod(scene_depth, refracted_uv, 0.0).r;
+    refracted = water_view_position(refracted_uv, refracted_depth, INV_PROJECTION_MATRIX);
     vec3 from = (water_inverse * INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
     vec3 to = (water_inverse * INV_VIEW_MATRIX * vec4(refracted, 1.0)).xyz;
     float path = water_segment(from, to, volume_size) * length(refracted - VERTEX);
     vec3 transmission = exp(-max(absorption, vec3(0.0)) * path);
-    vec3 behind = textureLod(scene_color, refracted_uv, 0.0).rgb;
+    vec3 behind = opaque_sample(refracted_uv, refracted_depth) ? textureLod(scene_color, refracted_uv, 0.0).rgb : water_color;
     if (virtual_bottom_enabled) {
         vec3 camera_local = (water_inverse * INV_VIEW_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
         vec3 ray = refract(normalize(water_position - camera_local), water_normal, 1.0 / 1.333);
@@ -120,5 +146,6 @@ void fragment() {
     RADIANCE = reflected;
     EMISSION = ((virtual_bottom_enabled ? vec3(0.0) : behind * transmission) + water_color * (vec3(1.0) - transmission)) * (1.0 - fresnel);
     EMISSION += reflection_fallback * fresnel * (1.0 - reflected.a);
-    ALPHA = 1.0;
+    vec3 contact = (water_inverse * INV_VIEW_MATRIX * vec4(opaque, 1.0)).xyz;
+    ALPHA = has_opaque && intersection_fade_distance > 0.0 ? smoothstep(0.0, intersection_fade_distance, abs(contact.y - from.y)) : 1.0;
 }

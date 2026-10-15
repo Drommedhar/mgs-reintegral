@@ -33,5 +33,5 @@ func run() -> void:
 		quit(1)
 		return
 	receipt.store_string(JSON.stringify(Array(changed)))
-	print("MGS_LOAD_PROGRESS Material filtering prepared: %d textures" % changed.size())
+	print("MGS_LOAD_PROGRESS Material imports prepared: %d resources" % changed.size())
 	quit()

@@ -6,7 +6,8 @@
 #include <string.h>
 #undef fprintf
 
-enum { EFFECT_LIMIT = 1024, EFFECT_EMISSIVE = 8, EFFECT_ONE_SIDED = 16, EFFECT_BEAM = 32, EFFECT_RIPPLE = 64 };
+enum { EFFECT_LIMIT = 1024, EFFECT_EMISSIVE = 8, EFFECT_ONE_SIDED = 16,
+       EFFECT_BEAM = 32, EFFECT_RIPPLE = 64, EFFECT_FOOTPRINT = 128 };
 typedef struct { DG_PRIM *prim; unsigned texture, flags; int first_face, face_count; } Effect;
 typedef struct { float position[4], uv_color[4], color_blend[4]; } EffectVertex;
 static Effect effects[EFFECT_LIMIT];
@@ -36,6 +37,12 @@ void MgsGodotRegisterRipple(DG_PRIM *prim, unsigned texture) {
     if (prim->prim_count != 8 || (prim->type & 31) != DG_PRIM_POLY_FT4)
         EffectFailure("surface ripple requires eight native ring quads");
     RegisterEffect(prim, texture, 0, prim->prim_count, EFFECT_RIPPLE);
+}
+
+void MgsGodotRegisterFootprint(DG_PRIM *prim, unsigned texture) {
+    if (prim->prim_count != 1 || (prim->type & 31) != DG_PRIM_POLY_FT4)
+        EffectFailure("footprint requires one native floor quad");
+    RegisterEffect(prim, texture, 0, 1, EFFECT_FOOTPRINT);
 }
 
 void MgsGodotRegisterLamp(DG_PRIM *prim, unsigned texture) {
@@ -84,8 +91,9 @@ int MgsGodotOwnsEffect(DG_PRIM *prim, int face, const void *packet) {
     if (!identity) return 0;
     const unsigned page = PacketPage(prim, packet);
     const unsigned code = ((const POLY_FT4 *)packet)->code;
-    /* Subtractive and framebuffer effects retain their native compositor. */
-    return (page & 0x180) != 0x100 && (!(code & 2) || ((page >> 5) & 3) != 2);
+    /* Only explicitly registered footprints transfer subtractive blending. */
+    return (page & 0x180) != 0x100 &&
+        (!(code & 2) || ((page >> 5) & 3) != 2 || (effect->flags & EFFECT_FOOTPRINT));
 }
 
 static void TransformPoint(float out[3], const MATRIX *matrix, const float in[3]) {
@@ -120,7 +128,8 @@ static void EffectQuad(EffectVertex out[4], const DG_CHANL *channel, const DG_PR
     const int raw = (flags & EFFECT_EMISSIVE) && (code & 1);
     const int kind = prim->type & 31;
     const int gouraud = kind == DG_PRIM_POLY_GT4 || kind == DG_PRIM_LINE_GT2;
-    const float surface_bias = texture->id == GV_StrCode("ripple") ? 0.001f : 0.0f;
+    const float surface_bias = (flags & EFFECT_FOOTPRINT) ? 0.002f :
+        texture->id == GV_StrCode("ripple") ? 0.001f : 0.0f;
     for (int corner = 0; corner < 4; ++corner) {
         const unsigned char *uv = packet + prim->voffset + corner * prim->vstep + 4;
         const unsigned char *color = packet + prim->voffset - 4 + (gouraud ? corner * prim->vstep : 0);
