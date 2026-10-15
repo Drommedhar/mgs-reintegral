@@ -5,5 +5,6 @@ namespace ReIntegral
         public const string Version = "@MGS_RELEASE_VERSION@";
         public const string Commit = "@MGS_BUILD_COMMIT@";
         public const bool ModernRenderer = @MGS_MODERN_RENDERER@;
+        public const string DefaultRenderer = "@MGS_RENDERER_ID@";
     }
 }

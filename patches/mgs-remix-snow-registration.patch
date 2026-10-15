@@ -1,0 +1,12 @@
+--- a/source/thing/snow.c
++++ b/source/thing/snow.c
+@@ -493,6 +493,9 @@
+ 
+         Snow_800C52F0(prim->packs[0], prim->packs[1], 32, work->colors);
+         Snow_800C5544(work, entry, 0, &GM_WhereList[0]->mov);
++#ifdef MGS_REMIX_SCENE
++        MgsRemixRegisterSnow(prim);
++#endif
+ 
+         entry++;
+     }

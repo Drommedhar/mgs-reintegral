@@ -9,6 +9,9 @@
 
 int GV_Time;
 static unsigned int trace_hash;
+static int radar_ticks;
+
+void MgsRadarSetCountdown(int ticks) { radar_ticks = ticks; }
 
 static unsigned int HashBytes(unsigned int hash, const void *data,
                               size_t size) {
@@ -69,7 +72,9 @@ static void CheckFixture(const struct CountdownFixture *fixture) {
   countdown_time = fixture->time;
   countdown_proc = 123;
   trace_hash = 2166136261u;
-    s19b_countdwn_800C3C90(&work, (u_long *)&ot);
+  radar_ticks = -1;
+  s19b_countdwn_800C3C90(&work, (u_long *)&ot);
+  assert(radar_ticks == fixture->time);
   assert(countdown_time == fixture->remaining);
   assert(countdown_proc == fixture->proc);
   assert(trace_hash == fixture->trace_hash);

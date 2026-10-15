@@ -20,6 +20,25 @@ static int expected_group, expected_model;
 static DG_MDL models[3];
 static DG_DEF definition;
 static TestGroup fixture;
+#ifdef MGS_GODOT_SCENE
+static int captured_group, captured_model[3], capture_calls;
+static int retain_objects;
+
+int MgsGodotRetainObjects(const DG_OBJS *objects)
+{
+    return retain_objects && !(objects->flag & DG_FLAG_INVISIBLE) &&
+        (!objects->group_id || (objects->group_id & DG_CurrentGroupID));
+}
+
+void MgsGodotCaptureScene(DG_CHANL *channel, int index)
+{
+    assert(channel->queue[0] == &fixture.group && index == 0);
+    ++capture_calls;
+    captured_group = fixture.group.bound_mode;
+    for (int part = 0; part < 3; ++part)
+        captured_model[part] = fixture.models[part].bound_mode;
+}
+#endif
 static DG_OBJS *queue[1];
 static int stop_chanl_system_flag;
 static DG_CHANLFUNC DG_ChanlUnits[7];
@@ -130,6 +149,10 @@ static void reset(int flags, int left, int right)
     render_checks = screen_calls = 0;
     stop_chanl_system_flag = DG_HikituriFlag = 0;
     half_width = 214;
+#ifdef MGS_GODOT_SCENE
+    capture_calls = 0;
+    retain_objects = 0;
+#endif
 }
 
 static void check_render_and_gameplay(void)
@@ -145,6 +168,11 @@ static void check_render_and_gameplay(void)
         expected_group = expected_model = ranges[index][2];
         DG_SortChanlSystem(0);
         assert(render_checks == 5);
+#ifdef MGS_GODOT_SCENE
+        assert(capture_calls == 1 && captured_group == expected_group);
+        for (int model = 0; model < 3; ++model)
+            assert(captured_model[model] == expected_model);
+#endif
         assert(fixture.group.bound_mode == ranges[index][3]);
         for (int model = 0; model < 3; ++model)
             assert(fixture.models[model].bound_mode == ranges[index][3]);
@@ -233,6 +261,57 @@ static void check_growth(void)
         assert(values[index] == index % 3);
 }
 
+#ifdef MGS_GODOT_SCENE
+static void check_godot_sides_and_hidden_groups(void)
+{
+    const int widths[] = {214, 280, 480};
+    for (size_t index = 0; index < sizeof(widths) / sizeof(widths[0]); ++index)
+        for (int side = -1; side <= 1; side += 2)
+        {
+            int centre = side * (widths[index] - 10);
+            reset(DG_FLAG_BOUND | DG_FLAG_GBOUND, centre - 2, centre + 2);
+            half_width = widths[index];
+            expected_group = expected_model = 2;
+            DG_SortChanlSystem(0);
+            assert(captured_group == 2 && captured_model[0] == 2);
+            assert(fixture.group.bound_mode == 0 && fixture.models[0].bound_mode == 0);
+        }
+    for (int hidden = 0; hidden < 2; ++hidden)
+    {
+        reset(DG_FLAG_BOUND | DG_FLAG_GBOUND, -10, 10);
+        if (hidden) fixture.group.flag |= DG_FLAG_INVISIBLE;
+        else fixture.group.group_id = 2;
+        expected_group = expected_model = 0;
+        DG_SortChanlSystem(0);
+        assert(captured_group == 0 && captured_model[0] == 0);
+        assert(fixture.group.bound_mode == 0);
+    }
+}
+#endif
+
+#ifdef MGS_GODOT_SCENE
+static void check_independent_packets(void)
+{
+    for (int width = 160; width <= 480; width += 160) {
+        reset(DG_FLAG_BOUND | DG_FLAG_GBOUND, 900, 1000);
+        half_width = width;
+        retain_objects = 1;
+        expected_group = expected_model = 0;
+        for (int frame = 0; frame < 20; ++frame) DG_SortChanlSystem(0);
+        assert(allocations == 3 && releases == 0);
+        assert(fixture.group.bound_mode == 0 && fixture.models[0].bound_mode == 0);
+        assert(captured_group == 0 && captured_model[0] == 0);
+        fixture.group.flag |= DG_FLAG_INVISIBLE;
+        for (int frame = 0; frame < 8; ++frame) DG_SortChanlSystem(0);
+        assert(releases == 3);
+        fixture.group.flag &= ~DG_FLAG_INVISIBLE;
+        fixture.group.group_id = 2;
+        DG_SortChanlSystem(0);
+        assert(allocations == 3);
+    }
+}
+#endif
+
 int main(void)
 {
 #ifdef _WIN32
@@ -244,6 +323,10 @@ int main(void)
     check_packet_failures();
     check_scope_and_default();
     check_growth();
+#ifdef MGS_GODOT_SCENE
+    check_godot_sides_and_hidden_groups();
+    check_independent_packets();
+#endif
     puts("Widescreen rendering preserves classic gameplay visibility");
     return 0;
 }

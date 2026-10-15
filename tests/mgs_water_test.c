@@ -41,7 +41,7 @@ static int allocations, releases, fail_allocation;
 
 void MgsVideoSetDrawMode(void *packet, int mode)
 {
-    assert(mode == MGS_VIDEO_WORLD || mode == MGS_VIDEO_CANVAS);
+    assert(mode == MGS_VIDEO_WORLD || mode == MGS_VIDEO_WATER_CANVAS);
     setlen(packet, 0);
 }
 

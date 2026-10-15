@@ -1,0 +1,63 @@
+diff --git a/source/takabe/telop.c b/source/takabe/telop.c
+index b3d130645..edfb3e3de 100644
+--- a/source/takabe/telop.c
++++ b/source/takabe/telop.c
+@@ -5,6 +5,9 @@
+ #include "libdg/libdg.h"
+ #include "libgcl/libgcl.h"
+ #include "takabe/thing.h"
++#ifdef MGS_NATIVE
++#include "mgs_video.h"
++#endif
+ 
+ typedef struct _TelopPrims
+ {
+@@ -12,6 +15,10 @@ typedef struct _TelopPrims
+     SPRT     sprt1;
+     DR_TPAGE tpage2;
+     SPRT     sprt2;
++#ifdef MGS_NATIVE
++    DR_TPAGE text_begin;
++    DR_TPAGE text_end;
++#endif
+ } TelopPrims;
+ 
+ typedef struct _TelopSub
+@@ -67,6 +74,10 @@ void telop_800DD550(TelopSub *sub, int x, int y, DG_TEX *arg3, DG_TEX *arg4)
+     MargePrim(&sub->prims[0].tpage1, &sub->prims[0].sprt1);
+     MargePrim(&sub->prims[0].tpage2, &sub->prims[0].sprt2);
+     MargePrim(&sub->prims[0].tpage1, &sub->prims[0].tpage2);
++#ifdef MGS_NATIVE
++    MgsVideoSetDrawMode(&sub->prims[0].text_begin, MGS_VIDEO_TEXT_CARD);
++    MgsVideoSetDrawMode(&sub->prims[0].text_end, MGS_VIDEO_HUD);
++#endif
+ 
+     sub->prims[1] = sub->prims[0];
+ 
+@@ -75,6 +86,17 @@ void telop_800DD550(TelopSub *sub, int x, int y, DG_TEX *arg3, DG_TEX *arg4)
+     sub->visible = 0;
+ }
+ 
++static void TelopDrawPrims(OT_TYPE *ot, TelopPrims *prims)
++{
++#ifdef MGS_NATIVE
++    addPrim(ot, &prims->text_end);
++    addPrim(ot, &prims->tpage1);
++    addPrim(ot, &prims->text_begin);
++#else
++    addPrim(ot, &prims->tpage1);
++#endif
++}
++
+ void telop_800DD730(OT_TYPE *ot, TelopSub *sub)
+ {
+     int         shade;
+@@ -156,7 +178,7 @@ void telop_800DD730(OT_TYPE *ot, TelopSub *sub)
+         shade |= LLOAD(&prims->sprt1.r0) & RGBA_A_MASK;
+         LSTORE(shade, &prims->sprt1.r0);
+         LSTORE(shade, &prims->sprt2.r0);
+-        addPrim(ot, &prims->tpage1);
++        TelopDrawPrims(ot, prims);
+     }
+ }
+ 

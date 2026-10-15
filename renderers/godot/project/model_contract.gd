@@ -42,7 +42,7 @@ static func validate(reference: Node3D, replacement: Node3D) -> String:
 		seen[name] = true
 	return "" if seen.size() == allowed.size() else "Replacement removed an original mesh/attachment slot"
 
-static func load_model(path: String) -> Node3D:
+static func load_model(path: String, geometry_only: bool = false) -> Node3D:
 	if path.get_extension().to_lower() == "tscn":
 		var scene := load(path) as PackedScene
 		if scene == null: return null
@@ -52,6 +52,24 @@ static func load_model(path: String) -> Node3D:
 		return null
 	var document := GLTFDocument.new()
 	var state := GLTFState.new()
-	if document.append_from_file(path, state) != OK:
-		return null
-	return document.generate_scene(state) as Node3D
+	state.handle_binary_image_mode = GLTFState.HANDLE_BINARY_IMAGE_MODE_EMBED_AS_UNCOMPRESSED
+	var converter := GLTFDocumentExtensionConvertImporterMesh.new()
+	var node: Node3D
+	var result: Error
+	if Engine.is_editor_hint(): GLTFDocument.register_gltf_document_extension(converter)
+	if geometry_only and path.get_extension().to_lower() == "gltf":
+		var data = JSON.parse_string(FileAccess.get_file_as_string(path))
+		if data is Dictionary:
+			data.erase("images")
+			data.erase("textures")
+			for material in data.get("materials", []):
+				material.get("pbrMetallicRoughness", {}).erase("baseColorTexture")
+			result = document.append_from_buffer(JSON.stringify(data).to_utf8_buffer(), path.get_base_dir(), state)
+		else:
+			result = ERR_PARSE_ERROR
+	else:
+		result = document.append_from_file(path, state)
+	if result == OK:
+		node = document.generate_scene(state) as Node3D
+	if Engine.is_editor_hint(): GLTFDocument.unregister_gltf_document_extension(converter)
+	return node

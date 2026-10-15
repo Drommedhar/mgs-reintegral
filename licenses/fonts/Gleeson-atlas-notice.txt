@@ -1,0 +1,22 @@
+Reintegrated optional interface coverage atlas
+
+MGS1 Codec font recreation: Copyright 2025 Andrew Gleeson.
+Original creator and download: https://gleeson.itch.io/mgs1-fonts
+Font and derived interface-font.bmp/.json: CC BY-SA 4.0.
+License: https://creativecommons.org/licenses/by-sa/4.0/
+Keep Gleeson-fonts-CC-BY-SA-4.0.txt and this notice with the assets.
+
+Changes: ASCII glyphs rasterized from the recreated vector outlines at eight
+samples per original pixel. The font's top bearing is removed for the game's
+native 8x6 interface box. Squared block letterforms are retained. This is a
+fan recreation, not original Konami font data, and no endorsement is implied.
+The digit 1 is moved left by one logical pixel to match the menu's bearing.
+The optional --smooth version straightens monotone diagonal staircases in
+N/M/K/Z/X/Y/W and slash; it preserves outline bounds and font advance widths.
+This is an adapted presentation style, not a claim of original vector artwork.
+
+Source font: assets/fonts/mgs1-codec-gleeson.ttf
+Reproduce: python tools/build_interface_font.py --output interface-font.bmp
+Smooth variant: add --smooth (requires fontTools in addition to Pillow).
+The generator does not require game discs, extracted fonts or private data.
+The adjacent JSON records source/atlas hashes and glyph bounds.

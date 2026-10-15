@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "id": "example.native_lighting",
+  "priority": 20,
+  "extensions": [
+    {"path": "example.gdextension", "class": "MgsExampleMod", "api_version": 1}
+  ],
+  "stages": {
+    "s00a": {"scene": "stage.tscn", "original_lighting": false},
+    "s01a": {"scene": "stage.tscn", "original_lighting": false}
+  }
+}

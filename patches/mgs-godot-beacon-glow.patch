@@ -1,0 +1,36 @@
+diff --git a/source/okajima/pato_lmp.c b/source/okajima/pato_lmp.c
+index f45ff25c0..ec83b17a2 100644
+--- a/source/okajima/pato_lmp.c
++++ b/source/okajima/pato_lmp.c
+@@ -290,6 +290,9 @@ void s00a_pato_lmp_800D6550( Work* work )
+         DG_VisibleObjs(work->field_744[i].objs);
+         DG_VisibleObjs(work->field_AD4[i].objs);
+         DG_VisiblePrim(work->field_1008);
++#ifdef MGS_GODOT_SCENE
++        work->field_24[i].objs->flag |= MGS_GODOT_ALARM_ACTIVE;
++#endif
+ 
+         work->field_FE4[i] = DG_ZeroVector;
+ 
+@@ -306,6 +309,9 @@ void s00a_pato_lmp_800D6600( Work* work )
+         DG_InvisibleObjs(work->field_744[i].objs);
+         DG_InvisibleObjs(work->field_AD4[i].objs);
+         DG_InvisiblePrim(work->field_1008);
++#ifdef MGS_GODOT_SCENE
++        work->field_24[i].objs->flag &= ~MGS_GODOT_ALARM_ACTIVE;
++#endif
+     }
+ }
+ 
+@@ -930,8 +936,9 @@ temp_label_end4:
+         GM_ConfigObjectJoint(temp_s0_5);
+         GM_ConfigObjectLight(temp_s0_5, work->field_F64);
+ #ifdef MGS_GODOT_SCENE
+-        MgsGodotRegisterAlarmLight(temp_s0_4->objs);
+-        MgsGodotRegisterAlarmLight(temp_s0_5->objs);
++        temp_s0_2->objs->flag |= MGS_GODOT_ALARM_GLASS;
++        MgsGodotRegisterAlarmLight(temp_s0_4->objs, 1);
++        MgsGodotRegisterAlarmLight(temp_s0_5->objs, 0);
+ #endif
+     }
+ 

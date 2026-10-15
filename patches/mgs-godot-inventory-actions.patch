@@ -1,0 +1,315 @@
+--- a/source/menu/item.c
++++ b/source/menu/item.c
+@@ -10,6 +10,7 @@
+ #endif
+ #ifdef MGS_GODOT_SCENE
+ #include "mgs_godot_inventory.h"
++int MENU_InventoryControlled(void);
+ #endif
+ 
+ static PANEL_TEXTURE panel_tex[ MENU_ITEM_COUNT ];
+@@ -561,6 +562,29 @@
+ STATIC int dword_800AB574 = 0;
+ STATIC int dword_800AB578 = 0;
+ 
++#ifdef MGS_GODOT_SCENE
++void MENU_ItemSelect(MenuWork *work, int id)
++{
++    menu_panel_8003D2BC(work->field_1DC_menu_item.field_C_alloc, id);
++    dword_800AB574 = dword_800AB578 = 0;
++}
++
++int MENU_ItemCanUse(int id, int quantity)
++{
++    if (quantity <= 0) return 0;
++    switch (id) {
++    case IT_Ration:
++    case IT_Ketchup: return !GM_FrozenItemsState && GM_Vitality != GM_VitalityMax;
++    case IT_ColdMedicine:
++    case IT_Diazepam: return 1;
++    case IT_TimerBomb:
++        return !(GM_PlayerStatus & (PLAYER_INTRUDE | PLAYER_SQUAT | PLAYER_GROUND | PLAYER_DAMAGED | PLAYER_DOWNED)) &&
++            !dword_8009F46C && !is_disable_item(IT_TimerBomb);
++    default: return 0;
++    }
++}
++#endif
++
+ int menu_item_open(MenuWork *work)
+ {
+     int                activeItems;
+@@ -816,16 +840,11 @@
+  * @param work Pointer to the MenuWork actor.
+  * @param ot Pointer to the ordering table.
+  */
+-void item_use_check(Menu_Item_Unknown *pPanels, unsigned short press)
++void MENU_ItemUse(Menu_Item_Unknown *pPanels)
+ {
+     PANEL *pPanel;
+     short  heal_amount;
+     short  item_amount;
+-
+-    if (!(press & PAD_CIRCLE))
+-    {
+-        return;
+-    }
+ 
+     pPanel = &pPanels->field_20_array[pPanels->field_0_main.field_4_selected_idx];
+ 
+@@ -932,6 +951,11 @@
+         pPanel->field_2_num = item_amount - 1;
+         GM_Items[pPanel->field_0_id] = item_amount - 1;
+     }
++}
++
++void item_use_check(Menu_Item_Unknown *pPanels, unsigned short press)
++{
++    if (press & PAD_CIRCLE) MENU_ItemUse(pPanels);
+ }
+ 
+ /**
+@@ -1156,6 +1180,10 @@
+ {
+     GV_PAD         *pPad = work->field_24_pInput;
+     Menu_Inventory *pLeftRight;
++#ifdef MGS_GODOT_SCENE
++    GV_PAD idle_pad = {0};
++    if (MENU_InventoryControlled()) pPad = &idle_pad;
++#endif
+ 
+     // If not browsing items/weapons menu and not using Codec...
+     if (work->field_2A_state == MENU_CLOSED)
+--- a/source/menu/weapon.c
++++ b/source/menu/weapon.c
+@@ -14,6 +14,7 @@
+ #endif
+ #ifdef MGS_GODOT_SCENE
+ #include "mgs_godot_inventory.h"
++int MENU_InventoryControlled(void);
+ #endif
+ 
+ // TODO: Move to correct header
+@@ -761,6 +762,9 @@
+ 
+ int sub_8003DAFC(Menu_Inventory *pLeftRight, GV_PAD *pPad)
+ {
++#ifdef MGS_GODOT_SCENE
++    if (MENU_InventoryControlled() && pLeftRight->field_10_state != 3) return 0;
++#endif
+     if (!(pPad->status & pLeftRight->field_8_panel_conf->field_4_input))
+     {
+         dword_800AB584 = NULL;
+@@ -1460,6 +1464,10 @@
+     int             selected_id, weapon_id, xoffset;
+ 
+     pPad = work->field_24_pInput;
++#ifdef MGS_GODOT_SCENE
++    GV_PAD idle_pad = {0};
++    if (MENU_InventoryControlled()) pPad = &idle_pad;
++#endif
+ 
+     if (work->field_2A_state == MENU_CLOSED)
+     {
+@@ -1588,3 +1596,7 @@
+ {
+     dword_800ABAE8 = 0;
+ }
++
++#ifdef MGS_GODOT_SCENE
++#include "inventory_actions.h"
++#endif
+--- a/source/menu/menuman.c
++++ b/source/menu/menuman.c
+@@ -17,10 +17,14 @@
+ #include "mgs_godot_bars.h"
+ #include "mgs_godot_radar.h"
+ #include "mgs_godot_inventory.h"
++#include "mgs_godot_inventory_actions.h"
+ #include "mgs_godot_codec.h"
+ #include "mgs_godot_options.h"
+ #include "mgs_godot_title.h"
+ #include "mgs_save_ui.h"
++void MENU_InventoryActionsUpdate(MenuWork *work, int apply);
++void MENU_InventoryActionsBegin(void);
++void MENU_InventoryActionsEnd(void);
+ #endif
+ 
+ static u_char SECTION(".bss") PrimBuffer[2][8192];
+@@ -80,6 +84,9 @@
+     pOtStart = (&menu_prim)->ot;
+     work->field_24_pInput = &GM_CurrentPadData[2];
+     menu_jimaku_act(work, pOtStart);
++#ifdef MGS_GODOT_SCENE
++    MENU_InventoryActionsUpdate(work, 1);
++#endif
+     if ( ( !(GV_PauseLevel & GV_PAUSE_PAUSE) && (GM_LoadComplete > 0) ) &&
+          ( !GM_LoadRequest ) )
+     {
+@@ -98,12 +105,18 @@
+         }
+     }
+ 
++#ifdef MGS_GODOT_SCENE
++    MENU_InventoryActionsUpdate(work, 0);
++#endif
+     addPrim(pOtStart, &work->field_4C_drawEnv[GV_Clock]);
+ }
+ 
+ static void Die(MenuWork *work)
+ {
+     TInitKillFn *pIter;
++#ifdef MGS_GODOT_SCENE
++    MENU_InventoryActionsEnd();
++#endif
+ 
+     pIter = gMenuKillFns_8009E2B4;
+     while (*pIter)
+@@ -123,6 +136,9 @@
+     work->field_2A_state = MENU_CLOSED;
+     work->field_29 = 0;
+     work->field_28_flags = 0;
++#ifdef MGS_GODOT_SCENE
++    MENU_InventoryActionsBegin();
++#endif
+ 
+     work->prim = &menu_prim;
+ 
+@@ -202,6 +218,7 @@
+     MgsGodotResetBars();
+     MgsGodotResetRadar();
+     MgsGodotResetInventory();
++    MgsGodotInventoryActionsReset();
+     MgsGodotResetCodec();
+     MgsGodotResetOptions();
+     MgsGodotResetTitle();
+--- /dev/null
++++ b/source/menu/inventory_actions.h
+@@ -0,0 +1,128 @@
++#include "mgs_godot_inventory_actions.h"
++
++int menu_item_open(MenuWork *work);
++int is_disable_item(int id);
++void MENU_ItemSelect(MenuWork *work, int id);
++int MENU_ItemCanUse(int id, int quantity);
++void MENU_ItemUse(Menu_Item_Unknown *panels);
++
++static int inventory_controlled;
++int MENU_InventoryControlled(void) { return inventory_controlled; }
++
++static Menu_Inventory *InventoryMenu(MenuWork *work, unsigned side)
++{
++    return side ? &work->field_1F0_menu_weapon : &work->field_1DC_menu_item;
++}
++
++static void InventoryEntry(MgsInventoryActionView *view, unsigned side, int id, int quantity)
++{
++    MgsInventoryEntry entry = {side, id, quantity, 0};
++    if (id == -1 || (side ? !menu_weapon_isWeaponDisabled_8003DF30(id) : quantity > 0 && !is_disable_item(id)))
++        entry.flags |= MGS_INV_EQUIPPABLE;
++    if (!side && MENU_ItemCanUse(id, quantity)) entry.flags |= MGS_INV_USABLE;
++    view->entries[view->count++] = entry;
++}
++
++static void InventoryEntries(MenuWork *work, MgsInventoryActionView *view, unsigned side)
++{
++    if (view->mode == side + 1) {
++        Menu_Item_Unknown *panels = InventoryMenu(work, side)->field_C_alloc;
++        for (int i = 0; i < panels->field_0_main.field_0_array_count; ++i) {
++            PANEL *panel = &panels->field_20_array[i];
++            InventoryEntry(view, side, panel->field_0_id, panel->field_2_num);
++        }
++    } else {
++        InventoryEntry(view, side, -1, 1);
++        if (GM_GameStatus & STATE_EQUIP_OFF) return;
++        for (int id = 0; id < (side ? 10 : IT_Max); ++id) {
++            int quantity = side ? GM_Weapons[id] : GM_Items[id];
++            if (quantity >= (side ? 0 : 1)) InventoryEntry(view, side, id, quantity);
++        }
++    }
++}
++
++static MgsInventoryActionView InventoryView(MenuWork *work)
++{
++    MgsInventoryActionView view = {0};
++    if ((GV_PauseLevel & GV_PAUSE_PAUSE) || GM_LoadComplete <= 0 || GM_LoadRequest || GM_GameStatus < 0) return view;
++    view.mode = work->field_2A_state == MENU_LEFT_OPEN ? 1 : work->field_2A_state == MENU_RIGHT_OPEN ? 2 : 0;
++    if (!view.mode && work->field_2A_state != MENU_CLOSED) return view;
++    view.active = 1;
++    view.owned = view.mode && inventory_controlled;
++    view.equipped[0] = GM_Item;
++    view.equipped[1] = GM_Weapon;
++    view.selection = -1;
++    if (!view.mode) {
++        if (!(GM_GameStatus & (STATE_TAKING_PHOTO | STATE_MENU_DISABLE)) &&
++            !(GM_PlayerStatus & (PLAYER_MENU_DISABLE | PLAYER_PAD_OFF)) && !(GM_Camera.flag & 0x101) &&
++            (GM_GameStatus & (STATE_VOX_STREAM | GAME_FLAG_BIT_13)) != STATE_VOX_STREAM) {
++            if ((work->field_28_flags & 4) && !(GM_PlayerStatus & PLAYER_ITEM_DISABLE) &&
++                work->field_1DC_menu_item.field_8_panel_conf->field_4_input) view.open_mask |= 1;
++            if ((work->field_28_flags & 2) && !(GM_PlayerStatus & PLAYER_WEAPON_DISABLE) &&
++                work->field_1F0_menu_weapon.field_8_panel_conf->field_4_input) view.open_mask |= 2;
++        }
++    } else {
++        Menu_Inventory *menu = InventoryMenu(work, view.mode - 1);
++        Menu_Item_Unknown *panels = menu->field_C_alloc;
++        view.selection = panels->field_20_array[panels->field_0_main.field_4_selected_idx].field_0_id;
++        if (menu->field_10_state == 1 && sub_8003D52C() > 255 && !panels->field_0_main.field_10) {
++            view.allowed = (1u << MGS_INV_SELECT) | (1u << MGS_INV_EQUIP) | (1u << MGS_INV_CLOSE);
++            if (view.mode == 1) view.allowed |= 1u << MGS_INV_USE;
++        }
++    }
++    InventoryEntries(work, &view, 0);
++    InventoryEntries(work, &view, 1);
++    return view;
++}
++
++static void InventorySelect(MenuWork *work, unsigned side, int id)
++{
++    Menu_Item_Unknown *panels = InventoryMenu(work, side)->field_C_alloc;
++    if (panels->field_20_array[panels->field_0_main.field_4_selected_idx].field_0_id == id) return;
++    if (!side) MENU_ItemSelect(work, id);
++    else {
++        menu_panel_8003D2BC(panels, id);
++        dword_800AB5E0 = dword_800AB5E4 = 0;
++    }
++    GM_SeSet2(0, 63, SE_ITEM_SELECT);
++}
++
++static uint32_t InventoryApply(MenuWork *work, const MgsInventoryAction *action)
++{
++    Menu_Inventory *menu = InventoryMenu(work, action->side);
++    if (action->kind == MGS_INV_OPEN) {
++        int opened = action->side ? menu_weapon_update_helper_8003E4B8(work) : menu_item_open(work);
++        if (!opened) return MGS_INV_BUSY;
++        work->field_2A_state = action->side ? MENU_RIGHT_OPEN : MENU_LEFT_OPEN;
++        dword_800AB584 = menu->field_8_panel_conf;
++        GV_PauseLevel |= GV_PAUSE_MENU;
++    } else if (action->kind == MGS_INV_USE) MENU_ItemUse(menu->field_C_alloc);
++    else {
++        if (action->kind != MGS_INV_CLOSE) InventorySelect(work, action->side, action->target);
++        if (action->kind == MGS_INV_EQUIP || action->kind == MGS_INV_CLOSE) menu->field_10_state = 3;
++    }
++    inventory_controlled = 1;
++    return MGS_INV_APPLIED;
++}
++
++void MENU_InventoryActionsUpdate(MenuWork *work, int apply)
++{
++    if (!MgsGodotOwnsInventoryActions()) return;
++    if (work->field_2A_state == MENU_CLOSED) inventory_controlled = 0;
++    MgsInventoryActionView view = InventoryView(work);
++    MgsGodotInventoryActionsView(&view);
++    MgsInventoryAction action;
++    if (apply && MgsInventoryActionsTake(&action)) MgsInventoryActionsComplete(InventoryApply(work, &action));
++}
++
++void MENU_InventoryActionsBegin(void)
++{
++    inventory_controlled = 0;
++    MgsGodotInventoryActionsBegin();
++}
++
++void MENU_InventoryActionsEnd(void)
++{
++    inventory_controlled = 0;
++    MgsGodotInventoryActionsEnd();
++}

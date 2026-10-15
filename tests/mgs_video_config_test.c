@@ -18,6 +18,8 @@ static bool use_driver_vsync;
 static int vsync_mode;
 enum { PSYZ_VSYNC_LIMITLESS = 3 };
 static double target_frame_time_us = 1000000.0 / 59.94;
+static bool compensate_frame_time;
+static double frame_lateness_us;
 static struct {
     double last_frame_time_us, last_draw_time_us, target_frame_time_us;
     unsigned total_frames;
@@ -151,6 +153,23 @@ int main(void)
         assert(gpu_stats.last_frame_time_us < target_frame_time_us + 10);
     }
     puts("A late frame resumes nominal pacing without shortened catch-up frames");
+    compensate_frame_time = true;
+    frame_lateness_us = 0;
+    Uint64 started = last_frame_time;
+    for (int i = 0; i < 120; ++i) {
+        fake_counter += (i & 1) ? 2000 : 22000;
+        finish_time = fake_counter;
+        WaitForNextFrame();
+    }
+    assert((double)(last_frame_time - started) < target_frame_time_us * 120 + 500);
+    fake_counter += 500000;
+    finish_time = fake_counter;
+    WaitForNextFrame();
+    fake_counter += 2000;
+    finish_time = fake_counter;
+    WaitForNextFrame();
+    assert(gpu_stats.last_frame_time_us >= target_frame_time_us - 10);
+    puts("Godot paired busy/idle frames retain cadence; loading stalls reset the schedule");
     puts("Explicit output: allocation/clamp/fullscreen failures reject startup; defaults retain fallback");
     return 0;
 }

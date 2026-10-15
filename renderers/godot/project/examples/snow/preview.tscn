@@ -1,0 +1,71 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="../../addons/mgs_snow/snow_volume.tscn" id="1"]
+[ext_resource type="Script" path="../water_frost/preview_camera.gd" id="2"]
+
+[sub_resource type="Environment" id="Environment"]
+background_mode = 1
+background_color = Color(0.025, 0.04, 0.06, 1)
+ambient_light_source = 3
+ambient_light_color = Color(0.5, 0.65, 0.8, 1)
+ambient_light_energy = 0.65
+
+[sub_resource type="StandardMaterial3D" id="Stone"]
+albedo_color = Color(0.11, 0.14, 0.17, 1)
+roughness = 0.85
+
+[sub_resource type="BoxMesh" id="Floor"]
+size = Vector3(20, 0.3, 20)
+material = SubResource("Stone")
+
+[sub_resource type="PlaneMesh" id="Roof"]
+size = Vector2(7, 6)
+material = SubResource("Stone")
+
+[sub_resource type="BoxMesh" id="Wall"]
+size = Vector3(0.3, 3, 6)
+material = SubResource("Stone")
+
+[sub_resource type="BoxMesh" id="Block"]
+size = Vector3(2, 1, 2)
+material = SubResource("Stone")
+
+[node name="SnowExample" type="Node3D"]
+
+[node name="Environment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment")
+
+[node name="Moonlight" type="DirectionalLight3D" parent="."]
+rotation_degrees = Vector3(-45, -30, 0)
+light_color = Color(0.65, 0.8, 1, 1)
+light_energy = 1.5
+shadow_enabled = true
+
+[node name="Camera" type="Camera3D" parent="."]
+position = Vector3(10, 5, 13)
+rotation_degrees = Vector3(-14, 37, 0)
+current = true
+environment = SubResource("Environment")
+script = ExtResource("2")
+
+[node name="Floor" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.15, 0)
+mesh = SubResource("Floor")
+
+[node name="ReversedRoof" type="MeshInstance3D" parent="."]
+position = Vector3(-3, 3, -2)
+rotation_degrees = Vector3(180, 0, 0)
+mesh = SubResource("Roof")
+
+[node name="Wall" type="MeshInstance3D" parent="."]
+position = Vector3(-6.5, 1.5, -2)
+mesh = SubResource("Wall")
+
+[node name="Block" type="MeshInstance3D" parent="."]
+position = Vector3(3, 0.5, 0)
+mesh = SubResource("Block")
+
+[node name="SnowVolume" parent="." instance=ExtResource("1")]
+position = Vector3(0, 4, 0)
+volume_size = Vector3(17, 8, 17)
+flake_size = Vector2(0.025, 0.06)

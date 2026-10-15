@@ -1,5 +1,9 @@
 # RE:INTEGRAL — 0.2.0-alpha.1
 
+This page describes the native 0.2.0-alpha.1 release. The separate Godot SDK
+development package includes its own player and mod creator guides; Godot
+features described there are not part of this native alpha download.
+
 This alpha adds optional graphics enhancements, faster map loading, and German
 or US English text/speech imported locally from your own discs.
 
@@ -45,6 +49,12 @@ linked into the game. The executables are unsigned.
    faster map loading and Psycho Mantis memory profiles. Defaults leave gameplay
    aids disabled. **Graphics** contains the three optional rendering enhancements.
 4. Click **Save and play**. Disc identities are checked before the game starts.
+
+For 240p comparison recordings, select **320x240** and turn **Widescreen** off.
+This uses 1× internal rendering with the original 4:3 output. Turn off the three
+**Graphics** enhancements for a baseline comparison. Resolution does not set
+the frame rate; the developer **Frame limit** stops the game after a number of
+frames, so leave it at **0** for an ongoing recording.
 
 For optional German or US English text and speech, open **Languages → Import
 from discs…**, choose the regional release and its two images, then click

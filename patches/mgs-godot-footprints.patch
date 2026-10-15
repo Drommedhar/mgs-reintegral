@@ -1,0 +1,72 @@
+diff --git a/source/enemy/asiato.c b/source/enemy/asiato.c
+index 1c5bd1a4b..f6d47cdd8 100644
+--- a/source/enemy/asiato.c
++++ b/source/enemy/asiato.c
+@@ -10,6 +10,9 @@
+ #include "libhzd/libhzd.h"
+ #include "game/game.h"
+ #include "strcode.h"
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_scene.h"
++#endif
+ 
+ /*---------------------------------------------------------------------------*/
+ 
+@@ -115,6 +118,9 @@ static int AsiatoChar_GetResources(Work *work, MATRIX *world, int arg2, int vy)
+         {
+             AsiatoChar_InitPacks(prim->packs[0], tex, 2, 48, 48, 48);
+             AsiatoChar_InitPacks(prim->packs[1], tex, 2, 48, 48, 48);
++#ifdef MGS_GODOT_SCENE
++            MgsGodotRegisterFootprint(prim, tex->id);
++#endif
+             DG_SetPos2(&svec2, &svec1);
+             DG_PutPrim(work->prim);
+             return 0;
+diff --git a/source/enemy/asiato2.c b/source/enemy/asiato2.c
+index dd2b15b43..92d590889 100644
+--- a/source/enemy/asiato2.c
++++ b/source/enemy/asiato2.c
+@@ -5,6 +5,9 @@
+ #include "libdg/libdg.h"
+ #include "game/game.h"
+ #include "strcode.h"
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_scene.h"
++#endif
+ 
+ /*---------------------------------------------------------------------------*/
+ 
+@@ -136,6 +139,9 @@ static int Asiato2Char_GetResources(Work *work, MATRIX *world, int arg2, int hei
+ 
+     Asiato2Char_InitPacks(prim->packs[0], tex, 2, 48, 48, 48);
+     Asiato2Char_InitPacks(prim->packs[1], tex, 2, 48, 48, 48);
++#ifdef MGS_GODOT_SCENE
++    MgsGodotRegisterFootprint(prim, tex->id);
++#endif
+ 
+     DG_SetPos2(&pos, &rot);
+     DG_PutPrim(work->prim);
+diff --git a/source/enemy/demoasi.c b/source/enemy/demoasi.c
+index 60cd4bf5e..bae7e315e 100644
+--- a/source/enemy/demoasi.c
++++ b/source/enemy/demoasi.c
+@@ -9,6 +9,9 @@
+ #include "libgv/libgv.h"
+ #include "game/game.h"
+ #include "strcode.h"
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_scene.h"
++#endif
+ 
+ /*---------------------------------------------------------------------------*/
+ 
+@@ -123,6 +126,9 @@ static int GetResources(Work *work, int which, int height, int arg3)
+ 
+     InitPacks(prim->packs[0], tex, 2, 48, 48, 48);
+     InitPacks(prim->packs[1], tex, 2, 48, 48, 48);
++#ifdef MGS_GODOT_SCENE
++    MgsGodotRegisterFootprint(prim, tex->id);
++#endif
+ 
+     DG_SetPos(work->world);
+     DG_PutPrim(work->prim);

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Xml;
@@ -6,9 +7,22 @@ using System.Xml.Serialization;
 
 namespace ReIntegral
 {
+    public sealed class VisualMod
+    {
+        public string Id = "";
+        public string Name = "";
+        public string Package = "";
+        public bool Enabled = true;
+
+        public override string ToString() { return Name == Id ? Id : Name + " (" + Id + ")"; }
+    }
+
     public sealed class Settings
     {
         public int Version = 1;
+        public string RendererId = "";
+        public bool GodotLegacyRendering;
+        public bool GodotSharpText = true;
         public string DiscOne = "";
         public string DiscTwo = "";
         public string TextPack = "";
@@ -29,6 +43,7 @@ namespace ReIntegral
         public string Stage = "title";
         public string Frames = "0";
         public string Advanced = "";
+        public List<VisualMod> Mods = new List<VisualMod>();
 
         public static Settings Load(string path)
         {

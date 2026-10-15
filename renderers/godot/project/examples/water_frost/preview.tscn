@@ -1,0 +1,124 @@
+[gd_scene load_steps=19 format=3]
+
+[ext_resource type="PackedScene" path="res://addons/mgs_water/pool.tscn" id="1"]
+[ext_resource type="PackedScene" path="res://addons/mgs_water/ocean.tscn" id="2"]
+[ext_resource type="Script" path="res://addons/mgs_water/frost_layer.gd" id="3"]
+[ext_resource type="Script" path="preview_camera.gd" id="4"]
+[ext_resource type="PackedScene" path="res://addons/mgs_water/puddle.tscn" id="5"]
+[ext_resource type="Shader" path="res://addons/mgs_water/surface.gdshader" id="6"]
+
+[sub_resource type="FastNoiseLite" id="BottomNoise"]
+frequency = 0.045
+
+[sub_resource type="Gradient" id="BottomColors"]
+colors = PackedColorArray(0.08, 0.1, 0.12, 1, 0.6, 0.5, 0.35, 1)
+
+[sub_resource type="NoiseTexture2D" id="BottomTexture"]
+width = 128
+height = 128
+seamless = true
+color_ramp = SubResource("BottomColors")
+noise = SubResource("BottomNoise")
+
+[sub_resource type="ShaderMaterial" id="PuddleMaterial"]
+shader = ExtResource("6")
+shader_parameter/virtual_bottom_enabled = true
+shader_parameter/bottom_texture = SubResource("BottomTexture")
+shader_parameter/bottom_color = Color(0.7, 0.7, 0.7, 1)
+shader_parameter/wave_height = 0.006
+shader_parameter/wavelength = 0.7
+shader_parameter/reflection_steps = 16
+
+[sub_resource type="ProceduralSkyMaterial" id="SkyMaterial"]
+sky_top_color = Color(0.12, 0.21, 0.3, 1)
+sky_horizon_color = Color(0.5, 0.6, 0.65, 1)
+
+[sub_resource type="Sky" id="Sky"]
+sky_material = SubResource("SkyMaterial")
+
+[sub_resource type="Environment" id="Environment"]
+background_mode = 2
+sky = SubResource("Sky")
+ambient_light_source = 3
+ambient_light_energy = 0.4
+tonemap_mode = 2
+
+[sub_resource type="StandardMaterial3D" id="Stone"]
+albedo_color = Color(0.28, 0.31, 0.32, 1)
+roughness = 0.8
+
+[sub_resource type="StandardMaterial3D" id="Metal"]
+albedo_color = Color(0.3, 0.22, 0.12, 1)
+metallic = 0.8
+roughness = 0.35
+
+[sub_resource type="BoxMesh" id="Floor"]
+material = SubResource("Stone")
+size = Vector3(12, 0.5, 10)
+
+[sub_resource type="BoxMesh" id="Wall"]
+material = SubResource("Stone")
+size = Vector3(1, 4, 8)
+
+[sub_resource type="CylinderMesh" id="Cylinder"]
+material = SubResource("Metal")
+top_radius = 0.5
+bottom_radius = 0.5
+height = 4.0
+
+[node name="WaterFrostPreview" type="Node3D"]
+
+[node name="Environment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+rotation_degrees = Vector3(-45, -30, 0)
+light_color = Color(0.8, 0.9, 1, 1)
+light_energy = 1.5
+shadow_enabled = true
+
+[node name="Camera" type="Camera3D" parent="."]
+position = Vector3(9, 7, 12)
+rotation_degrees = Vector3(-26, 37, 0)
+far = 1800.0
+script = ExtResource("4")
+
+[node name="Pool" parent="." instance=ExtResource("1")]
+animate_preview = true
+
+[node name="Floor" type="MeshInstance3D" parent="."]
+position = Vector3(0, -3, 0)
+mesh = SubResource("Floor")
+
+[node name="Wall" type="MeshInstance3D" parent="."]
+position = Vector3(-4, -1, 0)
+mesh = SubResource("Wall")
+
+[node name="ColdMetal" type="MeshInstance3D" parent="."]
+position = Vector3(1, -0.5, -1)
+mesh = SubResource("Cylinder")
+
+[node name="Frost" type="Node3D" parent="."]
+script = ExtResource("3")
+targets = Array[NodePath]([NodePath("../Wall"), NodePath("../ColdMetal")])
+
+[node name="RaisedPool" parent="." instance=ExtResource("1")]
+position = Vector3(14, 1, 0)
+volume_size = Vector3(4, 2, 4)
+animate_preview = true
+
+[node name="RaisedPoolFloor" type="MeshInstance3D" parent="."]
+position = Vector3(14, -1, 0)
+scale = Vector3(0.4, 1, 0.5)
+mesh = SubResource("Floor")
+
+[node name="DistantOcean" parent="." instance=ExtResource("2")]
+position = Vector3(0, -3, -900)
+animate_preview = true
+
+[node name="Puddle" parent="." instance=ExtResource("5")]
+position = Vector3(7, 0.5, 5)
+animate_preview = true
+
+[node name="Surface" parent="Puddle" index="0"]
+material_override = SubResource("PuddleMaterial")

@@ -5,7 +5,7 @@
 #include <psyz/video.h>
 #include <assert.h>
 
-static int deterministic, clock_failure, clock_changes, suppressed;
+static int deterministic, clock_failure, clock_changes, audio_loading;
 static unsigned pacing_changes;
 static PsyzVsyncMode pacing = PSYZ_VSYNC_AUTO;
 
@@ -26,11 +26,9 @@ int Psyz_VideoSetVsyncMode(PsyzVsyncMode mode)
     pacing = mode;
     return 0;
 }
-int Psyz_AudioSetOutputSuppressed(int value)
+void Psyz_AudioSetLoading(int value)
 {
-    assert(deterministic);
-    suppressed = value;
-    return 0;
+    audio_loading = value;
 }
 
 int main(void)
@@ -38,7 +36,7 @@ int main(void)
     assert(MgsLoadingConfigure(0));
     MgsLoadingBegin("s16d");
     MgsLoadingEnd();
-    assert(!clock_changes && !pacing_changes && !suppressed);
+    assert(!clock_changes && !pacing_changes && !audio_loading);
     clock_failure = 1;
     assert(!MgsLoadingConfigure(1) && !deterministic);
     clock_failure = 0;
@@ -48,9 +46,9 @@ int main(void)
         pacing = (PsyzVsyncMode)mode;
         for (int load = 0; load < 2; ++load) {
             MgsLoadingBegin("s16d");
-            assert(pacing == PSYZ_VSYNC_LIMITLESS && suppressed);
+            assert(pacing == PSYZ_VSYNC_LIMITLESS && audio_loading && MgsLoadingActive());
             MgsLoadingEnd();
-            assert(pacing == mode && !suppressed && clock_changes == 2);
+            assert(pacing == mode && !audio_loading && !MgsLoadingActive() && clock_changes == 2);
         }
     }
     assert(pacing_changes == 16);

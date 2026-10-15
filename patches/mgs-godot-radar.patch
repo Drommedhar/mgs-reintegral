@@ -1,0 +1,86 @@
+diff --git a/source/menu/menuman.c b/source/menu/menuman.c
+index 814444b48..15643ce5f 100644
+--- a/source/menu/menuman.c
++++ b/source/menu/menuman.c
+@@ -15,7 +15,7 @@
+ #endif
+ #ifdef MGS_GODOT_SCENE
+ #include "mgs_godot_bars.h"
+-#include "mgs_godot_scene.h"
++#include "mgs_godot_radar.h"
+ #endif
+ 
+ static u_char SECTION(".bss") PrimBuffer[2][8192];
+@@ -195,9 +195,9 @@ void MENU_ResetSystem(void)
+ #endif
+ #ifdef MGS_GODOT_SCENE
+     MgsGodotResetBars();
+-    MgsRadarBeginFrame(MgsGodotSceneEnabled());
++    MgsGodotResetRadar();
+ #elif defined(MGS_NATIVE)
+-    MgsRadarBeginFrame(0);
++    MgsRadarBeginFrame(0, 0);
+ #endif
+     if (menu_prim.next > menu_prim.end)
+     {
+diff --git a/source/menu/radar.c b/source/menu/radar.c
+index 979a1e942..b6f487667 100644
+--- a/source/menu/radar.c
++++ b/source/menu/radar.c
+@@ -923,7 +923,10 @@ void draw_seg(MenuPrim *pGlue, int alertLevel, int code)
+         }
+     }
+ 
+-    LoadImage(&rect_800AB490, (u_long *)image_8009E338);
++#ifdef MGS_NATIVE
++    if (!MgsRadarOwnsDrawing())
++#endif
++        LoadImage(&rect_800AB490, (u_long *)image_8009E338);
+ 
+     // Draw the static elements around the counter (two horizontal lines and the dot).
+     pCounterOrnamentUV = gStaticCounterElsUVs_8009E3C8;
+@@ -993,6 +996,9 @@ void menu_radar_draw_state(MenuWork *work, u_long *ot, int radarMode, int alertL
+     switch (radarMode)
+     {
+     case ALERT_JAMMING:
++#ifdef MGS_NATIVE
++        if (!MgsRadarOwnsDrawing())
++#endif
+         LoadImage(&rect_800AB490, (u_long *)image_8009E338);
+         draw_mode(work->prim, 6, 3);
+         draw_long_console(work->prim, 3);
+@@ -1252,6 +1258,21 @@ void draw_radar(MenuWork *work, u_long *ot)
+     addPrim(ot, &work->radar.dr_env[GV_Clock]);
+ }
+ 
++#ifdef MGS_NATIVE
++static void radar_present_owned(MenuWork *work)
++{
++    /* Retain native presentation side effects without inserting GPU commands. */
++    static unsigned char storage[131072];
++    OT_TYPE ordering = {0};
++    MenuPrim saved = *work->prim;
++    work->prim->next = storage;
++    work->prim->end = storage + sizeof(storage);
++    work->prim->ot = (u_long *)&ordering;
++    draw_radar(work, (u_long *)&ordering);
++    *work->prim = saved;
++}
++#endif
++
+ void menu_radar_update_8003B350(MenuWork *work, u_long *ot)
+ {
+     int pos;
+@@ -1293,7 +1314,11 @@ void menu_radar_update_8003B350(MenuWork *work, u_long *ot)
+             {
+                 work->radar.pos_y = pos;
+                 set_radar_pos(work, GV_Clock);
+-                draw_radar(work, ot);
++#ifdef MGS_NATIVE
++                if (MgsRadarOwnsDrawing()) radar_present_owned(work);
++                else
++#endif
++                    draw_radar(work, ot);
+             }
+         }
+     }

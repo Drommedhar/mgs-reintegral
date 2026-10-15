@@ -42,8 +42,8 @@ call to the original `NewMovie(0x97ed)` after initial stage setup. No movie fram
 or end conditions were forced. The 1,800-VSync capture shows the Metal Gear
 schematic sequence. A second run reached `n_frames = 413` of the 414-frame clip,
 stopped XA and destroyed the original movie actor, then exited normally at
-3,600 VSyncs. Local evidence is in
-[`build/movie-audit`](../build/movie-audit): `movie-frame.bmp`, `movie-run.log`,
+3,600 VSyncs. Undistributed local evidence was recorded in
+`build/movie-audit`: `movie-frame.bmp`, `movie-run.log`,
 `movie-complete.log`, and the debugger command scripts.
 
 This is component validation. It does not establish an authored campaign

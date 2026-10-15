@@ -1,0 +1,7 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3]
+
+[ext_resource type="Shader" path="frost.gdshader" id="1"]
+
+[resource]
+render_priority = -20
+shader = ExtResource("1")

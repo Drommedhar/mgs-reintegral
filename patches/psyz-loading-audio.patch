@@ -1,0 +1,138 @@
+diff --git a/psyz/include/psyz/audio.h b/psyz/include/psyz/audio.h
+index a105961..06dce77 100644
+--- a/psyz/include/psyz/audio.h
++++ b/psyz/include/psyz/audio.h
+@@ -59,6 +59,12 @@ void Psyz_AudioSetServiceCallback(void (*service)(void));
+ /* Refill SDL audio on the owning game thread when PSYZ_POLL_IRQ_ONLY is set. */
+ void Psyz_AudioPump(void);
+ 
++/* Loading keeps native samples audible and bounds the host queue. */
++void Psyz_AudioSetLoading(int loading);
++/* Service SPU interrupts on the owning thread while presentation is blocked,
++ * without advancing the game's frame clock. Never call inside a native frame. */
++void Psyz_AudioPumpWait(void);
++
+ /* Discard accelerated presentation audio while preserving the deterministic
+  * SPU/IRQ timeline and the caller's independent pause state. Returns -1 if
+  * the deterministic clock is disabled, otherwise 0. */
+@@ -72,6 +78,7 @@ typedef struct {
+     int paused;
+     unsigned starvation_events;
+     unsigned starved_frames;
++    unsigned wait_frames;
+ } PsyzAudioStats;
+ 
+ /* Empty refills measure the SDL input queue, not hardware underruns. */
+diff --git a/psyz/src/platform/sdl3_audio.c b/psyz/src/platform/sdl3_audio.c
+index 652c3ac..18cd6c6 100644
+--- a/psyz/src/platform/sdl3_audio.c
++++ b/psyz/src/platform/sdl3_audio.c
+@@ -18,6 +18,7 @@ static bool pumping;
+ static bool queued_once;
+ static bool output_paused;
+ static bool output_suppressed;
++static bool loading_output;
+ static bool timeline_priming = true;
+ static unsigned timeline_buffer_frames = BUFFER_FRAMES;
+ static PsyzAudioStats audio_stats;
+@@ -92,7 +93,17 @@ void Psyz_AudioSetServiceCallback(void (*service)(void)) {
+     service_tasks = service;
+ }
+ 
+-static void QueueTimelineAudio(const short* buffer, int frames) {
++void Psyz_AudioSetLoading(int loading) {
++    loading_output = loading != 0;
++}
++
++static bool SilentSamples(const short* buffer, int frames) {
++    for (int sample = 0; sample < frames * N_CHANNELS; ++sample)
++        if (buffer[sample]) return false;
++    return true;
++}
++
++static void QueueTimelineAudio(const short* buffer, int frames, bool loading_frame) {
+     if (!sdl_stream) {
+         return;
+     }
+@@ -103,7 +114,14 @@ static void QueueTimelineAudio(const short* buffer, int frames) {
+         }
+         return;
+     }
++    const bool accelerated = loading_output && loading_frame;
++    if (accelerated && SilentSamples(buffer, frames)) return;
+     int queued = SDL_GetAudioStreamQueued(sdl_stream);
++    while (accelerated && !timeline_priming &&
++           queued > (int)(timeline_buffer_frames * N_CHANNELS * SAMPLE_SIZE)) {
++        SDL_Delay(1);
++        queued = SDL_GetAudioStreamQueued(sdl_stream);
++    }
+     if (queued < 0) {
+         ERRORF("cannot query queued audio: %s", SDL_GetError());
+         abort();
+@@ -158,11 +176,34 @@ static void PumpTimelineAudio(void) {
+         Psyz_AudioLock();
+         Psyz_SpuPullSamplesServiced(buffer, (int)frames, service_tasks);
+         Psyz_AudioUnlock();
+-        QueueTimelineAudio(buffer, (int)frames);
++        QueueTimelineAudio(buffer, (int)frames, true);
+         due = Psyz_ClockAudioFramesDue();
+     }
+ }
+ 
++void Psyz_AudioPumpWait(void) {
++#ifdef PSYZ_POLL_IRQ_ONLY
++    if (!sdl_stream || pumping || output_paused || output_suppressed ||
++        Psyz_ClockFrameActive()) return;
++    int queued = SDL_GetAudioStreamQueued(sdl_stream);
++    if (queued < 0) {
++        ERRORF("cannot query presentation-wait audio: %s", SDL_GetError());
++        abort();
++    }
++    int frames = (int)timeline_buffer_frames - queued / (N_CHANNELS * SAMPLE_SIZE);
++    if (frames <= 0) return;
++    if (frames > BUFFER_FRAMES) frames = BUFFER_FRAMES;
++    short buffer[BUFFER_FRAMES * N_CHANNELS];
++    pumping = true;
++    Psyz_AudioLock();
++    Psyz_SpuPullSamplesServiced(buffer, frames, service_tasks);
++    Psyz_AudioUnlock();
++    audio_stats.wait_frames += (unsigned)frames;
++    QueueTimelineAudio(buffer, frames, false);
++    pumping = false;
++#endif
++}
++
+ void Psyz_AudioPump(void) {
+ #ifdef PSYZ_POLL_IRQ_ONLY
+     if (Psyz_ClockDeterministic()) {
+@@ -268,6 +309,7 @@ void Psyz_AudioDestroy(void) {
+     service_tasks = NULL;
+     pumping = queued_once = false;
+     output_paused = output_suppressed = false;
++    loading_output = false;
+     timeline_priming = true;
+     audio_stats = (PsyzAudioStats){0};
+     last_refill_ns = 0;
+diff --git a/psyz/src/psyz/clock.c b/psyz/src/psyz/clock.c
+index 496400b..e56303c 100644
+--- a/psyz/src/psyz/clock.c
++++ b/psyz/src/psyz/clock.c
+@@ -34,6 +34,7 @@ int Psyz_ClockSetDeterministic(int enabled) {
+ }
+ 
+ int Psyz_ClockDeterministic(void) { return deterministic; }
++int Psyz_ClockFrameActive(void) { return frame_active; }
+ 
+ uint32_t Psyz_ClockNowUs(void) {
+     return deterministic ? (uint32_t)(now_ticks * 50 / 441) : Psyz_OsNowUs();
+diff --git a/psyz/src/psyz/clock_internal.h b/psyz/src/psyz/clock_internal.h
+index ecfb1c2..e66ba51 100644
+--- a/psyz/src/psyz/clock_internal.h
++++ b/psyz/src/psyz/clock_internal.h
+@@ -10,5 +10,6 @@ void Psyz_ClockBeginFrame(int pal);
+ unsigned Psyz_ClockAudioFramesDue(void);
+ int Psyz_ClockAdvanceAudioSample(void);
+ void Psyz_ClockEndFrame(void);
++int Psyz_ClockFrameActive(void);
+ 
+ #endif

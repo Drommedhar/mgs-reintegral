@@ -1,0 +1,21 @@
+RE:INTEGRAL high-quality presentation fonts
+
+TeX Gyre Heros Regular, version 2.501, by Boguslaw Jackowski and Janusz M. Nowacki.
+Copyright 2006-2018 by its authors and contributors. Unmodified font distributed
+under the GUST Font License; see GUST-FONT-LICENSE.txt and LPPL-1.3c.txt.
+Official source: https://mirrors.ctan.org/fonts/tex-gyre.zip
+Heros is a Helvetica-style substitute, not original Metal Gear Solid artwork.
+
+MGS1 Codec font recreation, copyright 2025 Andrew Gleeson.
+https://gleeson.itch.io/mgs1-fonts
+Source font and derived interface-font.png: CC BY-SA 4.0.
+See Gleeson-fonts-CC-BY-SA-4.0.txt and Gleeson-atlas-notice.txt.
+The PNG uses alpha coverage, smoothed diagonal outlines and a corrected digit1
+bearing. Runtime fitting preserves locally prepared original glyph metrics.
+
+Generator adapted from
+https://github.com/ImperishableNEET/mgs1-reintegrated
+commit f83139e8f32ae14032bfe32a87dacb1c57cc559e, under MIT.
+Rebuild the PNG with requirements-fonts.txt installed:
+python tools/build_interface_font.py --smooth
+Asset sources and hashes are pinned in sources.lock.json.

@@ -1,5 +1,4 @@
 diff --git a/source/menu/radio.c b/source/menu/radio.c
-index b57dfaf..10f263a 100644
 --- a/source/menu/radio.c
 +++ b/source/menu/radio.c
 @@ -18,6 +18,18 @@
@@ -19,14 +18,14 @@ index b57dfaf..10f263a 100644
 +    return enabled && (status & PAD_TRIANGLE) && !(flags & 1);
 +}
  #endif
- 
- static SPRT             SECTION(".bss") gRadioNumberSprt_800bd9b0;
-@@ -1218,11 +1230,21 @@ skip_fading:
+
+ #ifdef MGS_GODOT_SCENE
+@@ -1300,11 +1312,21 @@
          draw_radio_wait_mark(work, ot);
-         if ((pPad->release &
+         if (CODEC_IS(MGS_CODEC_ADVANCE) || ((pPad->release &
               (PAD_UP | PAD_DOWN | PAD_LEFT | PAD_RIGHT | PAD_TRIANGLE | PAD_CROSS | PAD_SQUARE | PAD_CIRCLE)) &&
--            work->field_212 == 0)
-+            work->field_212 == 0
+-            work->field_212 == 0))
++            work->field_212 == 0)
 +#ifdef MGS_NATIVE
 +            || (ReiCodecTurboHeld(pPad->status, work->field_218->field_18) && !(GV_Time % 6))
 +#endif
@@ -44,12 +43,12 @@ index b57dfaf..10f263a 100644
          }
          if (!(pPad->status & work->field_212))
          {
-@@ -1271,7 +1293,11 @@ skip_fading:
+@@ -1353,7 +1375,11 @@
          }
          else
          {
--            if (!(pCharaStruct2->field_18 & 1) && (pPad->release & PAD_CROSS))
-+            if (!(pCharaStruct2->field_18 & 1) && ((pPad->release & PAD_CROSS)
+-            if (!(pCharaStruct2->field_18 & 1) && (CODEC_IS(MGS_CODEC_SKIP) || (pPad->release & PAD_CROSS)))
++            if (!(pCharaStruct2->field_18 & 1) && (CODEC_IS(MGS_CODEC_SKIP) || (pPad->release & PAD_CROSS)
 +#ifdef MGS_NATIVE
 +                || ReiCodecTurboHeld(pPad->status, pCharaStruct2->field_18)
 +#endif

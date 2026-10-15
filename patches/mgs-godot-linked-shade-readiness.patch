@@ -1,0 +1,30 @@
+diff --git a/source/libdg/shade.c b/source/libdg/shade.c
+index e2e5653..9e086cc 100644
+--- a/source/libdg/shade.c
++++ b/source/libdg/shade.c
+@@ -246,7 +246,9 @@ void DG_ShadeChanl( DG_CHANL *chanl, int idx )
+         {
+             if ( obj->bound_mode != 0
+ #ifdef MGS_GODOT_SCENE
+-                 || ( MgsGodotRetainObjects( objs ) && obj->packs[ idx ] != NULL )
++                 || ( MgsGodotRetainObjects( objs ) && obj->packs[ idx ] != NULL &&
++                      ( !(obj->model->flag & DG_MODEL_INDIRECT) ||
++                        objs->objs[obj->model->parent].packs[idx] != NULL ) )
+ #endif
+                )
+             {
+diff --git a/source/takabe/libdg2.c b/source/takabe/libdg2.c
+index e966ef1..2dedb92 100644
+--- a/source/takabe/libdg2.c
++++ b/source/takabe/libdg2.c
+@@ -1987,7 +1987,9 @@ void FogShadeChanl_800D6A04(DG_CHANL *chanl, int index)
+                 obj = objs->objs;
+                 for (n_models = objs->n_models; n_models > 0; n_models--)
+                 {
+-                    if (obj->bound_mode != 0 || (retained && obj->packs[index]))
++                    if (obj->bound_mode != 0 || (retained && obj->packs[index] &&
++                        (!(obj->model->flag & DG_MODEL_INDIRECT) ||
++                         objs->objs[obj->model->parent].packs[index])))
+                     {
+ #ifdef MGS_NATIVE
+                         DG_MulRotMatrix0(&obj->world, (MATRIX *)SCRPAD_ADDR);

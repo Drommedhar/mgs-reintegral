@@ -1,0 +1,131 @@
+diff --git a/source/libdg/chanl.c b/source/libdg/chanl.c
+index 404cbdf0b..125c5e5bf 100644
+--- a/source/libdg/chanl.c
++++ b/source/libdg/chanl.c
+@@ -88,14 +88,14 @@ static void CopyDrawEnv( DG_CHANL *cp, DRAWENV *envp, int isbg )
+     cp->new_clip_rect.h = env.clip.h;
+     SetDrawEnv( cp->new_env, &env );
+ #ifdef MGS_NATIVE
+-    MgsVideoTagChannel(cp->new_env, cp == &DG_Chanls[1]);
++    MgsVideoTagChannel(cp->new_env, cp == &DG_Chanls[0] ? MGS_VIDEO_BACKGROUND : cp == &DG_Chanls[1] ? MGS_VIDEO_WORLD : MGS_VIDEO_HUD);
+ #endif
+ 
+     env.clip.x += shift;
+     env.ofs[ 0 ] += shift;
+     SetDrawEnv( &cp->new_env[ 1 ], &env );
+ #ifdef MGS_NATIVE
+-    MgsVideoTagChannel(&cp->new_env[1], cp == &DG_Chanls[1]);
++    MgsVideoTagChannel(&cp->new_env[1], cp == &DG_Chanls[0] ? MGS_VIDEO_BACKGROUND : cp == &DG_Chanls[1] ? MGS_VIDEO_WORLD : MGS_VIDEO_HUD);
+ #endif
+ 
+     if ( isbg )
+@@ -103,14 +103,14 @@ static void CopyDrawEnv( DG_CHANL *cp, DRAWENV *envp, int isbg )
+         env.isbg = 0;
+         SetDrawEnv( &bg_drawenv[ 1 ], &env );
+ #ifdef MGS_NATIVE
+-        MgsVideoTagChannel(&bg_drawenv[1], 0);
++        MgsVideoTagChannel(&bg_drawenv[1], MGS_VIDEO_BACKGROUND);
+ #endif
+ 
+         env.clip.x -= shift;
+         env.ofs[ 0 ] -= shift;
+         SetDrawEnv( &bg_drawenv[ 0 ], &env );
+ #ifdef MGS_NATIVE
+-        MgsVideoTagChannel(&bg_drawenv[0], 0);
++        MgsVideoTagChannel(&bg_drawenv[0], MGS_VIDEO_BACKGROUND);
+ #endif
+     }
+ }
+@@ -172,11 +172,17 @@ void DG_DrawChanlSystem( int which )
+ #ifdef MGS_NATIVE
+     MgsVideoBeginFrame(which);
+     MgsTextureCorrectionSelect(which);
++#endif
++#ifdef MGS_REMIX_SCENE
++    MgsRemixDrawScene(which);
+ #endif
+     DrawOTag( (OT_TYPE *)&DG_Chanls[ 0 ].env1[ which ] );
+ #ifdef MGS_NATIVE
+     MgsVideoEndFrame();
+ #endif
++#ifdef MGS_REMIX_SCENE
++    MgsRemixFinishScene();
++#endif
+ }
+ 
+ void DG_ClearChanlSystem( int which )
+@@ -233,6 +239,9 @@ void DG_SortChanlSystem( int which )
+     u_short *time;
+     DG_CHANLFUNC *func;
+ 
++#ifdef MGS_REMIX_SCENE
++    MgsRemixCapturePresentation(which);
++#endif
+     time = &DG_ChanlTime[ 1 ];
+ #ifdef MGS_NATIVE
+     MgsVisibilityBegin( MgsVideoHalfWidth() != 160 );
+@@ -267,6 +276,9 @@ void DG_SortChanlSystem( int which )
+         {
+             *time++ = GetRCnt( RCntCNT1 );
+             ( *func )( &DG_Chanls[ 1 ], which );
++#ifdef MGS_REMIX_SCENE
++            if (num == 7 && i == 4) MgsRemixCaptureScene(&DG_Chanls[1], which);
++#endif
+             func++;
+         }
+ 
+@@ -304,6 +316,9 @@ int DG_QueueObjs( DG_OBJS *objs )
+     if ( n >= cp->prim_index ) return -1;
+     cp->queue[ n++ ] = objs;
+     cp->objs_index = n;
++#ifdef MGS_REMIX_SCENE
++    MgsRemixRegisterInstance(objs);
++#endif
+ #ifdef MGS_GODOT_SCENE
+     MgsGodotRegisterInstance(objs);
+ #endif
+@@ -328,6 +343,9 @@ void DG_DequeueObjs( DG_OBJS *objs )
+     }
+     return;
+ found:
++#ifdef MGS_REMIX_SCENE
++    MgsRemixRemoveInstance(objs);
++#endif
+ #ifdef MGS_GODOT_SCENE
+     MgsGodotRemoveInstance(objs);
+ #endif
+@@ -360,6 +378,10 @@ void DG_DequeuePrim( DG_PRIM *prim )
+     DG_CHANL *cp;
+     void **oque;
+ 
++#ifdef MGS_REMIX_SCENE
++    MgsRemixRemoveEffect(prim);
++#endif
++
+     which = prim->chanl + 1;
+     cp = &DG_Chanls[ which ];
+ 
+diff --git a/source/libdg/loader.c b/source/libdg/loader.c
+index c0f38665f..66082ba0a 100644
+--- a/source/libdg/loader.c
++++ b/source/libdg/loader.c
+@@ -98,6 +98,9 @@ int DG_LoadInitKmd( void *buf, int id )
+     }
+ #ifdef MGS_GODOT_SCENE
+     MgsGodotRegisterModel(def, id);
++#endif
++#ifdef MGS_REMIX_SCENE
++    MgsRemixRegisterModel(def, id);
+ #endif
+     return 1;
+ }
+@@ -360,6 +363,9 @@ int DG_LoadInitKmdar( void *buf, int id )
+ 
+ #ifdef MGS_GODOT_SCENE
+         MgsGodotRegisterModel(def, kmd->id);
++#endif
++#ifdef MGS_REMIX_SCENE
++        MgsRemixRegisterModel(def, kmd->id);
+ #endif
+         GV_SetCache( GV_CacheID( kmd->id, 'k' ), def );
+         kmd = (DG_KMDPACK *)mdl;

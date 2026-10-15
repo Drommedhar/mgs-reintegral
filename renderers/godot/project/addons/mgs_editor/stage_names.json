@@ -1,0 +1,862 @@
+{
+  "source": "https://github.com/FoxdieTeam/mgs_reversing#overlays",
+  "local_source": "vendor/mgs/README.md (revision pinned in sources.lock.json)",
+  "stages": {
+    "abst": {
+      "name": "Save / Load Menu",
+      "kind": "UI",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "brf": {
+      "name": "Briefing",
+      "kind": "Presentation",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "camera": {
+      "name": "JPEG Photo Menu",
+      "kind": "UI",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "change": {
+      "name": "Disc Change",
+      "kind": "Presentation",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "d00a": {
+      "name": "Loading Dock (Cutscene)",
+      "kind": "Cinematic",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "d01a": {
+      "name": "Heliport (Cutscene)",
+      "kind": "Cinematic",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "d03a": {
+      "name": "Holding Cell (Cutscene)",
+      "kind": "Cinematic",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "d11c": {
+      "name": "Communication Tower B (Cutscene)",
+      "kind": "Cinematic",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "d16e": {
+      "name": "Underground Base (Cutscene)",
+      "kind": "Cinematic",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "d18a": {
+      "name": "Supply Route (Cutscene)",
+      "kind": "Cinematic",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "d18ar": {
+      "name": "Supply Route (Cutscene) (RED)",
+      "kind": "Cinematic",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "demosel": {
+      "name": "Demo Theater",
+      "kind": "UI",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "ending": {
+      "name": "Ending Demo (SCENE 28-1)",
+      "kind": "Cinematic",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "endingr": {
+      "name": "Ending Demo (SCENE 28-1) (RED)",
+      "kind": "Cinematic",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "init": {
+      "name": "Common assets",
+      "kind": "Shared assets",
+      "configured": false,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "init_tux": {
+      "name": "Tuxedo assets",
+      "kind": "Shared assets",
+      "configured": false,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "init_ve": {
+      "name": "Very Easy assets",
+      "kind": "Shared assets",
+      "configured": false,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "opening": {
+      "name": "Opening Movie",
+      "kind": "Presentation",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "option": {
+      "name": "Options Menu",
+      "kind": "UI",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "preope": {
+      "name": "Previous Operations",
+      "kind": "UI",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "rank": {
+      "name": "Ranking Screen",
+      "kind": "UI",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "roll": {
+      "name": "Staff Roll",
+      "kind": "UI",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s00a": {
+      "name": "Loading Dock",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s01a": {
+      "name": "Heliport",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s02a": {
+      "name": "Tank Hangar",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s02b": {
+      "name": "Tank Hangar",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s02c": {
+      "name": "Tank Hangar (Before Contacting Meryl)",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s02d": {
+      "name": "Tank Hangar (After Contacting Meryl)",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s02e": {
+      "name": "Tank Hangar (After Torture)",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s03a": {
+      "name": "Holding Cell",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s03ar": {
+      "name": "Holding Cell (RED)",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s03b": {
+      "name": "Medical Room",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s03c": {
+      "name": "Medical Room",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s03d": {
+      "name": "Holding Cell",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s03dr": {
+      "name": "Holding Cell (RED)",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s03e": {
+      "name": "Holding Cell (vs. Soldiers)",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s03er": {
+      "name": "Holding Cell (vs. Soldiers) (RED)",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s04a": {
+      "name": "Armory",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s04b": {
+      "name": "Armory South (vs. Ocelot)",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s04br": {
+      "name": "Armory South (vs. Ocelot) (RED)",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s04c": {
+      "name": "Armory South",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s05a": {
+      "name": "Canyon",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s06a": {
+      "name": "Warhead Storage Building 1F",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s07a": {
+      "name": "Warhead Storage Building B1",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s07b": {
+      "name": "Commander's Room",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s07br": {
+      "name": "Commander's Room (RED)",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s07c": {
+      "name": "Warhead Storage Building B1",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s07cr": {
+      "name": "Warhead Storage Building B1 (RED)",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s08a": {
+      "name": "Warhead Storage Building B2",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s08b": {
+      "name": "Laboratory",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s08br": {
+      "name": "Laboratory (RED)",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s08c": {
+      "name": "Corridor",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s08cr": {
+      "name": "Corridor (RED)",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s09a": {
+      "name": "Caves",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s09ar": {
+      "name": "Caves (RED)",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s10a": {
+      "name": "Underground Passage",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s10ar": {
+      "name": "Underground Passage (RED)",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s11a": {
+      "name": "Communication Tower A",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s11b": {
+      "name": "Communication Tower Roof",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s11c": {
+      "name": "Communication Tower B",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s11d": {
+      "name": "Communication Tower A Wall",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s11e": {
+      "name": "Communication Tower B Elevator",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s11g": {
+      "name": "Communication Tower B Roof",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s11h": {
+      "name": "Communication Tower B Roof (vs. Hind D)",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s11i": {
+      "name": "Communication Tower Walkway",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s12a": {
+      "name": "Snowfield",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s12b": {
+      "name": "Snowfield (After vs. Sniper Wolf)",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s12c": {
+      "name": "Snowfield (After vs. Sniper Wolf)",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s13a": {
+      "name": "Blast Furnace",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s14e": {
+      "name": "Cargo Elevator",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s15a": {
+      "name": "Warehouse",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s15b": {
+      "name": "Warehouse North",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s15c": {
+      "name": "Warehouse",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s16a": {
+      "name": "Underground Base (1F)",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s16b": {
+      "name": "Underground Base (2F)",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s16c": {
+      "name": "Underground Base (3F)",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s16d": {
+      "name": "Underground Base (Control Room)",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s17a": {
+      "name": "Supply Route (vs. REX)",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s17ar": {
+      "name": "Supply Route (vs. REX) (RED)",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s18a": {
+      "name": "Supply Route (vs. Liquid)",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s18ar": {
+      "name": "Supply Route (vs. Liquid) (RED)",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s19a": {
+      "name": "Escape Route (Garage)",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s19ar": {
+      "name": "Escape Route (Garage) (RED)",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s19b": {
+      "name": "Escape Route (Tunnel)",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s19br": {
+      "name": "Escape Route (Tunnel) (RED)",
+      "kind": "Gameplay",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s20a": {
+      "name": "Ending Demo (SCENE 28-1)",
+      "kind": "Cinematic",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "s20ar": {
+      "name": "Ending Demo (SCENE 28-1) (RED)",
+      "kind": "Cinematic",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "select": {
+      "name": "Debug Menu",
+      "kind": "Debug",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "select1": {
+      "name": "Debug Menu Stage Select (s00a-s04c)",
+      "kind": "Debug",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "select2": {
+      "name": "Debug Menu Stage Select (s05a-s09a)",
+      "kind": "Debug",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "select3": {
+      "name": "Debug Menu Stage Select (s10a-s14e)",
+      "kind": "Debug",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "select4": {
+      "name": "Debug Menu Stage Select (s15a-s20a)",
+      "kind": "Debug",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "selectd": {
+      "name": "Debug Menu Demo Select",
+      "kind": "Debug",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "sound": {
+      "name": "Debug Menu Sound Test",
+      "kind": "Debug",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    },
+    "title": {
+      "name": "Title Screen",
+      "kind": "UI",
+      "configured": true,
+      "discs": [
+        1,
+        2
+      ]
+    }
+  },
+  "disc_source": "docs/data/godot_presentation_coverage.json"
+}

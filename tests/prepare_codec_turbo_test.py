@@ -21,8 +21,8 @@ def main():
     root = Path(__file__).resolve().parent.parent
     source = (root / "vendor/mgs/source/menu/radio.c").read_text(encoding="utf-8")
     helper = block(source, "static int ReiCodecTurboHeld(")
-    wait = block(source[source.index("draw_radio_wait_mark(work, ot);"):], "if ((pPad->release &")
-    interrupt = block(source, "if (!(pCharaStruct2->field_18 & 1) && ((pPad->release & PAD_CROSS)")
+    wait = block(source[source.index("draw_radio_wait_mark(work, ot);"):], "if (CODEC_IS(MGS_CODEC_ADVANCE)")
+    interrupt = block(source, "if (!(pCharaStruct2->field_18 & 1) && (CODEC_IS(MGS_CODEC_SKIP)")
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(helper + "\nstatic void Wait(Work *work, Pad *pPad) {\n" + wait +
                           "\n}\nstatic void Interrupt(Work *work, Pad *pPad) {\n"

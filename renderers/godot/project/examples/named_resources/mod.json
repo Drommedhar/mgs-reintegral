@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "id": "example.named-resources",
+  "priority": 10,
+  "stages": {"s00a": {"scene": "marker.tscn"}},
+  "resources": {
+    "finish/amber": {"path": "amber.tres"},
+    "finish/teal": {"path": "teal.tres"}
+  }
+}

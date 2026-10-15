@@ -13,6 +13,19 @@ def point(vector):
     return vector[0] / 1000, -vector[1] / 1000, -vector[2] / 1000
 
 
+def part_owners(count, parts):
+    owners = list(range(len(parts)))
+    for owner in range(count):
+        linked, visited = owner, set()
+        while linked != -1:
+            if linked < 0 or linked >= len(parts) or linked in visited:
+                raise ValueError("Invalid extended KMD part chain")
+            visited.add(linked)
+            owners[linked] = owner
+            linked = parts[linked].extension
+    return owners
+
+
 def resolve_vertex(parts: list[Part], owner: int, index: int):
     for _ in parts:
         part = parts[owner]
@@ -80,7 +93,11 @@ class Gltf:
             "pbrMetallicRoughness": {"metallicFactor": 0, "roughnessFactor": 1},
             "extras": {"mgsTextureId": identity, "mgsModelFlags": flags},
         }
-        if identity in textures:
+        if texture == 0:
+            # DG_WriteObjPacketUV uses the null texture for ID zero.
+            material["pbrMetallicRoughness"]["baseColorFactor"] = [0, 0, 0, 0]
+            material["extras"]["mgsNullTexture"] = True
+        elif identity in textures:
             index = len(self.document["images"])
             self.document["images"].append({"uri": textures[identity]["uri"]})
             self.document["textures"].append({"source": index, "sampler": 0})
@@ -163,7 +180,8 @@ def face_vertices(parts, part_index, face, origins, texture_size, color_layout):
             raise ValueError("KMD normal index out of range")
         normal = point(part.normals[normal_index])
         length = math.sqrt(sum(value * value for value in normal))
-        normal = tuple(value / length for value in normal) if length else None
+        # DG lighting uses vertex-minus-light vectors; KMD normals point inward.
+        normal = tuple(-value / length for value in normal) if length else None
         vertices.append(
             (position, uv, (owner, 0, 0, 0), (1, 0, 0, 0), shade_uv, normal)
         )
@@ -240,6 +258,7 @@ def convert_model(identity, count, parts, textures, path):
     return {
         "parts": count,
         "extendedParts": len(parts),
+        "partOwners": part_owners(count, parts),
         "colorCount": color_count,
         "surfaces": sum(len(m["primitives"]) for m in gltf.document["meshes"]),
         "unresolvedTextures": sorted(

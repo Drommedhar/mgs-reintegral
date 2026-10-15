@@ -1,0 +1,107 @@
+diff --git a/source/libgcl/command.c b/source/libgcl/command.c
+index 2473d963b..4890f7134 100644
+--- a/source/libgcl/command.c
++++ b/source/libgcl/command.c
+@@ -3,6 +3,9 @@
+ #include <stdio.h>
+ #include "mgstype.h"
+ #include "game/game.h"
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_declarations.h"
++#endif
+ 
+ static GCL_SCRIPT current_script;
+ 
+@@ -48,6 +51,9 @@ int GCL_Command( char *ptr )
+     u_short id;
+     GCL_COMMANDLIST *cl;
+     int ret, ofs;
++#ifdef MGS_GODOT_SCENE
++    const void *previous_command = MgsGodotCommandScope(ptr);
++#endif
+ 
+     id = GCL_GetShort( ptr );
+     cl = FindCommand( id );
+@@ -60,6 +66,9 @@ int GCL_Command( char *ptr )
+     GCL_SetArgTop( ptr );
+ 
+     ret = ( *cl->func )( ptr );
++#ifdef MGS_GODOT_SCENE
++    MgsGodotCommandScope(previous_command);
++#endif
+ 
+     GCL_UnsetCommandLine();
+ 
+diff --git a/source/libgcl/gcl_init.c b/source/libgcl/gcl_init.c
+index 7fca360ea..290171e63 100644
+--- a/source/libgcl/gcl_init.c
++++ b/source/libgcl/gcl_init.c
+@@ -1,6 +1,9 @@
+ #include "libgcl.h"
+ #include "mgstype.h"
+ #include "strcode.h"     // for GCX_* defs
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_sources.h"
++#endif
+ #include "libgv/libgv.h" // for GV_SetLoader
+ #ifdef MGS_NATIVE
+ #include "game/game.h"
+@@ -25,6 +28,9 @@ static int GCL_InitFunc(void *top, int id)
+ {
+     if (id == scenerio_code)
+     {
++#ifdef MGS_GODOT_SCENE
++        MgsGodotSelectScriptSource(top);
++#endif
+         GCL_LoadScript(top);
+     }
+ 
+diff --git a/source/takabe/elevator.c b/source/takabe/elevator.c
+index cc45443e9..d89e1d0ba 100644
+--- a/source/takabe/elevator.c
++++ b/source/takabe/elevator.c
+@@ -10,6 +10,10 @@
+ #include "takabe/thing.h"
+ #include "bullet/bakudan.h"
+ #include "strcode.h"
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_actors.h"
++#include "mgs_godot_scene.h"
++#endif
+ 
+ typedef struct _Work
+ {
+@@ -451,6 +455,11 @@ void ElevatorAct_800D8EA8(Work *work)
+ 
+         msg++;
+     }
++#ifdef MGS_GODOT_SCENE
++    MgsGodotElevatorSample sample = {{pos->vx, pos->vy, pos->vz}, GV_Time,
++        work->f5C0, work->f584, work->f580, !(work->object1.objs->flag & DG_FLAG_INVISIBLE)};
++    MgsGodotElevatorUpdate(work, &sample);
++#endif
+ }
+ 
+ void Elevator_800D9FC4(Work *, SVECTOR *);
+@@ -465,6 +474,9 @@ void Elevator_800DA3F8(Work *, HZD_GRP *);
+ 
+ void ElevatorDie_800D97D8(Work *work)
+ {
++#ifdef MGS_GODOT_SCENE
++    MgsGodotActorRemove(work);
++#endif
+     Elevator_800DA2E0(work);
+     Elevator_800DA268(work);
+ 
+@@ -736,6 +748,11 @@ void *NewElevator(int name, int where, int argc, char **argv)
+             GV_DestroyActor(&work->actor);
+             return NULL;
+         }
++#ifdef MGS_GODOT_SCENE
++        MgsGodotActorBinding binding = {MgsGodotGetInstanceId(work->object1.objs),
++            work->object1.objs->def->n_x_models, name, where};
++        MgsGodotElevatorCreate(work, &binding);
++#endif
+     }
+ 
+     return (void *)work;

@@ -13,11 +13,15 @@ if (-not (Select-String -LiteralPath (Join-Path $build 'CMakeCache.txt') -Patter
     throw 'Release packaging requires a RelWithDebInfo build.'
 }
 $output = [IO.Path]::GetFullPath($OutputDirectory, $project)
+$renderer = Get-Content -LiteralPath (Join-Path $build 'renderer.json') -Raw | ConvertFrom-Json
+if ($renderer.backend -ne 'native') {
+    throw 'This package script supports native renderer packages. Godot SDK/runtime bundling is not implemented yet.'
+}
 $name = "reintegral-$Version-windows-x86"
 $staging = Join-Path $output ($name + '-' + [Guid]::NewGuid().ToString('N'))
 $package = Join-Path $staging $name
 New-Item -ItemType Directory -Path $package -Force | Out-Null
-foreach ($file in @('RE-INTEGRAL.exe', 'mgs-integral-native.exe')) {
+foreach ($file in @('RE-INTEGRAL.exe', 'mgs-integral-native.exe', 'renderer.json')) {
     Copy-Item -LiteralPath (Join-Path $build $file) -Destination $package
 }
 Copy-Item -LiteralPath (Join-Path $build 'language-importer') -Destination $package -Recurse

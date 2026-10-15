@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="camera.gd" id="1"]
+
+[node name="PresentationCamera" type="Camera3D"]
+near = 0.01
+far = 250.0
+script = ExtResource("1")

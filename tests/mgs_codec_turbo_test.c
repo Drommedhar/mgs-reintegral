@@ -11,6 +11,9 @@
 #define PAD_CROSS 0x4000
 #define PAD_SQUARE 0x8000
 #define PAD_CIRCLE 0x2000
+enum { MGS_CODEC_ADVANCE = 1, MGS_CODEC_SKIP };
+static int codec_command;
+#define CODEC_IS(kind) (codec_command == (kind))
 typedef struct { int field_18, field_14_bInExecBlock, field_0_state; void *field_C_pScript; } Chara;
 typedef struct { int field_212, field_210_codec_state; Chara *field_218; } Work;
 typedef struct { unsigned short status, release; } Pad;
@@ -49,6 +52,15 @@ int main(int argc, char **argv)
     assert(chara.field_14_bInExecBlock == (enabled ? 0 : 1));
     assert((chara.field_18 & 0x100) == (enabled ? 0x100 : 0));
     interrupts = stops = 0; pad.status = 0; pad.release = PAD_CROSS;
+    Interrupt(&work, &pad); assert(interrupts == 1 && stops == 1);
+    advances = interrupts = stops = 0;
+    pad.release = 0;
+    codec_command = MGS_CODEC_ADVANCE;
+    Wait(&work, &pad); assert(advances == 1);
+    codec_command = MGS_CODEC_SKIP;
+    chara.field_18 = 1;
+    Interrupt(&work, &pad); assert(!interrupts && !stops);
+    chara.field_18 = 0;
     Interrupt(&work, &pad); assert(interrupts == 1 && stops == 1);
     puts("Native Codec hold/release, skip guard, cadence and debounce checks passed.");
     return 0;

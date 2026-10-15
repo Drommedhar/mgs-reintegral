@@ -1,0 +1,43 @@
+diff --git a/source/takabe/scn_mask.c b/source/takabe/scn_mask.c
+index af2e27de3..7c5522d00 100644
+--- a/source/takabe/scn_mask.c
++++ b/source/takabe/scn_mask.c
+@@ -8,6 +8,9 @@
+ #include "libgv/libgv.h"
+ #include "libdg/libdg.h"
+ #include "equip/equip.h"
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_context.h"
++#endif
+ 
+ /*---------------------------------------------------------------------------*/
+ 
+@@ -27,7 +30,7 @@ typedef struct _Work
+ {
+     GV_ACT      actor;
+     PRIM_WORK  *prims;
+-    int         unused0;
++    int         mode;
+     int         unused1;
+ } Work;
+ 
+@@ -39,6 +42,10 @@ static void Act(Work *work)
+     TILE   *tile;
+     OT_TYPE *ot;
+ 
++#ifdef MGS_GODOT_SCENE
++    if (work->mode == SCREEN_MASK_NV_MODE && MgsGodotOwnsNightVision()) return;
++#endif
++
+     ot = DG_ChanlOTag(0);
+ 
+     tile = &work->prims->scanline_tile[GV_Clock][0];
+@@ -67,6 +74,8 @@ static int GetResources(Work *work, int mode)
+     TILE       *tile0, *tile1;
+     int         counter;
+ 
++    work->mode = mode;
++
+     prims = (PRIM_WORK *)GV_Malloc(sizeof(PRIM_WORK));
+     work->prims = prims;
+     if (!prims)

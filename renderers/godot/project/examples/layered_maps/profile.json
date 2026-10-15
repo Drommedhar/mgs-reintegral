@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "mods": [
+    {
+      "manifest": "res://examples/layered_maps/shared/mod.json",
+      "enabled": true,
+      "priority": 500
+    },
+    {
+      "manifest": "res://examples/layered_maps/intro/mod.json",
+      "enabled": true,
+      "priority": 10
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+--- a/source/libdg/bound.c
++++ b/source/libdg/bound.c
+@@ -4,6 +4,9 @@
+ #ifdef MGS_NATIVE
+ #include "mgs_video.h"
+ #include "mgs_visibility.h"
++#endif
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_scene.h"
+ #endif
+ 
+ static void UpdateThermalTexture( DG_CHANL *chanl, int index );
+@@ -174,7 +177,11 @@
+             classic_mode = *classic_group ? BoundCheckWidth( VXY[ 1 ], 160 ) : 0;
+         }
+         obj->bound_mode = render_mode;
+-        if ( render_mode || classic_mode )
++        if ( render_mode || classic_mode
++#ifdef MGS_GODOT_SCENE
++             || MgsGodotRetainObjects( objs )
++#endif
++           )
+         {
+             obj->free_count = 8;
+             if ( obj->packs[ pack ] == NULL && DG_MakeObjPacket( obj, pack, flag ) < 0 )
+--- a/source/libdg/shade.c
++++ b/source/libdg/shade.c
+@@ -3,6 +3,9 @@
+ #include <libgte.h>
+ #include <libgpu.h>
+ #include "mgstype.h"
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_scene.h"
++#endif
+ 
+ void DG_ShadeStart( void )
+ {
+@@ -216,7 +219,11 @@
+         objs = *queue++;
+ 
+         // TODO: figure out the values for bound_mode
+-        if ( objs->bound_mode == 0 )
++        if ( objs->bound_mode == 0
++#ifdef MGS_GODOT_SCENE
++             && !MgsGodotRetainObjects( objs )
++#endif
++           )
+         {
+             continue;
+         }
+@@ -237,7 +244,11 @@
+         obj = objs->objs;
+         for ( n_models = objs->n_models; n_models > 0 ; n_models-- )
+         {
+-            if ( obj->bound_mode != 0 )
++            if ( obj->bound_mode != 0
++#ifdef MGS_GODOT_SCENE
++                 || ( MgsGodotRetainObjects( objs ) && obj->packs[ idx ] != NULL )
++#endif
++               )
+             {
+                 DG_MulRotMatrix0( &obj->world, getScratchAddr(0) );
+                 gte_SetLightMatrix( getScratchAddr(0) );

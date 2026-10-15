@@ -1,0 +1,27 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="PackedScene" path="water_region.tscn" id="1"]
+[ext_resource type="Script" path="view_distance.gd" id="2"]
+[ext_resource type="Shader" path="surface.gdshader" id="3"]
+
+[sub_resource type="ShaderMaterial" id="OceanMaterial"]
+render_priority = -10
+shader = ExtResource("3")
+shader_parameter/wave_height = 0.18
+shader_parameter/wavelength = 18.0
+shader_parameter/roughness = 0.2
+shader_parameter/reflection_steps = 12
+shader_parameter/reflection_view_distance = 70.0
+
+[node name="DistantOcean" instance=ExtResource("1")]
+volume_size = Vector3(1500, 50, 1500)
+caustics_enabled = false
+underwater_enabled = false
+displacement_bounds = 0.5
+
+[node name="Surface" parent="." index="0"]
+material_override = SubResource("OceanMaterial")
+
+[node name="ViewDistance" type="Node" parent="."]
+script = ExtResource("2")
+distance = 1800.0

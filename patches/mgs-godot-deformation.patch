@@ -1,0 +1,74 @@
+diff --git a/source/libdg/loader.c b/source/libdg/loader.c
+index 54829ebad..66f20b634 100644
+--- a/source/libdg/loader.c
++++ b/source/libdg/loader.c
+@@ -7,6 +7,7 @@
+ #ifdef MGS_GODOT_SCENE
+ #include "mgs_godot_scene.h"
+ #include "mgs_godot_sources.h"
++#include "mgs_godot_deformation.h"
+ #endif
+ #include "mgstype.h"
+ #include "libgv/libgv.h"
+@@ -94,6 +95,9 @@ int DG_LoadInitKmd( void *buf, int id )
+         if ( mdl->nindices != NULL ) mdl->nindices = (u_char *)( (int)mdl->nindices + (int)def );
+         if ( mdl->uvs != NULL ) mdl->uvs = (u_char *)( (int)mdl->uvs + (int)def );
+         if ( mdl->texids != NULL ) mdl->texids = (u_short *)( (int)mdl->texids + (int)def );
++#ifdef MGS_GODOT_SCENE
++        MgsGodotCaptureVertexOwners(def, (int)(mdl - def->models));
++#endif
+         if ( mdl->parent >= 0 ) LinkModelToParent( mdl, &def->models[ mdl->parent ] );
+         mdl++;
+     }
+@@ -359,6 +363,9 @@ int DG_LoadInitKmdar( void *buf, int id )
+             if ( mdl->nindices != NULL ) mdl->nindices = (u_char *)( (int)mdl->nindices + offset );
+             if ( mdl->uvs != NULL ) mdl->uvs = (u_char *)( (int)mdl->uvs + offset );
+             if ( mdl->texids != NULL ) mdl->texids = (u_short *)( (int)mdl->texids + offset );
++#ifdef MGS_GODOT_SCENE
++            MgsGodotCaptureVertexOwners(def, (int)(mdl - def->models));
++#endif
+             if ( mdl->parent >= 0 ) LinkModelToParent( mdl, &def->models[ mdl->parent ] );
+             mdl++;
+         }
+diff --git a/source/takabe/shakemdl.c b/source/takabe/shakemdl.c
+index 5b6602843..74b4ddd16 100644
+--- a/source/takabe/shakemdl.c
++++ b/source/takabe/shakemdl.c
+@@ -1,4 +1,7 @@
+ #include "shakemdl.h"
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_deformation.h"
++#endif
+ 
+ #include "mgstype.h"
+ #include "libgv/libgv.h"
+@@ -103,6 +106,9 @@ static void Act( Work *work )
+             }
+ 
+             MoveVerts(work, (short *)SCRPAD_ADDR);
++#ifdef MGS_GODOT_SCENE
++            MgsGodotDeformationChanged(work->def);
++#endif
+ 
+             if ((work->scale == 0) && (work->trg_scale == 0))
+             {
+@@ -115,6 +121,9 @@ static void Act( Work *work )
+ static void Die( Work *work )
+ {
+     RestoreVerts(work);
++#ifdef MGS_GODOT_SCENE
++    MgsGodotDeformationChanged(work->def);
++#endif
+ 
+     if (work->points)
+     {
+@@ -136,6 +145,9 @@ static int GetResources( Work *work, int model )
+     }
+ 
+     rots = work->rots;
++#ifdef MGS_GODOT_SCENE
++    MgsGodotTrackDeformation(work->def);
++#endif
+     speeds = work->speeds;
+ 
+     for (i = ROT_GROUP; i > 0; i--)

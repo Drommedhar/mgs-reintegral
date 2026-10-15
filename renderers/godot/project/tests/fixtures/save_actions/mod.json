@@ -1,0 +1,7 @@
+{
+  "schema": 1,
+  "id": "test.save-actions",
+  "priority": 1,
+  "replacements": {},
+  "stages": { "s13a": { "scene": "probe.tscn" }, "title": { "scene": "probe.tscn" } }
+}

@@ -1,0 +1,22 @@
+--- a/source/thing/snow.c
++++ b/source/thing/snow.c
+@@ -7,6 +7,9 @@
+ #include "libgcl/libgcl.h"
+ #include "game/game.h"
+ #include "strcode.h"
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_scene.h"
++#endif
+ 
+ /*---------------------------------------------------------------------------*/
+ 
+@@ -496,6 +499,9 @@
+ #ifdef MGS_REMIX_SCENE
+         MgsRemixRegisterSnow(prim);
+ #endif
++#ifdef MGS_GODOT_SCENE
++        MgsGodotRegisterEffect(prim, MGS_GODOT_EFFECT_SNOW, 0, prim->prim_count);
++#endif
+ 
+         entry++;
+     }

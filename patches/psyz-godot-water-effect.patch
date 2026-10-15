@@ -1,0 +1,28 @@
+diff --git a/psyz/src/platform/sdl3_gpu.c b/psyz/src/platform/sdl3_gpu.c
+index 0763f8e..7614d46 100644
+--- a/psyz/src/platform/sdl3_gpu.c
++++ b/psyz/src/platform/sdl3_gpu.c
+@@ -111,6 +111,14 @@ static Posi draw_area_start = {0, 0};
+ static Posi draw_area_end = {0x10000, 0x10000};
+ static SDL_Rect scissor_rect = {0, 0, VRAM_W, VRAM_H};
+ #ifdef PSYZ_GODOT_REMOTE
++static bool water_effect;
++void MgsGodotWaterEffect(int active) {
++    bool next = active && MgsGodotSelectedMinor() >= 32;
++    if (water_effect == next) return;
++    Draw_FlushBuffer();
++    water_effect = next;
++}
++
+ void MgsGodotWorldBegin(unsigned near_depth, unsigned far_depth) {
+     Draw_FlushBuffer();
+     const int32_t region[] = {scissor_rect.x, scissor_rect.y,
+@@ -2205,7 +2213,7 @@ void Draw_FlushBuffer(void) {
+          draw_offset.x * (1.0f - remote_grid) * remote_transform + frame_centre_x * (1.0f - remote_transform), 0, 0},
+         force_mask_bit, preserve_masked, 1.0f,
+         BatchSamplesFramebuffer() | (texture_screen_aligned << 1) |
+-        (batch_reads_destination << 3) | (batch_has_texture << 4)};
++        (batch_reads_destination << 3) | (batch_has_texture << 4) | (water_effect << 6)};
+     _Static_assert(sizeof(Vertex) == 20 && sizeof(header) == 72, "Godot protocol layout");
+     unsigned char payload[MAX_VERTEX_COUNT * sizeof(Vertex) + MAX_INDEX_COUNT * sizeof(u16)];
+     memcpy(payload, vertex_buf, n_vertices * sizeof(Vertex));

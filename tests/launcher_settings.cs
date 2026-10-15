@@ -38,6 +38,8 @@ internal static class LauncherSettingsTest
         Require(!value.Invulnerable && !value.BonusItems && !value.AutoCard, "Gameplay aids must default off");
         Require(value.CodecTurbo, "Codec fast advance must default on in the user launcher");
         Require(!value.FastLoading, "Experimental fast loading must default off");
+        Require(!value.GodotLegacyRendering, "Godot must default to full scene rendering");
+        Require(value.GodotSharpText, "Godot must default to sharp text");
         Require(!value.TextureCorrection && !value.GeometryPrecision && !value.DepthBuffer,
             "Experimental graphics must default off");
         value.DiscOne = "C:\\日本語\\disc 1.cue";
@@ -46,6 +48,8 @@ internal static class LauncherSettingsTest
         value.Advanced = "--mods-root \"C:\\my mods\"";
         value.Save(path);
         value.Fullscreen = true;
+        value.GodotLegacyRendering = true;
+        value.GodotSharpText = false;
         value.FastLoading = true;
         value.CodecTurbo = false;
         value.TextureCorrection = value.GeometryPrecision = value.DepthBuffer = true;
@@ -57,6 +61,8 @@ internal static class LauncherSettingsTest
             "Graphics settings did not round-trip");
         Require(!restored.CodecTurbo, "Codec fast advance opt-out did not persist");
         Require(restored.FastLoading, "Fast loading setting did not round-trip");
+        Require(restored.GodotLegacyRendering, "Legacy-through-Godot mode did not round-trip");
+        Require(!restored.GodotSharpText, "Original pixel font choice did not round-trip");
         Require(restored.TextPack == value.TextPack && restored.VoicePack == value.VoicePack,
             "Language selections did not round-trip");
         string languages = GameLaunch.Arguments(restored);
@@ -75,6 +81,13 @@ internal static class LauncherSettingsTest
             Stage = "s00a", Frames = "600", MantisMemory = "42",
             Advanced = "--capture \"C:\\frame capture.bmp\"" };
         string command = GameLaunch.Arguments(settings);
+        string godot = GameLaunch.Arguments(settings, true);
+        Require(godot.Contains("--resolution " + settings.Resolution) && godot.Contains("--widescreen") &&
+            !godot.Contains("--texture-correction") && !godot.Contains("--depth-buffer") && !godot.Contains("--fullscreen"),
+            "Godot launch received incompatible native display options");
+        settings.Widescreen = false;
+        Require(!GameLaunch.Arguments(settings, true).Contains("--widescreen"), "Godot ignored original-aspect selection");
+        settings.Widescreen = true;
         foreach (string flag in new[] { "--bonus-items 1", "--invulnerable 1", "--auto-card 1", "--debug-overlay",
             "--fullscreen", "--widescreen", "--texture-correction", "--geometry-precision", "--depth-buffer", "--fast-loading 1",
             "--stage s00a", "--frames 600", "--mantis-memory 42", settings.Advanced })
@@ -91,9 +104,27 @@ internal static class LauncherSettingsTest
     {
         string directory = Path.Combine(Path.GetTempPath(), "reintegral-settings-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(directory);
-        try { CheckQuoting(); CheckSettings(directory); CheckArguments(); }
+        try { CheckQuoting(); CheckSettings(directory); CheckArguments(); CheckCaptureIsolation(); }
         finally { Directory.Delete(directory, true); }
         Console.WriteLine("Launcher settings, Windows argument quoting and option checks passed.");
         return 0;
+    }
+
+    private static void CheckCaptureIsolation()
+    {
+        string[] keys = { "MGS_GODOT_CAPTURE_FRAME", "MGS_GODOT_CAPTURE_EVERY", "MGS_GODOT_CAPTURE_FILE",
+            "MGS_GODOT_DIAGNOSTIC_CAPTURE", "MGS_GODOT_QUIT_FRAME", "MGS_BASELINE_PROBE" };
+        foreach (string key in keys)
+        {
+            string previous = Environment.GetEnvironmentVariable(key);
+            try
+            {
+                Environment.SetEnvironmentVariable(key, "100");
+                var start = GameLaunch.StartInfo("fixture.exe", "", ".");
+                Require(!start.EnvironmentVariables.ContainsKey(key), "Normal play inherited " + key);
+                Require(start.EnvironmentVariables["MGS_GODOT_PERFORMANCE_RUN"] == "1", "Normal play allows capture");
+            }
+            finally { Environment.SetEnvironmentVariable(key, previous); }
+        }
     }
 }

@@ -2,6 +2,9 @@
 #include "charadef.h"
 #include "mgs_overlay.h"
 #include "mgs_video.h"
+#ifdef MGS_GODOT_SCENE
+#include "mgs_godot_context.h"
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -103,6 +106,9 @@ void MgsNativeSelectStage(const char *name) {
     exit(EXIT_FAILURE);
   }
   StageCharacterEntries = MgsNativeStageTable();
+#ifdef MGS_GODOT_SCENE
+  MgsGodotStageChanged(name);
+#endif
   MgsVideoStage(name);
   printf("[native] stage=%s\n", name);
 }

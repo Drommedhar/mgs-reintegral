@@ -1,7 +1,8 @@
 add_library(psyz_renderer STATIC
     "${PSYZ_SOURCE_ROOT}/src/platform/sdl3_gpu.c"
     "${PSYZ_SOURCE_ROOT}/src/platform/sdl3_software.c"
-    "${CMAKE_CURRENT_LIST_DIR}/transport.c")
+    "${CMAKE_CURRENT_LIST_DIR}/transport.c"
+    "${CMAKE_CURRENT_LIST_DIR}/input_capture.c")
 target_include_directories(psyz_renderer PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}"
     "${PSYZ_SOURCE_ROOT}/include"

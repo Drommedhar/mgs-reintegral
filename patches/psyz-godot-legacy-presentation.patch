@@ -1,0 +1,28 @@
+diff --git a/psyz/src/platform/sdl3_gpu.c b/psyz/src/platform/sdl3_gpu.c
+index 614d245..0763f8e 100644
+--- a/psyz/src/platform/sdl3_gpu.c
++++ b/psyz/src/platform/sdl3_gpu.c
+@@ -812,10 +812,22 @@ static void PlatformBackend_Present(void) {
+ #ifdef PSYZ_GODOT_REMOTE
+     if (!InitPlatform()) return;
+     Draw_FlushBuffer();
+-    const uint32_t frame[] = {disp_on, display_area.x, display_area.y,
++    uint32_t frame[] = {disp_on, display_area.x, display_area.y,
+         display_size.x, presentation_source_height ? presentation_source_height : SDL_min(set_disp_vert, display_size.y),
+         presentation_width ? presentation_width : 4,
+         presentation_height ? presentation_height : 3};
++    if (!MgsGodotHasCapability(MGS_GODOT_CAP_SCENE_MESHES)) {
++        frame[4] = presentation_source_height ? presentation_source_height : display_size.y;
++        if (!presentation_width || !presentation_height) {
++            if (aspect_mode == PSYZ_ASPECT_DISPLAY && set_disp_vert > 0) {
++                frame[5] = 4 * set_disp_horiz * (is_pal ? 288 : 240);
++                frame[6] = 3 * 256 * set_disp_vert;
++            } else {
++                frame[5] = display_size.y > 0 ? display_size.x : 4;
++                frame[6] = display_size.y > 0 ? display_size.y : 3;
++            }
++        }
++    }
+     MgsGodotQueue(MGS_GODOT_DEBUG_TEXT, debug_text, (uint32_t)SDL_strlen(debug_text), NULL, 0);
+     MgsGodotExchange(MGS_GODOT_FRAME, frame, sizeof(frame), NULL, 0);
+     gpu_stats.last_submit_time_us = MgsGodotTakeExchangeTimeUs();

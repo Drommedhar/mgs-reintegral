@@ -1,0 +1,455 @@
+--- a/source/onoda/open/open.c
++++ b/source/onoda/open/open.c
+@@ -20,6 +20,7 @@
+ #endif
+ #ifdef MGS_GODOT_SCENE
+ #include "mgs_godot_title.h"
++#include "mgs_title_actions.h"
+ #endif
+ 
+ typedef struct _Unknown
+@@ -1084,6 +1085,32 @@
+     }
+ }
+ 
++enum TitleCommand { TITLE_COMMAND_NONE, TITLE_COMMAND_SELECT, TITLE_COMMAND_CONFIRM, TITLE_COMMAND_BACK };
++
++static void TitleMenuLayout(Work *work)
++{
++    static const int widths[] = {38, 40, 26, 32, 30, 44};
++    const int selected = work->fA78;
++    if (selected < 0 || selected > 5) return;
++    const int items[] = {selected ? selected - 1 : 4, selected, selected >= 4 ? 0 : selected + 1};
++    for (int item = 0; item < 6; ++item) work->fE0[item] = 0;
++    for (int row = 0; row < 3; ++row) {
++        const int item = items[row], half = widths[item], y = 55 + row * 15;
++        POLY_GT4 *poly = &work->f934_polys[item];
++        title_open_800C4B94(poly, row == 0 ? 0 : 128, row == 0 ? 0 : 192, row == 0 ? 0 : 128,
++                          row == 2 ? 0 : 128, row == 2 ? 0 : 192, row == 2 ? 0 : 128);
++        setXY4(poly, -half, y, half, y, -half, y + 8, half, y + 8);
++        SetSemiTrans(poly, row != 1);
++        work->fE0[item] = 256;
++    }
++    work->fA98 = 2;
++    work->f184 = 0;
++}
++
++#ifdef MGS_GODOT_SCENE
++#include "open_actions.h"
++#endif
++
+ void title_open_800C628C(Work *work)
+ {
+     GCL_ARGS  args;
+@@ -1099,17 +1126,26 @@
+     int       x, y;
+     int       shade;
+     int       bright;
++    int       command = 0;
+ 
+     args.argc = 3;
+     args.argv = argv;
+     press = work->pad->press;
+     press2 = work->pad[1].press;
+     status = work->pad->status;
++#ifdef MGS_GODOT_SCENE
++    command = TitleAction(work);
++    if (command) {
++        work->fB00 = 0;
++        if (command == MGS_TITLE_SELECT) return;
++        press = status = 0;
++    }
++#endif
+     argv[0] = work->mem_flag;
+     argv[1] = work->vr_flag;
+     argv[2] = has_clear_data;
+ 
+-    if (press == 0 && press2 == 0)
++    if (press == 0 && press2 == 0 && !command)
+     {
+         work->fB00++;
+     }
+@@ -1131,7 +1167,7 @@
+         switch (work->fA74)
+         {
+         case 0:
+-            if (press != 0)
++            if (press != 0 || command == TITLE_COMMAND_CONFIRM)
+             {
+                 work->fA74 = 2;
+                 if (sd_sng_play() == 1)
+@@ -1142,7 +1178,7 @@
+             break;
+ 
+         case 1:
+-            if (press != 0)
++            if (press != 0 || command == TITLE_COMMAND_CONFIRM)
+             {
+                 work->fA74 = 3;
+                 if (sd_sng_play() == 1)
+@@ -1153,7 +1189,7 @@
+             break;
+ 
+         case 4:
+-            if (press & PAD_START)
++            if (command == TITLE_COMMAND_CONFIRM || (press & PAD_START))
+             {
+                 work->fB0C = 1;
+                 work->fA74 = 6;
+@@ -1164,7 +1200,7 @@
+             break;
+ 
+         case 5:
+-            if (press & PAD_START)
++            if (command == TITLE_COMMAND_CONFIRM || (press & PAD_START))
+             {
+                 work->fB0C = 1;
+                 work->fA74 = 6;
+@@ -1176,133 +1212,12 @@
+             break;
+ 
+         case 6:
+-            if (press & PAD_START)
++            if (command == TITLE_COMMAND_CONFIRM || (press & PAD_START))
+             {
+                 work->fB0C = 1;
+                 work->fA74 = 7;
+ 
+-                switch (work->fA78)
+-                {
+-                case 0:
+-                    title_open_800C4B94(&p934[4], 0, 0, 0, 0x80, 0xC0, 0x80);
+-                    title_open_800C4B94(&p934[0], 0x80, 0xC0, 0x80, 0x80, 0xC0, 0x80);
+-                    title_open_800C4B94(&p934[1], 0x80, 0xC0, 0x80, 0, 0, 0);
+-                    setXY4(&p934[4], -0x1E, 0x37, 0x1E, 0x37, -0x1E, 0x3F, 0x1E, 0x3F);
+-                    setXY4(&p934[0], -0x26, 0x46, 0x26, 0x46, -0x26, 0x4E, 0x26, 0x4E);
+-                    setXY4(&p934[1], -0x28, 0x55, 0x28, 0x55, -0x28, 0x5D, 0x28, 0x5D);
+-                    SetSemiTrans(&p934[4], 1);
+-                    SetSemiTrans(&p934[0], 0);
+-                    SetSemiTrans(&p934[1], 1);
+-                    work->fA98 = 2;
+-                    work->f184 = 0;
+-                    work->fE0[0] = 0x100;
+-                    work->fE0[1] = 0x100;
+-                    work->fE0[2] = 0;
+-                    work->fE0[3] = 0;
+-                    work->fE0[4] = 0x100;
+-                    work->fE0[5] = 0;
+-                    break;
+-
+-                case 1:
+-                    title_open_800C4B94(&p934[0], 0, 0, 0, 0x80, 0xC0, 0x80);
+-                    title_open_800C4B94(&p934[1], 0x80, 0xC0, 0x80, 0x80, 0xC0, 0x80);
+-                    title_open_800C4B94(&p934[2], 0x80, 0xC0, 0x80, 0, 0, 0);
+-                    setXY4(&p934[0], -0x26, 0x37, 0x26, 0x37, -0x26, 0x3F, 0x26, 0x3F);
+-                    setXY4(&p934[1], -0x28, 0x46, 0x28, 0x46, -0x28, 0x4E, 0x28, 0x4E);
+-                    setXY4(&p934[2], -0x1A, 0x55, 0x1A, 0x55, -0x1A, 0x5D, 0x1A, 0x5D);
+-                    SetSemiTrans(&p934[0], 1);
+-                    SetSemiTrans(&p934[1], 0);
+-                    SetSemiTrans(&p934[2], 1);
+-                    work->fA98 = 2;
+-                    work->f184 = 0;
+-                    work->fE0[0] = 0x100;
+-                    work->fE0[1] = 0x100;
+-                    work->fE0[2] = 0x100;
+-                    work->fE0[3] = 0;
+-                    work->fE0[4] = 0;
+-                    work->fE0[5] = 0;
+-                    break;
+-
+-                case 2:
+-                    title_open_800C4B94(&p934[1], 0, 0, 0, 0x80, 0xC0, 0x80);
+-                    title_open_800C4B94(&p934[2], 0x80, 0xC0, 0x80, 0x80, 0xC0, 0x80);
+-                    title_open_800C4B94(&p934[3], 0x80, 0xC0, 0x80, 0, 0, 0);
+-                    setXY4(&p934[1], -0x28, 0x37, 0x28, 0x37, -0x28, 0x3F, 0x28, 0x3F);
+-                    setXY4(&p934[2], -0x1A, 0x46, 0x1A, 0x46, -0x1A, 0x4E, 0x1A, 0x4E);
+-                    setXY4(&p934[3], -0x20, 0x55, 0x20, 0x55, -0x20, 0x5D, 0x20, 0x5D);
+-                    SetSemiTrans(&p934[1], 1);
+-                    SetSemiTrans(&p934[2], 0);
+-                    SetSemiTrans(&p934[3], 1);
+-                    work->fA98 = 2;
+-                    work->f184 = 0;
+-                    work->fE0[0] = 0;
+-                    work->fE0[1] = 0x100;
+-                    work->fE0[2] = 0x100;
+-                    work->fE0[3] = 0x100;
+-                    work->fE0[4] = 0;
+-                    work->fE0[5] = 0;
+-                    break;
+-
+-                case 3:
+-                    title_open_800C4B94(&p934[2], 0, 0, 0, 0x80, 0xC0, 0x80);
+-                    title_open_800C4B94(&p934[3], 0x80, 0xC0, 0x80, 0x80, 0xC0, 0x80);
+-                    title_open_800C4B94(&p934[4], 0x80, 0xC0, 0x80, 0, 0, 0);
+-                    setXY4(&p934[2], -0x1A, 0x37, 0x1A, 0x37, -0x1A, 0x3F, 0x1A, 0x3F);
+-                    setXY4(&p934[3], -0x20, 0x46, 0x20, 0x46, -0x20, 0x4E, 0x20, 0x4E);
+-                    setXY4(&p934[4], -0x1E, 0x55, 0x1E, 0x55, -0x1E, 0x5D, 0x1E, 0x5D);
+-                    SetSemiTrans(&p934[2], 1);
+-                    SetSemiTrans(&p934[3], 0);
+-                    SetSemiTrans(&p934[4], 1);
+-                    work->fA98 = 2;
+-                    work->f184 = 0;
+-                    work->fE0[0] = 0;
+-                    work->fE0[1] = 0;
+-                    work->fE0[2] = 0x100;
+-                    work->fE0[3] = 0x100;
+-                    work->fE0[4] = 0x100;
+-                    work->fE0[5] = 0;
+-                    break;
+-
+-                case 4:
+-                    title_open_800C4B94(&p934[3], 0, 0, 0, 0x80, 0xC0, 0x80);
+-                    title_open_800C4B94(&p934[4], 0x80, 0xC0, 0x80, 0x80, 0xC0, 0x80);
+-                    title_open_800C4B94(&p934[0], 0x80, 0xC0, 0x80, 0, 0, 0);
+-                    setXY4(&p934[3], -0x20, 0x37, 0x20, 0x37, -0x20, 0x3F, 0x20, 0x3F);
+-                    setXY4(&p934[4], -0x1E, 0x46, 0x1E, 0x46, -0x1E, 0x4E, 0x1E, 0x4E);
+-                    setXY4(&p934[0], -0x26, 0x55, 0x26, 0x55, -0x26, 0x5D, 0x26, 0x5D);
+-                    SetSemiTrans(&p934[3], 1);
+-                    SetSemiTrans(&p934[4], 0);
+-                    SetSemiTrans(&p934[0], 1);
+-                    work->fA98 = 2;
+-                    work->f184 = 0;
+-                    work->fE0[0] = 0x100;
+-                    work->fE0[1] = 0;
+-                    work->fE0[2] = 0;
+-                    work->fE0[3] = 0x100;
+-                    work->fE0[4] = 0x100;
+-                    work->fE0[5] = 0;
+-                    break;
+-
+-                case 5:
+-                    title_open_800C4B94(&p934[4], 0, 0, 0, 0x80, 0xC0, 0x80);
+-                    title_open_800C4B94(&p934[5], 0x80, 0xC0, 0x80, 0x80, 0xC0, 0x80);
+-                    title_open_800C4B94(&p934[0], 0x80, 0xC0, 0x80, 0, 0, 0);
+-                    setXY4(&p934[4], -0x1E, 0x37, 0x1E, 0x37, -0x1E, 0x3F, 0x1E, 0x3F);
+-                    setXY4(&p934[5], -0x2C, 0x46, 0x2C, 0x46, -0x2C, 0x4E, 0x2C, 0x4E);
+-                    setXY4(&p934[0], -0x26, 0x55, 0x26, 0x55, -0x26, 0x5D, 0x26, 0x5D);
+-                    SetSemiTrans(&p934[4], 1);
+-                    SetSemiTrans(&p934[5], 0);
+-                    SetSemiTrans(&p934[0], 1);
+-                    work->fA98 = 2;
+-                    work->f184 = 0;
+-                    work->fE0[0] = 0x100;
+-                    work->fE0[1] = 0;
+-                    work->fE0[2] = 0;
+-                    work->fE0[3] = 0;
+-                    work->fE0[4] = 0x100;
+-                    work->fE0[5] = 0x100;
+-                    break;
+-                }
++                TitleMenuLayout(work);
+             }
+             title_open_800C5760(work);
+             break;
+@@ -1371,7 +1286,7 @@
+                     }
+                 }
+ 
+-                if (press & (PAD_CIRCLE | PAD_START))
++                if (command == TITLE_COMMAND_CONFIRM || (press & (PAD_CIRCLE | PAD_START)))
+                 {
+                     GM_SeSet2(0, 63, SE_MENU_GUNSHOT);
+                     work->fA74 = 0x15;
+@@ -1403,7 +1318,7 @@
+                         GM_SetSound(0x1FFFFFF, 0);
+                     }
+                 }
+-                else if (press & PAD_CROSS)
++                else if (command == TITLE_COMMAND_BACK || (press & PAD_CROSS))
+                 {
+                     work->fB0C = 1;
+                     work->fA74 = 6;
+@@ -1474,7 +1389,7 @@
+                     }
+                 }
+ 
+-                if (press & (PAD_CIRCLE | PAD_START))
++                if (command == TITLE_COMMAND_CONFIRM || (press & (PAD_CIRCLE | PAD_START)))
+                 {
+                     GM_SeSet2(0, 63, SE_MENU_GUNSHOT);
+                     work->fA74 = 0xA;
+@@ -1492,7 +1407,7 @@
+                         GM_SetSound(0x1FFFFFF, 0);
+                     }
+                 }
+-                else if (press & PAD_CROSS)
++                else if (command == TITLE_COMMAND_BACK || (press & PAD_CROSS))
+                 {
+                     work->fB0C = 1;
+                     work->fA74 = 6;
+@@ -1563,7 +1478,7 @@
+                     }
+                 }
+ 
+-                if (press & (PAD_CIRCLE | PAD_START))
++                if (command == TITLE_COMMAND_CONFIRM || (press & (PAD_CIRCLE | PAD_START)))
+                 {
+                     GM_SeSet2(0, 63, SE_MENU_GUNSHOT);
+                     work->fA74 = 0xB;
+@@ -1581,7 +1496,7 @@
+                         GM_SetSound(0x1FFFFFF, 0);
+                     }
+                 }
+-                else if (press & PAD_CROSS)
++                else if (command == TITLE_COMMAND_BACK || (press & PAD_CROSS))
+                 {
+                     work->fB0C = 1;
+                     work->fA74 = 6;
+@@ -1651,7 +1566,7 @@
+                     }
+                 }
+ 
+-                if (press & (PAD_CIRCLE | PAD_START))
++                if (command == TITLE_COMMAND_CONFIRM || (press & (PAD_CIRCLE | PAD_START)))
+                 {
+                     GM_SeSet2(0, 63, SE_MENU_GUNSHOT);
+                     work->fA74 = 0xC;
+@@ -1669,7 +1584,7 @@
+                         GM_SetSound(0x1FFFFFF, 0);
+                     }
+                 }
+-                else if (press & PAD_CROSS)
++                else if (command == TITLE_COMMAND_BACK || (press & PAD_CROSS))
+                 {
+                     work->fB0C = 1;
+                     work->fA74 = 6;
+@@ -1739,7 +1654,7 @@
+                     }
+                 }
+ 
+-                if (press & (PAD_CIRCLE | PAD_START))
++                if (command == TITLE_COMMAND_CONFIRM || (press & (PAD_CIRCLE | PAD_START)))
+                 {
+                     GM_SeSet2(0, 63, SE_MENU_GUNSHOT);
+                     work->fA74 = 0xD;
+@@ -1759,7 +1674,7 @@
+                         GM_SetSound(0x1FFFF0B, 0);
+                     }
+                 }
+-                else if (press & PAD_CROSS)
++                else if (command == TITLE_COMMAND_BACK || (press & PAD_CROSS))
+                 {
+                     work->fB0C = 1;
+                     work->fA74 = 6;
+@@ -1829,7 +1744,7 @@
+                     }
+                 }
+ 
+-                if (press & (PAD_CIRCLE | PAD_START))
++                if (command == TITLE_COMMAND_CONFIRM || (press & (PAD_CIRCLE | PAD_START)))
+                 {
+                     GM_SeSet2(0, 63, SE_MENU_GUNSHOT);
+                     work->fA74 = 0xE;
+@@ -1847,7 +1762,7 @@
+                         GM_SetSound(0x1FFFFFF, 0);
+                     }
+                 }
+-                else if (press & PAD_CROSS)
++                else if (command == TITLE_COMMAND_BACK || (press & PAD_CROSS))
+                 {
+                     work->fB0C = 1;
+                     work->fA74 = 6;
+@@ -1883,7 +1798,7 @@
+                 work->f24E4 = work->f24E4 + 1;
+                 GM_SeSet2(0, 63, SE_MENU_CURSOR);
+             }
+-            else if (press & PAD_CIRCLE)
++            else if (command == TITLE_COMMAND_CONFIRM || (press & PAD_CIRCLE))
+             {
+                 GM_GameLevel = work->f24E4;
+                 printf("\n Game Level = %d\n\n", GM_GameLevel);
+@@ -1907,7 +1822,7 @@
+                 GCL_ExecProc(work->f2500, 0);
+                 fonttext_kill_name = 0x46CD;
+             }
+-            else if (press & PAD_CROSS)
++            else if (command == TITLE_COMMAND_BACK || (press & PAD_CROSS))
+             {
+                 for (i = 0; i < 24; i++)
+                 {
+@@ -2016,7 +1931,7 @@
+                     work->f24E0 = 1;
+                 }
+             }
+-            else if (press & PAD_CIRCLE)
++            else if (command == TITLE_COMMAND_CONFIRM || (press & PAD_CIRCLE))
+             {
+                 if (work->f24E0 == 1)
+                 {
+@@ -2090,7 +2005,7 @@
+                 }
+                 title_open_800C4AD0(work, 0x15, 0);
+             }
+-            else if (press & PAD_CROSS)
++            else if (command == TITLE_COMMAND_BACK || (press & PAD_CROSS))
+             {
+                 GM_SeSet2(0, 63, SE_MENU_EXIT);
+                 work->fA74 = 7;
+--- a/source/onoda/open/open_ui.h
++++ b/source/onoda/open/open_ui.h
+@@ -37,12 +37,25 @@
+     return element;
+ }
+ 
+-static void TitleUiView(Work *work)
++static MgsTitleFrame TitleUiState(Work *work)
+ {
+-    MgsTitleFrame frame = {.active=work->fA74==18 || work->fA74==19 || work->fA74==21,
++    MgsTitleFrame frame = {.active=1,
+         .mode=work->fA74, .selection=work->fA78, .difficulty=work->f24E4+1,
+         .extreme=work->demo_rank!=0, .storage_choice=work->f24E0,
+         .storage={work->f24F0,work->f24F4}};
++    return frame;
++}
++
++static unsigned TitleUiReady(Work *work)
++{
++    int mode = work->fA74;
++    return work->fB0C == 0 && (mode <= 1 || (mode >= 4 && mode <= 7) || mode == 18 || mode == 19 || mode == 21);
++}
++
++static void TitleUiView(Work *work)
++{
++    MgsTitleFrame frame = TitleUiState(work);
++    frame.active = work->fA74 == 18 || work->fA74 == 19 || work->fA74 == 21;
+     const POLY_FT4 *groups[] = {work->f18C_polys, work->f4FC_polys, work->f7CC_polys};
+     const int *layers[] = {work->f30, work->fF8, work->f140};
+     const unsigned sizes[] = {22,18,9};
+@@ -68,5 +81,5 @@
+     }
+     for (unsigned item = 0; item < MGS_TITLE_ELEMENTS; ++item)
+         if (elements[item].layer) frame.active = 1;
+-    MgsGodotTitleView(frame,elements);
++    MgsGodotTitleView(frame,elements,TitleUiReady(work));
+ }
+--- /dev/null
++++ b/source/onoda/open/open_actions.h
+@@ -0,0 +1,28 @@
++/* Included after TitleMenuLayout; commands share the native transition branches. */
++static void TitleSelect(Work *work, int target)
++{
++    int *selection = &work->fA78;
++    if (work->fA74 == 21) {
++        selection = &work->f24E4;
++        --target;
++    } else if (work->fA74 == 18 || work->fA74 == 19) {
++        selection = &work->f24E0;
++    }
++    if (*selection == target) return;
++    *selection = target;
++    GM_SeSet2(0, 63, SE_MENU_CURSOR);
++    if (work->fA74 == 7) {
++        work->fB14 = work->fB1C = 0;
++        TitleMenuLayout(work);
++    }
++}
++
++static int TitleAction(Work *work)
++{
++    MgsTitleAction action;
++    if (!MgsTitleActionsTake(TitleUiState(work), TitleUiReady(work), &action)) return 0;
++    if (action.kind != MGS_TITLE_BACK && (work->fA74 == 7 || work->fA74 == 18 || work->fA74 == 19 || work->fA74 == 21))
++        TitleSelect(work, action.target);
++    MgsTitleActionsComplete(MGS_TITLE_APPLIED);
++    return action.kind;
++}

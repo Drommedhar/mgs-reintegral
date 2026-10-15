@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "launchApi": 1,
+  "id": "@MGS_RENDERER_ID@",
+  "name": "@MGS_RENDERER_NAME@",
+  "version": "@MGS_RELEASE_VERSION@",
+  "backend": "@MGS_RENDERER_BACKEND@",
+  "nativeArchitecture": "x86",
+  "rendererArchitecture": "@MGS_RENDERER_ARCH@",
+  "executable": "mgs-integral-native.exe",
+  "nativeGraphicsOptions": @MGS_MODERN_RENDERER@,
+  "godotExecutable": "@MGS_RENDERER_ENGINE@",
+  "godotProject": "@MGS_RENDERER_PROJECT@",
+  "godotAssets": "@MGS_RENDERER_ASSETS@"
+}

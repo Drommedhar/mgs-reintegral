@@ -1,0 +1,22 @@
+[gd_scene load_steps=2 format=3]
+
+[sub_resource type="Environment" id="Environment_shared"]
+resource_local_to_scene = true
+ambient_light_source = 2
+ambient_light_color = Color(0.6, 0.6, 0.6, 1)
+ambient_light_energy = 1.0
+ambient_light_sky_contribution = 0.0
+reflected_light_source = 1
+
+[node name="SharedDocksLighting" type="Node3D"]
+metadata/mgs_coordinate_space = "native_y_up"
+
+[node name="MapEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_shared")
+
+[node name="SharedLamp" type="OmniLight3D" parent="."]
+position = Vector3(0, 3, 1)
+light_color = Color(0.8, 0.9, 1, 1)
+light_energy = 1.0
+omni_range = 5.0
+shadow_enabled = true

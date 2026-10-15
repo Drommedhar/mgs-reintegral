@@ -1,0 +1,7 @@
+{
+  "schema": 1,
+  "id": "test.display-settings",
+  "priority": 1,
+  "replacements": {},
+  "stages": { "s00a": { "scene": "probe.tscn" } }
+}

@@ -1,0 +1,9 @@
+[configuration]
+entry_symbol = "mgs_visual_mod_init"
+compatibility_minimum = "4.4"
+reloadable = false
+
+[libraries]
+windows.x86_64 = "bin/mgs_visual_mod.dll"
+linux.x86_64 = "bin/libmgs_visual_mod.so"
+macos = "bin/libmgs_visual_mod.dylib"

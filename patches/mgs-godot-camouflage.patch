@@ -1,0 +1,95 @@
+diff --git a/source/equip/kogaku2.c b/source/equip/kogaku2.c
+index 2972cfc72..21c60d93b 100644
+--- a/source/equip/kogaku2.c
++++ b/source/equip/kogaku2.c
+@@ -5,6 +5,9 @@
+ #include "libdg/libdg.h"
+ #include "game/game.h"
+ #include "strcode.h"
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_scene.h"
++#endif
+ 
+ /*---------------------------------------------------------------------------*/
+ 
+@@ -280,6 +283,21 @@ static void RestoreModelFlags(Work *work)
+ static void Act2(Work *work);
+ static void Die2(Work *work);
+ 
++#ifdef MGS_GODOT_SCENE
++static void PublishCamouflage(Work *work)
++{
++    float amount = 1.0f;
++    if (work->ypos3_ninja > work->ypos1)
++    {
++        amount = (float)(work->ypos3_ninja - work->ypos2) /
++                 (work->ypos3_ninja - work->ypos1);
++        if (amount < 0.0f) amount = 0.0f;
++        if (amount > 1.0f) amount = 1.0f;
++    }
++    MgsGodotSetCamouflage(work->parent->objs, amount, work->color);
++}
++#endif
++
+ static void Act(Work *work)
+ {
+     int ypos2 = work->ypos2;
+@@ -307,10 +325,17 @@ static void Act(Work *work)
+         work->actor.act = (GV_ACTFUNC)Act2;
+         work->actor.die = (GV_ACTFUNC)Die2;
+     }
++#ifdef MGS_GODOT_SCENE
++    if (GM_GameStatus & STATE_THERMG) MgsGodotClearCamouflage(work->parent->objs);
++    else PublishCamouflage(work);
++#endif
+ }
+ 
+ static void Die(Work *work)
+ {
++#ifdef MGS_GODOT_SCENE
++    MgsGodotClearCamouflage(work->parent->objs);
++#endif
+     RestoreModelFlags(work);
+ }
+ 
+@@ -324,6 +349,9 @@ static void Act2(Work *work)
+         EQ_InvisibleUnit2(work->parent->objs, work->color, 0);
+         work->actor.act = (GV_ACTFUNC)Act;
+         work->actor.die = (GV_ACTFUNC)Die;
++#ifdef MGS_GODOT_SCENE
++        PublishCamouflage(work);
++#endif
+     }
+     else
+     {
+@@ -333,7 +361,9 @@ static void Act2(Work *work)
+ 
+ static void Die2(Work *work)
+ {
+-    /* do nothing */
++#ifdef MGS_GODOT_SCENE
++    MgsGodotClearCamouflage(work->parent->objs);
++#endif
+ }
+ 
+ /*---------------------------------------------------------------------------*/
+@@ -370,6 +400,9 @@ void *NewKogaku2(CONTROL *control, OBJECT *parent, int num_parent)
+             work->color = NINJA_COLOR;
+             EQ_InvisibleUnit2(objs, work->color , 0);
+         }
++#ifdef MGS_GODOT_SCENE
++        PublishCamouflage(work);
++#endif
+     }
+ 
+     return (void *)work;
+@@ -496,6 +529,9 @@ void *NewKogaku3(CONTROL *control, OBJECT *parent, int num_parent)
+         {
+             work->color = NINJA_COLOR;
+         }
++#ifdef MGS_GODOT_SCENE
++        PublishCamouflage(work);
++#endif
+     }
+ 
+     return (void *)work;

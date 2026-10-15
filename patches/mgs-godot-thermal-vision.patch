@@ -1,0 +1,12 @@
+diff --git a/source/takabe/scn_mask.c b/source/takabe/scn_mask.c
+index 7c5522d00..5e524cc71 100644
+--- a/source/takabe/scn_mask.c
++++ b/source/takabe/scn_mask.c
+@@ -44,6 +44,7 @@ static void Act(Work *work)
+ 
+ #ifdef MGS_GODOT_SCENE
+     if (work->mode == SCREEN_MASK_NV_MODE && MgsGodotOwnsNightVision()) return;
++    if (work->mode == SCREEN_MASK_IR_MODE && MgsGodotOwnsThermalVision()) return;
+ #endif
+ 
+     ot = DG_ChanlOTag(0);

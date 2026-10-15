@@ -27,6 +27,7 @@ func _initialize() -> void:
 			push_error("Cannot load " + identity)
 			quit(1)
 			return
+		node.set_meta("mgs_retail_derived", true)
 		for mesh in node.find_children("*", "MeshInstance3D", true, false):
 			var material := StandardMaterial3D.new()
 			material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED

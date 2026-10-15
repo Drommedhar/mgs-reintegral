@@ -1,4 +1,7 @@
 #include "mgs_language.h"
+#ifdef MGS_GODOT_SCENE
+#include "mgs_godot_cinematic.h"
+#endif
 
 #include <SDL3/SDL_stdinc.h>
 #include <stdio.h>
@@ -328,6 +331,9 @@ static int ValidStream(const LanguageRecord *record)
 
 void MgsLanguageSelectStream(unsigned kind, unsigned disc, unsigned identity, unsigned sector)
 {
+#ifdef MGS_GODOT_SCENE
+    MgsGodotCinematicSelect(kind, disc, identity);
+#endif
     MgsLanguageCloseStream();
     if (!voice_pack.file)
         return;

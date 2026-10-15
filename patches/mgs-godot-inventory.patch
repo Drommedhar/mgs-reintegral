@@ -1,0 +1,229 @@
+diff --git a/source/menu/item.c b/source/menu/item.c
+index b3a374411..efd2db6fa 100644
+--- a/source/menu/item.c
++++ b/source/menu/item.c
+@@ -8,6 +8,9 @@
+ #ifdef MGS_NATIVE
+ #include "mgs_language.h"
+ #endif
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_inventory.h"
++#endif
+ 
+ static PANEL_TEXTURE panel_tex[ MENU_ITEM_COUNT ];
+ 
+@@ -335,6 +338,12 @@ int is_disable_item(int item)
+ 
+ void draw_shape_key(MenuWork *work, u_long *ot, int id)
+ {
++#ifdef MGS_GODOT_SCENE
++    if (MgsGodotOwnsInventory()) {
++        MgsGodotInventoryShape(id);
++        return;
++    }
++#endif
+     RECT      pal_rect;
+     RECT      img_rect;
+     RPK_ITEM *pPalItem;
+@@ -383,8 +392,42 @@ void draw_shape_key(MenuWork *work, u_long *ot, int id)
+  * @param ypos The y-coordinate where the item should be drawn.
+  * @param pMenuSub Pointer to the current item in the inventory.
+  */
++#ifdef MGS_GODOT_SCENE
++static void PublishItem(int x, int y, const PANEL *source)
++{
++    int id = source->field_0_id;
++    MgsInventoryPanel panel = {.id = id, .x = x, .y = y, .quantity = source->field_2_num};
++    const char *name = "NO ITEM";
++    if (source->field_4_pos) panel.flags |= MGS_INVENTORY_DIM;
++    else if (!source->field_6_current) panel.flags |= MGS_INVENTORY_HIGHLIGHT;
++    if (id >= 0) {
++        panel.icon = gMenuItemRpkInfo_8009E484[id].field_4_rpk_idx;
++        name = gMenuItemRpkInfo_8009E484[id].field_0_weapon_name;
++        if (is_disable_item(id)) panel.flags |= MGS_INVENTORY_DISABLED;
++        if (GM_FrozenItemsState == 1 && (id == IT_Ration || id == IT_Ketchup)) panel.flags |= MGS_INVENTORY_FROZEN;
++        if (GM_ItemTypes[id + 1] & IT_TYPE_CONSUMABLE) {
++            panel.flags |= MGS_INVENTORY_COUNT;
++            panel.maximum = GM_ItemsMax[id - IT_Ration];
++        } else if (id == IT_Card) {
++            panel.flags |= MGS_INVENTORY_LEVEL;
++            panel.level = GM_Items[IT_Card];
++        } else if (id == IT_TimerBomb) {
++            panel.flags |= MGS_INVENTORY_TIMER;
++            panel.quantity = GM_Items[id];
++        }
++    }
++    MgsGodotSubmitInventoryPanel(panel, name);
++}
++#endif
++
+ void draw_item(MenuWork *work, u_long *ot, int xpos, int ypos, Menu_Inventory *pMenuSub)
+ {
++#ifdef MGS_GODOT_SCENE
++    if (MgsGodotOwnsInventory()) {
++        PublishItem(xpos, ypos, &pMenuSub->field_0_current);
++        return;
++    }
++#endif
+     PANEL_TEXTURE *pMenuSprt;       // $s6
+     SPRT          *pIconSprt;       // $s0
+     int            rgb;             // $s1
+diff --git a/source/menu/life.c b/source/menu/life.c
+index e42d904f5..53ffb0eb7 100644
+--- a/source/menu/life.c
++++ b/source/menu/life.c
+@@ -9,6 +9,7 @@
+ #include "menu/radio.h"
+ #ifdef MGS_GODOT_SCENE
+ #include "mgs_godot_bars.h"
++#include "mgs_godot_inventory.h"
+ #endif
+ 
+ MENU_BAR_CONF gSnakeLifeBarConfig_8009E5F4 = {"LIFE", {0x10, 0x8F, 0x7F}, {0x1F, 0xDF, 0x3F}, 0};
+@@ -510,6 +511,9 @@ int sub_8003F84C(int idx)
+     desc_sprt.y0 = coords_800AB600[idx][1];
+     desc_sprt.clut = 0x7fbc;
+ 
++#ifdef MGS_GODOT_SCENE
++    if (!MgsGodotOwnsInventory())
++#endif
+     ClearImage(&rect_800AB600, 0, 0, 0);
+ 
+     font_init_kcb(&desc_font, &rect_800AB600, 960, 510);
+@@ -523,13 +527,26 @@ int sub_8003F84C(int idx)
+ 
+     font_set_buffer(&desc_font, font_buffer);
+     font_set_color(&desc_font, 0, 0x6739, 0);
++#ifdef MGS_GODOT_SCENE
++    if (!MgsGodotOwnsInventory())
++#endif
+     font_clut_update(&desc_font);
+     return 1;
+ }
+ 
+ void menu_printDescription_8003F97C(char *description)
+ {
++#ifdef MGS_GODOT_SCENE
++    if (MgsGodotOwnsInventory())
++        MgsTextLayoutBegin(MgsGodotPrepareInventoryDescription(), desc_font.buffer);
++#endif
+     font_print_string(&desc_font, description);
++#ifdef MGS_GODOT_SCENE
++    if (MgsGodotOwnsInventory()) {
++        MgsTextLayoutEnd(desc_font.cbuffer, desc_font.row * 2, desc_font.height);
++        return;
++    }
++#endif
+     font_update(&desc_font);
+ }
+ 
+@@ -549,6 +566,17 @@ void menu_drawDescriptionPanel_8003F9B4(MenuWork *work, u_long *ot, const char *
+ 
+     work->field_2B |= 2;
+ 
++#ifdef MGS_GODOT_SCENE
++    if (MgsGodotOwnsInventory()) {
++        MgsGodotInventoryDescription((MgsSubtitleFrame){.active = 1, .visible = 1,
++            .kind = strcmp(str, "WEAPON") == 0, .x = desc_sprt.x0, .y = desc_sprt.y0,
++            .width = 200, .height = 80, .text_width = desc_font.max_width,
++            .character_spacing = desc_font.c_skip, .line_spacing = desc_font.l_skip});
++        draw_player_life_8003F4B8(work->prim, desc_sprt.x0 - 10, 24);
++        return;
++    }
++#endif
++
+     NEW_PRIM(sprt, work);
+ 
+     *sprt = desc_sprt;
+diff --git a/source/menu/menuman.c b/source/menu/menuman.c
+index 15643ce5f..e8bb85869 100644
+--- a/source/menu/menuman.c
++++ b/source/menu/menuman.c
+@@ -16,6 +16,7 @@
+ #ifdef MGS_GODOT_SCENE
+ #include "mgs_godot_bars.h"
+ #include "mgs_godot_radar.h"
++#include "mgs_godot_inventory.h"
+ #endif
+ 
+ static u_char SECTION(".bss") PrimBuffer[2][8192];
+@@ -196,6 +197,7 @@ void MENU_ResetSystem(void)
+ #ifdef MGS_GODOT_SCENE
+     MgsGodotResetBars();
+     MgsGodotResetRadar();
++    MgsGodotResetInventory();
+ #elif defined(MGS_NATIVE)
+     MgsRadarBeginFrame(0, 0);
+ #endif
+diff --git a/source/menu/weapon.c b/source/menu/weapon.c
+index 79dcdb0d3..75119cd8d 100644
+--- a/source/menu/weapon.c
++++ b/source/menu/weapon.c
+@@ -12,6 +12,9 @@
+ #ifdef MGS_NATIVE
+ #include "mgs_language.h"
+ #endif
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_inventory.h"
++#endif
+ 
+ // TODO: Move to correct header
+ // Functions of signature TMenuItemUnknownFn:
+@@ -202,8 +205,13 @@ void sub_8003CFE0(PANEL_TEXTURE *pPanelTex, int index)
+     pPanelTex->field_C_uvclut = LLOAD(&elem->field_0_u);
+     elem->field_8_rect1.w = pPanelTex->field_10_w / 4;
+     elem->field_8_rect1.h = pPanelTex->field_12_h;
+-    LoadImage(&elem->field_8_rect1, pPanelTex->field_0_pixels);
+-    LoadImage(&elem->field_10_rect2, pPanelTex->field_4_word_ptr_pixels);
++#ifdef MGS_GODOT_SCENE
++    if (!MgsGodotOwnsInventory())
++#endif
++    {
++        LoadImage(&elem->field_8_rect1, pPanelTex->field_0_pixels);
++        LoadImage(&elem->field_10_rect2, pPanelTex->field_4_word_ptr_pixels);
++    }
+ }
+ 
+ void sub_8003D070(PANEL_TEXTURE *pPanelTex, TIM *tim)
+@@ -1077,8 +1085,41 @@ void menu_weapon_printDescription_8003E030(int wpn_id)
+     menu_printDescription_8003F97C(weaponDescription);
+ }
+ 
++#ifdef MGS_GODOT_SCENE
++static void PublishWeapon(int x, int y, const PANEL *source)
++{
++    int id = source->field_0_id;
++    MgsInventoryPanel panel = {.side = 1, .id = id, .x = x + 4, .y = y, .quantity = source->field_2_num};
++    const char *name = "NO ITEM";
++    if (source->field_4_pos) panel.flags |= MGS_INVENTORY_DIM;
++    else if (!source->field_6_current) panel.flags |= MGS_INVENTORY_HIGHLIGHT;
++    if (id >= 0) {
++        panel.icon = id == WP_Socom && !GM_SilencerFlag ? 2 : gMenuWeaponRpkInfo_8009E57C[id].field_4_rpk_idx;
++        name = id == WP_Famas && GM_GameLevel == GM_LEVEL_VERYEASY ? "MP 5 SD" : gMenuWeaponRpkInfo_8009E57C[id].field_0_weapon_name;
++        if (menu_weapon_isWeaponDisabled_8003DF30(id)) panel.flags |= MGS_INVENTORY_DISABLED;
++        if (source->field_2_num >= 0 && source->field_2_num < 10000) {
++            panel.flags |= MGS_INVENTORY_COUNT;
++            panel.maximum = GM_WeaponsMax[id];
++        }
++        if (source->field_6_current && GM_MagazineMax > 0) {
++            panel.flags |= MGS_INVENTORY_MAGAZINE;
++            panel.magazine = GM_Magazine;
++            panel.magazine_max = GM_MagazineMax;
++            panel.burst = GM_Weapon == WP_Famas ? 3 : 0;
++        }
++    }
++    MgsGodotSubmitInventoryPanel(panel, name);
++}
++#endif
++
+ void menu_weapon_init_helper_8003E0E8(MenuWork *work, u_long *ot, int off_x, int off_y, PANEL *pPanel)
+ {
++#ifdef MGS_GODOT_SCENE
++    if (MgsGodotOwnsInventory()) {
++        PublishWeapon(off_x, off_y, pPanel);
++        return;
++    }
++#endif
+     PANEL_TEXTURE        *pTexture;
+     const char           *str;
+     int                   weaponIdx, weaponIdxCopy;

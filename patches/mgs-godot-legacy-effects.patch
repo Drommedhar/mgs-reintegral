@@ -1,0 +1,71 @@
+diff --git a/source/libdg/divide.c b/source/libdg/divide.c
+index c9d416b5f..b80d87099 100644
+--- a/source/libdg/divide.c
++++ b/source/libdg/divide.c
+@@ -631,7 +631,7 @@ void DG_DivideChanl( DG_CHANL *chanl, int idx )
+             for ( j = objs->n_models ; j > 0 ; --j )
+             {
+ #ifdef MGS_GODOT_SCENE
+-                if (MgsGodotSceneEnabled() && MgsGodotOwnsPart(objs, objs->n_models - j, idx)) {
++                if (MgsGodotSceneEnabled() && (MgsGodotLegacyPart(objs, objs->n_models - j) || MgsGodotOwnsPart(objs, objs->n_models - j, idx))) {
+                     ++obj;
+                     continue;
+                 }
+@@ -663,7 +663,7 @@ void DG_DivideChanl( DG_CHANL *chanl, int idx )
+             for ( j = objs->n_models ; j > 0 ; --j )
+             {
+ #ifdef MGS_GODOT_SCENE
+-                if (MgsGodotSceneEnabled() && MgsGodotOwnsPart(objs, objs->n_models - j, idx)) {
++                if (MgsGodotSceneEnabled() && (MgsGodotLegacyPart(objs, objs->n_models - j) || MgsGodotOwnsPart(objs, objs->n_models - j, idx))) {
+                     ++obj;
+                     continue;
+                 }
+diff --git a/source/libdg/sort.c b/source/libdg/sort.c
+index 6ac0cc902..045652252 100644
+--- a/source/libdg/sort.c
++++ b/source/libdg/sort.c
+@@ -78,6 +78,9 @@ void DG_SortChanl( DG_CHANL *chanl, int idx )
+     for (i = chanl->queue_size - chanl->prim_index; i > 0; i--)
+     {
+         pPrim = *pQueue++;
++#ifdef MGS_GODOT_SCENE
++        if (MgsGodotSceneEnabled() && (pPrim->type & MGS_GODOT_LEGACY_GLOW)) continue;
++#endif
+ 
+         if (pPrim->type & DG_PRIM_INVISIBLE)
+         {
+@@ -100,6 +103,12 @@ void DG_SortChanl( DG_CHANL *chanl, int idx )
+ 
+         while (--prim_count >= 0)
+         {
++#ifdef MGS_GODOT_SCENE
++            if (MgsGodotSceneEnabled() && MgsGodotLegacyShadowPacket(prim, pPrim->type)) {
++                prim += prim_size;
++                continue;
++            }
++#endif
+             index2 = *((u_short *)prim);
+ 
+             if (index2 > 0)
+diff --git a/source/thing/emitter.c b/source/thing/emitter.c
+index bbda925da..60621f62e 100644
+--- a/source/thing/emitter.c
++++ b/source/thing/emitter.c
+@@ -1,4 +1,7 @@
+ #include "emitter.h"
++#ifdef MGS_GODOT_SCENE
++#include "mgs_godot_scene.h"
++#endif
+ 
+ #include "mgstype.h"
+ #include "libgv/libgv.h"
+@@ -83,6 +86,9 @@ static int GetResources( Work *work, int map, int count )
+     }
+ 
+     prim->raise = n;
++#ifdef MGS_GODOT_SCENE
++    prim->type |= MGS_GODOT_LEGACY_GLOW;
++#endif
+ 
+     tex = DG_GetTexture( GV_StrCode( "sfex0236" ) );
+     if ( tex == NULL )

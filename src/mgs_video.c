@@ -15,6 +15,7 @@ static unsigned view_numerator = 1, view_denominator = 1;
 static int widescreen, frame_active, frame_centre, capture_output, movie_active;
 static int codec_active, menu_stage;
 static unsigned output_width, output_height;
+static int output_fullscreen;
 
 int MgsVideoReferenceRequired(void)
 {
@@ -25,7 +26,7 @@ int MgsVideoReferenceRequired(void)
 static int GodotWorldCommand(const u_long *words, int available, void *userdata)
 {
     (void)userdata;
-    if (available < 3 || words[1] >= words[2] || words[2] > 65536) return -1;
+    if (available < 3 || words[1] >= words[2] || words[2] > 65537 || (words[2] == 65537 && words[1] != 65536)) return -1;
     if (MgsGodotSceneEnabled()) MgsGodotWorldBegin(words[1], words[2]);
     return 3;
 }
@@ -85,9 +86,16 @@ static int SetChannelTransform(int mode)
 static int VideoCommand(const u_long *words, int available, void *userdata)
 {
     (void)userdata;
-    if (available < 1 || (words[0] & 0x00ffffffu) > MGS_VIDEO_BACKGROUND)
+    if (available < 1 || (words[0] & 0x00ffffffu) > MGS_VIDEO_TEXT_CARD)
         return -1;
-    if (frame_active && !SetChannelTransform((int)(words[0] & 0x00ffffffu)))
+    int mode = (int)(words[0] & 0x00ffffffu);
+#ifdef MGS_GODOT_SCENE
+    MgsGodotWaterEffect(mode == MGS_VIDEO_WATER_CANVAS);
+    MgsGodotTextCard(mode == MGS_VIDEO_TEXT_CARD);
+#endif
+    if (mode == MGS_VIDEO_WATER_CANVAS) mode = MGS_VIDEO_CANVAS;
+    if (mode == MGS_VIDEO_TEXT_CARD) mode = MGS_VIDEO_HUD;
+    if (frame_active && !SetChannelTransform(mode))
         return -1;
     return 1;
 }
@@ -115,6 +123,10 @@ int MgsVideoConfigure(const MgsVideoOptions *options)
         fputs("Widescreen aspect must be between 4:3 and 4:1.\n", stderr);
         return 0;
     }
+#ifdef MGS_GODOT_SCENE
+    /* Godot scales the output; the native transport keeps PS1 packet coordinates. */
+    scale = 1;
+#endif
     if (Psyz_VideoConfigureWindow(width, height, options->fullscreen) != 0 ||
         Psyz_VideoSetInternalResolution(scale) != 0) {
         fputs("Renderer cannot configure the requested output resolution.\n", stderr);
@@ -123,6 +135,7 @@ int MgsVideoConfigure(const MgsVideoOptions *options)
     capture_output = 1;
     output_width = width;
     output_height = height;
+    output_fullscreen = options->fullscreen;
     widescreen = options->widescreen;
     if (widescreen) {
         unsigned divisor = GreatestCommonDivisor(4 * height, 3 * width);
@@ -146,11 +159,41 @@ int MgsVideoConfigure(const MgsVideoOptions *options)
     return 1;
 }
 
+MgsVideoOptions MgsVideoGetOptions(void)
+{
+    return (MgsVideoOptions){output_width ? output_width : 320,
+                            output_height ? output_height : 240, widescreen, output_fullscreen};
+}
+
+int MgsVideoSetProjection(unsigned width, unsigned height, int wide)
+{
+    if (!capture_output || width < 320 || width > 2560 || height < 240 ||
+        height > (wide ? 1792u : 1920u) || (wide != 0 && wide != 1) ||
+        (wide && (width * 3 < height * 4 || width * 3 > height * 12))) return 0;
+    MgsVideoEndFrame();
+    int original = MgsVideoReferenceRequired();
+    unsigned present_width = wide ? (original ? 4 : width) : 0;
+    unsigned present_height = wide ? (original ? 3 : height) : 0;
+    if (Psyz_VideoSetPresentation(present_width, present_height, wide ? FRAME_HEIGHT : 0) != 0) return 0;
+    unsigned divisor = wide ? GreatestCommonDivisor(4 * height, 3 * width) : 1;
+    view_numerator = wide ? 4 * height / divisor : 1;
+    view_denominator = wide ? 3 * width / divisor : 1;
+    output_width = width;
+    output_height = height;
+    widescreen = wide;
+    return 1;
+}
+
 int MgsVideoHalfWidth(void)
 {
     if (movie_active || codec_active || menu_stage)
         return 160;
     return (int)((160 * view_denominator + view_numerator - 1) / view_numerator);
+}
+
+float MgsVideoHorizontalScale(void)
+{
+    return MgsVideoReferenceRequired() ? 1.0f : (float)view_numerator / view_denominator;
 }
 
 int MgsVideoCapturesOutput(void)

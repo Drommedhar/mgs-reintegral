@@ -1,0 +1,19 @@
+Solid Snake pixel animation by Irbif (Reddit u/Irbif).
+Original artwork and animation copyright belongs to Irbif.
+
+Original post:
+https://www.reddit.com/r/gaming/comments/p9725h/im_a_pixel_artist_i_made_this_animation_of_solid/
+Source animation:
+https://i.redd.it/uz9pk3unlui71.gif
+Source SHA-256:
+045c6aa4a4f7713b3b94b0f497fc30387857169af2337c87146ce88de00331fe
+
+RE:INTEGRAL loading presentation retains all 37 original frames and their
+100 ms timing. The atlas packs the original pixel grid without changing its
+colors; the Godot shader hides the backdrop/shadow and draws only the silhouette
+outline. The generated image experiments were not used.
+
+Credit is attribution, not a redistribution license. No license grant was
+identified on the source post. This artwork is outside the repository's
+source-code license; permission for public redistribution remains unverified.
+Solid Snake / Metal Gear character rights belong to their respective owners.

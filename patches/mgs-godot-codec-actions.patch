@@ -1,0 +1,316 @@
+--- a/source/menu/radio.c
++++ b/source/menu/radio.c
+@@ -22,6 +22,12 @@
+ 
+ #ifdef MGS_GODOT_SCENE
+ #include "mgs_godot_codec.h"
++#include "mgs_godot_codec_actions.h"
++static MgsCodecAction codec_command;
++static unsigned codec_choice_count;
++#define CODEC_IS(expected) (codec_command.kind == (expected))
++#else
++#define CODEC_IS(kind) 0
+ #endif
+ 
+ static SPRT             SECTION(".bss") gRadioNumberSprt_800bd9b0;
+@@ -894,6 +900,10 @@
+ 
+     dword_800ABB04 = pMenuChara->field_C_pScript;
+     last_index = pMenuChara->field_1A_index;
++#ifdef MGS_GODOT_SCENE
++    if (CODEC_IS(MGS_CODEC_SELECT) || CODEC_IS(MGS_CODEC_CONFIRM))
++        pMenuChara->field_1A_index = codec_command.target;
++#endif
+ 
+     if ((pPad->press & PAD_UP) && (pMenuChara->field_1A_index > 0))
+     {
+@@ -950,6 +960,9 @@
+         index++;
+     }
+ 
++#ifdef MGS_GODOT_SCENE
++    codec_choice_count = index;
++#endif
+     if (last_index != pMenuChara->field_1A_index)
+     {
+         GM_SeSet2(0, 63, SE_MENU_CURSOR);
+@@ -963,7 +976,7 @@
+ 
+     kcb->max_width = var_s7;
+ 
+-    if (pPad->press & PAD_CIRCLE)
++    if (CODEC_IS(MGS_CODEC_CONFIRM) || (pPad->press & PAD_CIRCLE))
+     {
+         GM_Result = pMenuChara->field_1A_index;
+         sub_80041118(work);
+@@ -1027,6 +1040,10 @@
+ STATIC int   dword_800AB63C = 0;
+ STATIC short gCodecFadingStep = 0;
+ STATIC int   dword_800AB644 = -1;
++
++#ifdef MGS_GODOT_SCENE
++#include "radio_actions.h"
++#endif
+ 
+ STATIC void menu_radio_codec_helper_8004158C(MenuWork *work, u_long *ot, GV_PAD *pPad)
+ {
+@@ -1098,25 +1115,25 @@
+         }
+         else
+         {
+-            gCodecAction = CODEC_ACTION_NONE;
+-            if (pPad->press & (PAD_SELECT | PAD_CROSS))
++            if (!CODEC_IS(MGS_CODEC_TUNE)) gCodecAction = CODEC_ACTION_NONE;
++            if (CODEC_IS(MGS_CODEC_BACK) || (pPad->press & (PAD_SELECT | PAD_CROSS)))
+             {
+                 work->field_212 = 0;
+                 work->field_210_codec_state = 0x12;
+             }
+-            else if (pPad->press & PAD_DOWN)
++            else if (CODEC_IS(MGS_CODEC_MEMORY) || (pPad->press & PAD_DOWN))
+             {
+                 gCodecAction = CODEC_ACTION_MEMORY;
+                 menu_radio_codec_helper_helper4_8004DE20(work);
+                 work->field_210_codec_state = 0xA;
+                 GM_SeSet2(0, 0x3F, SE_RADIO_SELECT);
+             }
+-            else if (pPad->press & (PAD_UP | PAD_CIRCLE))
++            else if (CODEC_IS(MGS_CODEC_CALL) || (pPad->press & (PAD_UP | PAD_CIRCLE)))
+             {
+                 gCodecAction = CODEC_ACTION_PTT;
+                 menu_radio_codec_helper_helper11_8004150C(work);
+             }
+-            else if (pPad->status & (PAD_LEFT | PAD_RIGHT))
++            else if (!CODEC_IS(MGS_CODEC_TUNE) && (pPad->status & (PAD_LEFT | PAD_RIGHT)))
+             {
+                 if (pPad->status & PAD_LEFT)
+                 {
+@@ -1281,9 +1298,9 @@
+         break;
+     case 4: // codec call interrupted
+         draw_radio_wait_mark(work, ot);
+-        if ((pPad->release &
++        if (CODEC_IS(MGS_CODEC_ADVANCE) || ((pPad->release &
+              (PAD_UP | PAD_DOWN | PAD_LEFT | PAD_RIGHT | PAD_TRIANGLE | PAD_CROSS | PAD_SQUARE | PAD_CIRCLE)) &&
+-            work->field_212 == 0)
++            work->field_212 == 0))
+         {
+             menu_radio_codec_helper_helper8_80048044();
+             sub_80041118(work);
+@@ -1336,7 +1353,7 @@
+         }
+         else
+         {
+-            if (!(pCharaStruct2->field_18 & 1) && (pPad->release & PAD_CROSS))
++            if (!(pCharaStruct2->field_18 & 1) && (CODEC_IS(MGS_CODEC_SKIP) || (pPad->release & PAD_CROSS)))
+             {
+                 menu_radio_codec_helper__helper13_800410E4(work, pCharaStruct2->field_C_pScript);
+                 dword_800ABAF8 = 8;
+@@ -1406,7 +1423,7 @@
+         else
+         {
+             draw_radio_wait_mark(work, ot);
+-            if (pPad->press & (PAD_UDLR | PAD_ABXY))
++            if (CODEC_IS(MGS_CODEC_ADVANCE) || (pPad->press & (PAD_UDLR | PAD_ABXY)))
+             {
+                 work->field_210_codec_state = 7;
+             }
+@@ -1566,7 +1583,7 @@
+ 
+ STATIC int dword_800AB648 = 0;
+ 
+-STATIC void menu_radio_update_80042198(MenuWork *work, u_long *ot)
++STATIC void CodecUpdate(MenuWork *work, u_long *ot)
+ {
+     GCL_ARGS args;
+     long     argv[2];
+@@ -1579,6 +1596,10 @@
+ 
+     state = work->field_2A_state;
+     pPad = work->field_24_pInput;
++#ifdef MGS_GODOT_SCENE
++    GV_PAD idle_pad = {0};
++    if (codec_command.kind) pPad = &idle_pad;
++#endif
+     if (GM_PlayerStatus & PLAYER_MENU_DISABLE)
+     {
+         return;
+@@ -1588,7 +1609,7 @@
+         if (!(GM_GameStatus & (STATE_VOX_STREAM | STATE_TAKING_PHOTO | STATE_RADIO_OFF)) && GV_PauseLevel == 0)
+         {
+             if ((gRadioIncomingCall_8009E708.field_0 > 0 && gRadioIncomingCall_8009E708.field_2_timer < 0) ||
+-                pPad->press & PAD_SELECT)
++                CODEC_IS(MGS_CODEC_OPEN) || (pPad->press & PAD_SELECT))
+             {
+                 dword_800ABB1C = DG_FrameRate;
+                 DG_FrameRate = 2;
+@@ -1739,8 +1760,25 @@
+     }
+ }
+ 
++STATIC void menu_radio_update_80042198(MenuWork *work, u_long *ot)
++{
++#ifdef MGS_GODOT_SCENE
++    CodecActionsView(work);
++    codec_command = (MgsCodecAction){0};
++    if (MgsCodecActionsTake(&codec_command)) CodecActionsApply(work);
++#endif
++    CodecUpdate(work, ot);
++#ifdef MGS_GODOT_SCENE
++    if (codec_command.kind) MgsCodecActionsComplete();
++    CodecActionsView(work);
++#endif
++}
++
+ void menu_radio_init(MenuWork *work)
+ {
++#ifdef MGS_GODOT_SCENE
++    MgsGodotCodecActionsBegin();
++#endif
+ #ifdef MGS_NATIVE
+     MgsVideoCodec(0);
+ #endif
+@@ -1750,6 +1788,9 @@
+ 
+ void menu_radio_kill(MenuWork *work)
+ {
++#ifdef MGS_GODOT_SCENE
++    MgsGodotCodecActionsEnd();
++#endif
+ #ifdef MGS_NATIVE
+     MgsVideoCodec(0);
+ #endif
+--- a/source/menu/radiomem.c
++++ b/source/menu/radiomem.c
+@@ -7,6 +7,7 @@
+ 
+ #ifdef MGS_GODOT_SCENE
+ #include "mgs_godot_codec.h"
++#include "mgs_codec_actions.h"
+ #endif
+ 
+ typedef struct RadioCodecStru_800ABB98
+@@ -423,6 +424,46 @@
+     GV_FreeMemory(GV_PACKET_MEMORY0, stru_800ABB98);
+ }
+ 
++static void CodecMemoryConfirm(int cancel)
++{
++    RadioCodecStru_800ABB98 *memory = stru_800ABB98;
++    if (cancel) gRadioCodecFrequency_800ABB9E = -1;
++    else {
++        current_call = memory->field_0_idx;
++        gRadioCodecFrequency_800ABB9E = memory->field_10_array[current_call].freq;
++    }
++    word_800ABB9C = 1;
++    GM_SeSet2(0, 0x3f, cancel ? SE_RADIO_CANCEL : SE_RADIO_SELECT);
++}
++
++#ifdef MGS_GODOT_SCENE
++void MENU_CodecMemoryView(MenuWork *work, MgsCodecActionView *view)
++{
++    RadioCodecStru_800ABB98 *memory = stru_800ABB98;
++    view->selection = memory->field_0_idx;
++    view->count = memory->field_4_count;
++    if (word_800ABB9C != 0 || work->field_212 >= 5) return;
++    view->allowed = 1u << MGS_CODEC_BACK;
++    if (view->count) view->allowed |= (1u << MGS_CODEC_SELECT) | (1u << MGS_CODEC_CONFIRM);
++}
++
++void MENU_CodecMemoryAction(unsigned kind, unsigned target)
++{
++    RadioCodecStru_800ABB98 *memory = stru_800ABB98;
++    if (kind == MGS_CODEC_BACK) { CodecMemoryConfirm(1); return; }
++    if (kind != MGS_CODEC_SELECT && kind != MGS_CODEC_CONFIRM) return;
++    if (memory->field_0_idx != target) {
++        memory->field_0_idx = target;
++        while (memory->field_0_idx < memory->field_2) memory->field_2 -= 2;
++        while (memory->field_0_idx >= memory->field_2 + 8) memory->field_2 += 2;
++        memory->field_6 = 0;
++        GM_SeSet2(0, 0x3f, SE_RADIO_CURSOR);
++        sub_8004D4A0(memory);
++    }
++    if (kind == MGS_CODEC_CONFIRM) CodecMemoryConfirm(0);
++}
++#endif
++
+ int menu_radio_codec_helper_helper2_8004DF68( MenuWork *work, GV_PAD *pad )
+ {
+     RadioCodecStru_800ABB98 *pStru;
+@@ -463,20 +504,8 @@
+         pStru->field_6 = 0;
+     }
+ 
+-    if ( pad->press & PAD_CIRCLE )
+-    {
+-        current_call = pStru->field_0_idx;
+-        gRadioCodecFrequency_800ABB9E = pStru->field_10_array[current_call].freq;
+-        word_800ABB9C = 1;
+-        GM_SeSet2(0, 0x3f, SE_RADIO_SELECT);
+-    }
+-
+-    if ( pad->press & PAD_CROSS )
+-    {
+-        gRadioCodecFrequency_800ABB9E = -1;
+-        word_800ABB9C = 1;
+-        GM_SeSet2(0, 0x3f, SE_RADIO_CANCEL);
+-    }
++    if ( pad->press & PAD_CIRCLE ) CodecMemoryConfirm(0);
++    if ( pad->press & PAD_CROSS ) CodecMemoryConfirm(1);
+ 
+     if (word_800ABB9C == 0 && work->field_212 > 4)
+     {
+--- /dev/null
++++ b/source/menu/radio_actions.h
+@@ -0,0 +1,51 @@
++void MENU_CodecMemoryView(MenuWork *work, MgsCodecActionView *view);
++void MENU_CodecMemoryAction(unsigned kind, unsigned target);
++
++static void CodecActionsView(MenuWork *work)
++{
++    MgsCodecActionView view = {0};
++    uintptr_t item = 0;
++    view.opened = work->field_2A_state == MENU_CODEC_OPEN;
++    view.mode = view.opened ? work->field_210_codec_state : 21;
++    view.frequency = codec_freq_800AB638;
++    if (!(GM_PlayerStatus & PLAYER_MENU_DISABLE)) {
++        if (work->field_2A_state == MENU_CLOSED &&
++            !(GM_GameStatus & (STATE_VOX_STREAM | STATE_TAKING_PHOTO | STATE_RADIO_OFF)) && GV_PauseLevel == 0) {
++            view.active = 1;
++            view.allowed = 1u << MGS_CODEC_OPEN;
++        } else if (view.opened) {
++            view.active = 1;
++            if (view.mode == 1 && gRadioIncomingCall_8009E708.field_0 == 0)
++                view.allowed = (1u << MGS_CODEC_TUNE) | (1u << MGS_CODEC_CALL) |
++                    (1u << MGS_CODEC_MEMORY) | (1u << MGS_CODEC_BACK);
++            else if (view.mode == 4 && work->field_212 == 0)
++                view.allowed = 1u << MGS_CODEC_ADVANCE;
++            else if (view.mode == 5 && work->field_218->field_14_bInExecBlock && !(work->field_218->field_18 & 1))
++                view.allowed = 1u << MGS_CODEC_SKIP;
++            else if (view.mode == 9 && work->field_212 == 0)
++                view.allowed = 1u << MGS_CODEC_ADVANCE;
++            else if (view.mode == 10) MENU_CodecMemoryView(work, &view);
++            else if (view.mode == 16) {
++                view.selection = work->field_218->field_1A_index;
++                view.count = codec_choice_count;
++                if (view.count) view.allowed = (1u << MGS_CODEC_SELECT) | (1u << MGS_CODEC_CONFIRM);
++            }
++            if (view.mode == 4 || view.mode == 5 || view.mode == 16)
++                item = (uintptr_t)work->field_218->field_C_pScript;
++        }
++    }
++    MgsGodotCodecActionsView(view, item);
++}
++
++static void CodecActionsApply(MenuWork *work)
++{
++    if (codec_command.kind == MGS_CODEC_TUNE) {
++        int target = codec_command.target;
++        gCodecAction = target < codec_freq_800AB638 ? CODEC_ACTION_LEFT : CODEC_ACTION_RIGHT;
++        if (target != codec_freq_800AB638) GM_SeSet2(0, 0x3F, SE_RADIO_TUNING);
++        codec_freq_800AB638 = target;
++        dword_800AB63C = dword_800ABB10 = 0;
++    } else if (work->field_210_codec_state == 10) {
++        MENU_CodecMemoryAction(codec_command.kind, codec_command.target);
++    }
++}
