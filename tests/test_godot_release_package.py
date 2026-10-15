@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 import json
+import os
 import tempfile
 import unittest
 import zipfile
@@ -10,7 +11,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from tools.package_godot_sdk import stable_version
-from tools.verify_godot_package import verify
+from tools.verify_godot_package import NativeProbeDirectory, verify
 
 
 class ReleasePackageTests(unittest.TestCase):
@@ -107,3 +108,47 @@ class ReleasePackageTests(unittest.TestCase):
         self.assertEqual(stable_version("0.3.0"), "0.3.0")
         with self.assertRaises(argparse.ArgumentTypeError):
             stable_version("0.3.0-alpha.1")
+
+    def test_temporary_windows_lock_does_not_fail_valid_package(self):
+        unlink = os.unlink
+        failures = []
+
+        def temporarily_locked(path, *args, **kwargs):
+            if Path(path).name == "mgs-integral-native.exe" and len(failures) < 3:
+                error = PermissionError(13, "File is in use", str(path))
+                error.winerror = 32
+                failures.append(error)
+                raise error
+            return unlink(path, *args, **kwargs)
+
+        with (
+            patch("tempfile.tempdir", self.directory.name),
+            patch("os.unlink", side_effect=temporarily_locked),
+        ):
+            self.assertEqual(self.verify_fixture()["version"], "0.3.0")
+        self.assertEqual(len(failures), 3)
+
+    def test_persistent_windows_lock_is_still_fatal(self):
+        error = PermissionError(13, "File is in use")
+        error.winerror = 32
+        directory = NativeProbeDirectory(dir=self.directory.name)
+        with (
+            patch("tempfile.TemporaryDirectory.cleanup", side_effect=error) as cleanup,
+            patch("tools.verify_godot_package.time.sleep") as sleep,
+            self.assertRaises(PermissionError),
+        ):
+            directory.cleanup()
+        self.assertEqual(cleanup.call_count, 51)
+        self.assertEqual(sleep.call_count, 50)
+        directory.cleanup()
+
+    def test_other_permission_errors_are_not_retried(self):
+        directory = NativeProbeDirectory(dir=self.directory.name)
+        with (
+            patch("tempfile.TemporaryDirectory.cleanup", side_effect=PermissionError),
+            patch("tools.verify_godot_package.time.sleep") as sleep,
+            self.assertRaises(PermissionError),
+        ):
+            directory.cleanup()
+        sleep.assert_not_called()
+        directory.cleanup()

@@ -1,6 +1,6 @@
 # Stable 0.3.0 release workflow
 
-Task: M8.03i. Status: committing, merging to main and publishing0.3.0.
+Task: M8.03i. Status: committed/merged/pushed; first CI probe-cleanup failure fixed, publication rerun pending.
 
 ## Publication authorization - 15 October
 

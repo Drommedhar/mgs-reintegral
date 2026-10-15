@@ -7,9 +7,22 @@ import posixpath
 import re
 import subprocess
 import tempfile
+import time
 import zipfile
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
+
+
+class NativeProbeDirectory(tempfile.TemporaryDirectory):
+    def cleanup(self):
+        for attempt in range(51):
+            try:
+                super().cleanup()
+                return
+            except PermissionError as error:
+                if getattr(error, "winerror", None) != 32 or attempt == 50:
+                    raise
+                time.sleep(0.1)
 
 
 def check_links(archive, prefix, names):
@@ -118,7 +131,7 @@ def verify(path):
             raise ValueError("Editor entry point does not match package kind")
         check_payload(archive, prefix, names, metadata)
         check_links(archive, prefix, names)
-        with tempfile.TemporaryDirectory(prefix="release probe ü ") as directory:
+        with NativeProbeDirectory(prefix="release probe ü ") as directory:
             native = Path(directory) / "mgs-integral-native.exe"
             native.write_bytes(
                 archive.read(prefix + "build/windows-x86-godot/mgs-integral-native.exe")
