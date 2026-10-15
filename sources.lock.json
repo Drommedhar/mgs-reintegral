@@ -4,12 +4,42 @@
     "python": {
       "version": "3.13.16",
       "url": "https://www.python.org/ftp/python/3.13.16/python-3.13.16-embed-amd64.zip",
-      "sha256": "97dae5274cc54867065e8d5a3226e48c35017ed332a0fdb0e27d5b5821961297"
+      "sha256": "97dae5274cc54867065e8d5a3226e48c35017ed332a0fdb0e27d5b5821961297",
+      "directory": "python",
+      "files": {
+        "python.exe": "31fe10b4ed82a2f960af0ef9931f46a4b84ff286f8b6ffd9dee098cf4f10f17f",
+        "python313.dll": "3b29bf9ff39bed8f660f5b935f19657f7ce7f145009851741b11364f6ebcb862",
+        "python313.zip": "33c48dd2c3031d27784950aaee96d3d65f916e3c43dd3637ace333a7b9e8021a",
+        "python313._pth": "5e73f017e1167abd1c3d36b6d5f986d4623f7ca456d57f2e045accdf89cf12a3"
+      }
     },
     "powershell": {
       "version": "7.6.6",
       "url": "https://github.com/PowerShell/PowerShell/releases/download/v7.6.6/PowerShell-7.6.6-win-x64.zip",
-      "sha256": "02fe458be20493fbdf43f61ea20610b811ee6c738ab1676c61b9cfcd1a33c860"
+      "sha256": "02fe458be20493fbdf43f61ea20610b811ee6c738ab1676c61b9cfcd1a33c860",
+      "directory": "powershell",
+      "files": {
+        "pwsh.exe": "bfb46af89433268872ddb43d1ca7a3f433452ee91ed356a9786940f90118e285",
+        "pwsh.dll": "91f9892f15a7e2dcf440afc3a497a7d839f9d38d1ab4a50bd36080d982a01449",
+        "System.Management.Automation.dll": "ed8d39663e05435aab59f1c7fb0ad20292e22b0cb12cf47aad4b62b31e4d4126",
+        "pwsh.runtimeconfig.json": "6c1779b71c67b5f40b2d0041bacae0873320dd55f0dc3d5df76d88c8d486275d",
+        "pwsh.deps.json": "dfc3a3fb00f53720610f389e2525fb268928b381e55f899b84b478502d5736a2",
+        "coreclr.dll": "20ea763d5ad8be8656a3123c4ad5afdb4c714a009bfc63bb8f4906d6678130db",
+        "clrjit.dll": "8b3e57d21cc9914a0f2df5df3b0fa5fc426d91282846eb88da07736cfb7416aa",
+        "hostfxr.dll": "6d2d8b595846bfcbb5ef7b1cb1a3156aff4930d2002b6ac813910b848c918855",
+        "hostpolicy.dll": "400e8547169e8d4405adfd79510ae429f76f7a580932ac8a602ef5d88e4feb2e",
+        "System.Private.CoreLib.dll": "63d83dd8169f23820f5d3bf0f0399f60e5e26200361787dfcb1c24cabc76e423"
+      }
+    },
+    "godot": {
+      "version": "4.8-dev7",
+      "url": "https://github.com/godotengine/godot-builds/releases/download/4.8-dev7/Godot_v4.8-dev7_win64.exe.zip",
+      "sha256": "560a08a239421b89e6c7532930bc78714fda12ef5cf10bc9586531c7c1a64ac2",
+      "directory": "godot-4.8-dev7",
+      "files": {
+        "Godot_v4.8-dev7_win64.exe": "ffeea622b211379a98612ee7bc0ee9c18f982fac11a2d478c7988f98340c3918",
+        "Godot_v4.8-dev7_win64_console.exe": "b5dc28b256128a7e5dcbb59ce3767c18ddbc1062d27b0a8f8ef5c84f25a480d9"
+      }
     }
   },
   "godotCpp": {
@@ -262,5 +292,30 @@
     "generator": "tools/build_interface_font.py",
     "generatorRequirements": "requirements-fonts.txt",
     "generatedAtlasSha256": "5bca92a2076d111803717f425e5a900d69140a3bba1208168abfbdc9295f8d94"
-  }
+  },
+  "legacyRelease": {
+    "version": "0.2.0-alpha.1",
+    "player": {
+      "url": "https://github.com/Drommedhar/mgs-reintegral/releases/download/v0.2.0-alpha.1/reintegral-0.2.0-alpha.1-windows-x86.zip",
+      "sha256": "1390213568236529c8470198ee3155decff2aa7fa7f6ebdeff2945b7c98a94cb"
+    },
+    "source": {
+      "url": "https://github.com/Drommedhar/mgs-reintegral/releases/download/v0.2.0-alpha.1/reintegral-0.2.0-alpha.1-mpl-source.zip",
+      "sha256": "c46959c2296b89e7dc9de4fc0feb8017d1f977b05d0b468bb0ce37cf036e49fd"
+    }
+  },
+  "godotNotices": [
+    {
+      "url": "https://raw.githubusercontent.com/godotengine/godot/c971f93e7/LICENSE.txt",
+      "sha256": "b0435e3b3e4e55238f05f4b306f30524a1b2e20147810d436eaa554fa6855c80"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/godotengine/godot/c971f93e7/COPYRIGHT.txt",
+      "sha256": "d5aeff0741d5cb7a566befd8867667549c8bb46399a0e93091273b632bbefd96"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/godotengine/godot/c971f93e7/AUTHORS.md",
+      "sha256": "94ed8fc22d19a96bb9dc37acdd105a772269453af25ff39cb5f082d1505f92cb"
+    }
+  ]
 }

@@ -4,13 +4,16 @@ param(
     [string]$DiscDirectory,
     [string]$DiscOne,
     [string]$DiscTwo,
-    [ValidateSet(1, 2)][int[]]$Discs = @(1, 2),
+    [string[]]$Discs = @('1', '2'),
     [string[]]$Stages
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
+$Discs = @($Discs -split ',')
+if (@($Discs | Where-Object { $_ -notin @('1', '2') }).Count) { throw 'Discs must be 1, 2 or 1,2.' }
+if ($Stages) { $Stages = @($Stages -split ',') }
 switch ($Action) {
     'prepare' {
         $cues = @()

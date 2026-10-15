@@ -1,6 +1,6 @@
 # Native binding investigation — dock and UI
 
-Source investigation for M0.06 with a separately labeled initial live-provider check below. This is **not the completed public binding contract or SDK acceptance**. It records evidence that must survive context compaction. See the [coverage matrix](GODOT_PRESENTATION_COVERAGE.md) and [execution ledger](GODOT_SDK_PROGRESS.md).
+Source investigation for M0.06 with a separately labeled initial live-provider check below. This is **not the completed public binding contract or SDK acceptance**. See the [coverage matrix](GODOT_PRESENTATION_COVERAGE.md); the historical execution ledger is `docs/GODOT_SDK_PROGRESS.md` in the source checkout.
 
 ## Actual dock elevator declaration
 

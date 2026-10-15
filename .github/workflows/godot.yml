@@ -1,0 +1,118 @@
+name: Build Godot game and SDK
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version without v (for example 0.3.0-alpha.1)'
+        required: true
+        default: '0.3.0-alpha.1'
+        type: string
+      publish:
+        description: Publish the tested files as a prerelease
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: godot-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: windows-2022
+    timeout-minutes: 40
+    permissions:
+      contents: write
+    env:
+      RELEASE_VERSION: ${{ inputs.version }}
+      GH_TOKEN: ${{ github.token }}
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Validate release request
+        env:
+          PUBLISH_RELEASE: ${{ inputs.publish }}
+        run: |
+          if ($env:RELEASE_VERSION -notmatch '^\d+\.\d+\.\d+-alpha\.\d+$') { throw 'Use a version such as 0.3.0-alpha.1.' }
+          if ($env:PUBLISH_RELEASE -ne 'true') { exit 0 }
+          $release = gh api "repos/$env:GITHUB_REPOSITORY/releases" --paginate --jq '.[].tag_name'
+          if ($LASTEXITCODE -ne 0) { throw 'Cannot inspect existing releases.' }
+          if (@($release) -contains "v$env:RELEASE_VERSION") { throw 'That release already exists. Choose a new alpha version.' }
+          $tags = gh api "repos/$env:GITHUB_REPOSITORY/git/matching-refs/tags/v$env:RELEASE_VERSION" --jq '.[].ref'
+          if ($LASTEXITCODE -ne 0) { throw 'Cannot inspect existing tags.' }
+          if (@($tags) -contains "refs/tags/v$env:RELEASE_VERSION") { throw 'That tag already exists. Choose a new alpha version.' }
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+          cache: pip
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        id: dependencies
+        with:
+          path: |
+            .tools/cmake-3.31.8
+            .tools/ninja-1.13.1
+            vendor
+          key: windows-x86-dependencies-${{ hashFiles('sources.lock.json', 'patches/**', 'tools/toolchain.ps1') }}
+      - name: Bootstrap and verify pinned sources
+        run: |
+          ./tools/bootstrap.ps1
+          ./tools/bootstrap.ps1 -Check
+      - name: Build optimized game, symbols, launcher and tests
+        run: ./tools/build.ps1 -Configuration RelWithDebInfo -BuildDirectory build/godot-release -RendererModule renderers/godot/native -Version $env:RELEASE_VERSION -Parallel 4
+      - name: Cache verified build dependencies before tests
+        if: steps.dependencies.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            .tools/cmake-3.31.8
+            .tools/ninja-1.13.1
+            vendor
+          key: ${{ steps.dependencies.outputs.cache-primary-key }}
+      - name: Test without retail discs or a physical GPU
+        env:
+          SDL_AUDIODRIVER: dummy
+        run: |
+          & ./.tools/cmake-3.31.8/cmake-3.31.8-windows-x86_64/bin/ctest.exe --test-dir build/godot-release --output-on-failure --timeout 60 -j 4 -E '^mgs_(gpu_|widescreen_gpu_|modern_gpu_|joint_geometry_)'
+          if ($LASTEXITCODE -ne 0) { throw 'CTest failed.' }
+      - name: Package and audit both downloads
+        run: |
+          ./tools/prepare-godot-release.ps1 -BuildDirectory build/godot-release -Version $env:RELEASE_VERSION -OutputDirectory build/packages
+      - name: Check downloaded tools and relocated editor without discs or GPU
+        run: |
+          & ./.venv/Scripts/python.exe tools/test_godot_release.py --sdk "build/packages/reintegral-sdk-$env:RELEASE_VERSION-windows-x86.zip" --game "build/packages/reintegral-$env:RELEASE_VERSION-windows-x86.zip" --output 'build/release-smoke'
+          if ($LASTEXITCODE -ne 0) { throw 'Packaged editor/download smoke test failed.' }
+      - name: Publish prerelease after validation
+        if: inputs.publish
+        run: |
+          $assets = @(Get-ChildItem -LiteralPath build/packages -File | Where-Object { $_.Extension -eq '.zip' -or $_.Name.EndsWith('SHA256SUMS.txt') } | Select-Object -ExpandProperty FullName)
+          gh release create "v$env:RELEASE_VERSION" @assets --repo $env:GITHUB_REPOSITORY --target $env:GITHUB_SHA --prerelease --draft --title "RE:INTEGRAL $env:RELEASE_VERSION" --notes-file docs/RELEASE_0.3.md
+          if ($LASTEXITCODE -ne 0) { throw 'Release upload failed; any partial release remains a draft.' }
+          gh release edit "v$env:RELEASE_VERSION" --repo $env:GITHUB_REPOSITORY --draft=false
+          if ($LASTEXITCODE -ne 0) { throw 'Could not publish the completed draft.' }
+      - name: Keep test-build downloads briefly
+        if: success() && !inputs.publish
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: godot-test-downloads
+          path: |
+            build/packages/*.zip
+            build/packages/*SHA256SUMS.txt
+          retention-days: 3
+      - name: Keep failure diagnostics briefly
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: godot-test-diagnostics
+          path: |
+            build/godot-release/Testing/Temporary/*.log
+            build/godot-release/CMakeFiles/CMakeConfigureLog.yaml
+            build/release-smoke/*.log
+          retention-days: 3

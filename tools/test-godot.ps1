@@ -37,6 +37,9 @@ function Test-GodotScript {
 }
 
 Test-GodotScript 'scene_snapshot_test'
+Test-GodotScript 'snow_volume_test'
+Test-GodotScript 'snow_collision_test'
+Test-GodotScript 'snow_skin_test'
 Test-GodotScript 'scene_preparation_test'
 Test-GodotScript 'scene_resources_test'
 Test-GodotScript 'session_gate_test'
@@ -78,6 +81,9 @@ Test-GodotScript 'disc_content_test'
 Test-GodotScript 'catalog_responsiveness_test' -TimeoutSeconds 120
 Test-GodotScript 'scene_browser_test'
 Test-GodotScript 'workspace_roundtrip_test'
+Test-GodotScript 'workspace_status_test'
+& (Join-Path $PSScriptRoot 'test-godot-map-editor.ps1') -LogDirectory (Join-Path $logRoot 'workspace-status') -Fixture workspace_status
+& (Join-Path $PSScriptRoot 'test-godot-map-editor.ps1') -LogDirectory (Join-Path $logRoot 'workspace-export') -Fixture workspace_export
 Test-GodotScript 'binary_export_test'
 Test-GodotScript 'source_dependency_test'
 Test-GodotScript 'mod_resources_test' -TimeoutSeconds 90
@@ -113,6 +119,9 @@ if ($SkipGpu) {
     Write-Host "[godot] CPU tests passed; GPU tests skipped. Logs: $logRoot"
     return
 }
+Test-GodotScript 'render_schedule_test' -Gpu
+Test-GodotScript 'snow_gpu_test' -Gpu
+Test-GodotScript 'snow_render_test' -Gpu
 Test-GodotScript 'depth_composition_test' -Gpu
 Test-GodotScript 'beam_render_test' -Gpu
 Test-GodotScript 'beam_render_test' -Gpu -Fsr2

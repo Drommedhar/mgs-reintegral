@@ -47,10 +47,11 @@ func select(path: String, open_scene: bool) -> void:
 
 func open_zip(path: String) -> void:
 	var repository := ProjectSettings.globalize_path("res://../../..")
-	var python := preload("res://addons/mgs_editor/sdk_paths.gd").python()
-	if not FileAccess.file_exists(python):
-		failed.emit("Python importer is missing: " + python + ". Repair the SDK or run tools/bootstrap.ps1 in a source checkout.")
+	var preparation := preload("res://addons/mgs_editor/sdk_paths.gd").prepare_python()
+	if not preparation.is_empty():
+		failed.emit(preparation)
 		return
+	var python := preload("res://addons/mgs_editor/sdk_paths.gd").python()
 	var output: Array = []
 	var result := OS.execute(python, [repository.path_join("tools/import_godot_mod.py"), path, ProjectSettings.globalize_path("res://mods"),
 		"--godot", OS.get_executable_path(), "--project", ProjectSettings.globalize_path("res://")], output, true)

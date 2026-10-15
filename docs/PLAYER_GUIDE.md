@@ -1,7 +1,7 @@
 # Player guide: play RE:INTEGRAL and install mods
 
-This guide covers the Godot SDK development package, including SDK dev22. You
-can use its launcher to play without opening the editor. The separately released
+This guide covers the 0.3.0-alpha.1 game and SDK packages. Both include the same
+launcher and gameplay host; the SDK adds authoring tools. The separately released
 native **0.2.0-alpha.1** package has its own [alpha guide](ALPHA.md); it does not
 include the Godot editor or Godot visual mods.
 
@@ -22,17 +22,19 @@ For making mods, use the [mod creator guide](MOD_CREATOR_GUIDE.md).
 Game files are not included. Plain ISO images and other regional releases are
 not substitutes for the Integral gameplay discs. The VR disc is optional for
 preparation; this guide covers the campaign, not VR Missions playability.
-Godot, Python and PowerShell are bundled; no compiler or separate Python
-installation is needed.
+Missing Godot, PowerShell and Python tools download on first use with pinned
+checksum verification, then work offline. Initial setup needs internet access;
+no compiler or separate Python installation is needed.
 
 ## First launch with Godot
 
-1. Extract the **entire SDK ZIP** into a writable folder. Keep its subfolders
+1. Extract the **entire game or SDK ZIP** into a writable folder. Keep its subfolders
    together; copying only `RE-INTEGRAL.exe` is insufficient.
 2. Open **Prepare.cmd**. Select both campaign CUE files together. Preparation
    reads your discs and creates local map/model/texture previews. Let it finish
    before starting the game. Keep the source disc images available afterwards.
-3. Open **Play.cmd**, or `RE-INTEGRAL.exe` in the SDK root.
+3. Open **Play.cmd**. It installs missing runtime tools before opening the
+   launcher. Once setup is complete, `RE-INTEGRAL.exe` also works directly.
 4. In **Discs and display**, select Disc 1 and Disc 2, then choose your output
    resolution, fullscreen and widescreen settings.
 5. In **Graphics**, select **Godot**, then **Godot scene rendering**.
@@ -41,11 +43,13 @@ installation is needed.
 
 The first launch of a large mod can take a minute or more while Godot imports
 its assets. The launcher shows preparation/import status and elapsed time.
-Later launches reuse the cache where possible. Once the game window opens,
-the logo and overall startup progress cover content checks and renderer setup.
-They disappear before the opening cinematic. Later in-game transitions show
-no loading interface. The optional FPS/debug overlay remains a separate
-setting under **Developer options**.
+Later launches reuse the cache where possible. Startup checks show their status
+to the left of the outline animation. During scene loading, the animation
+appears in the lower-right after a short delay and disappears when ready.
+Scene transitions show no progress text. Sounds continue through renderer waits
+unless the original game stops or ends them. The animation is by
+**Irbif (u/Irbif)**; see the [artist credit](THIRD_PARTY.md#tooling-and-local-content).
+The optional FPS/debug overlay remains a separate setting under **Developer options**.
 
 Normal launcher sessions disable automatic image captures and ignore inherited
 capture/probe environment settings. The FPS overlay does not capture images.
@@ -65,7 +69,7 @@ retain their original resolution. Both Legacy modes retain their original text.
 | Godot → Godot scene rendering | Godot geometry, materials, lights, effects and editable interfaces | Loaded when checked in Mods |
 | Godot → Legacy through Godot | Original native drawing commands presented by Godot | Not loaded |
 
-Both Godot modes need the bundled engine and runtime project. Full scene
+Both Godot modes need the downloaded pinned engine and included runtime project. Full scene
 rendering also needs prepared disc content. Renderer changes take effect when
 starting the next game session. Switching modes preserves your mod selections
 and uses the same launcher save location.
@@ -185,8 +189,3 @@ When reporting a problem, include the SDK/build version, renderer mode, mod name
 and versions, Windows/GPU/controller details, the last action before the problem,
 and relevant logs. Review logs for private paths before sharing. Do not attach
 disc images, extracted game data or imported language packs.
-
-During loading, a small outline animation appears in the lower-right after a short
-delay and disappears when the scene is ready. The original Solid Snake pixel
-animation is by **Irbif (u/Irbif)**; see the [artist credit and source](THIRD_PARTY.md#tooling-and-local-content).
-Sounds continue through renderer waits unless the original game stops or ends them.

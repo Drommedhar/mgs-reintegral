@@ -7,8 +7,14 @@ import tempfile
 import unittest
 import zipfile
 from pathlib import Path
+from unittest.mock import patch
 
-from tools.sdk_package_audit import audit, inspect_archive, inspect_resource
+from tools.sdk_package_audit import (
+    audit,
+    inspect_archive,
+    inspect_resource,
+    known_original_hashes,
+)
 
 
 def archive_of(name, data):
@@ -19,6 +25,39 @@ def archive_of(name, data):
 
 
 class SdkPackageTests(unittest.TestCase):
+    def test_baseline_detects_original_without_local_disc_catalogs(self):
+        self.assertGreater(len(known_original_hashes()), 33000)
+        original = b"synthetic fingerprint fixture"
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            contents = archive_of("nested.zip", archive_of("renamed.dat", original))
+            (root / "source.zip").write_bytes(contents)
+            inventory = {"source.zip": hashlib.sha256(contents).hexdigest()}
+            with (
+                patch(
+                    "tools.sdk_package_audit.known_original_hashes",
+                    return_value={hashlib.sha256(original).hexdigest()},
+                ),
+                self.assertRaisesRegex(ValueError, "Original-content copy"),
+            ):
+                audit(root, inventory)
+
+    def test_downloaded_tools_cannot_enter_release_archive(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            path = root / ".tools/godot/engine.exe"
+            path.parent.mkdir(parents=True)
+            path.write_bytes(b"tool fixture")
+            with self.assertRaisesRegex(ValueError, "must not be bundled"):
+                audit(
+                    root,
+                    {
+                        path.relative_to(root).as_posix(): hashlib.sha256(
+                            path.read_bytes()
+                        ).hexdigest()
+                    },
+                )
+
     def test_loose_editor_resources_and_embedded_images_cannot_ship(self):
         custom = '[gd_resource type="StandardMaterial3D" format=3]\n'
         inspect_resource("examples/named_resources/amber.tres", custom)

@@ -53,9 +53,13 @@ func export_history() -> void:
 	var history := state.read(workspace.root)
 	check(history.export_path == ProjectSettings.globalize_path(destination), "Export destination not remembered")
 	check(history.fingerprint == state.snapshot(workspace.root).fingerprint, "Fresh export is marked dirty")
+	var status := preload("res://addons/mgs_editor/workspace_status.gd").new().inspect(workspace.root)
+	check(status.known and not status.changed and status.error.is_empty(), "Fresh export source history does not match")
 	var scene_path: String = workspace.root.path_join("map.tscn")
 	write(scene_path, FileAccess.get_file_as_string(scene_path).replace("AuthoredBox", "RenamedBox"))
 	check(history.fingerprint != state.snapshot(workspace.root).fingerprint, "Saved scene edit was not detected")
+	status = preload("res://addons/mgs_editor/workspace_status.gd").new().inspect(workspace.root)
+	check(status.changed, "Background status missed a saved scene edit")
 	var data: Dictionary = workspace.manifest()
 	data.version = "1.1"
 	workspace.save(data)

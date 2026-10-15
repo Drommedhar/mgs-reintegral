@@ -16,10 +16,12 @@ var snapshot := {}
 var history := {}
 var history_error := ""
 var snapshot_error := ""
+var status_check := preload("res://addons/mgs_editor/workspace_status.gd").new()
 var dirty := true
 var active := ""
 var busy := false
 var pending_resources := {}
+var export_progress := preload("res://addons/mgs_editor/export_progress.gd").new()
 
 func _ready() -> void:
 	version.placeholder_text = "Mod version (optional)"
@@ -36,6 +38,7 @@ func _ready() -> void:
 			row.add_child(button)
 	summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	add_child(summary)
+	add_child(export_progress)
 	export_dialog.access = FileDialog.ACCESS_FILESYSTEM
 	export_dialog.file_mode = FileDialog.FILE_MODE_SAVE_FILE
 	export_dialog.filters = PackedStringArray(["*.zip ; Mod ZIP"])
@@ -68,27 +71,35 @@ func resource_edited(_property: StringName) -> void:
 
 func invalidate() -> void:
 	dirty = true
+	status_check.cancel()
 
 func activate() -> void:
 	if active == workspace.root: return
 	active = workspace.root
+	snapshot.clear()
+	snapshot_error = ""
+	read_history()
 	version.text = str(workspace.manifest().get("version", ""))
 	invalidate()
 	refresh()
 
 func refresh() -> void:
 	if busy or workspace == null: return
-	if dirty:
-		var state := State.new()
-		history = state.read(workspace.root)
-		history_error = state.error
-		snapshot = state.snapshot(workspace.root)
-		snapshot_error = state.error
+	if status_check.worker.is_started() and not status_check.worker.is_alive():
+		var result := status_check.finish()
+		if not dirty:
+			snapshot = result
+			history = result.get("history", {})
+			history_error = result.get("error", "")
+	if dirty and not status_check.worker.is_started():
+		var started := status_check.start(workspace.root)
+		snapshot_error = "Cannot check workspace status: " + error_string(started) if started != OK else ""
 		dirty = false
 	var unsaved := Array(EditorInterface.get_unsaved_scenes()).filter(func(path): return path.begins_with(workspace.root + "/"))
-	var changed: bool = snapshot.get("fingerprint", "") != history.get("fingerprint", "")
-	var text := "Saved changes not exported" if changed else "Workspace matches exported ZIP"
+	var text := "Saved changes not exported" if snapshot.get("changed", false) else "Workspace matches exported ZIP"
+	if not snapshot.get("known", false): text = "Export to check saved changes against the ZIP"
 	if history.get("export_path", "").is_empty(): text = "Not exported yet"
+	if dirty or status_check.worker.is_started(): text = "Checking saved workspace changes…"
 	if not snapshot_error.is_empty(): text = "Export needs attention: " + snapshot_error
 	if not history_error.is_empty(): text = history_error
 	var resource_changes := pending_resources.keys().any(func(path): return path.begins_with(workspace.root + "/"))
@@ -135,8 +146,13 @@ func save_workspace() -> bool:
 	reported.emit("Workspace saved: " + target if error.is_empty() else error)
 	return error.is_empty()
 
+func read_history() -> void:
+	var state := State.new()
+	history = state.read(workspace.root, false)
+	history_error = state.error
+
 func export_current() -> void:
-	refresh()
+	read_history()
 	if not history_error.is_empty(): reported.emit(history_error); return
 	var destination: String = history.get("export_path", "")
 	if destination.is_empty(): choose_export()
@@ -144,6 +160,8 @@ func export_current() -> void:
 
 func choose_export() -> void:
 	if busy: return
+	read_history()
+	if not history_error.is_empty(): reported.emit(history_error); return
 	export_dialog.current_path = history.get("export_path", "")
 	if export_dialog.current_path.is_empty():
 		var default_path := ProjectSettings.globalize_path("res://../../../build/mod-exports/" + workspace.root.get_file() + ".zip")
@@ -151,8 +169,16 @@ func choose_export() -> void:
 	export_dialog.popup_centered_ratio(0.7)
 
 func write_export(destination: String, explicit_destination: bool) -> void:
-	if not await save_workspace(): return
-	var error := State.new().export_zip(workspace.root, destination, explicit_destination)
+	if busy or export_progress.running: return
+	export_progress.begin()
+	await get_tree().process_frame
+	if not await save_workspace():
+		export_progress.finish()
+		return
+	busy = true
+	status_check.cancel()
+	var error := await export_progress.export_workspace(workspace.root, destination, explicit_destination)
+	busy = false
 	invalidate()
 	refresh()
 	reported.emit("Exported " + ProjectSettings.globalize_path(destination) if error.is_empty() else error)
@@ -167,6 +193,10 @@ func choose_fork() -> void:
 func fork_workspace() -> void:
 	if not await save_workspace(): return
 	var repository := ProjectSettings.globalize_path("res://../../..")
+	var preparation := preload("res://addons/mgs_editor/sdk_paths.gd").prepare_python()
+	if not preparation.is_empty():
+		reported.emit(preparation)
+		return
 	var python := preload("res://addons/mgs_editor/sdk_paths.gd").python()
 	var output: Array = []
 	var destination := "res://mods/" + fork_id.text.strip_edges()
@@ -183,3 +213,7 @@ func fork_workspace() -> void:
 	while filesystem.is_scanning(): await get_tree().process_frame
 	selected.emit(destination)
 	reported.emit("Created independent mod: " + destination)
+
+func _exit_tree() -> void:
+	status_check.cancel()
+	if status_check.worker.is_started(): status_check.finish()

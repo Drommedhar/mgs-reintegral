@@ -4,6 +4,7 @@ extends RefCounted
 static var pixel_cache: Dictionary = {}
 var originals: Dictionary = {}
 var visited: Dictionary = {}
+var progress := Callable()
 
 static func fingerprint(image: Image) -> String:
 	var pixels := image.duplicate() as Image
@@ -18,6 +19,7 @@ static func fingerprint(image: Image) -> String:
 
 func inspect(image: Image, location: String) -> String:
 	if image.is_empty(): return ""
+	if progress.is_valid() and not progress.call("validating", "Checking image " + location.get_file(), 0, 0): return "Export cancelled."
 	var candidate := fingerprint(image)
 	if candidate.is_empty(): return "Cannot inspect compressed image: " + location
 	for digest in originals:

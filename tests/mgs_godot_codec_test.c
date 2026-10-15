@@ -20,9 +20,10 @@ void MgsGodotQueue(uint32_t op, const void *header, uint32_t hsize, const void *
     memcpy(wire + hsize, data, bytes);
     ++queued;
 }
-void MgsGodotExchange(uint32_t op, const void *data, uint32_t size, void *reply, uint32_t reply_size)
+void MgsGodotRequest(uint32_t op, const void *data, uint32_t size,
+                     uint32_t reply_size, void (*complete)(const void *))
 {
-    (void)op; (void)data; (void)size; (void)reply; (void)reply_size;
+    (void)op; (void)data; (void)size; (void)reply_size; (void)complete;
     assert(!"Codec actions were not negotiated in this portrait test");
 }
 static uint32_t Word(unsigned offset)

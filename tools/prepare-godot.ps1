@@ -5,8 +5,8 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $projectDirectory = Split-Path $PSScriptRoot -Parent
 $version = '4.8-dev7'
-$archiveHash = '560a08a239421b89e6c7532930bc78714fda12ef5cf10bc9586531c7c1a64ac2'
-$toolDirectory = Join-Path $projectDirectory ".tools/godot-$version"
+. (Join-Path $PSScriptRoot 'download-tool.ps1')
+$toolDirectory = Install-MgsTool $projectDirectory 'godot'
 $executable = Join-Path $toolDirectory "Godot_v${version}_win64_console.exe"
 if (Test-Path -LiteralPath (Join-Path $projectDirectory 'sdk.json')) {
     foreach ($path in @($executable, (Join-Path $projectDirectory 'renderers/godot/project/.generated/psx.vert.glsl'),
@@ -17,17 +17,6 @@ if (Test-Path -LiteralPath (Join-Path $projectDirectory 'sdk.json')) {
     $reported = & $executable --version
     if ($LASTEXITCODE -ne 0 -or $reported.Trim() -ne '4.8.dev7.official.c971f93e7') { throw "Unexpected SDK Godot version: $reported" }
     return
-}
-if (-not (Test-Path -LiteralPath $executable)) {
-    $archive = Join-Path $projectDirectory ".tools/Godot_v${version}_win64.exe.zip"
-    New-Item -ItemType Directory -Path (Split-Path $archive -Parent) -Force | Out-Null
-    if (-not (Test-Path -LiteralPath $archive)) {
-        Invoke-WebRequest -Uri "https://github.com/godotengine/godot-builds/releases/download/$version/Godot_v${version}_win64.exe.zip" -OutFile $archive
-    }
-    if ((Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash -ne $archiveHash) {
-        throw "Godot archive hash mismatch: $archive"
-    }
-    Expand-Archive -LiteralPath $archive -DestinationPath $toolDirectory -Force
 }
 $reportedVersion = & $executable --version
 if ($LASTEXITCODE -ne 0 -or $reportedVersion.Trim() -ne '4.8.dev7.official.c971f93e7') {

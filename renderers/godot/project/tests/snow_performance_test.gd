@@ -16,6 +16,7 @@ func run() -> void:
 	floor.position.y = -4
 	scene.add_child(floor)
 	var volume: Node3D = load("res://addons/mgs_snow/snow_volume.tscn").instantiate()
+	volume.simulation_mode = 1
 	scene.add_child(volume)
 	volume.set_physics_process(false)
 	var started := Time.get_ticks_usec()

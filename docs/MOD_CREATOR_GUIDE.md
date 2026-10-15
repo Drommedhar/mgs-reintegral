@@ -2,14 +2,14 @@
 
 Make and test visual mods using the Godot SDK's **MGS Visuals** dock and Godot's
 normal Scene tree, Inspector, materials and animation tools. This guide covers
-the SDK dev23 workflow. You do not need a running game, F7 capture or a compiler
+the 0.3.0-alpha.1 SDK workflow. You do not need a running game, F7 capture or a compiler
 to preview original maps and create your first mod.
 
 For playing and installing a finished ZIP, use the [player guide](PLAYER_GUIDE.md).
 For scripting, manifests and extension APIs, use the
 [technical reference](GODOT_MODDING.md).
 
-SDK23 supplies higher-resolution original-style menu lettering and scalable
+The SDK supplies higher-resolution original-style menu lettering and scalable
 dialogue by default. Native text positions, wrapping and timing still drive the
 default interfaces. Players can choose the original pixel fonts in the launcher.
 An authored text control's `font_override` takes precedence; injected SDK fonts
@@ -36,8 +36,8 @@ not contain the original meshes, textures, fonts or extracted disc data.
 
 ## Set up the editor
 
-1. Extract the complete SDK into a writable folder. Keep the bundled Godot
-   version; substituting another editor can break the renderer/SDK contract.
+1. Extract the complete SDK into a writable folder. Its commands download the
+   pinned tools on first use; keep that Godot version for renderer/SDK compatibility.
 2. Run **Prepare.cmd** and select both Integral campaign CUE files. Let the
    preparation finish. See the [player requirements](PLAYER_GUIDE.md#what-you-need)
    for the supported disc format.
@@ -118,14 +118,21 @@ after a native test starts apply on the next launch.
    Subsequent exports update that remembered destination. **Export As…**
    chooses another ZIP destination while keeping the same mod ID.
 3. Check the workspace status: **Workspace matches exported ZIP** confirms
-   the current saved workspace matches its last export. If it says **Export
+   the saved source files match their last export. This check runs in the
+   background while you edit. Older workspaces ask for one export to establish
+   this comparison. Full dependency and original-content validation runs when
+   exporting, rather than every time you open or save a resource. If it says **Export
    needs attention**, read the dependency/error path; a save dialog alone does
    not mean a ZIP was written.
 4. Follow the [player installation steps](PLAYER_GUIDE.md#install-update-or-disable-a-mod)
    to install your exported ZIP in the launcher. Verify it with **Godot scene
    rendering** and only the intended mods enabled.
 
-Export saves first and collects referenced custom resources. It preserves the
+Export saves first, then shows a progress dialog while checking custom resources
+and writing the ZIP. Validation shows the current activity and elapsed time;
+compression shows its percentage by bytes written. **Cancel** keeps the previous
+ZIP and export history. Cancellation becomes unavailable while finalizing the ZIP.
+The editor continues drawing throughout the export. It preserves the
 previous ZIP if export fails. If another program changed that ZIP, ordinary
 export refuses to overwrite it; inspect the change or choose **Export As…**.
 
@@ -280,7 +287,7 @@ by the water system.
 
 ## Falling snow
 
-Copy `addons/mgs_snow` into your mod and instance **snow_volume.tscn**. Size and
+Copy `addons/mgs_snow` into your mod and instance **snow_volume.tscn**. GPU weather simulation is the default; select Exact surfaces (CPU) when triangle collision and moving-surface attachment are required. Size and
 position the volume, then use its Inspector for flake amount, size, fall speed,
 wind and contact fading. Enable **Animate Preview** to watch it in the editor.
 Both sides of scene geometry block flakes, including one-sided roofs. This is

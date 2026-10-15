@@ -10,9 +10,12 @@
 - **[Mod creator guide](docs/MOD_CREATOR_GUIDE.md):** prepare your discs, make a first mod, edit original and custom visuals, test in the native game and export a portable ZIP. Includes moving objects, water and frost.
 - **[SDK quickstart](docs/SDK_QUICKSTART.md):** package entry points and the two guides. **[Technical reference](docs/GODOT_MODDING.md):** manifests, scripting and GDExtension APIs.
 
-These guides describe the development Godot SDK, including dev18. The native
-alpha below is a separate package. Godot campaign-wide fidelity and human
+These guides describe the 0.3.0-alpha.1 game and SDK release candidates. The native
+0.2 alpha below is a separate published package. Godot campaign-wide fidelity and human
 playability acceptance remain in progress.
+
+[0.3 release notes](docs/RELEASE_0.3.md) describe the two downloads and known limits.
+The [release runbook](docs/RELEASING.md) covers local builds and the manual workflow.
 
 ## Play the alpha
 

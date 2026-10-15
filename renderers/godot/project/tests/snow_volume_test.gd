@@ -33,6 +33,7 @@ func run() -> void:
 	volume.amount = 128
 	volume.wind_velocity = Vector3.ZERO
 	volume.flutter_strength = 0
+	volume.simulation_mode = 1
 	scene.add_child(volume)
 	volume.set_physics_process(false)
 	volume.collision.prepare(100000)

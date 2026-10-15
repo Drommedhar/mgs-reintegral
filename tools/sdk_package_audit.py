@@ -78,8 +78,21 @@ def original_hashes(local: Path) -> set[str]:
     return hashes
 
 
-def audit(root: Path, inventory: dict[str, str], local: Path) -> None:
-    originals = original_hashes(local)
+def known_original_hashes(local: Path | None = None) -> set[str]:
+    baseline = Path(__file__).resolve().parents[1] / "config/sdk-original-sha256.txt"
+    originals = set(baseline.read_text(encoding="ascii").splitlines())
+    if not originals or any(
+        len(value) != 64 or any(c not in "0123456789abcdef" for c in value)
+        for value in originals
+    ):
+        raise ValueError("Invalid known-original fingerprint index")
+    if local is not None:
+        originals.update(original_hashes(local))
+    return originals
+
+
+def audit(root: Path, inventory: dict[str, str], local: Path | None = None) -> None:
+    originals = known_original_hashes(local)
     actual = {
         path.relative_to(root).as_posix() for path in root.rglob("*") if path.is_file()
     }
@@ -96,6 +109,8 @@ def audit(root: Path, inventory: dict[str, str], local: Path) -> None:
         parts = Path(relative).parts
         if any(part in {".local", ".godot", "mods", "__pycache__"} for part in parts):
             raise ValueError(f"SDK contains local content or caches: {relative}")
+        if parts[0] == ".tools":
+            raise ValueError(f"Downloaded tools must not be bundled: {relative}")
         if relative.startswith("renderers/godot/project/"):
             if (
                 path.suffix.lower()

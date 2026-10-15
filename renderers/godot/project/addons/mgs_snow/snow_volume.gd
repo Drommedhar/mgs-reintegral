@@ -3,10 +3,15 @@ extends Node3D
 
 const CollisionWorld = preload("collision_world.gd")
 const Particles = preload("snow_particles.gd")
+const GPU = preload("gpu_snow.gd")
 const SHADER = preload("flake.gdshader")
 const GROUP := "mgs_snow_volumes"
 
 @export_group("Volume")
+@export_enum("GPU weather", "Exact surfaces (CPU)") var simulation_mode := 0:
+	set(value):
+		simulation_mode = value
+		if is_node_ready(): rebuild()
 @export var volume_size := Vector3(12, 8, 12):
 	set(value):
 		volume_size = value
@@ -20,7 +25,7 @@ const GROUP := "mgs_snow_volumes"
 @export_range(0, 10000, 1) var amount := 1000:
 	set(value):
 		amount = clampi(value, 0, 10000)
-		if is_node_ready(): particles.reset(amount, random_seed)
+		if is_node_ready(): reset_particles()
 @export var flake_size := Vector2(0.012, 0.035)
 @export var flake_color := Color(0.9, 0.95, 1.0, 0.85)
 @export_range(0.0, 20.0, 0.01, "suffix:m/s") var fall_speed := 0.8
@@ -34,6 +39,10 @@ const GROUP := "mgs_snow_volumes"
 @export_group("Contact")
 @export_range(0.01, 10.0, 0.01, "suffix:s") var settle_time := 0.8
 @export_range(0.001, 0.1, 0.001, "suffix:m") var contact_offset := 0.006
+@export_group("GPU Weather Collision")
+@export_flags_3d_render var weather_collision_mask := 1
+@export_enum("256", "512", "1024", "2048", "4096", "8192") var weather_collision_resolution := 1
+@export_group("Exact Surface Collision")
 @export var collision_roots: Array[NodePath] = []:
 	set(value):
 		collision_roots = value
@@ -47,6 +56,7 @@ const GROUP := "mgs_snow_volumes"
 var collision := CollisionWorld.new()
 var particles := Particles.new()
 var draw: MultiMeshInstance3D
+var gpu: RefCounted
 var material := ShaderMaterial.new()
 var api: Node
 var native_session := ""
@@ -64,6 +74,7 @@ func _ready() -> void:
 	if draw.get_parent() == null: add_child(draw)
 	rebuild()
 	get_tree().node_added.connect(collision.queue_node)
+	RenderingServer.frame_pre_draw.connect(flush_gpu)
 	if not Engine.is_editor_hint():
 		api = get_tree().get_first_node_in_group("mgs_visual_api_v1")
 		if api != null: api.native_context_updated.connect(update_native_time)
@@ -73,6 +84,17 @@ func rebuild() -> void:
 	collision.roots.clear()
 	collision.exclusions.clear()
 	collision.warnings.clear()
+	if gpu != null:
+		gpu.release()
+		gpu = null
+	draw.visible = simulation_mode == 1
+	if simulation_mode == 0:
+		particles.reset(0, random_seed)
+		gpu = GPU.new()
+		gpu.initialize(self, material)
+		gpu.reset(self)
+		update_configuration_warnings()
+		return
 	for path in collision_exclusions:
 		var node := get_node_or_null(path)
 		if node != null: collision.exclusions.append(node)
@@ -88,9 +110,12 @@ func rebuild() -> void:
 	update_configuration_warnings()
 
 func _physics_process(delta: float) -> void:
-	draw.visible = active()
+	draw.visible = active() and simulation_mode == 1
 	material.set_shader_parameter("flake_color", flake_color)
-	if not draw.visible or (Engine.is_editor_hint() and not animate_preview): return
+	if not active() or (Engine.is_editor_hint() and not animate_preview): return
+	if gpu != null:
+		if api == null: advance(delta)
+		return
 	var warning_count := collision.warnings.size()
 	collision.prepare()
 	if collision.warnings.size() != warning_count: update_configuration_warnings()
@@ -109,8 +134,19 @@ func active() -> bool:
 
 func advance(delta: float) -> void:
 	if not active() or not collision.pending.is_empty(): return
+	if gpu != null:
+		gpu.advance(delta)
+		material.set_shader_parameter("snow_time", gpu.time)
+		return
 	particles.step(delta, self, collision)
 	material.set_shader_parameter("snow_time", particles.time)
+
+func reset_particles() -> void:
+	if gpu != null: gpu.reset(self)
+	else: particles.reset(amount, random_seed)
+
+func flush_gpu() -> void:
+	if gpu != null: gpu.flush(self)
 
 func update_native_time() -> void:
 	var context: Dictionary = api.get_native_context()
@@ -119,12 +155,12 @@ func update_native_time() -> void:
 		native_session = str(context.session_id)
 		native_epoch = int(context.epoch)
 		native_tick = int(context.actor_loop_tick)
-		particles.reset(amount, random_seed)
+		reset_particles()
 		return
 	if int(context.actor_loop_tick) == native_tick: return
 	native_tick = int(context.actor_loop_tick)
 	if int(context.pause_mask) == 0:
-		if active(): collision.sync()
+		if active() and gpu == null: collision.sync()
 		advance(maxi(0, int(context.passage_ticks)) / (60000.0 / 1001.0))
 
 func owns_native_snow(point: Vector3) -> bool:
@@ -142,6 +178,10 @@ func _get_configuration_warnings() -> PackedStringArray:
 	return result
 
 func _exit_tree() -> void:
+	if RenderingServer.frame_pre_draw.is_connected(flush_gpu): RenderingServer.frame_pre_draw.disconnect(flush_gpu)
+	if gpu != null:
+		gpu.release()
+		gpu = null
 	if get_tree().node_added.is_connected(collision.queue_node): get_tree().node_added.disconnect(collision.queue_node)
 	if is_instance_valid(api): api.native_context_updated.disconnect(update_native_time)
 	collision.clear()

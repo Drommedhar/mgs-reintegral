@@ -5,8 +5,9 @@ or the [player guide](PLAYER_GUIDE.md) to install finished mods. This reference
 covers the underlying resource, scripting and extension contracts.
 
 Godot is the primary renderer and modding editor direction. The matched protocol
-v15.32 implementation supports the workflows below, retaining compatibility with
-package-pinned v15.30/31 clients; campaign-wide renderer
+v15.35 implementation supports the workflows below, retaining native compatibility with
+package-pinned v15.30–34 clients. Community launch API 2 currently validates
+v15.30–32 descriptors; campaign-wide renderer
 coverage and a stable public SDK remain follow-up work.
 
 This is the first renderer-facing API, not a finished campaign SDK. The C runtime

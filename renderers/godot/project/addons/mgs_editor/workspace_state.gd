@@ -18,7 +18,7 @@ static func fingerprint(files: Dictionary) -> String:
 		hash.update(content.finish())
 	return hash.finish().hex_encode()
 
-func read(root: String) -> Dictionary:
+func read(root: String, inspect_archive: bool = true) -> Dictionary:
 	error = ""
 	var path := root.path_join(FILE)
 	if FileAccess.file_exists(path):
@@ -36,6 +36,7 @@ func read(root: String) -> Dictionary:
 		return {}
 	state.export_path = source.zip
 	state.export_sha256 = source.sha256
+	if not inspect_archive: return state
 	if not FileAccess.file_exists(source.zip) or FileAccess.get_sha256(source.zip) != source.sha256: return state
 	var archive := ZIPReader.new()
 	if archive.open(source.zip) != OK: return state
@@ -50,10 +51,13 @@ func snapshot(root: String) -> Dictionary:
 	var exporter := Export.new()
 	error = exporter.prepare(root.path_join("mod.json"))
 	if not error.is_empty(): return {}
+	return prepared_snapshot(exporter)
+
+static func prepared_snapshot(exporter: RefCounted) -> Dictionary:
 	var files := {}
 	for path in exporter.files: files[str(path).trim_prefix(exporter.root + "/")] = exporter.files[path]
 	var manifest: Dictionary = JSON.parse_string(files["mod.json"].get_string_from_utf8())
-	return {"fingerprint":fingerprint(files), "id":manifest.id, "version":str(manifest.get("version", ""))}
+	return {"fingerprint":fingerprint(files), "id":manifest.id, "version":str(manifest.get("version", "")), "source_hashes":exporter.source_hashes}
 
 func record(root: String, destination: String, current: Dictionary) -> String:
 	var data := current.duplicate()
@@ -70,14 +74,20 @@ func record(root: String, destination: String, current: Dictionary) -> String:
 	if result != OK: return "ZIP exported, but cannot update workspace export history: " + error_string(result)
 	return ""
 
-func export_zip(root: String, destination: String, allow_external_change: bool = false) -> String:
-	var state := read(root)
+func export_zip(root: String, destination: String, allow_external_change: bool = false, progress: Callable = Callable()) -> String:
+	var exporter := Export.new()
+	exporter.progress = progress
+	if not exporter.report("checking_zip", "Checking export destination…"): return exporter.error
+	var state := read(root, false)
 	if not error.is_empty(): return error
 	destination = ProjectSettings.globalize_path(destination).simplify_path()
 	if not allow_external_change and destination == state.get("export_path", "") and FileAccess.file_exists(destination):
 		if FileAccess.get_sha256(destination) != state.get("export_sha256", ""):
 			return "The ZIP changed outside this workspace. Open it to review the changes, or use Export ZIP As."
-	var current := snapshot(root)
+	error = exporter.prepare(root.path_join("mod.json"))
 	if not error.is_empty(): return error
-	var result := Export.new().export_mod(root.path_join("mod.json"), destination, true)
+	if not exporter.report("fingerprint", "Fingerprinting checked resources…"): return exporter.error
+	var current := prepared_snapshot(exporter)
+	var result := exporter.export_prepared(destination, true)
+	if result.is_empty(): exporter.report("recording", "Recording export history…")
 	return record(root, destination, current) if result.is_empty() else result

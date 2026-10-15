@@ -45,16 +45,17 @@ and `MGS_GODOT_SCENE_VIEW`; the launcher sets these independently of renderer br
 
 ## Wire and semantic contracts
 
-[GODOT_PROTOCOL.md](GODOT_PROTOCOL.md) is the current **15.31** byte-level contract
+[GODOT_PROTOCOL.md](GODOT_PROTOCOL.md) is the current **15.35** byte-level contract
 for every renderer using this host, despite its historical filename. Scalars are
 little-endian; each packet is uint32 payload size, uint32 operation, then payload.
 The buffer limit is 64 MiB. Handle partial reads and ordered commands. HELLO must
 come first, authenticate the private token and agree on version/capabilities.
 Replies echo the operation with bit31 set and begin with the input button word.
 The public session ID in HELLO is different from the private token.
-The host also accepts15.30 packages. It passes their declared minor to the native
-process as `MGS_PRESENTATION_MINOR`, so strict15.30 companions still receive a
-15.30 offer. Built-in Godot uses31; its reply bit16 forwards one F2 press through
+The native host also accepts15.30–34. Community launch API2 descriptors currently
+validate15.30–32. The launcher passes their declared minor as
+`MGS_PRESENTATION_MINOR`, preserving that offer. Built-in Godot uses35;
+its reply bit16 forwards one F2 press through
 SDL while preserving native recording/replay control.
 
 Command mode implements DRAW/UPLOAD/MOVE/READ/SYNC/FRAME/CLEAR and session-bound

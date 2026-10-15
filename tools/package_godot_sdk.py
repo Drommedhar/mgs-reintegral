@@ -14,6 +14,9 @@ CODE = {".gd", ".uid", ".tscn", ".tres", ".gdshader", ".gdshaderinc"}
 SCRIPTS = (
     "sdk.ps1",
     "sdk-paths.ps1",
+    "prepare-python.ps1",
+    "sdk-bootstrap.ps1",
+    "download-tool.ps1",
     "run.ps1",
     "run-godot.ps1",
     "run-godot-editor.ps1",
@@ -75,7 +78,7 @@ class Package:
         self.write(relative, json.dumps(value, indent=2) + "\n")
 
 
-def copy_project(package):
+def copy_project(package, kind="sdk"):
     for path in sorted((PROJECT / GODOT).iterdir()):
         source = path.with_suffix("") if path.suffix == ".uid" else path
         if path.is_file() and source.suffix in {".gd", ".gdshader", ".gdshaderinc"}:
@@ -84,7 +87,13 @@ def copy_project(package):
     package.copy(
         PROJECT / GODOT / "map_environment.tres", GODOT / "map_environment.tres"
     )
-    package.copy(PROJECT / GODOT / "project.godot", GODOT / "project.godot")
+    config = (PROJECT / GODOT / "project.godot").read_text(encoding="utf-8")
+    if kind == "game":
+        config = config.replace(
+            'enabled=PackedStringArray("res://addons/mgs_editor/plugin.cfg")',
+            "enabled=PackedStringArray()",
+        )
+    package.write(GODOT / "project.godot", config)
     package.copy(
         PROJECT / GODOT / "re-integral-logo.png", GODOT / "re-integral-logo.png"
     )
@@ -95,13 +104,31 @@ def copy_project(package):
         "texgyreheros-regular.otf",
     ):
         package.copy(PROJECT / GODOT / name, GODOT / name)
+    if kind == "sdk":
+        copy_authoring(package)
+    package.tree(PROJECT / GODOT / "addons/mgs_water", GODOT / "addons/mgs_water", CODE)
+    package.tree(PROJECT / GODOT / "addons/mgs_snow", GODOT / "addons/mgs_snow", CODE)
+    for shader in (
+        "psx.vert.glsl",
+        "psx.frag.glsl",
+        "legacy-debug-font.bin",
+        "SDL_render_debug_font.h",
+    ):
+        relative = GODOT / ".generated" / shader
+        package.copy(PROJECT / relative, relative)
+    for script in SCRIPTS:
+        package.copy(PROJECT / "tools" / script, Path("tools") / script)
+    package.tree(PROJECT / "tools/godot_assets", "tools/godot_assets", {".py"})
+    package.copy(PROJECT / "config/stages.json", "config/stages.json")
+    package.copy(PROJECT / "sources.lock.json", "sources.lock.json")
+
+
+def copy_authoring(package):
     package.tree(
         PROJECT / GODOT / "addons/mgs_editor",
         GODOT / "addons/mgs_editor",
         CODE | {".cfg", ".json"},
     )
-    package.tree(PROJECT / GODOT / "addons/mgs_water", GODOT / "addons/mgs_water", CODE)
-    package.tree(PROJECT / GODOT / "addons/mgs_snow", GODOT / "addons/mgs_snow", CODE)
     for example in (
         "lighting",
         "native_elevator",
@@ -120,24 +147,11 @@ def copy_project(package):
         PROJECT / GODOT / "examples/make_map_demo.gd",
         GODOT / "examples/make_map_demo.gd",
     )
-    for shader in (
-        "psx.vert.glsl",
-        "psx.frag.glsl",
-        "legacy-debug-font.bin",
-        "SDL_render_debug_font.h",
-    ):
-        relative = GODOT / ".generated" / shader
-        package.copy(PROJECT / relative, relative)
-    for script in SCRIPTS:
-        package.copy(PROJECT / "tools" / script, Path("tools") / script)
-    package.tree(PROJECT / "tools/godot_assets", "tools/godot_assets", {".py"})
     package.tree(
         PROJECT / "renderers/godot/sdk",
         "renderers/godot/sdk",
         {".cpp", ".h", ".json", ".txt", ".tscn", ".gdextension"},
     )
-    package.copy(PROJECT / "config/stages.json", "config/stages.json")
-    package.copy(PROJECT / "sources.lock.json", "sources.lock.json")
 
 
 def copy_runtime(package, build, legacy):
@@ -182,23 +196,20 @@ def copy_runtime(package, build, legacy):
 
 
 def copy_tools(package, options):
-    package.tree(options.python, ".tools/python")
-    package.write(".tools/python/python313._pth", "python313.zip\n.\n../../tools\n")
-    package.tree(options.powershell, ".tools/powershell")
-    engine = ".tools/godot-4.8-dev7"
-    for name in ("Godot_v4.8-dev7_win64.exe", "Godot_v4.8-dev7_win64_console.exe"):
-        package.copy(PROJECT / engine / name, Path(engine) / name)
     package.tree(options.godot_notices, "licenses/godot")
-    for action in ("Editor", "Prepare", "Play"):
+    actions = (
+        ("Editor", "Prepare", "Play") if options.kind == "sdk" else ("Prepare", "Play")
+    )
+    for action in actions:
         package.write(
             f"{action}.cmd",
-            '@echo off\r\n"%~dp0.tools\\powershell\\pwsh.exe" -NoProfile -File "%~dp0tools\\sdk.ps1" -Action '
+            '@echo off\nsetlocal\n"%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\\sdk-bootstrap.ps1" -Action '
             + action.lower()
-            + " %*\r\n",
+            + ' %*\nset "result=%errorlevel%"\nif not "%result%"=="0" pause\nexit /b %result%\n',
         )
 
 
-def copy_notices(package, legacy):
+def copy_notices(package, legacy, legacy_source):
     package.copy(PROJECT / "LICENSE", "LICENSE")
     package.tree(PROJECT / "licenses/fonts", "licenses/fonts")
     package.tree(PROJECT / "licenses/loading-animation", "licenses/loading-animation")
@@ -212,7 +223,7 @@ def copy_notices(package, legacy):
     package.copy(PROJECT / "requirements-fonts.txt", "requirements-fonts.txt")
     package.tree(legacy / "licenses", "licenses/native")
     package.copy(
-        PROJECT / "build/alpha-0.2-published/reintegral-0.2.0-alpha.1-mpl-source.zip",
+        legacy_source,
         "source/legacy-0.2-mpl-source.zip",
     )
     for name in (
@@ -234,6 +245,10 @@ def copy_notices(package, legacy):
         "GODOT_WATER_FROST.md",
         "GODOT_SNOW.md",
         "SDK_QUICKSTART.md",
+        "RELEASE_0.3.md",
+        "GODOT_NATIVE_BINDING_NOTES.md",
+        "GODOT_PRESENTATION_COVERAGE.md",
+        "MOVIE_VALIDATION.md",
     ):
         package.copy(PROJECT / "docs" / name, Path("docs") / name)
     package.write(
@@ -245,7 +260,8 @@ def copy_notices(package, legacy):
         .replace("](GODOT_MODDING.md)", "](docs/GODOT_MODDING.md)")
         .replace("](GODOT_WATER_FROST.md)", "](docs/GODOT_WATER_FROST.md)")
         .replace("](GODOT_SNOW.md)", "](docs/GODOT_SNOW.md)")
-        .replace("](GODOT_SDK_MASTER_PLAN.html)", "](docs/GODOT_SDK_MASTER_PLAN.html)"),
+        .replace("](GODOT_SDK_MASTER_PLAN.html)", "](docs/GODOT_SDK_MASTER_PLAN.html)")
+        .replace("](RELEASE_0.3.md)", "](docs/RELEASE_0.3.md)"),
     )
     for part in ("platform", "psyz"):
         package.tree(
@@ -256,11 +272,21 @@ def copy_notices(package, legacy):
     )
     package.write(
         "SOURCE-AND-NOTICES.txt",
-        "Development SDK, not a final release. See docs/THIRD_PARTY.md for license scopes.\nModified MPL source for the current host is in source/psyz under MPL 2.0; see licenses/native/MPL-2.0.txt.\nThe preserved Legacy 0.2 MPL source is in source/legacy-0.2-mpl-source.zip.\nTool notices remain alongside Python, PowerShell and the importer; Godot notices are in licenses/godot.\n",
+        "Development release, not a final release. See docs/THIRD_PARTY.md for license scopes.\nModified MPL source for the current host is in source/psyz under MPL 2.0; see licenses/native/MPL-2.0.txt.\nThe preserved Legacy 0.2 MPL source is in source/legacy-0.2-mpl-source.zip.\nDownloaded tools retain their own notices; Godot notices are in licenses/godot.\n",
     )
+    package.copy(PROJECT / "patches/psyz-movies.patch", "patches/psyz-movies.patch")
+    for relative in (
+        "patches/mgs-movies.patch",
+        "tests/test_vlc.c",
+        "tests/test_mdec_decode.c",
+        "tests/test_cd.c",
+        "docs/data/godot_presentation_coverage.json",
+    ):
+        package.copy(PROJECT / relative, relative)
+    package.copy(PROJECT / "renderers/modern/README.md", "renderers/modern/README.md")
 
 
-def finish(package, build):
+def finish(package, build, version, kind, local):
     from sdk_package_audit import audit
 
     configuration = next(
@@ -271,12 +297,22 @@ def finish(package, build):
     commit = subprocess.check_output(
         ["git", "rev-parse", "HEAD"], cwd=PROJECT, text=True
     ).strip()
+    engine = subprocess.check_output(
+        [str(build / "mgs-integral-native.exe"), "--version"], text=True
+    ).strip()
+    if not engine.startswith(f"RE:INTEGRAL {version} ("):
+        raise ValueError(f"Native build version does not match {version}: {engine}")
+    if engine != f"RE:INTEGRAL {version} ({commit[:12]})":
+        raise ValueError(f"Native build commit does not match {commit}: {engine}")
     package.json(
         "sdk.json",
         {
             "schema": 1,
             "packageId": package.root.name,
-            "channel": "development",
+            "channel": "alpha",
+            "version": version,
+            "kind": kind,
+            "nativeBuild": engine,
             "sourceCommit": commit,
             "sourceWorktreeDirty": bool(
                 subprocess.check_output(
@@ -298,8 +334,8 @@ def finish(package, build):
         "package-files.json",
         {"schema": 1, "sha256": dict(sorted(package.files.items()))},
     )
-    audit(package.root, package.files, PROJECT / ".local")
-    archive = package.root.with_suffix(".zip")
+    audit(package.root, package.files, local)
+    archive = package.root.with_name(package.root.name + ".zip")
     if archive.exists():
         raise FileExistsError(archive)
     with zipfile.ZipFile(archive, "x", zipfile.ZIP_DEFLATED, compresslevel=6) as output:
@@ -327,15 +363,23 @@ def finish(package, build):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    for name in ("output", "build", "legacy", "python", "powershell", "godot-notices"):
+    for name in ("output", "build", "legacy", "legacy-source", "godot-notices"):
         parser.add_argument("--" + name, type=Path, required=True)
+    parser.add_argument("--version", required=True)
+    parser.add_argument("--kind", choices=("sdk", "game"), default="sdk")
+    parser.add_argument("--local-content", type=Path)
     options = parser.parse_args()
     package = Package(options.output.resolve())
-    copy_project(package)
+    copy_project(package, options.kind)
     copy_runtime(package, options.build, options.legacy)
     copy_tools(package, options)
-    copy_notices(package, options.legacy)
-    finish(package, options.build)
+    copy_notices(package, options.legacy, options.legacy_source)
+    if options.kind == "game":
+        package.write(
+            "START-HERE.md",
+            "# RE:INTEGRAL\n\nStart with [the player guide](docs/PLAYER_GUIDE.md).\nRelease notes: [0.3.0-alpha.1](docs/RELEASE_0.3.md).\n",
+        )
+    finish(package, options.build, options.version, options.kind, options.local_content)
 
 
 if __name__ == "__main__":

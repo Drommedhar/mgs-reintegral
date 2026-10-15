@@ -11,7 +11,7 @@ on:
       publish:
         description: Publish the tested files as a prerelease
         required: true
-        default: true
+        default: false
         type: boolean
 
 permissions:

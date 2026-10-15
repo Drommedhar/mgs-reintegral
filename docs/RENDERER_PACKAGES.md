@@ -61,7 +61,7 @@ quotes each argument and does not invoke a shell. Optional `presentationAssets`
 points to locally prepared content with `catalog.json`; omit it for renderers
 that do not use that representation. Never include those original assets in the package.
 
-The current host accepts protocol **15.30–15.31** and offers the package's declared
+Community launch API2 currently accepts protocol **15.30–15.32** and offers the package's declared
 minor, preserving existing15.30 packages. Readiness must still match the descriptor
 exactly. Minor31 adds the one-shot F2 host shortcut. `commands` mode requires
 capability mask **29 / 0x1d**; `scene` requires **536870911 / 0x1fffffff**.

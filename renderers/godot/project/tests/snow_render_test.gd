@@ -38,6 +38,7 @@ func run() -> void:
 	var scene: Node3D = load("res://examples/snow/preview.tscn").instantiate()
 	viewport.add_child(scene)
 	var snow: Node3D = scene.get_node("SnowVolume")
+	snow.simulation_mode = 1
 	snow.set_physics_process(false)
 	snow.collision.prepare(1000000)
 	snow.collision.sync()

@@ -1,6 +1,6 @@
 # Start here: RE:INTEGRAL Godot SDK
 
-This development package includes the launcher, Godot renderer/editor, native
+This 0.3.0-alpha.1 SDK includes the launcher, Godot renderer/editor project, native
 gameplay host and preserved Legacy 0.2 renderer. No game assets, prepared
 previews, saved games or user mods are included. Campaign-wide Godot fidelity,
 playability and performance acceptance remain in progress.
@@ -20,7 +20,8 @@ playability and performance acceptance remain in progress.
 ## First steps
 
 1. Extract the entire ZIP into a writable folder. Keep the directory layout.
-   Godot, Python and PowerShell are included; no development checkout is needed.
+   No development checkout is needed. The first command downloads missing tools;
+   allow internet access and space for Godot, PowerShell and Python.
 2. Run **Prepare.cmd** and select both Integral campaign CUE files together.
    Keep each CUE with its referenced BIN. Preparation reads them locally; keep
    the images available afterwards. The optional VR disc does not establish VR
@@ -55,6 +56,7 @@ From PowerShell in the extracted SDK folder, you can select a disc folder:
 
 For a small initial authoring check, append `-Discs 1 -Stages s00a`. Run full
 preparation afterwards for the other gameplay/cinematic variants and Disc 2.
+Use comma-separated lists for multiple values: `-Discs 1,2 -Stages s00a,s01a`.
 
 Move the entire SDK folder to relocate it. Prepared content resolves relative
 to the SDK root, but disc receipts retain the source image paths. If your discs
@@ -73,3 +75,21 @@ The package's `sdk.json` identifies its build and tool versions.
 `package-files.json` records packaged input hashes; the adjacent `.zip.sha256`
 records the archive hash. Preserve `SOURCE-AND-NOTICES.txt` and license files.
 Distribute exported mod ZIPs, not your populated SDK or prepared game content.
+
+## Tool downloads
+
+**Editor.cmd** and **Play.cmd** install the pinned Godot and PowerShell versions
+if missing. **Prepare.cmd** also installs embedded Python; preparing content,
+opening a ZIP or saving a workspace copy in the editor installs it when needed.
+Windows PowerShell 5.1 starts the
+bootstrap, so no PowerShell 7 or Python installation is required beforehand.
+Downloads and required executable files are verified against SHA-256 values in
+`sources.lock.json`. A completed tool installation is reused offline and is not
+automatically upgraded. The archive itself contains no downloaded `.tools` tree.
+
+If a download fails or its checksum differs, the command reports the error and
+does not install that download. Run the same command again to retry. Keep the
+whole package, including its populated `.tools` folder, when moving it for
+offline use. Installing tools never prepares or downloads game content.
+
+See [release notes](RELEASE_0.3.md) for the current validation limits.

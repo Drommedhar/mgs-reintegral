@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [string]$LogDirectory = 'build/godot-sdk-m0',
-    [ValidateSet('map_composition', 'mod_profile', 'startup')][string]$Fixture = 'map_composition'
+    [ValidateSet('map_composition', 'mod_profile', 'startup', 'workspace_status', 'workspace_export', 'export_dialog')][string]$Fixture = 'map_composition'
 )
 
 Set-StrictMode -Version Latest
@@ -54,10 +54,17 @@ $configPath = Join-Path $project 'project.godot'
 $config = [IO.File]::ReadAllText($configPath).Replace('enabled=PackedStringArray("res://addons/mgs_editor/plugin.cfg")',
     'enabled=PackedStringArray("res://addons/mgs_editor/plugin.cfg", "res://addons/composition-test/plugin.cfg")')
 [IO.File]::WriteAllText($configPath, $config, [Text.UTF8Encoding]::new($false))
+if ($Fixture -eq 'workspace_export') {
+    $config = $config.Replace('"res://addons/mgs_editor/plugin.cfg", ', '')
+    [IO.File]::WriteAllText($configPath, $config, [Text.UTF8Encoding]::new($false))
+}
 $stdout = Join-Path $logs 'composition-editor.log'
 $stderr = Join-Path $logs 'composition-editor.err'
 $engine = Join-Path $repository '.tools/godot-4.8-dev7/Godot_v4.8-dev7_win64_console.exe'
-$process = Start-Process -FilePath $engine -ArgumentList @('--editor', '--rendering-driver', 'vulkan', '--path', "`"$project`"") `
+$engineArguments = @('--editor', '--path', "`"$project`"")
+if ($Fixture -in @('workspace_status', 'workspace_export')) { $engineArguments += '--headless' }
+else { $engineArguments += @('--rendering-driver', 'vulkan') }
+$process = Start-Process -FilePath $engine -ArgumentList $engineArguments `
     -WindowStyle Hidden -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
 try {
     if (-not $process.WaitForExit(240000)) { throw "Map editor test timed out. See $logs" }

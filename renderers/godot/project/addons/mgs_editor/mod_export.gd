@@ -3,6 +3,8 @@ extends RefCounted
 
 var root := ""
 var files: Dictionary = {}
+var source_hashes: Dictionary = {}
+var progress := Callable()
 var error := ""
 var dependency_check_only := false
 var aliases: Dictionary = {}
@@ -16,6 +18,11 @@ var provenance := Provenance.new()
 const MANIFEST_RESOURCES = {
 	"replacements":["path"], "stages":["scene"], "materials":["albedo", "normal", "orm", "emission"],
 	"effects":["material", "depth_shader"], "appearances":["material"], "postprocess":["effect"], "ui":["scene"], "resources":["path"]}
+
+func report(phase: String, detail: String, completed: int = 0, total: int = 0) -> bool:
+	if not progress.is_valid() or progress.call(phase, detail, completed, total): return true
+	error = "Export cancelled."
+	return false
 
 static func manifest_for_scene(scene_path: String) -> String:
 	var directory := scene_path.get_base_dir()
@@ -39,10 +46,12 @@ func collect(path: String) -> void:
 		error = "Export dependency is outside the mod folder: " + path
 		return
 	if files.has(path): return
+	if not report("validating", "Checking %s (%d files found)" % [path.trim_prefix(root + "/"), files.size()]): return
 	if not FileAccess.file_exists(path):
 		error = "Export dependency is missing: " + path
 		return
 	files[path] = FileAccess.get_file_as_bytes(path)
+	source_hashes[path.trim_prefix(root + "/")] = Provenance.digest(files[path])
 	error = provenance.inspect(files[path], path)
 	if not error.is_empty(): return
 	var extension := path.get_extension().to_lower()
@@ -152,14 +161,19 @@ func collect_extension(path: String) -> void:
 func prepare(manifest_path: String) -> String:
 	root = ProjectSettings.globalize_path(manifest_path.get_base_dir()).simplify_path()
 	files.clear()
+	source_hashes.clear()
 	aliases.clear()
 	error = ""
 	if not FileAccess.file_exists(manifest_path): return "Save the workspace before exporting: " + manifest_path
-	var manifest = JSON.parse_string(FileAccess.get_file_as_string(manifest_path))
+	var manifest_bytes := FileAccess.get_file_as_bytes(manifest_path)
+	source_hashes["mod.json"] = Provenance.digest(manifest_bytes)
+	var manifest = JSON.parse_string(manifest_bytes.get_string_from_utf8())
 	if not manifest is Dictionary or manifest.get("schema") != 1: return "Invalid mod manifest"
 	if not manifest.get("id") is String or str(manifest.id).strip_edges().is_empty(): return "Mod manifest requires an ID"
 	error = ModResources.validate(root, manifest.get("resources", {}))
 	if not error.is_empty(): return error
+	if not report("catalogs", "Checking original-content catalogs…"): return error
+	provenance.images.progress = progress
 	error = provenance.load_catalogs(catalog_paths)
 	if not error.is_empty(): return error
 	for section in MANIFEST_RESOURCES:
@@ -190,11 +204,18 @@ func export_mod(manifest_path: String, destination: String, overwrite: bool = fa
 	if FileAccess.file_exists(destination) and not overwrite: return "Export destination already exists"
 	var prepared := prepare(manifest_path)
 	if not prepared.is_empty(): return prepared
+	return export_prepared(destination, overwrite)
+
+func export_prepared(destination: String, overwrite: bool = false) -> String:
+	destination = ProjectSettings.globalize_path(destination).simplify_path()
+	if destination.get_extension().to_lower() != "zip": return "Mod archives must use the .zip extension"
+	if FileAccess.file_exists(destination) and not overwrite: return "Export destination already exists"
 	if files.has(destination): return "Export cannot overwrite a mod dependency: " + destination
 	var directory_error := DirAccess.make_dir_recursive_absolute(destination.get_base_dir())
 	if directory_error != OK: return "Cannot create export folder: " + error_string(directory_error)
 	var temporary := destination + ".%d.tmp" % Time.get_ticks_usec()
 	var write_error := write_archive(temporary)
+	if write_error.is_empty() and not report("finalizing", "Finalizing ZIP…"): write_error = error
 	if write_error.is_empty():
 		var result := DirAccess.rename_absolute(temporary, destination)
 		if result != OK: write_error = "Cannot replace mod archive: " + error_string(result)
@@ -205,11 +226,25 @@ func write_archive(destination: String) -> String:
 	var archive := ZIPPacker.new()
 	var result := archive.open(destination)
 	if result != OK: return "Cannot open mod archive: " + error_string(result)
+	var total := 0
+	var completed := 0
+	for bytes in files.values(): total += bytes.size()
 	for path in files:
 		result = archive.start_file(str(path).trim_prefix(root + "/"))
-		if result == OK: result = archive.write_file(files[path])
-		if result == OK: result = archive.close_file()
+		if result != OK: break
+		var bytes: PackedByteArray = files[path]
+		for offset in range(0, bytes.size(), 1024 * 1024):
+			if not report("compressing", "Writing " + str(path).trim_prefix(root + "/"), completed, total):
+				result = ERR_SKIP
+				break
+			var chunk := bytes.slice(offset, mini(offset + 1024 * 1024, bytes.size()))
+			result = archive.write_file(chunk)
+			if result != OK: break
+			completed += chunk.size()
+		var file_result := archive.close_file()
+		if result == OK: result = file_result
 		if result != OK: break
 	var close_result := archive.close()
+	if result == ERR_SKIP: return error
 	if result != OK or close_result != OK: return "Cannot finish mod archive"
 	return ""

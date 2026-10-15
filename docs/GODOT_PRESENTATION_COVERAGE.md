@@ -1,6 +1,6 @@
 # Godot presentation coverage inventory
 
-Recorded 12 October 2026 for M0.04–M0.06 of the [execution ledger](GODOT_SDK_PROGRESS.md). Resource presence, import preparation, source tracing and executed presentation acceptance are separate states.
+Recorded 12 October 2026 for M0.04–M0.06 of the source checkout's `docs/GODOT_SDK_PROGRESS.md`. Resource presence, import preparation, source tracing and executed presentation acceptance are separate states. See the [release notes](RELEASE_0.3.md) for current release limits.
 
 The generated content inventory below was refreshed on 13 October against both prepared campaign catalogs. The producer tables preserve the initial audit baseline; later implementation evidence is recorded in the ledger and the dated updates at the end of this document.
 

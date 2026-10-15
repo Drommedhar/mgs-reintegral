@@ -74,9 +74,11 @@ var display_settings := preload("res://display_settings.gd").new()
 var scene_resources := preload("res://scene_resources.gd").new()
 var startup_screen: StartupScreen
 var preparing_scene := false
+var render_schedule := preload("res://render_schedule.gd").new()
 
 func _ready() -> void:
 	var startup_phase := Time.get_ticks_msec()
+	add_child(render_schedule)
 	add_child(settings)
 	add_child(inventory_actions)
 	scene_view.mod_api.inventory_actions = inventory_actions
@@ -302,6 +304,7 @@ func renderer_ready(target: RID, error: String) -> void:
 		return
 	texture.texture_rd_rid = target
 	if scene_enabled:
+		render_schedule.start()
 		live_vram.texture_rd_rid = gpu.target
 		scene_view.materials.live_vram = live_vram
 	print("MGS_GODOT_READY protocol=%d.%d renderer=RenderingDevice" % [session_gate.VERSION, session_gate.MINOR])
@@ -386,6 +389,7 @@ func shutdown(exit_code: int) -> void:
 	if shutting_down:
 		return
 	shutting_down = true
+	render_schedule.stop()
 	scene_view.content.finish_loading()
 	scene_resources.finish_loading()
 	set_process(false)
@@ -575,7 +579,7 @@ func submit_commands(batch: Array, operation: int, payload: PackedByteArray) -> 
 		thermal_viewport.render(scene_view.camera, Vector2i(Vector2(world_viewport.size) * world_viewport.scaling_3d_scale), thermal_active)
 		world_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 		metadata_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
-		await RenderingServer.frame_post_draw
+		await render_schedule.world()
 		if cut: camera_history.finish(scene_view.camera)
 	if not shutting_down:
 		var water_override := scene_enabled and scene_view.world_ready and scene_view.mod_api.owns_underwater_view()
@@ -746,6 +750,7 @@ func completed(operation: int, payload: PackedByteArray, result: PackedByteArray
 			print("MGS_RENDER_COST frame=%d %s SCENE CPU %.2f ms" % [frame_number, gpu.last_stats, scene_update_ms])
 		if frame_number == int(OS.get_environment("MGS_GODOT_QUIT_FRAME")):
 			request_close()
+		render_schedule.present()
 		if preload("res://capture_policy.gd").due(frame_number):
 			await capture_presentation(int(OS.get_environment("MGS_GODOT_CAPTURE_EVERY")) > 0)
 	send_reply(operation, result)

@@ -2,24 +2,36 @@
 
 Copy `addons/mgs_snow` into your mod, then instance its **snow_volume.tscn** through Godot's normal Scene tree. Internal resources use relative paths. The volume creates visual flakes and local collision data; it never changes native gameplay physics. No snow is added to any map automatically.
 
+**Simulation Mode** defaults to **GPU weather**: Godot GPUParticles3D simulates the flakes, with a dynamic heightfield for weather collision. **Exact surfaces (CPU)** retains triangle collision and attachment to moving surfaces when those behaviors are needed.
+
 The root's **Volume Size** is a box centered on the node, in metres. Snow falls from local +Y toward local -Y. Move or rotate the node with ordinary transforms. Select **Animate Preview** to see it in the editor. **Prewarm** fills the volume immediately while checking for roofs above each flake, so covered areas do not start full of snow.
 
 ## Inspector controls
 
 | Group | Controls |
 | --- | --- |
-| Volume | Dimensions, enabled state, replace original snow, editor preview, prewarm and random seed |
+| Volume | Simulation mode, dimensions, enabled state, replace original snow, editor preview, prewarm and random seed |
 | Flakes | Amount, minimum/maximum size in metres, color/opacity, fall speed in metres per second and speed variation |
 | Wind | Local wind velocity, gust strength/speed, flutter strength/speed |
-| Contact | Settle/fade time, contact offset, collision roots/exclusions and Rebuild collision |
+| Contact | Settle/fade time and contact offset |
+| GPU Weather Collision | Geometry render-layer mask and heightfield resolution |
+| Exact Surface Collision | Collision roots/exclusions and Rebuild collision |
 
 Amount is the maximum active flake count, not a density per square metre. Increase it deliberately when enlarging a volume. Size and speed ranges vary deterministically between flakes. Rebuild collision resets the preview and applies a changed random seed or collision-source selection.
 
-Flakes briefly rest and fade on contact. They follow a moving surface while fading and then return to the falling population. They do **not** accumulate a snow layer. Native pause freezes falling, flutter and fading; a native scene/session reset clears previous flakes. Offline previews use their own clock.
+Flakes briefly rest and fade on contact. In exact CPU mode they follow a moving surface while fading; GPU weather mode settles them at the contact position. They then return to the falling population. They do **not** accumulate a snow layer. Native pause freezes falling, flutter and fading; a native scene/session reset clears previous flakes. Offline previews use their own clock.
 
 **Replace Original Snow** defaults on. Original snow within an enabled, ready volume is hidden; snow outside it remains. Turn the switch off to combine the two deliberately. Disabling or hiding the volume restores original snow. Existing effect-material overrides are separate from this volume.
 
-## Geometry collision
+## GPU weather collision
+
+The default uses [GPUParticles3D](https://docs.godotengine.org/en/stable/classes/class_gpuparticles3d.html) with a [heightfield collider](https://docs.godotengine.org/en/stable/classes/class_gpuparticlescollisionheightfield3d.html). The heightfield covers the volume and captures visible geometry on **Weather Collision Mask** (layer1 by default). It updates when simulation advances, including moving and skinned geometry, and stays idle while native time is paused. The default512px field balances detail and GPU work; raise its resolution for smaller contact features.
+
+This is outdoor weather collision: it represents the uppermost surface along local Y. It cannot represent stacked floors or exact side-wall collisions, and settled flakes do not attach to a surface moving sideways. Collision Roots/Exclusions apply only to exact CPU mode; use the render-layer mask for GPU weather. Generated collision data stays local and is not exported.
+
+## Exact surface collision
+
+Select **Exact surfaces (CPU)** for the behaviors below. This mode has CPU cost proportional to flake count and collision complexity.
 
 Flakes test the segment from their old position to their next position against scene triangles. Both faces count, including the reverse side of a one-sided roof or wall. Collision is independent of camera visibility and material face culling, and supports layered floors and wind into side walls.
 
@@ -39,8 +51,8 @@ Boundaries to account for when authoring:
 
 Run `examples/snow/preview.tscn` with F6 for a standalone scene with a reversed-facing roof, a wall and raised geometry. Right mouse/WASD/Q/E move its camera. This example contains no original game assets and does not modify the docks.
 
-The initial default is 1,000 flakes. A local synthetic fixture with 20,402 floor triangles measured approximately 1.5ms, 3.7ms and 7.4ms at the 95th percentile for 1,000, 2,500 and 5,000 flakes respectively. These are CPU simulation measurements, **not** complete game frame times or a guarantee on other hardware. Start with the default, measure your actual scene, and use fewer flakes or simpler collision sources before increasing the count.
+Both modes default to 1,000 flakes. The following historical measurements describe exact CPU mode, not GPU weather mode. A local synthetic fixture with 20,402 floor triangles measured approximately 1.5ms, 3.7ms and 7.4ms at the 95th percentile for 1,000, 2,500 and 5,000 flakes respectively. These are CPU simulation measurements, **not** complete game frame times or a guarantee on other hardware. Start with the default, measure your actual scene, and use fewer flakes or simpler collision sources before increasing the count.
 
 A full docks probe found that recomputing every skin bind for every mesh was too expensive. Collision now evaluates only the bones used by its triangles. With 1,000 temporary test flakes, a bounded 2560×1440 native run measured about 59.5–59.8 FPS in its warm windows; startup and screenshot readback are excluded. This is scoped evidence, not campaign-wide performance acceptance or an automatic snow addition to that mod.
 
-The implementation uses [two-sided concave collision](https://docs.godotengine.org/en/stable/classes/class_concavepolygonshape3d.html), [back-face ray queries](https://docs.godotengine.org/en/stable/classes/class_physicsrayqueryparameters3d.html) and a single [MultiMesh](https://docs.godotengine.org/en/stable/classes/class_multimesh.html) per volume. A top-down heightfield alone would not represent the required walls and stacked surfaces.
+The implementation uses [two-sided concave collision](https://docs.godotengine.org/en/stable/classes/class_concavepolygonshape3d.html), [back-face ray queries](https://docs.godotengine.org/en/stable/classes/class_physicsrayqueryparameters3d.html) and a single [MultiMesh](https://docs.godotengine.org/en/stable/classes/class_multimesh.html) per volume. The GPU weather mode deliberately trades those exact walls, stacked surfaces and attachments for GPU simulation.
