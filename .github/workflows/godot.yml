@@ -1,17 +1,17 @@
-name: Build Godot game and SDK
+name: Release game and modding SDK
 
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version without v (for example 0.3.0-alpha.1)'
+        description: 'Stable version without v (for example 0.3.0)'
         required: true
-        default: '0.3.0-alpha.1'
+        default: '0.3.0'
         type: string
       publish:
-        description: Publish the tested files as a prerelease
+        description: Publish the tested files as the latest stable release (main only)
         required: true
-        default: false
+        default: true
         type: boolean
 
 permissions:
@@ -41,18 +41,23 @@ jobs:
         env:
           PUBLISH_RELEASE: ${{ inputs.publish }}
         run: |
-          if ($env:RELEASE_VERSION -notmatch '^\d+\.\d+\.\d+-alpha\.\d+$') { throw 'Use a version such as 0.3.0-alpha.1.' }
+          if ($env:RELEASE_VERSION -notmatch '^\d+\.\d+\.\d+$') { throw 'Use a stable version such as 0.3.0; prerelease suffixes are not allowed.' }
           if ($env:PUBLISH_RELEASE -ne 'true') { exit 0 }
+          if ($env:GITHUB_REF -ne 'refs/heads/main') { throw 'Publish releases from main after merging the release changes.' }
           $release = gh api "repos/$env:GITHUB_REPOSITORY/releases" --paginate --jq '.[].tag_name'
           if ($LASTEXITCODE -ne 0) { throw 'Cannot inspect existing releases.' }
-          if (@($release) -contains "v$env:RELEASE_VERSION") { throw 'That release already exists. Choose a new alpha version.' }
+          if (@($release) -contains "v$env:RELEASE_VERSION") { throw 'That release already exists. Choose a new stable version.' }
           $tags = gh api "repos/$env:GITHUB_REPOSITORY/git/matching-refs/tags/v$env:RELEASE_VERSION" --jq '.[].ref'
           if ($LASTEXITCODE -ne 0) { throw 'Cannot inspect existing tags.' }
-          if (@($tags) -contains "refs/tags/v$env:RELEASE_VERSION") { throw 'That tag already exists. Choose a new alpha version.' }
+          if (@($tags) -contains "refs/tags/v$env:RELEASE_VERSION") { throw 'That tag already exists. Choose a new stable version.' }
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.12'
           cache: pip
+      - name: Test release publication guards without GitHub writes
+        run: |
+          python -m unittest tests.test_godot_release_workflow
+          if ($LASTEXITCODE -ne 0) { throw 'Release workflow tests failed.' }
       - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: dependencies
         with:
@@ -89,13 +94,18 @@ jobs:
         run: |
           & ./.venv/Scripts/python.exe tools/test_godot_release.py --sdk "build/packages/reintegral-sdk-$env:RELEASE_VERSION-windows-x86.zip" --game "build/packages/reintegral-$env:RELEASE_VERSION-windows-x86.zip" --output 'build/release-smoke'
           if ($LASTEXITCODE -ne 0) { throw 'Packaged editor/download smoke test failed.' }
-      - name: Publish prerelease after validation
+      - name: Publish stable release after validation
         if: inputs.publish
         run: |
-          $assets = @(Get-ChildItem -LiteralPath build/packages -File | Where-Object { $_.Extension -eq '.zip' -or $_.Name.EndsWith('SHA256SUMS.txt') } | Select-Object -ExpandProperty FullName)
-          gh release create "v$env:RELEASE_VERSION" @assets --repo $env:GITHUB_REPOSITORY --target $env:GITHUB_SHA --prerelease --draft --title "RE:INTEGRAL $env:RELEASE_VERSION" --notes-file docs/RELEASE_0.3.md
+          $names = @("reintegral-$env:RELEASE_VERSION-windows-x86.zip", "reintegral-sdk-$env:RELEASE_VERSION-windows-x86.zip", "reintegral-$env:RELEASE_VERSION-symbols.zip", "reintegral-$env:RELEASE_VERSION-SHA256SUMS.txt")
+          $assets = @($names | ForEach-Object {
+            $path = Join-Path build/packages $_
+            if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { throw "Missing release asset: $path" }
+            (Resolve-Path -LiteralPath $path).Path
+          })
+          gh release create "v$env:RELEASE_VERSION" @assets --repo $env:GITHUB_REPOSITORY --target $env:GITHUB_SHA --prerelease=false --draft --title "RE:INTEGRAL $env:RELEASE_VERSION" --notes-file docs/RELEASE_0.3.md
           if ($LASTEXITCODE -ne 0) { throw 'Release upload failed; any partial release remains a draft.' }
-          gh release edit "v$env:RELEASE_VERSION" --repo $env:GITHUB_REPOSITORY --draft=false
+          gh release edit "v$env:RELEASE_VERSION" --repo $env:GITHUB_REPOSITORY --draft=false --prerelease=false --latest
           if ($LASTEXITCODE -ne 0) { throw 'Could not publish the completed draft.' }
       - name: Keep test-build downloads briefly
         if: success() && !inputs.publish

@@ -1,8 +1,9 @@
-"""Stage a relocatable development SDK from explicit code and tool inputs."""
+"""Stage a relocatable game or SDK release from explicit code and tool inputs."""
 
 import argparse
 import hashlib
 import json
+import re
 import shutil
 import subprocess
 import zipfile
@@ -272,7 +273,7 @@ def copy_notices(package, legacy, legacy_source):
     )
     package.write(
         "SOURCE-AND-NOTICES.txt",
-        "Development release, not a final release. See docs/THIRD_PARTY.md for license scopes.\nModified MPL source for the current host is in source/psyz under MPL 2.0; see licenses/native/MPL-2.0.txt.\nThe preserved Legacy 0.2 MPL source is in source/legacy-0.2-mpl-source.zip.\nDownloaded tools retain their own notices; Godot notices are in licenses/godot.\n",
+        "See docs/THIRD_PARTY.md for license scopes and docs/RELEASE_0.3.md for release scope.\nModified MPL source for the current host is in source/psyz under MPL 2.0; see licenses/native/MPL-2.0.txt.\nThe preserved Legacy 0.2 MPL source is in source/legacy-0.2-mpl-source.zip.\nDownloaded tools retain their own notices; Godot notices are in licenses/godot.\n",
     )
     package.copy(PROJECT / "patches/psyz-movies.patch", "patches/psyz-movies.patch")
     for relative in (
@@ -309,7 +310,7 @@ def finish(package, build, version, kind, local):
         {
             "schema": 1,
             "packageId": package.root.name,
-            "channel": "alpha",
+            "channel": "stable",
             "version": version,
             "kind": kind,
             "nativeBuild": engine,
@@ -361,11 +362,17 @@ def finish(package, build, version, kind, local):
     )
 
 
+def stable_version(value):
+    if not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", value):
+        raise argparse.ArgumentTypeError("Use a stable version such as 0.3.0")
+    return value
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ("output", "build", "legacy", "legacy-source", "godot-notices"):
         parser.add_argument("--" + name, type=Path, required=True)
-    parser.add_argument("--version", required=True)
+    parser.add_argument("--version", type=stable_version, required=True)
     parser.add_argument("--kind", choices=("sdk", "game"), default="sdk")
     parser.add_argument("--local-content", type=Path)
     options = parser.parse_args()
@@ -377,7 +384,8 @@ def main():
     if options.kind == "game":
         package.write(
             "START-HERE.md",
-            "# RE:INTEGRAL\n\nStart with [the player guide](docs/PLAYER_GUIDE.md).\nRelease notes: [0.3.0-alpha.1](docs/RELEASE_0.3.md).\n",
+            "# RE:INTEGRAL\n\nStart with [the player guide](docs/PLAYER_GUIDE.md).\n"
+            f"Release notes: [{options.version}](docs/RELEASE_0.3.md).\n",
         )
     finish(package, options.build, options.version, options.kind, options.local_content)
 

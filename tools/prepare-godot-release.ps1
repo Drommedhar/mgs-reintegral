@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [ValidatePattern('^[0-9]+\.[0-9]+\.[0-9]+-alpha\.[0-9]+$')][string]$Version = '0.3.0-alpha.1',
+    [ValidatePattern('^[0-9]+\.[0-9]+\.[0-9]+$')][string]$Version = '0.3.0',
     [Parameter(Mandatory)][string]$BuildDirectory,
     [Parameter(Mandatory)][string]$OutputDirectory
 )
@@ -17,7 +17,7 @@ if (-not (Select-String -LiteralPath (Join-Path $build 'CMakeCache.txt') -Patter
 $python = Join-Path $repository '.venv/Scripts/python.exe'
 Push-Location $repository
 try {
-    & $python -m unittest tests.test_sdk_tools tests.test_sdk_package
+    & $python -m unittest tests.test_sdk_tools tests.test_sdk_package tests.test_godot_release_package
     if ($LASTEXITCODE -ne 0) { throw 'Release prerequisite tests failed.' }
     foreach ($kind in @('game', 'sdk')) {
         $name = if ($kind -eq 'sdk') { "reintegral-sdk-$Version-windows-x86" } else { "reintegral-$Version-windows-x86" }

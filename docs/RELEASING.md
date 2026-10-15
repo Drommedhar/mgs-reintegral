@@ -3,7 +3,10 @@
 The 0.3 workflow produces separate game and SDK ZIPs from the same optimized
 native build. The game package omits the editor plugin, examples and extension
 development sources. `sdk.json` identifies the package kind, version, native
-build, source revision and whether the source worktree was dirty.
+build, stable channel, source revision and whether the source worktree was dirty.
+Both ZIPs include the launcher, Godot host/project and the preserved Legacy 0.2
+renderer. CI builds the launcher and Godot host from source; it downloads and
+verifies the pinned Legacy executable and matching source archive.
 
 ## Local preparation
 
@@ -12,9 +15,9 @@ and settings in place. Choose a new evidence directory for each candidate.
 
 ```powershell
 ./tools/bootstrap.ps1 -Check
-./tools/build.ps1 -Configuration RelWithDebInfo -RendererModule renderers/godot/native -BuildDirectory build/windows-x86-godot-relwithdebinfo -Version 0.3.0-alpha.1
-./tools/prepare-godot-release.ps1 -Version 0.3.0-alpha.1 -BuildDirectory build/windows-x86-godot-relwithdebinfo -OutputDirectory build/evidence/release-candidate
-./.venv/Scripts/python.exe tools/test_godot_release.py --sdk build/evidence/release-candidate/reintegral-sdk-0.3.0-alpha.1-windows-x86.zip --game build/evidence/release-candidate/reintegral-0.3.0-alpha.1-windows-x86.zip --output "build/evidence/release-smoke"
+./tools/build.ps1 -Configuration RelWithDebInfo -RendererModule renderers/godot/native -BuildDirectory build/windows-x86-godot-relwithdebinfo -Version 0.3.0
+./tools/prepare-godot-release.ps1 -Version 0.3.0 -BuildDirectory build/windows-x86-godot-relwithdebinfo -OutputDirectory build/evidence/release-candidate
+./.venv/Scripts/python.exe tools/test_godot_release.py --sdk build/evidence/release-candidate/reintegral-sdk-0.3.0-windows-x86.zip --game build/evidence/release-candidate/reintegral-0.3.0-windows-x86.zip --output "build/evidence/release-smoke"
 ```
 
 The preparation script runs package/bootstrap tests, builds both archives,
@@ -58,14 +61,25 @@ to the index through a reviewed change; never disable the audit to package it.
 
 ## Manual GitHub workflow
 
-**Build Godot game and SDK** is manual. Its version input defaults to
-`0.3.0-alpha.1`; **publish defaults to false**. It builds pinned sources and the
-Godot host, runs tests without retail discs or a physical GPU, creates the same
-two audited packages and saves workflow artifacts. The old native alpha workflow
-remains separate and also defaults to no publication.
+After merging the release changes into `main`, open **Actions → Release game
+and modding SDK → Run workflow**. Select **main**, leave version at `0.3.0` and
+leave **publish** checked. Publication defaults to enabled and is allowed only
+from `main`. The workflow runs manually; normal pushes and merges do not start it.
 
-For a future authorized publication, resolve the release-note publication items,
-commit reviewed source, select that revision and explicitly enable publish.
-The workflow refuses an existing tag/release, uploads a draft first, and only
-publishes after successful asset upload. It does not commit or push source.
-These workflow instructions are not authorization to run it.
+It builds pinned sources, the launcher and Godot host, runs CPU tests, packages
+both renderers and the SDK, audits inventories and native versions, and checks
+relocated editor operations. Only after all checks pass does it upload the game,
+SDK, symbols and aggregate checksums to a draft and publish **v0.3.0** as a normal
+release marked **Latest**, with prerelease explicitly disabled. The tag targets
+the exact tested workflow commit. An existing release or tag is rejected;
+failed uploads remain drafts rather than publishing incomplete downloads.
+
+Uncheck **publish** for a build without release/tag creation; its downloads are
+retained as workflow artifacts for three days. This mode also permits branch
+validation. Alpha/beta/RC version suffixes are rejected in both modes. The old
+native **Build alpha release** workflow remains separate and defaults to no
+publication; it is not the 0.3 game/SDK release workflow.
+
+Resolve the publication items recorded in the release notes before public upload.
+Local preparation does not push source, dispatch CI, create a tag or publish
+a release. The manual workflow performs publication when **publish** is checked.

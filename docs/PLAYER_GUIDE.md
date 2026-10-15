@@ -1,6 +1,6 @@
 # Player guide: play RE:INTEGRAL and install mods
 
-This guide covers the 0.3.0-alpha.1 game and SDK packages. Both include the same
+This guide covers the 0.3.0 game and SDK packages. Both include the same
 launcher and gameplay host; the SDK adds authoring tools. The separately released
 native **0.2.0-alpha.1** package has its own [alpha guide](ALPHA.md); it does not
 include the Godot editor or Godot visual mods.

@@ -37,6 +37,52 @@ def check_links(archive, prefix, names):
         )
 
 
+def check_payload(archive, prefix, names, metadata):
+    if metadata["channel"] != "stable" or not re.fullmatch(
+        r"[0-9]+\.[0-9]+\.[0-9]+", metadata["version"]
+    ):
+        raise ValueError("Release package must have a stable version and channel")
+    if metadata["kind"] not in {"sdk", "game"}:
+        raise ValueError("Unknown release package kind")
+    required = {
+        "RE-INTEGRAL.exe",
+        "Prepare.cmd",
+        "Play.cmd",
+        "renderer.json",
+        "renderers/legacy/renderer.json",
+    }
+    if metadata["kind"] == "sdk":
+        required.update(
+            {
+                "Editor.cmd",
+                "renderers/godot/project/addons/mgs_editor/plugin.cfg",
+                "renderers/godot/sdk/CMakeLists.txt",
+                "renderers/godot/sdk/example_mod.cpp",
+            }
+        )
+    missing = required - names
+    if missing:
+        raise ValueError("Missing release payload: " + ", ".join(sorted(missing)))
+    for path, identity, backend in (
+        ("renderer.json", "godot", "godot"),
+        ("renderers/legacy/renderer.json", "legacy", "native"),
+    ):
+        renderer = json.loads(archive.read(prefix + path))
+        if renderer["id"] != identity or renderer["backend"] != backend:
+            raise ValueError("Incorrect renderer descriptor: " + path)
+        executable = posixpath.normpath(
+            posixpath.join(posixpath.dirname(path), renderer["executable"])
+        )
+        if executable not in names:
+            raise ValueError("Missing renderer executable: " + executable)
+        if identity == "godot":
+            if renderer["version"] != metadata["version"]:
+                raise ValueError("Godot renderer version differs from release")
+            project = renderer["godotProject"] + "/project.godot"
+            if project not in names:
+                raise ValueError("Missing Godot project: " + project)
+
+
 def verify(path):
     with zipfile.ZipFile(path) as archive:
         if archive.testzip() is not None:
@@ -70,6 +116,7 @@ def verify(path):
         metadata = json.loads(archive.read(prefix + "sdk.json"))
         if ("Editor.cmd" in names) != (metadata["kind"] == "sdk"):
             raise ValueError("Editor entry point does not match package kind")
+        check_payload(archive, prefix, names, metadata)
         check_links(archive, prefix, names)
         with tempfile.TemporaryDirectory(prefix="release probe ü ") as directory:
             native = Path(directory) / "mgs-integral-native.exe"
@@ -89,6 +136,7 @@ def verify(path):
         "files": len(names),
         "kind": metadata["kind"],
         "version": metadata["version"],
+        "channel": metadata["channel"],
     }
 
 

@@ -1,6 +1,6 @@
 # Start here: RE:INTEGRAL Godot SDK
 
-This 0.3.0-alpha.1 SDK includes the launcher, Godot renderer/editor project, native
+This 0.3.0 SDK includes the launcher, Godot renderer/editor project, native
 gameplay host and preserved Legacy 0.2 renderer. No game assets, prepared
 previews, saved games or user mods are included. Campaign-wide Godot fidelity,
 playability and performance acceptance remain in progress.

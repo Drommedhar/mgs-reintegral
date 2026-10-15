@@ -2,7 +2,7 @@
 
 Make and test visual mods using the Godot SDK's **MGS Visuals** dock and Godot's
 normal Scene tree, Inspector, materials and animation tools. This guide covers
-the 0.3.0-alpha.1 SDK workflow. You do not need a running game, F7 capture or a compiler
+the 0.3.0 SDK workflow. You do not need a running game, F7 capture or a compiler
 to preview original maps and create your first mod.
 
 For playing and installing a finished ZIP, use the [player guide](PLAYER_GUIDE.md).
