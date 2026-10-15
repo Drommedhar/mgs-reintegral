@@ -1062,6 +1062,18 @@ if(BUILD_TESTING)
     target_compile_definitions(mgs_dyncon_geometry_test PRIVATE MGS_NATIVE)
     target_compile_options(mgs_dyncon_geometry_test PRIVATE -fwrapv -fno-strict-aliasing)
     add_executable(mgs_mods_test tests/test_mods.c src/mgs_mods.c)
+    set(codec_turbo_fixture "${CMAKE_CURRENT_BINARY_DIR}/codec_turbo_fixture.h")
+    add_custom_command(OUTPUT "${codec_turbo_fixture}"
+        COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/prepare_codec_turbo_test.py"
+            --output "${codec_turbo_fixture}"
+        DEPENDS tests/prepare_codec_turbo_test.py vendor/mgs/source/menu/radio.c
+        VERBATIM)
+    add_executable(mgs_codec_turbo_test tests/mgs_codec_turbo_test.c "${codec_turbo_fixture}")
+    target_include_directories(mgs_codec_turbo_test PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
+    target_compile_options(mgs_codec_turbo_test PRIVATE -UNDEBUG)
+    foreach(mode IN ITEMS 1 0 unset invalid)
+        add_test(NAME codec_turbo_${mode} COMMAND mgs_codec_turbo_test "${mode}")
+    endforeach()
     add_executable(mgs_sdk_test tests/mgs_sdk_test.c src/mgs_sdk.c src/mgs_controller_ports.c)
     target_include_directories(mgs_sdk_test PRIVATE vendor/mgs/source vendor/mgs/source/include)
     target_compile_definitions(mgs_sdk_test PRIVATE MGS_NATIVE INTEGRAL)

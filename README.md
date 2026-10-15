@@ -247,3 +247,8 @@ the information in good faith and make appropriate corrections. The
 [issue template](.github/ISSUE_TEMPLATE/licensing.md) helps identify the affected material.
 
 Unofficial project; not affiliated with or endorsed by Konami.
+
+Hold Triangle to fast-forward skippable Codec dialogue. Enabled by default in the
+GUI launcher; disable it on the Gameplay tab. Direct engine launches retain
+original behavior unless `REI_CODEC_TURBO=1` is set. This advances dialogue
+through its native state machine without accelerating the game clock.

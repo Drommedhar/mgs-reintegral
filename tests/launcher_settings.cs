@@ -36,6 +36,7 @@ internal static class LauncherSettingsTest
         string path = Path.Combine(directory, "settings.xml");
         var value = Settings.Load(path);
         Require(!value.Invulnerable && !value.BonusItems && !value.AutoCard, "Gameplay aids must default off");
+        Require(value.CodecTurbo, "Codec fast advance must default on in the user launcher");
         Require(!value.FastLoading, "Experimental fast loading must default off");
         Require(!value.GodotLegacyRendering, "Godot must default to full scene rendering");
         Require(value.GodotSharpText, "Godot must default to sharp text");
@@ -50,6 +51,7 @@ internal static class LauncherSettingsTest
         value.GodotLegacyRendering = true;
         value.GodotSharpText = false;
         value.FastLoading = true;
+        value.CodecTurbo = false;
         value.TextureCorrection = value.GeometryPrecision = value.DepthBuffer = true;
         value.Save(path);
         var restored = Settings.Load(path);
@@ -57,6 +59,7 @@ internal static class LauncherSettingsTest
             "Settings round-trip or replacement failed");
         Require(restored.TextureCorrection && restored.GeometryPrecision && restored.DepthBuffer,
             "Graphics settings did not round-trip");
+        Require(!restored.CodecTurbo, "Codec fast advance opt-out did not persist");
         Require(restored.FastLoading, "Fast loading setting did not round-trip");
         Require(restored.GodotLegacyRendering, "Legacy-through-Godot mode did not round-trip");
         Require(!restored.GodotSharpText, "Original pixel font choice did not round-trip");

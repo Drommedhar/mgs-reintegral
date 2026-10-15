@@ -83,6 +83,7 @@ namespace ReIntegral
             log.WriteLine("Renderer " + activeRenderer.Id + " " + activeRenderer.Version + " — " + activeRenderer.Executable);
             log.WriteLine(activeArguments);
             game = new Process { StartInfo = GameLaunch.StartInfo(activeRenderer.Executable, activeArguments, dataDirectory) };
+            game.StartInfo.EnvironmentVariables["REI_CODEC_TURBO"] = activeSettings.CodecTurbo ? "1" : "0";
             if (godot != null) godot.Configure(game.StartInfo);
             game.OutputDataReceived += WriteLog;
             game.ErrorDataReceived += WriteLog;
