@@ -78,7 +78,14 @@ API 2 does not claim a general community-mod capability/dependency schema.
 
 ## Development builds and validation
 
-CMake generates a descriptor beside the built executable. The Godot development descriptor refers to the checked-out project, pinned engine and local prepared assets using relative paths. It is not a standalone player distribution. `tools/package-godot-sdk.ps1` builds the relocatable development SDK; final M8 acceptance remains open.
+CMake generates a descriptor beside the built executable. A full Godot build through
+`tools/build.ps1` also prepares the pinned Godot engine/shaders and installs preserved
+Legacy 0.2 under the build's `renderers/legacy`, including its notices and MPL source.
+Configure-only and explicit target builds skip this preparation. The Godot development
+descriptor refers to the checked-out project, pinned engine and local prepared assets
+using relative paths. Disc preparation remains separate, and the build folder is not
+a standalone player distribution. `tools/package-godot-sdk.ps1` builds the relocatable
+development SDK; final M8 acceptance remains open.
 
 Old settings without `RendererId` use the launching build's declared default until saved. A saved explicit ID never falls back to that default if its package is removed.
 

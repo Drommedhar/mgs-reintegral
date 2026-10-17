@@ -172,10 +172,19 @@ cd mgs-reintegral
 ./tools/build.ps1 -Configuration RelWithDebInfo -BuildDirectory build/windows-x86-godot -RendererModule renderers/godot/native -Version 0.3.0
 ```
 
-This builds the Godot native host, launcher and tests. The optimized build is
-appropriate for performance checks. `build/windows-x86-godot` is the directory
-used by the source editor's native test runner. For native debugging, configure
-a separate build directory with `-Configuration Debug`.
+This builds the Godot native host, launcher and tests, prepares the pinned Godot
+engine and shaders, and installs the preserved Legacy 0.2 executable under
+`build/windows-x86-godot/renderers/legacy`. Both renderers then appear as installed
+in the launcher. First use downloads checksum-verified dependencies; later builds
+reuse them. Legacy is the preserved 0.2 release, not a second build of the current
+gameplay sources. Disc preparation below is still required before playing.
+
+The optimized build is appropriate for performance checks. The source editor's
+native test runner uses `build/windows-x86-godot`. For native debugging, configure
+a separate build directory with `-Configuration Debug`. `-ConfigureOnly` and
+explicit `-Target` builds skip renderer installation. The Godot development
+descriptor points to the engine and editable project in this checkout; use release
+packaging below for a portable folder.
 
 Dependencies are pinned in [sources.lock.json](sources.lock.json). Bootstrap
 installs Python requirements into `.venv` and downloads CMake/Ninja to `.tools`.
@@ -227,8 +236,8 @@ retained for three days. Existing tags/releases are rejected. Normal pushes
 and merges do not trigger this workflow. The old **Build alpha release** workflow
 is separate and does not produce the 0.3 game/SDK downloads.
 
-Release packaging adds the pinned, preserved Legacy 0.2 executable to the source
-Godot build. To produce the game, SDK, symbols and checksums locally, use a new
+Release packaging bundles both renderers and the Godot project into portable
+downloads. To produce the game, SDK, symbols and checksums locally, use a new
 output directory:
 
 ```powershell

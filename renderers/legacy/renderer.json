@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "launchApi": 1,
+  "id": "legacy",
+  "name": "Legacy 0.2",
+  "version": "0.2.0-alpha.1",
+  "backend": "native",
+  "nativeArchitecture": "x86",
+  "rendererArchitecture": "x86",
+  "executable": "mgs-integral-native.exe",
+  "nativeGraphicsOptions": false
+}

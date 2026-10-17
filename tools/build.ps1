@@ -69,3 +69,10 @@ if ($Target) {
 if ($LASTEXITCODE -ne 0) {
     throw "Build failed with exit code $LASTEXITCODE."
 }
+
+if (-not $Target) {
+    $renderer = Get-Content -LiteralPath (Join-Path $buildDirectory 'renderer.json') -Raw | ConvertFrom-Json
+    if ($renderer.backend -eq 'godot') {
+        & (Join-Path $PSScriptRoot 'prepare-build-renderers.ps1') -BuildDirectory $buildDirectory
+    }
+}

@@ -26,4 +26,4 @@ foreach ($command in @('git', 'python')) {
 if ($LASTEXITCODE -ne 0) { throw 'Python 3.11 or newer is required.' }
 $null = & (Join-Path $PSScriptRoot 'toolchain.ps1')
 & (Join-Path $PSScriptRoot 'bootstrap.ps1')
-Write-Host 'Ready. Build with ./tools/build.ps1 -Configuration Debug, then open build/windows-x86-debug/RE-INTEGRAL.exe.'
+Write-Host 'Ready. Build both renderer choices with ./tools/build.ps1 -Configuration RelWithDebInfo -BuildDirectory build/windows-x86-godot -RendererModule renderers/godot/native -Version 0.3.0, then open build/windows-x86-godot/RE-INTEGRAL.exe.'

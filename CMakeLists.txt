@@ -1163,6 +1163,8 @@ if(BUILD_TESTING)
         ENVIRONMENT "MGS_LANGUAGE_TEST_ENGINE=$<TARGET_FILE:mgs-integral-native>")
     set_tests_properties(import_content PROPERTIES WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
     add_test(NAME list_assets COMMAND "${Python3_EXECUTABLE}" -m unittest tests.test_list_assets)
+    add_test(NAME build_renderers COMMAND "${Python3_EXECUTABLE}" -m unittest tests.test_build_renderers)
+    set_tests_properties(build_renderers PROPERTIES WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
     add_test(NAME godot_presentation_inventory COMMAND "${Python3_EXECUTABLE}"
         -m unittest tests.test_godot_presentation_inventory tests.test_godot_cinematics)
     set_tests_properties(godot_presentation_inventory PROPERTIES WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")

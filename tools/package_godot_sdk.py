@@ -179,20 +179,8 @@ def copy_runtime(package, build, legacy):
     package.copy(
         legacy / "mgs-integral-native.exe", "renderers/legacy/mgs-integral-native.exe"
     )
-    package.json(
-        "renderers/legacy/renderer.json",
-        {
-            "schema": 1,
-            "launchApi": 1,
-            "id": "legacy",
-            "name": "Legacy 0.2",
-            "version": "0.2.0-alpha.1",
-            "backend": "native",
-            "nativeArchitecture": "x86",
-            "rendererArchitecture": "x86",
-            "executable": "mgs-integral-native.exe",
-            "nativeGraphicsOptions": False,
-        },
+    package.copy(
+        PROJECT / "renderers/legacy/renderer.json", "renderers/legacy/renderer.json"
     )
 
 
