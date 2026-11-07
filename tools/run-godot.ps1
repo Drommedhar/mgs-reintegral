@@ -29,7 +29,7 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $projectDirectory = Split-Path $PSScriptRoot -Parent
-$godot = Join-Path $projectDirectory '.tools/godot-4.8-dev7/Godot_v4.8-dev7_win64_console.exe'
+$godot = Join-Path $projectDirectory '.tools/godot-4.8-beta2/Godot_v4.8-beta2_win64_console.exe'
 $rendererProject = Join-Path $projectDirectory 'renderers/godot/project'
 $buildDirectory = Join-Path $projectDirectory 'build/windows-x86-godot'
 if (Test-Path -LiteralPath (Join-Path $projectDirectory 'sdk.json')) {

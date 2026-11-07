@@ -19,7 +19,7 @@ PROJECT = REPOSITORY / "renderers/godot/project"
 GODOT = Path(
     os.environ.get(
         "MGS_GODOT_EXECUTABLE",
-        REPOSITORY / ".tools/godot-4.8-dev7/Godot_v4.8-dev7_win64_console.exe",
+        REPOSITORY / ".tools/godot-4.8-beta2/Godot_v4.8-beta2_win64_console.exe",
     )
 )
 

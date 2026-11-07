@@ -223,6 +223,8 @@ namespace ReIntegral
             mods.LoadMods(value.Mods);
             godotMode.SelectedIndex = value.GodotLegacyRendering ? 1 : 0;
             sharpText.Checked = value.GodotSharpText;
+            nativeDithering.Checked = value.GodotDithering;
+            ditherScale.Value = value.GodotDitherScale;
             LoadRenderers(value.RendererId);
         }
 
@@ -238,7 +240,8 @@ namespace ReIntegral
                 DebugOverlay = overlay.Checked, MantisMemory = mantis.Text.Trim(), Stage = stage.Text.Trim(),
                 Frames = frames.Text.Trim(), Advanced = advanced.Text.Replace("\r", " ").Replace("\n", " "),
                 RendererId = SelectedRenderer.Id, GodotLegacyRendering = godotMode.SelectedIndex == 1,
-                GodotSharpText = sharpText.Checked, Mods = mods.ReadMods() };
+                GodotSharpText = sharpText.Checked, GodotDithering = nativeDithering.Checked,
+                GodotDitherScale = ditherScale.Value, Mods = mods.ReadMods() };
         }
 
         private static string AbsolutePath(string value)

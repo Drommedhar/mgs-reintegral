@@ -150,8 +150,11 @@ namespace ReIntegral
             int code = game.ExitCode;
             log.WriteLine("Native process exited with code " + code + " (0x" + code.ToString("X8") + ").");
             game.Dispose(); game = null;
-            log.Dispose(); log = null;
+            var finishedRenderer = godot;
             Guard(StopGodot);
+            if (code != 0 && code != 75 && finishedRenderer != null)
+                Guard(delegate { finishedRenderer.WriteDiagnostics(log); });
+            log.Dispose(); log = null;
             Guard(ReloadDisplaySettings);
             play.Enabled = true;
             tabs.Enabled = true;

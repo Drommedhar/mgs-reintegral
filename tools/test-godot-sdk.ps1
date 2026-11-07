@@ -11,7 +11,7 @@ $repository = Split-Path $PSScriptRoot -Parent
 $sdk = [IO.Path]::GetFullPath($SdkDirectory)
 $logs = [IO.Path]::GetFullPath($LogDirectory, $repository)
 $project = Join-Path $sdk 'renderers/godot/project'
-$godot = Join-Path $sdk '.tools/godot-4.8-dev7/Godot_v4.8-dev7_win64_console.exe'
+$godot = Join-Path $sdk '.tools/godot-4.8-beta2/Godot_v4.8-beta2_win64_console.exe'
 if (-not (Test-Path -LiteralPath (Join-Path $sdk 'sdk.json'))) { throw 'Select an extracted development SDK.' }
 New-Item -ItemType Directory -Path $logs -Force | Out-Null
 $configPath = Join-Path $project 'project.godot'

@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Stable version without v (for example 0.3.0)'
+        description: 'Stable version without v (for example 0.3.1)'
         required: true
-        default: '0.3.0'
+        default: '0.3.1'
         type: string
       publish:
         description: Publish the tested files as the latest stable release (main only)
@@ -41,7 +41,7 @@ jobs:
         env:
           PUBLISH_RELEASE: ${{ inputs.publish }}
         run: |
-          if ($env:RELEASE_VERSION -notmatch '^\d+\.\d+\.\d+$') { throw 'Use a stable version such as 0.3.0; prerelease suffixes are not allowed.' }
+          if ($env:RELEASE_VERSION -notmatch '^\d+\.\d+\.\d+$') { throw 'Use a stable version such as 0.3.1; prerelease suffixes are not allowed.' }
           if ($env:PUBLISH_RELEASE -ne 'true') { exit 0 }
           if ($env:GITHUB_REF -ne 'refs/heads/main') { throw 'Publish releases from main after merging the release changes.' }
           $release = gh api "repos/$env:GITHUB_REPOSITORY/releases" --paginate --jq '.[].tag_name'

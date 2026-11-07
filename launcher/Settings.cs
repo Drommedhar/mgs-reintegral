@@ -23,6 +23,8 @@ namespace ReIntegral
         public string RendererId = "";
         public bool GodotLegacyRendering;
         public bool GodotSharpText = true;
+        public bool GodotDithering = true;
+        public decimal GodotDitherScale = 1.0m;
         public string DiscOne = "";
         public string DiscTwo = "";
         public string TextPack = "";
@@ -53,12 +55,14 @@ namespace ReIntegral
             {
                 var settings = (Settings)new XmlSerializer(typeof(Settings)).Deserialize(reader);
                 if (settings.Version != 1) throw new InvalidDataException("Unsupported settings version.");
+                settings.ValidateDithering();
                 return settings;
             }
         }
 
         public void Save(string path)
         {
+            ValidateDithering();
             string temporary = path + "." + Guid.NewGuid().ToString("N") + ".tmp";
             try
             {
@@ -71,6 +75,12 @@ namespace ReIntegral
             {
                 if (File.Exists(temporary)) File.Delete(temporary);
             }
+        }
+
+        public void ValidateDithering()
+        {
+            if (GodotDitherScale < 0.25m || GodotDitherScale > 4.0m)
+                throw new ArgumentException("Native dithering pattern scale must be between 0.25 and 4.0.");
         }
     }
 }

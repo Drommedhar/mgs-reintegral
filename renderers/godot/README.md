@@ -22,6 +22,19 @@ renderer directly. Use **Mods → Add ZIPs…**, tick the packages you want, the
 **Save and play**. ZIP installation, resource import and saved selections are
 handled by the launcher. It uses the prepared local disc content above.
 
+**Graphics → Native dithering (Godot)** controls the original ordered pattern on
+native primitives and original-color materials in both Godot rendering modes.
+The pattern scale accepts fractional values from 0.25 to 4.0: 1.0 preserves the
+existing pattern, 0.5 halves its size, and values such as 1.3 or 1.4 enlarge it.
+Changes apply on the next game session. Disabling dithering retains original
+color quantization and the game's per-primitive eligibility rules. Godot PBR and
+custom materials keep their existing colors; this is not a full-screen filter.
+The controls are disabled for standalone Legacy 0.2 and community renderers.
+Direct Godot launches accept `MGS_GODOT_DITHERING=0` or `1` and
+`MGS_GODOT_DITHER_SCALE=1.3`; an omitted value retains the default enabled/1.0.
+Primitive patterns retain their existing output-pixel grid, while original-color
+world materials retain their native-pixel grid before output scaling.
+
 The runtime uses Forward+. Its world viewport inherits the project's positional
 shadow atlas settings (4096 by default). Active opaque meshes remain shadow
 casters outside the original camera bounds, including animated characters.

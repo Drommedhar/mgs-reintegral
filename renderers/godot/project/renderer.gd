@@ -3,6 +3,7 @@ extends RefCounted
 const WorldBlit = preload("res://world_blit.gd")
 const DepthCapture = preload("res://depth_capture.gd")
 const ScaledVram = preload("res://scaled_vram.gd")
+const Dithering = preload("res://dithering.gd")
 
 const WIDTH = 1024
 const HEIGHT = 512
@@ -140,13 +141,21 @@ func uniform(binding: int, kind: int, ids: Array[RID]) -> RDUniform:
 
 func initialize(callback: Callable) -> void:
 	var started := Time.get_ticks_msec()
+	var dithering := Dithering.new()
+	var setting_error := dithering.configure_environment()
+	if not setting_error.is_empty():
+		callback.call_deferred(RID(), setting_error)
+		return
 	rd = RenderingServer.get_rendering_device()
 	if rd == null:
 		callback.call_deferred(RID(), "RenderingDevice unavailable; use Forward+ with Vulkan")
 		return
 	var source := RDShaderSource.new()
 	source.source_vertex = FileAccess.get_file_as_string("res://.generated/psx.vert.glsl")
-	source.source_fragment = FileAccess.get_file_as_string("res://.generated/psx.frag.glsl")
+	source.source_fragment = dithering.adapt_fragment(FileAccess.get_file_as_string("res://.generated/psx.frag.glsl"))
+	if source.source_fragment.is_empty():
+		callback.call_deferred(RID(), "Psyz dithering shader changed; review the Godot shader adapter")
+		return
 	var spirv := rd.shader_compile_spirv_from_source(source)
 	print("MGS_STARTUP phase=primitive_shader ms=%d" % (Time.get_ticks_msec() - started))
 	var errors := spirv.compile_error_vertex + spirv.compile_error_fragment

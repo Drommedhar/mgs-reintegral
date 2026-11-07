@@ -15,6 +15,13 @@ internal static class LauncherSettingsTest
         if (!condition) throw new InvalidOperationException(message);
     }
 
+    private static void Rejected<T>(Action action, string message) where T : Exception
+    {
+        try { action(); }
+        catch (T) { return; }
+        throw new InvalidOperationException(message);
+    }
+
     private static void CheckQuoting()
     {
         foreach (string path in new[] { "", "C:\\path with spaces\\disc.cue", "D:\\日本語\\ä\\", "a\"b", "trailing\\\\" })
@@ -70,8 +77,7 @@ internal static class LauncherSettingsTest
             languages.Contains("--voice-pack " + GameLaunch.Quote(value.VoicePack)), "Language paths were not quoted");
         Require(Directory.GetFiles(directory, "*.tmp").Length == 0, "Temporary settings file leaked");
         File.WriteAllText(path, "<Settings><Version>99</Version></Settings>");
-        try { Settings.Load(path); throw new InvalidOperationException("Unknown settings version accepted"); }
-        catch (InvalidDataException) { }
+        Rejected<InvalidDataException>(() => Settings.Load(path), "Unknown settings version accepted");
     }
 
     private static void CheckArguments()
@@ -95,16 +101,55 @@ internal static class LauncherSettingsTest
         foreach (string resolution in new[] { "3840x2160", "2560x1920", "0x0", "1920x1080 --help" })
         {
             settings.Resolution = resolution;
-            try { GameLaunch.Arguments(settings); throw new InvalidOperationException("Invalid resolution accepted"); }
-            catch (ArgumentException) { }
+            Rejected<ArgumentException>(() => GameLaunch.Arguments(settings), "Invalid resolution accepted");
         }
+    }
+
+    private static void CheckDithering(string directory)
+    {
+        string path = Path.Combine(directory, "dithering.xml");
+        File.WriteAllText(path, "<Settings><Version>1</Version></Settings>");
+        var settings = Settings.Load(path);
+        Require(settings.GodotDithering && settings.GodotDitherScale == 1m,
+            "Existing profiles must retain original dithering and pattern size");
+        foreach (string scale in new[] { "0.5", "1.0", "1.3", "1.4" })
+        {
+            File.WriteAllText(path, "<Settings><Version>1</Version><GodotDithering>false</GodotDithering>" +
+                "<GodotDitherScale>" + scale + "</GodotDitherScale></Settings>");
+            settings = Settings.Load(path);
+            settings.Save(path);
+            var restored = Settings.Load(path);
+            Require(!restored.GodotDithering &&
+                restored.GodotDitherScale == Decimal.Parse(scale, System.Globalization.CultureInfo.InvariantCulture),
+                "Fractional dithering settings did not persist: " + scale);
+        }
+        foreach (string scale in new[] { "0", "-1", "0.24", "4.01" })
+        {
+            File.WriteAllText(path, "<Settings><Version>1</Version><GodotDitherScale>" + scale + "</GodotDitherScale></Settings>");
+            Rejected<ArgumentException>(() => Settings.Load(path), "Invalid dither scale accepted: " + scale);
+        }
+        var culture = System.Threading.Thread.CurrentThread.CurrentCulture;
+        try
+        {
+            System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("de-DE");
+            settings = new Settings { GodotDithering = false, GodotDitherScale = 1.3m };
+            var start = GameLaunch.StartInfo("fixture.exe", "", directory);
+            start.EnvironmentVariables["MGS_GODOT_DITHERING"] = "1";
+            start.EnvironmentVariables["MGS_GODOT_DITHER_SCALE"] = "4.0";
+            GameLaunch.ConfigureGodotDithering(start, settings);
+            Require(start.EnvironmentVariables["MGS_GODOT_DITHERING"] == "0" &&
+                start.EnvironmentVariables["MGS_GODOT_DITHER_SCALE"] == "1.3",
+                "Godot launch must override inherited settings using invariant decimal notation");
+            Require(!GameLaunch.Arguments(settings).Contains("dither"), "Preserved Legacy must not receive Godot-only switches");
+        }
+        finally { System.Threading.Thread.CurrentThread.CurrentCulture = culture; }
     }
 
     public static int Main()
     {
         string directory = Path.Combine(Path.GetTempPath(), "reintegral-settings-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(directory);
-        try { CheckQuoting(); CheckSettings(directory); CheckArguments(); CheckCaptureIsolation(); }
+        try { CheckQuoting(); CheckSettings(directory); CheckArguments(); CheckCaptureIsolation(); CheckDithering(directory); }
         finally { Directory.Delete(directory, true); }
         Console.WriteLine("Launcher settings, Windows argument quoting and option checks passed.");
         return 0;

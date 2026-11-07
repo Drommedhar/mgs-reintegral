@@ -60,7 +60,7 @@ if ($Fixture -eq 'workspace_export') {
 }
 $stdout = Join-Path $logs 'composition-editor.log'
 $stderr = Join-Path $logs 'composition-editor.err'
-$engine = Join-Path $repository '.tools/godot-4.8-dev7/Godot_v4.8-dev7_win64_console.exe'
+$engine = Join-Path $repository '.tools/godot-4.8-beta2/Godot_v4.8-beta2_win64_console.exe'
 $engineArguments = @('--editor', '--path', "`"$project`"")
 if ($Fixture -in @('workspace_status', 'workspace_export')) { $engineArguments += '--headless' }
 else { $engineArguments += @('--rendering-driver', 'vulkan') }

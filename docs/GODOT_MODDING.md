@@ -73,7 +73,7 @@ controls are included in the current development SDK.
 From the repository folder, open the project in the pinned Godot editor:
 
 ```powershell
-& ".\.tools\godot-4.8-dev7\Godot_v4.8-dev7_win64.exe" --editor --path ".\renderers\godot\project"
+& ".\.tools\godot-4.8-beta2\Godot_v4.8-beta2_win64.exe" --editor --path ".\renderers\godot\project"
 ```
 
 This command works in a fresh PowerShell session without setting `$p`. Keep the
@@ -195,7 +195,7 @@ from native gameplay. Dedicated checkpoint/cinematic profiles remain future work
 The custom elevator example is generated with:
 
 ```powershell
-& ".\.tools\godot-4.8-dev7\Godot_v4.8-dev7_win64_console.exe" --headless --path ".\renderers\godot\project" --script res://examples/native_elevator/create_example.gd
+& ".\.tools\godot-4.8-beta2\Godot_v4.8-beta2_win64_console.exe" --headless --path ".\renderers\godot\project" --script res://examples/native_elevator/create_example.gd
 ```
 
 It creates `mods/sdk-native-elevator` and `build/mod-exports/sdk-native-elevator.zip`.
@@ -496,7 +496,7 @@ retains original lighting, and bypass original five-bit color quantization.
 `extensions` loads a native library into the **64-bit Godot process**. It does
 not inject code into the 32-bit gameplay runtime. The working C++ example is in
 `renderers/godot/sdk`; its godot-cpp 4.4 source revision is pinned in
-`sources.lock.json` and tested with the pinned Godot 4.8-dev7 renderer.
+`sources.lock.json` and tested with the pinned Godot 4.8-beta2 renderer.
 
 ```powershell
 & "$p\tools\build-godot-mod.ps1"
@@ -592,7 +592,7 @@ The asset-free example in `examples/named_resources` provides an Inspector-selec
 amber/teal finish on a custom sphere in the dock. Export it with:
 
 ```powershell
-& "$p\.tools\godot-4.8-dev7\Godot_v4.8-dev7_win64_console.exe" --headless --path "$p\renderers\godot\project" --script res://examples/named_resources/export_example.gd
+& "$p\.tools\godot-4.8-beta2\Godot_v4.8-beta2_win64_console.exe" --headless --path "$p\renderers\godot\project" --script res://examples/named_resources/export_example.gd
 ```
 
 Open `build/mod-exports/sdk-named-resources.zip` through **Open ZIP…**, select the
@@ -637,7 +637,7 @@ selector and procedurally authored normal/ORM maps. Original albedos are referen
 by asset ID and are not copied:
 
 ```powershell
-& "$p\.tools\godot-4.8-dev7\Godot_v4.8-dev7_win64_console.exe" --headless --path "$p\renderers\godot\project" --script res://examples/make_map_demo.gd
+& "$p\.tools\godot-4.8-beta2\Godot_v4.8-beta2_win64_console.exe" --headless --path "$p\renderers\godot\project" --script res://examples/make_map_demo.gd
 & "$p\tools\run-godot.ps1" -Scene3D -Stage s00a -Mods "$p\renderers\godot\project\mods\map-overlay-demo\mod.json"
 ```
 
@@ -667,7 +667,7 @@ Generate a visibly altered mesh from your prepared resident model, without
 shipping the source asset:
 
 ```powershell
-& "$p\.tools\godot-4.8-dev7\Godot_v4.8-dev7_win64_console.exe" --headless --path "$p\renderers\godot\project" --script res://examples/make_local_demo.gd
+& "$p\.tools\godot-4.8-beta2\Godot_v4.8-beta2_win64_console.exe" --headless --path "$p\renderers\godot\project" --script res://examples/make_local_demo.gd
 & "$p\tools\run-godot.ps1" -Scene3D -Stage s00a -Mods "$p\renderers\godot\project\mods\generated-mesh-demo\mod.json"
 ```
 

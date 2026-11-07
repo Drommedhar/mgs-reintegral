@@ -15,6 +15,8 @@ namespace ReIntegral
         private Process renderer;
         private SettingsBridge settingsBridge;
         private Task output, errors;
+        private string logPrefix;
+        private int? rendererExitCode;
         private bool sceneEnabled = true;
         private int captureFrame;
         private string captureFile;
@@ -30,7 +32,7 @@ namespace ReIntegral
         }
 
         public GodotSession(string root, string directory)
-            : this(Path.Combine(root, ".tools", "godot-4.8-dev7", "Godot_v4.8-dev7_win64_console.exe"),
+            : this(Path.Combine(root, ".tools", "godot-4.8-beta2", "Godot_v4.8-beta2_win64_console.exe"),
                 Path.Combine(root, "renderers", "godot", "project"), Path.Combine(root, ".local", "godot-content"), directory)
         {
         }
@@ -56,6 +58,7 @@ namespace ReIntegral
             string project = await Task.Run(() => GodotProject.Prepare(
                 projectSource, dataDirectory, enabledMods, progress));
             string prefix = Path.Combine(dataDirectory, "logs", "godot-" + DateTime.UtcNow.ToString("yyyyMMdd-HHmmss-fff"));
+            logPrefix = prefix;
             string timing = prefix + "-startup.txt";
             File.WriteAllText(timing, "project_ms=" + startup.ElapsedMilliseconds + Environment.NewLine);
             startup.Restart();
@@ -88,6 +91,7 @@ namespace ReIntegral
             start.EnvironmentVariables["MGS_GODOT_ASSETS"] = assets;
             start.EnvironmentVariables["MGS_GODOT_SCENE_VIEW"] = sceneEnabled ? "1" : "0";
             start.EnvironmentVariables["MGS_GODOT_PIXEL_FONTS"] = settings.GodotSharpText ? "0" : "1";
+            GameLaunch.ConfigureGodotDithering(start, settings);
             start.EnvironmentVariables["MGS_GODOT_RENDER_SIZE"] = settings.Resolution;
             start.EnvironmentVariables["MGS_GODOT_WIDESCREEN"] = settings.Widescreen ? "1" : "0";
             start.EnvironmentVariables["MGS_GODOT_MODS"] = new JavaScriptSerializer().Serialize(GodotProject.Manifests(project, enabledMods));
@@ -192,10 +196,16 @@ namespace ReIntegral
             finally { settingsBridge = null; StopRenderer(); }
         }
 
+        public void WriteDiagnostics(TextWriter writer)
+        {
+            RendererSession.WriteDiagnostics(writer, "Godot", logPrefix, rendererExitCode);
+        }
+
         private void StopRenderer()
         {
             if (renderer == null) return;
-            if (!renderer.HasExited) renderer.Kill();
+            if (renderer.HasExited) rendererExitCode = renderer.ExitCode;
+            else renderer.Kill();
             renderer.WaitForExit();
             renderer.Dispose();
             renderer = null;

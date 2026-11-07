@@ -82,6 +82,13 @@ namespace ReIntegral
             return start;
         }
 
+        public static void ConfigureGodotDithering(ProcessStartInfo start, Settings settings)
+        {
+            settings.ValidateDithering();
+            start.EnvironmentVariables["MGS_GODOT_DITHERING"] = settings.GodotDithering ? "1" : "0";
+            start.EnvironmentVariables["MGS_GODOT_DITHER_SCALE"] = settings.GodotDitherScale.ToString(CultureInfo.InvariantCulture);
+        }
+
         public static async Task ValidateDisc(string executable, string path, int number, string directory)
         {
             if (!File.Exists(path)) throw new FileNotFoundException("Select an existing Disc " + number + " CUE file.", path);

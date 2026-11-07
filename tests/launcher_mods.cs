@@ -29,13 +29,16 @@ internal static class LauncherModsTest
         string zip = Path.Combine(directory, "invalid.zip");
         Archive(zip, entries);
         int count = Directory.GetDirectories(Path.Combine(directory, "mods")).Length;
-        try { ModPackage.Install(zip, directory); throw new InvalidOperationException("Accepted invalid archive"); }
-        catch (InvalidDataException) { }
+        bool rejected = false;
+        try { ModPackage.Install(zip, directory); }
+        catch (InvalidDataException) { rejected = true; }
+        Require(rejected, "Accepted invalid archive");
         Require(count == Directory.GetDirectories(Path.Combine(directory, "mods")).Length, "Failed install leaked files");
     }
 
     private static void CheckPackages(string directory)
     {
+        CheckRendererDiagnostics(directory);
         Require(!GodotSession.ProgressMessage("[   0% ] import | Importing Scene...").Contains("0%"),
             "Monolithic GLB import is presented as stalled 0% progress");
         Require(GodotSession.ProgressMessage("[  33% ] reimport | dock_remastered.glb") ==
@@ -93,6 +96,27 @@ internal static class LauncherModsTest
         var restored = Settings.Load(settingsPath);
         Require(!restored.Mods[0].Enabled && restored.Mods[1].Package == updated.Package, "Mod selections did not persist");
         CheckProject(directory, restored.Mods);
+    }
+
+    private static void CheckRendererDiagnostics(string directory)
+    {
+        string prefix = Path.Combine(directory, "renderer-failure");
+        File.WriteAllText(prefix + ".log", "MGS_NATIVE_CONTEXT stage=d00a\n");
+        File.WriteAllLines(prefix + ".err", Enumerable.Range(0, 100).Select(index => "error " + index)
+            .Concat(new[] { "ERROR: renderer failure after opening cinematic" }));
+        var report = new StringWriter();
+        RendererSession.WriteDiagnostics(report, "Godot", prefix, unchecked((int)0xc0000005));
+        string text = report.ToString();
+        Require(text.Contains("0xC0000005") && text.Contains(prefix + ".err") &&
+            text.Contains("renderer failure after opening cinematic") && text.Contains("stage=d00a"),
+            "Native failure report omitted the renderer exit, logs or final error");
+        Require(!text.Contains("error 0\n"), "Renderer failure report copied unbounded log history");
+        report = new StringWriter();
+        RendererSession.WriteDiagnostics(report, "Godot", prefix, null);
+        Require(report.ToString().Contains("stopped by launcher"), "Launcher cleanup was reported as a renderer crash");
+        report = new StringWriter();
+        RendererSession.WriteDiagnostics(report, "Godot", null, null);
+        Require(report.ToString().Contains("not started"), "Unstarted renderer diagnostics were ambiguous");
     }
 
     private static void CheckProject(string directory, List<VisualMod> mods)

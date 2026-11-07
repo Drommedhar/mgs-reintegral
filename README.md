@@ -8,7 +8,7 @@ and the PsyZ platform library. Godot handles presentation and visual modding;
 the native runtime owns gameplay, collision, animation state, audio, saves
 and timing.
 
-Version **0.3.0** brings the Godot renderer and modding SDK together with the
+Version **0.3.1** brings the Godot renderer and modding SDK together with the
 launcher and preserved **Legacy 0.2** renderer. Windows is the current target.
 Linux support is planned, not available in these packages.
 
@@ -28,10 +28,10 @@ The 0.3 release provides these downloads:
 
 | Download | Contents |
 | --- | --- |
-| `reintegral-0.3.0-windows-x86.zip` | Game, launcher, Godot presentation project and preserved Legacy 0.2 renderer |
-| `reintegral-sdk-0.3.0-windows-x86.zip` | Everything in the game package, plus the editor plugin, examples and GDExtension sources |
-| `reintegral-0.3.0-symbols.zip` | Matching native debug symbols; not needed to play |
-| `reintegral-0.3.0-SHA256SUMS.txt` | Checksums for the three ZIPs |
+| `reintegral-0.3.1-windows-x86.zip` | Game, launcher, Godot presentation project and preserved Legacy 0.2 renderer |
+| `reintegral-sdk-0.3.1-windows-x86.zip` | Everything in the game package, plus the editor plugin, examples and GDExtension sources |
+| `reintegral-0.3.1-symbols.zip` | Matching native debug symbols; not needed to play |
+| `reintegral-0.3.1-SHA256SUMS.txt` | Checksums for the three ZIPs |
 
 Both game and SDK require **64-bit Windows 10 22H2 or Windows 11** and .NET
 Framework 4.8 for the launcher. The gameplay host remains x86; Godot and the
@@ -72,6 +72,12 @@ Both 0.3 packages include both renderer choices. Switch renderers before
 starting a new game session; they use the same launcher save location.
 Compatible community renderers can be discovered through **Graphics → Renderer
 folder → Refresh**; see the [renderer package contract](docs/RENDERER_PACKAGES.md).
+
+Version 0.3.1 uses pinned **Godot 4.8-beta2** and adds **Graphics → Native
+dithering (Godot)** with a fractional pattern scale from 0.25 to 4.0. The default
+is enabled at 1.0; 0.5 gives half-size cells. This controls native-color drawing
+in both Godot modes; custom/PBR materials retain their colors. Standalone Legacy
+0.2 is unchanged.
 
 To install a visual mod, use **Mods → Add ZIPs…**, enable it, select **Godot
 scene rendering**, and start a new session. The docks remaster is a separate
@@ -169,7 +175,7 @@ PowerShell 7, then open a new terminal and rerun setup.
 git clone https://github.com/Drommedhar/mgs-reintegral.git
 cd mgs-reintegral
 ./tools/setup.ps1
-./tools/build.ps1 -Configuration RelWithDebInfo -BuildDirectory build/windows-x86-godot -RendererModule renderers/godot/native -Version 0.3.0
+./tools/build.ps1 -Configuration RelWithDebInfo -BuildDirectory build/windows-x86-godot -RendererModule renderers/godot/native -Version 0.3.1
 ```
 
 This builds the Godot native host, launcher and tests, prepares the pinned Godot
@@ -225,10 +231,10 @@ for measurement details.
 ## Release workflow
 
 After merging the release changes, run **Actions → Release game and modding SDK
-→ Run workflow** on **main**. Version defaults to **0.3.0** and **publish** is
+→ Run workflow** on **main**. Version defaults to **0.3.1** and **publish** is
 checked. CI builds the launcher/Godot host, verifies the preserved Legacy
 payload, runs CPU tests and package/editor checks, then uploads the game, SDK,
-symbols and checksums. It publishes **v0.3.0** as a normal release marked
+symbols and checksums. It publishes **v0.3.1** as a normal release marked
 **Latest**, with prerelease disabled.
 
 Uncheck **publish** for a build without release/tag creation; its artifacts are
@@ -241,7 +247,7 @@ downloads. To produce the game, SDK, symbols and checksums locally, use a new
 output directory:
 
 ```powershell
-./tools/prepare-godot-release.ps1 -Version 0.3.0 -BuildDirectory build/windows-x86-godot -OutputDirectory build/evidence/release-0.3
+./tools/prepare-godot-release.ps1 -Version 0.3.1 -BuildDirectory build/windows-x86-godot -OutputDirectory build/evidence/release-0.3
 ```
 
 See [release preparation](docs/RELEASING.md) for package audits and relocated

@@ -1,4 +1,4 @@
-# RE:INTEGRAL 0.3.0
+# RE:INTEGRAL 0.3.1
 
 Stable-channel release of the Godot presentation renderer and modding SDK.
 Campaign-wide Godot appearance, playability and performance acceptance are
@@ -6,13 +6,13 @@ still in progress; the known limitations below remain applicable.
 
 ## Downloads
 
-- **Game:** `reintegral-0.3.0-windows-x86.zip`. Includes the launcher,
+- **Game:** `reintegral-0.3.1-windows-x86.zip`. Includes the launcher,
   native gameplay host, Godot presentation project and preserved Legacy 0.2.
-- **SDK:** `reintegral-sdk-0.3.0-windows-x86.zip`. Includes everything
+- **SDK:** `reintegral-sdk-0.3.1-windows-x86.zip`. Includes everything
   needed to play plus the editor plugin, authoring examples and GDExtension sources.
-- **Symbols:** `reintegral-0.3.0-symbols.zip`, matching native debugging symbols.
+- **Symbols:** `reintegral-0.3.1-symbols.zip`, matching native debugging symbols.
   Not needed to play.
-- **Checksums:** `reintegral-0.3.0-SHA256SUMS.txt`. Both game and SDK also contain
+- **Checksums:** `reintegral-0.3.1-SHA256SUMS.txt`. Both game and SDK also contain
   per-file inventories and the modified MPL-covered source/notices.
 
 Both packages require 64-bit Windows despite the x86 gameplay host. Extract the
@@ -25,7 +25,28 @@ pinned SHA-256 hashes and reused offline. They are not bundled in `.tools`.
 No original game assets, prepared disc content, saves or user mods are distributed.
 The docks remaster is a separate mod, not part of these downloads.
 
-## Included changes
+## Changes since 0.3.0
+
+- Updated the pinned Godot editor/runtime from 4.8-dev7 to **4.8-beta2**.
+  The engine remains a preview release; the package uses the existing stable channel.
+- Added **Graphics → Native dithering (Godot)** and a fractional pattern scale
+  from **0.25 to 4.0**, addressing [#2](https://github.com/Drommedhar/mgs-reintegral/issues/2).
+  Defaults remain enabled at 1.0. Both Godot modes support the setting;
+  custom/PBR colors and standalone Legacy 0.2 are unchanged.
+- Native failure logs now include bounded renderer log output and the renderer's
+  exit status, making renderer disconnects easier to investigate.
+- Fresh full source builds prepare Godot and install preserved Legacy 0.2,
+  so both renderer choices are available after the documented build commands.
+
+The opening crash reported in [#4](https://github.com/Drommedhar/mgs-reintegral/issues/4)
+is **not confirmed fixed**. Automated real-disc runs completed the opening on
+dev7 and beta2; beta2 passed the first Codec call on a Radeon RX 9070 XT.
+The reporter's RX 6700 XT renderer logs are still needed to identify the cause.
+Local validation passed 8 relevant CTests, 48 Python tests, 11 headless Godot
+checks and 5 GPU checks, plus extension and launcher settings checks. These
+scoped checks do not establish campaign-wide playability or hardware coverage.
+
+## Included features
 
 - Godot scene rendering and Legacy through Godot, with original gameplay,
   collision, animation, audio, saves and timing remaining native.

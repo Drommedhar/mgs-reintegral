@@ -4,7 +4,7 @@ param([switch]$SkipGpu, [switch]$SkipNativeMod, [switch]$NativeEditorSession)
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $projectDirectory = Split-Path $PSScriptRoot -Parent
-$godot = Join-Path $projectDirectory '.tools/godot-4.8-dev7/Godot_v4.8-dev7_win64_console.exe'
+$godot = Join-Path $projectDirectory '.tools/godot-4.8-beta2/Godot_v4.8-beta2_win64_console.exe'
 $python = Join-Path $projectDirectory '.venv/Scripts/python.exe'
 $rendererProject = Join-Path $projectDirectory 'renderers/godot/project'
 $logRoot = Join-Path $projectDirectory ('build/godot-tests/' + [Guid]::NewGuid().ToString('N'))
@@ -62,6 +62,7 @@ Test-GodotScript 'menu_input_test'
 Test-GodotScript 'save_ui_test'
 Test-GodotScript 'save_actions_test'
 Test-GodotScript 'display_settings_test'
+Test-GodotScript 'dithering_settings_test'
 Test-GodotScript 'display_menu_test'
 & (Join-Path $PSScriptRoot 'test-settings-bridge.ps1')
 Test-GodotScript 'model_sources_test'
@@ -123,6 +124,7 @@ Test-GodotScript 'render_schedule_test' -Gpu
 Test-GodotScript 'snow_gpu_test' -Gpu
 Test-GodotScript 'snow_render_test' -Gpu
 Test-GodotScript 'depth_composition_test' -Gpu
+Test-GodotScript 'dithering_test' -Gpu
 Test-GodotScript 'beam_render_test' -Gpu
 Test-GodotScript 'beam_render_test' -Gpu -Fsr2
 Test-GodotScript 'original_ui_render_test' -Gpu

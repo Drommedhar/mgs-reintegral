@@ -165,7 +165,7 @@ def copy_runtime(package, build, legacy):
     package.tree(build / "language-importer", "language-importer")
     manifest.update(
         executable="build/windows-x86-godot/mgs-integral-native.exe",
-        godotExecutable=".tools/godot-4.8-dev7/Godot_v4.8-dev7_win64_console.exe",
+        godotExecutable=".tools/godot-4.8-beta2/Godot_v4.8-beta2_win64_console.exe",
         godotProject=GODOT.as_posix(),
         godotAssets=".local/godot-content",
     )
@@ -311,7 +311,7 @@ def finish(package, build, version, kind, local):
                 ).strip()
             ),
             "nativeConfiguration": configuration,
-            "godot": "4.8.dev7.official.c971f93e7",
+            "godot": "4.8.beta2.official.cafc17a19",
             "presentationProtocol": "15.35",
             "visualApi": 1,
             "tools": json.loads((PROJECT / "sources.lock.json").read_text())[

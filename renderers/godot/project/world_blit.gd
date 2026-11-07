@@ -38,7 +38,7 @@ void main() {
     if (source.a < 0.001 && max(max(source.r, source.g), source.b) < 0.001) discard;
     if (preserve_mask != 0u && texelFetch(destination, ivec2(gl_FragCoord.xy), 0).a > 0.5) discard;
     const int dither[16] = int[16](-4, 0, -3, 1, 2, -2, 3, -1, -3, 1, -4, 0, 3, -1, 2, -2);
-    ivec2 pixel = ivec2(gl_FragCoord.xy / float(options.y));
+    ivec2 pixel = ivec2(gl_FragCoord.xy / (float(options.y) * uintBitsToFloat(options.z)));
     float offset = options.x != 0u ? float(dither[(pixel.y & 3) * 4 + (pixel.x & 3)]) : 0.0;
     vec3 rgb = (flags & 2u) != 0u ? clamp(floor((source.rgb * 255.0 + offset) / 8.0), 0.0, 31.0) / 31.0 : source.rgb;
     rgb += texelFetch(destination, ivec2(gl_FragCoord.xy), 0).rgb * (1.0 - source.a);
@@ -54,8 +54,11 @@ var sampler: RID
 var background_sampler: RID
 var sources: Array[RID] = []
 var empty_metadata: RID
+var dithering := preload("res://dithering.gd").new()
 
 func initialize(device: RenderingDevice, framebuffer: RID) -> String:
+	var setting_error := dithering.configure_environment()
+	if not setting_error.is_empty(): return setting_error
 	rd = device
 	var code := RDShaderSource.new()
 	code.source_vertex = VERTEX
@@ -115,7 +118,8 @@ func draw(framebuffer: RID, texture: RID, snapshot: RID, depth: RID,
 	rd.draw_list_bind_uniform_set(list, uniforms, 0)
 	var values := PackedFloat32Array([viewport.position.x, viewport.position.y, viewport.size.x, viewport.size.y]).to_byte_array()
 	values.append_array(payload.slice(16, 32))
-	values.append_array(PackedInt32Array([payload.decode_u32(48), scale, 0, 0]).to_byte_array())
+	values.append_array(PackedInt32Array([payload.decode_u32(48) if dithering.enabled else 0, scale, 0, 0]).to_byte_array())
+	values.encode_float(40, dithering.pattern_scale)
 	rd.draw_list_set_push_constant(list, values, 48)
 	rd.draw_list_enable_scissor(list, Rect2(rectangle.position * scale, rectangle.size * scale))
 	rd.draw_list_draw(list, false, 1, 3)

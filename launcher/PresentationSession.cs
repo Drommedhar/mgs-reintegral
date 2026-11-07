@@ -15,6 +15,7 @@ namespace ReIntegral
         private Process renderer;
         private Task logs;
         private SettingsBridge settingsBridge;
+        private int? rendererExitCode;
 
         public PresentationSession(RendererPackage package, string directory)
         {
@@ -85,7 +86,8 @@ namespace ReIntegral
             {
                 if (renderer != null)
                 {
-                    if (!renderer.HasExited)
+                    if (renderer.HasExited) rendererExitCode = renderer.ExitCode;
+                    else
                     {
                         File.WriteAllText(stop, "stop\n");
                         if (!renderer.WaitForExit(2000)) renderer.Kill();
@@ -102,6 +104,11 @@ namespace ReIntegral
                 if (settingsBridge != null) settingsBridge.Dispose();
                 settingsBridge = null;
             }
+        }
+
+        public void WriteDiagnostics(TextWriter writer)
+        {
+            RendererSession.WriteDiagnostics(writer, package.Name, prefix, rendererExitCode);
         }
     }
 }

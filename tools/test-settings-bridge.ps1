@@ -5,7 +5,7 @@ $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path $PSScriptRoot -Parent
 $buildRoot = Join-Path $projectRoot $BuildDirectory
 $fixture = Join-Path $buildRoot 'settings-host.exe'
-$godotExe = Join-Path $projectRoot '.tools/godot-4.8-dev7/Godot_v4.8-dev7_win64_console.exe'
+$godotExe = Join-Path $projectRoot '.tools/godot-4.8-beta2/Godot_v4.8-beta2_win64_console.exe'
 $rendererRoot = Join-Path $projectRoot 'renderers/godot/project'
 $logs = Join-Path $projectRoot ('build/settings-tests/' + [Guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $logs -Force | Out-Null

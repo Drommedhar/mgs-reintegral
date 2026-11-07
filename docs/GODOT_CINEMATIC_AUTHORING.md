@@ -110,10 +110,10 @@ streaming skips that exact frame. Pausing or repeating the same frame does not
 reset it again. Clip entry/exit, generation changes and stage reconfiguration
 also request a reset. Native timing, audio and events stay authoritative.
 
-Godot 4.8.dev7 `c971f93e7` does not expose a direct FSR2 accumulation-reset API:
-its [Forward+ source](https://github.com/godotengine/godot/blob/c971f93e7/servers/rendering/renderer_rd/forward_clustered/render_forward_clustered.cpp)
+Godot 4.8.beta2 `cafc17a19` does not expose a direct FSR2 accumulation-reset API:
+its [Forward+ source](https://github.com/godotengine/godot/blob/cafc17a19/servers/rendering/renderer_rd/forward_clustered/render_forward_clustered.cpp)
 always supplies a false reset flag. `camera_history.gd` uses the pinned
-[RenderingServer sharpness setter](https://github.com/godotengine/godot/blob/c971f93e7/servers/rendering/renderer_viewport.cpp)
+[RenderingServer sharpness setter](https://github.com/godotengine/godot/blob/cafc17a19/servers/rendering/renderer_viewport.cpp)
 with the existing value to rebuild the viewport's temporal buffers once before
 the cut frame. Resolution, FSR2 mode and sharpness remain unchanged. Volumetric
 fog uses a temporary copy of the active environment with history weight zero for

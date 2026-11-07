@@ -44,7 +44,7 @@ def check_release(sdk_archive, game_archive, output, downloads):
     run(cmd, output / "bootstrap.log")
     if (sdk / ".tools/python").exists():
         raise ValueError("Editor installed Python before a Python operation")
-    godot = sdk / ".tools/godot-4.8-dev7/Godot_v4.8-dev7_win64_console.exe"
+    godot = sdk / ".tools/godot-4.8-beta2/Godot_v4.8-beta2_win64_console.exe"
     project = sdk / "renderers/godot/project"
     run(
         [str(godot), "--headless", "--editor", "--path", str(project), "--import"],

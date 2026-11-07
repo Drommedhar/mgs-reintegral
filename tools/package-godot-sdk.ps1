@@ -2,7 +2,7 @@
 param(
     [Parameter(Mandatory)][string]$OutputDirectory,
     [string]$BuildDirectory = 'build/windows-x86-godot',
-    [ValidatePattern('^[0-9]+\.[0-9]+\.[0-9]+$')][string]$Version = '0.3.0',
+    [ValidatePattern('^[0-9]+\.[0-9]+\.[0-9]+$')][string]$Version = '0.3.1',
     [ValidateSet('sdk', 'game')][string]$Kind = 'sdk'
 )
 

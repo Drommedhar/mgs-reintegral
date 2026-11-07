@@ -15,9 +15,9 @@ and settings in place. Choose a new evidence directory for each candidate.
 
 ```powershell
 ./tools/bootstrap.ps1 -Check
-./tools/build.ps1 -Configuration RelWithDebInfo -RendererModule renderers/godot/native -BuildDirectory build/windows-x86-godot-relwithdebinfo -Version 0.3.0
-./tools/prepare-godot-release.ps1 -Version 0.3.0 -BuildDirectory build/windows-x86-godot-relwithdebinfo -OutputDirectory build/evidence/release-candidate
-./.venv/Scripts/python.exe tools/test_godot_release.py --sdk build/evidence/release-candidate/reintegral-sdk-0.3.0-windows-x86.zip --game build/evidence/release-candidate/reintegral-0.3.0-windows-x86.zip --output "build/evidence/release-smoke"
+./tools/build.ps1 -Configuration RelWithDebInfo -RendererModule renderers/godot/native -BuildDirectory build/windows-x86-godot-relwithdebinfo -Version 0.3.1
+./tools/prepare-godot-release.ps1 -Version 0.3.1 -BuildDirectory build/windows-x86-godot-relwithdebinfo -OutputDirectory build/evidence/release-candidate
+./.venv/Scripts/python.exe tools/test_godot_release.py --sdk build/evidence/release-candidate/reintegral-sdk-0.3.1-windows-x86.zip --game build/evidence/release-candidate/reintegral-0.3.1-windows-x86.zip --output "build/evidence/release-smoke"
 ```
 
 The preparation script runs package/bootstrap tests, builds both archives,
@@ -62,14 +62,14 @@ to the index through a reviewed change; never disable the audit to package it.
 ## Manual GitHub workflow
 
 After merging the release changes into `main`, open **Actions → Release game
-and modding SDK → Run workflow**. Select **main**, leave version at `0.3.0` and
+and modding SDK → Run workflow**. Select **main**, leave version at `0.3.1` and
 leave **publish** checked. Publication defaults to enabled and is allowed only
 from `main`. The workflow runs manually; normal pushes and merges do not start it.
 
 It builds pinned sources, the launcher and Godot host, runs CPU tests, packages
 both renderers and the SDK, audits inventories and native versions, and checks
 relocated editor operations. Only after all checks pass does it upload the game,
-SDK, symbols and aggregate checksums to a draft and publish **v0.3.0** as a normal
+SDK, symbols and aggregate checksums to a draft and publish **v0.3.1** as a normal
 release marked **Latest**, with prerelease explicitly disabled. The tag targets
 the exact tested workflow commit. An existing release or tag is rejected;
 failed uploads remain drafts rather than publishing incomplete downloads.

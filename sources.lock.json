@@ -32,13 +32,13 @@
       }
     },
     "godot": {
-      "version": "4.8-dev7",
-      "url": "https://github.com/godotengine/godot-builds/releases/download/4.8-dev7/Godot_v4.8-dev7_win64.exe.zip",
-      "sha256": "560a08a239421b89e6c7532930bc78714fda12ef5cf10bc9586531c7c1a64ac2",
-      "directory": "godot-4.8-dev7",
+      "version": "4.8-beta2",
+      "url": "https://github.com/godotengine/godot-builds/releases/download/4.8-beta2/Godot_v4.8-beta2_win64.exe.zip",
+      "sha256": "f42d63725c48de1ec0660f29b37b7926fe5b02330404e64d3ad3e022382376e2",
+      "directory": "godot-4.8-beta2",
       "files": {
-        "Godot_v4.8-dev7_win64.exe": "ffeea622b211379a98612ee7bc0ee9c18f982fac11a2d478c7988f98340c3918",
-        "Godot_v4.8-dev7_win64_console.exe": "b5dc28b256128a7e5dcbb59ce3767c18ddbc1062d27b0a8f8ef5c84f25a480d9"
+        "Godot_v4.8-beta2_win64.exe": "9d735a72c1a06bf42379829257b0bf966a6cf0ea507c6d8efa051bcfc8faccf2",
+        "Godot_v4.8-beta2_win64_console.exe": "1a470886fc810b81a61e01bad7678e38989f1c94cf8e9733bfd1026224b3f42b"
       }
     }
   },
@@ -307,15 +307,15 @@
   },
   "godotNotices": [
     {
-      "url": "https://raw.githubusercontent.com/godotengine/godot/c971f93e7/LICENSE.txt",
+      "url": "https://raw.githubusercontent.com/godotengine/godot/cafc17a192acf67903910a68aeb3c076c0907a4b/LICENSE.txt",
       "sha256": "b0435e3b3e4e55238f05f4b306f30524a1b2e20147810d436eaa554fa6855c80"
     },
     {
-      "url": "https://raw.githubusercontent.com/godotengine/godot/c971f93e7/COPYRIGHT.txt",
+      "url": "https://raw.githubusercontent.com/godotengine/godot/cafc17a192acf67903910a68aeb3c076c0907a4b/COPYRIGHT.txt",
       "sha256": "d5aeff0741d5cb7a566befd8867667549c8bb46399a0e93091273b632bbefd96"
     },
     {
-      "url": "https://raw.githubusercontent.com/godotengine/godot/c971f93e7/AUTHORS.md",
+      "url": "https://raw.githubusercontent.com/godotengine/godot/cafc17a192acf67903910a68aeb3c076c0907a4b/AUTHORS.md",
       "sha256": "94ed8fc22d19a96bb9dc37acdd105a772269453af25ff39cb5f082d1505f92cb"
     }
   ]

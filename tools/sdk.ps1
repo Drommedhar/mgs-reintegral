@@ -43,7 +43,7 @@ switch ($Action) {
     }
     'editor' {
         & (Join-Path $PSScriptRoot 'prepare-godot.ps1')
-        Start-Process -FilePath (Join-Path $root '.tools/godot-4.8-dev7/Godot_v4.8-dev7_win64.exe') `
+        Start-Process -FilePath (Join-Path $root '.tools/godot-4.8-beta2/Godot_v4.8-beta2_win64.exe') `
             -ArgumentList @('--editor', '--path', "`"$(Join-Path $root 'renderers/godot/project')`"") -WindowStyle Hidden
     }
     'play' { Start-Process -FilePath (Join-Path $root 'RE-INTEGRAL.exe') -WorkingDirectory $root -WindowStyle Hidden }

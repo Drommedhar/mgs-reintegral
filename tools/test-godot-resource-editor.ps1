@@ -31,7 +31,7 @@ script="../../tests/mod_resources_editor_test.gd"
 '@ | Set-Content -LiteralPath (Join-Path $project 'addons/mgs_editor/plugin.cfg') -Encoding utf8NoBOM
 $stdout = Join-Path $logs 'resources-editor.log'
 $stderr = Join-Path $logs 'resources-editor.err'
-$godot = Join-Path $repository '.tools/godot-4.8-dev7/Godot_v4.8-dev7_win64_console.exe'
+$godot = Join-Path $repository '.tools/godot-4.8-beta2/Godot_v4.8-beta2_win64_console.exe'
 $process = Start-Process -FilePath $godot -ArgumentList @('--headless', '--editor', '--path', "`"$project`"") `
     -WindowStyle Hidden -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
 try {

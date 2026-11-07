@@ -4,7 +4,7 @@ param()
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $projectDirectory = Split-Path $PSScriptRoot -Parent
-$version = '4.8-dev7'
+$version = '4.8-beta2'
 . (Join-Path $PSScriptRoot 'download-tool.ps1')
 $toolDirectory = Install-MgsTool $projectDirectory 'godot'
 $executable = Join-Path $toolDirectory "Godot_v${version}_win64_console.exe"
@@ -15,11 +15,11 @@ if (Test-Path -LiteralPath (Join-Path $projectDirectory 'sdk.json')) {
         if (-not (Test-Path -LiteralPath $path)) { throw "SDK component is missing: $path. Extract a fresh SDK." }
     }
     $reported = & $executable --version
-    if ($LASTEXITCODE -ne 0 -or $reported.Trim() -ne '4.8.dev7.official.c971f93e7') { throw "Unexpected SDK Godot version: $reported" }
+    if ($LASTEXITCODE -ne 0 -or $reported.Trim() -ne '4.8.beta2.official.cafc17a19') { throw "Unexpected SDK Godot version: $reported" }
     return
 }
 $reportedVersion = & $executable --version
-if ($LASTEXITCODE -ne 0 -or $reportedVersion.Trim() -ne '4.8.dev7.official.c971f93e7') {
+if ($LASTEXITCODE -ne 0 -or $reportedVersion.Trim() -ne '4.8.beta2.official.cafc17a19') {
     throw "Unexpected Godot version: $reportedVersion"
 }
 $generated = Join-Path $projectDirectory 'renderers/godot/project/.generated'

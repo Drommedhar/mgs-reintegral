@@ -39,7 +39,7 @@ $rendererEnvironment['MGS_GODOT_CAPTURE_FILE']="$logs/godot-output.png"
 $rendererEnvironment['MGS_GODOT_CAPTURE_EVERY']='0'
 $rendererEnvironment['MGS_GODOT_QUIT_FRAME']='0'
 $rendererEnvironment['MGS_SETTINGS_PORT']=''
-$renderer=Start-Process -FilePath "$repo/.tools/godot-4.8-dev7/Godot_v4.8-dev7_win64_console.exe" -ArgumentList @('--path',"$repo/renderers/godot/project",$(if ($Fullscreen) { '--fullscreen' } else { '--borderless' }),'--position','0,0','--resolution',"${Width}x${Height}") -Environment $rendererEnvironment -WindowStyle Hidden -PassThru -RedirectStandardOutput "$logs/godot.log" -RedirectStandardError "$logs/godot.err"
+$renderer=Start-Process -FilePath "$repo/.tools/godot-4.8-beta2/Godot_v4.8-beta2_win64_console.exe" -ArgumentList @('--path',"$repo/renderers/godot/project",$(if ($Fullscreen) { '--fullscreen' } else { '--borderless' }),'--position','0,0','--resolution',"${Width}x${Height}") -Environment $rendererEnvironment -WindowStyle Hidden -PassThru -RedirectStandardOutput "$logs/godot.log" -RedirectStandardError "$logs/godot.err"
 $native=$null
 try {
  $deadline=[DateTime]::UtcNow.AddSeconds(30)

@@ -6,7 +6,7 @@ var cut_environment: Environment
 func begin(camera: Camera3D) -> void:
 	var viewport := camera.get_viewport()
 	if viewport.scaling_3d_mode == Viewport.SCALING_3D_MODE_FSR2 or viewport.use_taa:
-		# Godot c971f93e7 has no FSR2 reset API. This server setter rebuilds
+		# Godot cafc17a19 has no FSR2 reset API. This server setter rebuilds
 		# render buffers once, including FSR2/TAA history, without changing settings.
 		RenderingServer.viewport_set_fsr_sharpness(viewport.get_viewport_rid(), viewport.fsr_sharpness)
 	camera.reset_physics_interpolation()
